@@ -22,6 +22,13 @@ export const messages = {
     },
   },
 
+  errors: {
+    // "Bir hata oluştu" değil: kullanıcıya ne yapacağını söyler
+    // (docs/standards/02-coding-standards.md → copy kuralları)
+    unexpected: "Şu an bağlanamıyoruz. Lütfen biraz sonra tekrar deneyin.",
+    databaseUnavailable: "Veritabanına şu an ulaşılamıyor. Lütfen biraz sonra tekrar deneyin.",
+  },
+
   home: {
     heading: "benim-belediyem",
     intro:

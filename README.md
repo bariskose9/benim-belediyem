@@ -9,7 +9,11 @@ etkinlik ve üyelik akışlarını tek çatı altında toplayan bir öğrenme/po
 ## Durum
 
 Proje `docs/project/roadmap.md`'deki adımlara göre ilerliyor.
-Şu an **adım 0 tamamlandı**: teknik iskelet kurulu, hizmet sayfaları henüz yok.
+Şu an **adım 1 tamamlandı**: iskelet ayakta, canlıya çıktı, CI çalışıyor.
+Hizmet sayfaları henüz yok.
+
+- Canlı: **https://benim-belediyem.vercel.app**
+- Sağlık ucu: **https://benim-belediyem.vercel.app/api/health**
 
 ## Gereksinimler
 
@@ -75,8 +79,25 @@ Commit öncesi kapı: `npm run lint && npm run typecheck && npm run test && npm 
 
 Ayrı "test projesi" açılmaz — aynı kod, farklı ortam değişkenleri.
 
-- Canlı: _(adım 1'de eklenecek)_
-- Preview: her PR'da otomatik oluşur, PR sayfasında görünür
+- Canlı: https://benim-belediyem.vercel.app
+- Preview: her PR'da otomatik oluşur, PR sayfasında görünür.
+  Preview adresi dala göre değiştiği için `NEXT_PUBLIC_APP_URL` elle girilmez —
+  `src/config/env.ts` bunu Vercel'in `NEXT_PUBLIC_VERCEL_URL` değişkeninden türetir.
+
+## Sürekli entegrasyon
+
+Her PR'da iki iş akışı çalışır; ikisi de yeşil olmadan merge edilmez.
+
+| Akış | Ne çalışır |
+| --- | --- |
+| `ci.yml` | `format:check` → `lint` → `typecheck` → `test` → `build` + bağımlılık denetimi |
+| `e2e.yml` | Playwright (masaüstü + 375px), rapor artifact olarak yüklenir |
+
+Bağımlılık denetiminde **üretim** bağımlılıkları kapıdır (`npm audit --omit=dev`);
+geliştirme bağımlılıkları bilgi amaçlı raporlanır (gerekçe: roadmap teknik borç #12).
+
+`build` adımı ortam değişkenlerini gerçekten doğrular — `SKIP_ENV_VALIDATION` gibi
+bir kaçış kapısı yoktur.
 
 ## Klasör yapısı
 

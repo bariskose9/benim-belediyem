@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Aynı dala arka arkaya push atılırsa eski çalıştırma iptal edilir —
+# hem hızlanır hem ücretsiz dakika harcamaz.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: lint · typecheck · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Build sırasında src/config/env.ts doğrulaması GERÇEKTEN çalışsın diye
+      # değişkenler veriliyor. `SKIP_ENV_VALIDATION` gibi bir kaçış kapısı yok:
+      # kapı devre dışı bırakılabiliyorsa kapı değildir.
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_ENV_LABEL: local
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # `npm ci` kilit dosyasından kurar — CI'da sürüm kayması olmaz.
+      - run: npm ci
+
+      - name: Biçim (Prettier)
+        run: npm run format:check
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Tip denetimi (TypeScript)
+        run: npm run typecheck
+
+      - name: Testler (Vitest)
+        run: npm run test
+
+      - name: Build (Next.js)
+        run: npm run build
+
+  audit:
+    name: bağımlılık denetimi
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Üretim bağımlılıkları kapıdır: kullanıcıya giden kodda yüksek/kritik açık kabul edilmez.
+      - name: Üretim bağımlılıkları (kırmızı olur)
+        run: npm audit --omit=dev --audit-level=high
+
+      # Geliştirme bağımlılıkları bilgi amaçlıdır: şu an ESLint zincirinde
+      # upstream'de yaması olmayan uyarılar var (roadmap teknik borç #12).
+      - name: Geliştirme bağımlılıkları (yalnızca bilgi)
+        run: npm audit --audit-level=high || true
