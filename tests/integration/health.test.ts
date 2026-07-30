@@ -1,14 +1,25 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GET } from "@/app/api/health/route";
+// Veritabanı taklit ediliyor: bu testler sağlık ucunun KARAR mantığını doğruluyor
+// (ulaşılabiliyorsa 200, ulaşılamıyorsa 503). Gerçek veritabanıyla uçtan uca
+// doğrulama E2E testinde yapılıyor.
+const queryRaw = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/db", () => ({ prisma: { $queryRaw: queryRaw } }));
 
-/**
- * Route handler doğrudan çağrılıyor: HTTP sunucusu ayağa kaldırmadan
- * yanıt sözleşmesinin (docs/standards/03-api-guidelines.md) korunduğu doğrulanır.
- */
-describe("GET /api/health", () => {
+async function callHealth() {
+  const { GET } = await import("@/app/api/health/route");
+
+  return GET();
+}
+
+describe("GET /api/health — veritabanı ayakta", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    queryRaw.mockResolvedValue([{ "?column?": 1 }]);
+  });
+
   it("200 ve tek tip başarı zarfı döner", async () => {
-    const response = GET();
+    const response = await callHealth();
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -16,33 +27,34 @@ describe("GET /api/health", () => {
     expect(body).not.toHaveProperty("error");
   });
 
-  it("uygulamanın ayakta olduğunu ve hangi ortamda çalıştığını söyler", async () => {
-    const body = await GET().json();
+  it("uygulamanın ve veritabanının durumunu ayrı ayrı bildirir", async () => {
+    const body = await (await callHealth()).json();
 
     expect(body.data.status).toBe("ok");
-    expect(["local", "preview", "production"]).toContain(body.data.env);
+    expect(body.data.app).toBe("ok");
+    expect(body.data.db).toBe("ok");
   });
 
-  it("hangi sürüm ve commit'in yayında olduğunu bildirir", async () => {
-    // Duman testinin işe yaraması için: "yeni sürüm gerçekten çıktı mı?"
-    const body = await GET().json();
+  it("hangi ortam, sürüm ve commit'in yayında olduğunu söyler", async () => {
+    const body = await (await callHealth()).json();
 
+    expect(["local", "preview", "production"]).toContain(body.data.env);
     expect(body.data.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(body.data.commit).toBeTruthy();
-  });
-
-  it("geçerli bir zaman damgası döner", async () => {
-    const body = await GET().json();
-
     expect(Number.isNaN(Date.parse(body.data.timestamp))).toBe(false);
   });
 
+  it("araya giren CDN'in cevabı dondurmasını engeller", async () => {
+    // force-dynamic yalnızca Next'in render'ını etkiliyor, yanıt başlığını değil.
+    expect((await callHealth()).headers.get("cache-control")).toBe("no-store, max-age=0");
+  });
+
   it("gizli değer veya iç detay sızdırmaz", async () => {
-    const raw = JSON.stringify(await GET().json());
+    const raw = JSON.stringify(await (await callHealth()).json());
 
     for (const forbidden of [
-      "DATABASE_URL",
-      "postgres",
+      "postgresql://",
+      "belediye",
       "AUTH_SECRET",
       "/Users/",
       "node_modules",
@@ -52,14 +64,70 @@ describe("GET /api/health", () => {
   });
 
   it("önbelleğe alınmaz olarak işaretlenmiştir", async () => {
-    // Önbelleğe alınırsa "sağlıklı" cevabı donar ve uç anlamsızlaşır.
     const routeModule = await import("@/app/api/health/route");
 
     expect(routeModule.dynamic).toBe("force-dynamic");
   });
+});
 
-  it("araya giren CDN'in cevabı dondurmasını engeller", () => {
-    // force-dynamic yalnızca Next'in render'ını etkiliyor, yanıt başlığını değil.
-    expect(GET().headers.get("cache-control")).toBe("no-store, max-age=0");
+describe("GET /api/health — veritabanı düşük", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("veritabanına ulaşılamıyorsa 503 döner", async () => {
+    queryRaw.mockRejectedValue(new Error("connect ECONNREFUSED 127.0.0.1:5432"));
+
+    const response = await callHealth();
+
+    expect(response.status).toBe(503);
+    expect((await response.json()).error.code).toBe("SERVICE_UNAVAILABLE");
+  });
+
+  it("hangi parçanın düştüğünü söyler", async () => {
+    queryRaw.mockRejectedValue(new Error("down"));
+
+    const body = await (await callHealth()).json();
+
+    expect(body.error.details.app).toBe("ok");
+    expect(body.error.details.db).toBe("down");
+  });
+
+  it("hata mesajı Türkçe ve eyleme dönük", async () => {
+    queryRaw.mockRejectedValue(new Error("down"));
+
+    const body = await (await callHealth()).json();
+
+    expect(body.error.message).toMatch(/tekrar deneyin/i);
+  });
+
+  it("bağlantı hatasının içeriğini istemciye sızdırmaz", async () => {
+    // Gerçek hata sunucu log'una gitmeli, istemciye ASLA.
+    queryRaw.mockRejectedValue(new Error("ECONNREFUSED 10.0.0.5:5432 /Users/gizli/db.ts"));
+
+    const raw = JSON.stringify(await (await callHealth()).json());
+
+    expect(raw).not.toContain("ECONNREFUSED");
+    expect(raw).not.toContain("/Users/");
+    expect(raw).not.toContain("10.0.0.5");
+  });
+
+  it("veritabanı cevap vermezse süresiz beklemez", async () => {
+    // Askıda kalan bir sorgu sağlık ucunu kilitlerse izleme aracı
+    // "yavaş" ile "çökmüş" arasındaki farkı göremez.
+    vi.useFakeTimers();
+    queryRaw.mockReturnValue(new Promise(() => {}));
+
+    const responsePromise = callHealth();
+    await vi.advanceTimersByTimeAsync(3_500);
+    const response = await responsePromise;
+
+    expect(response.status).toBe(503);
+    vi.useRealTimers();
   });
 });

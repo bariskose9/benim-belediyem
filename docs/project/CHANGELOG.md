@@ -4,6 +4,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 2
+- `docker-compose.yml` — local PostgreSQL 18.4 (Neon'daki sürümle birebir aynı),
+  sağlık kontrollü; `docker compose up -d --wait` bu kontrolü bekler
+- `Dockerfile` — çok aşamalı build (deps → builder → runner), root olmayan kullanıcı,
+  konteyner sağlık kontrolü. Vercel bu imajı kullanmaz; taşınabilirlik ve öğrenme için
+- `prisma/schema.prisma` + `prisma.config.ts` — Prisma 7 kurulumu (model yok, adım 3'te gelir)
+- `prisma/migrations/0_init` — boş baseline migration; migration boru hattının
+  local (`migrate dev`) ve preview/production (`migrate deploy`) tarafında çalıştığını kanıtlar
+- `prisma/seed.ts` — idempotent seed iskeleti
+- `src/lib/db.ts` — tekil PrismaClient, `@prisma/adapter-pg` üzerinden (ADR-008)
+- `npm run setup` — tek komutla kurulum: `npm ci` → Docker → migration → seed (~2,5 dk)
+- `db:up`, `db:down`, `db:reset`, `db:migrate`, `db:deploy`, `db:studio` komutları
+- **ADR-008** — Prisma bağlantısı için `@prisma/adapter-pg` kararı ve alternatifleri
+
+### Değişti — adım 2
+- `GET /api/health` artık veritabanını da kontrol ediyor: ulaşılabiliyorsa
+  `200` + `db: "ok"`, ulaşılamıyorsa `503` + hangi parçanın düştüğü.
+  Sorgunun zaman aşımı var (3 sn) — cevap vermeyen veritabanı ucu askıda bırakmaz
+- `src/config/env.ts` — `DATABASE_URL` ve `DIRECT_URL` artık **zorunlu** ve
+  `postgresql://` protokolü doğrulanıyor
+- `next.config.ts` — `standalone` çıktısı yalnızca Docker imajı için açılıyor
+  (`NEXT_OUTPUT=standalone`); `next start` bu modda çalışmadığı için kalıcı değil
+- `e2e.yml` — Postgres servis kabı eklendi; E2E artık gerçek veritabanına bağlanıyor
+  ve `migrate deploy` ile migration'ları uyguluyor
+- `src/lib/http.ts` — hata yanıtları artık her zaman `Cache-Control: no-store` gönderiyor
+
+### Düzeltildi — adım 2
+- `prisma.config.ts` Prisma'nın `env()` yardımcısını kullanıyordu; bu, veritabanına
+  hiç bağlanmayan `prisma generate` komutunu bile `DIRECT_URL` olmadan başarısız
+  kılıyordu. Docker imajı derlenirken ve Vercel'in `postinstall` adımında patlıyordu
+
 ### Eklendi — adım 1
 - `GET /api/health` — uygulama sağlık ucu; ortam, sürüm, commit ve zaman damgası döner.
   Yayın sonrası duman testinin ilk adımı bu (`CLAUDE.md §5.8`)

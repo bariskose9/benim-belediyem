@@ -18,9 +18,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
+    # E2E gerçek veritabanına bağlanır: sağlık ucunun "db: ok" demesi ancak
+    # gerçekten bağlanabiliyorsa doğrulanabilir. Sürüm local Docker ve Neon ile
+    # aynı tutulur (docs/standards/13-environments.md).
+    services:
+      postgres:
+        image: postgres:18.4-alpine
+        env:
+          POSTGRES_USER: belediye
+          POSTGRES_PASSWORD: belediye
+          POSTGRES_DB: benim_belediyem
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U belediye -d benim_belediyem"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
     env:
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NEXT_PUBLIC_ENV_LABEL: local
+      DATABASE_URL: postgresql://belediye:belediye@localhost:5432/benim_belediyem
+      DIRECT_URL: postgresql://belediye:belediye@localhost:5432/benim_belediyem
 
     steps:
       - uses: actions/checkout@v6
@@ -51,6 +71,11 @@ jobs:
       - name: Sistem bağımlılıkları (önbellekten gelindiyse)
         run: npx playwright install-deps chromium
         if: steps.pw-cache.outputs.cache-hit == 'true'
+
+      # Üretimde çalışan komutun aynısı: `migrate dev` ASLA kullanılmaz
+      # (docs/standards/13-environments.md).
+      - name: Migration'ları uygula
+        run: npx prisma migrate deploy
 
       # playwright.config.ts webServer'ı kendisi ayağa kaldırır (build + start).
       - name: E2E testleri

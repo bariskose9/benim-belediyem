@@ -40,9 +40,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // `output: "standalone"` bilerek YOK: `next start` ile birlikte çalışmıyor
-  // ("next start does not work with output: standalone"). Sadece Docker imajı
-  // için gerekli, o yüzden adım 2'de Dockerfile ile birlikte eklenecek.
+  // `standalone` çıktısı yalnızca Docker imajı için açılır (Dockerfile bunu
+  // `NEXT_OUTPUT=standalone` ile ister). Kalıcı açık bırakılmıyor çünkü
+  // `next start` bu modda çalışmıyor — local ve CI o komutu kullanıyor.
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   poweredByHeader: false,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

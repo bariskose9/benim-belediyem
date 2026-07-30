@@ -1,0 +1,3 @@
+# Bu dosya Prisma Migrate tarafından üretilir ve commit EDİLİR.
+# Sağlayıcı değişirse (örn. postgresql → mysql) migration'lar geçersiz olur.
+provider = "postgresql"

@@ -26,6 +26,11 @@ jobs:
       # kapı devre dışı bırakılabiliyorsa kapı değildir.
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NEXT_PUBLIC_ENV_LABEL: local
+      # Bu iş veritabanına bağlanmıyor (testlerde Prisma taklit ediliyor,
+      # build sırasında sorgu çalışmıyor) ama env doğrulaması geçerli bir
+      # adres bekliyor. Gerçek veritabanıyla doğrulama e2e.yml'de yapılıyor.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
 
     steps:
       - uses: actions/checkout@v6
@@ -76,3 +81,24 @@ jobs:
       # upstream'de yaması olmayan uyarılar var (roadmap teknik borç #12).
       - name: Geliştirme bağımlılıkları (yalnızca bilgi)
         run: npm audit --audit-level=high || true
+
+  docker:
+    name: Docker imajı derlenebiliyor mu
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v6
+
+      # Dockerfile üretime gitmiyor ama bozulursa "başka sunucuya taşıyabilirim"
+      # güvencesi sessizce kaybolur. Derlenebildiği burada kanıtlanır; imaj
+      # hiçbir yere gönderilmez (`push: false`).
+      - uses: docker/setup-buildx-action@v3
+
+      - name: İmajı derle
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

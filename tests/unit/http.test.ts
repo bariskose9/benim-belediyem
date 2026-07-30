@@ -41,6 +41,11 @@ describe("hata yanıtları", () => {
     expect((await response.json()).error.code).toBe("NOT_FOUND");
   });
 
+  it("hata yanıtı hiçbir zaman önbelleklenmez", () => {
+    // Geçici bir arıza kalıcı gibi görünmemeli, düzeldiğinde eski hata dönmemeli.
+    expect(fail(new NotFoundError("yok")).headers.get("cache-control")).toBe("no-store, max-age=0");
+  });
+
   it("kullanıcıya Türkçe ve eyleme dönük mesaj gösterir", async () => {
     const body = await fail(
       new ConflictError("Seçtiğiniz saat dolmuş. Lütfen başka bir saat seçin."),

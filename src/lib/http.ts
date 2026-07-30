@@ -67,6 +67,11 @@ export function fail(error: unknown, details?: unknown): NextResponse<ApiFailure
         ...(details === undefined ? {} : { details }),
       },
     },
-    { status: appError.status },
+    {
+      status: appError.status,
+      // Hata yanıtı hiçbir zaman önbelleklenmez: geçici bir arıza kalıcı gibi
+      // görünmemeli, düzeldiğinde kullanıcı hâlâ eski hatayı almamalı.
+      headers: { "Cache-Control": "no-store, max-age=0" },
+    },
   );
 }

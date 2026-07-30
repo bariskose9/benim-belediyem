@@ -1,0 +1,24 @@
+// Şemanın TEK kaynağı burasıdır (docs/standards/04-database.md).
+// Veritabanına elle tablo/kolon eklenmez; her değişiklik migration ile yapılır.
+//
+// Adım 2'de bilerek MODEL YOK: bu adımın amacı migration boru hattının
+// (local `migrate dev`, preview/production `migrate deploy`) çalıştığını
+// kanıtlamak. Gerçek tablolar adım 3'te data-model.md'ye göre tek seferde gelir.
+
+generator client {
+  // Prisma 7'de `prisma-client-js` deprecated; yeni projelerde `prisma-client`
+  // kullanılır ve `output` ZORUNLUDUR.
+  // https://www.prisma.io/docs/orm/prisma-schema/overview/generators
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  // package.json "type": "module" olduğu için üretilen kod da ESM olmalı.
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Prisma 7'de `url` ve `directUrl` şemadan KALDIRILDI:
+  //   · migration adresi → prisma.config.ts (havuzsuz DIRECT_URL)
+  //   · uygulama adresi  → src/lib/db.ts içindeki driver adapter (havuzlu DATABASE_URL)
+  // Gerekçe: docs/project/decisions/ADR-008-prisma-driver-adapter.md
+}

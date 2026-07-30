@@ -1,0 +1,33 @@
+# Local geliştirme veritabanı — YALNIZCA local (docs/standards/13-environments.md).
+#
+# Vercel'e Docker imajı gönderilmez; preview ve production Neon kullanır.
+# İmaj sürümü Neon'daki sürümle (PostgreSQL 18.4) BİREBİR aynı tutulur:
+# "local'de çalışıyordu canlıda çalışmıyor" sorununun en yaygın kaynağı sürüm farkıdır.
+
+services:
+  db:
+    image: postgres:18.4-alpine
+    container_name: benim-belediyem-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-belediye}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-belediye}
+      POSTGRES_DB: ${POSTGRES_DB:-benim_belediyem}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # PostgreSQL 18 imajında PGDATA=/var/lib/postgresql/18/docker ve VOLUME
+      # /var/lib/postgresql. Eski sürümlerdeki /var/lib/postgresql/data yolu
+      # bağlanırsa veri KALICI OLMAZ — sessizce kaybolur.
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      # `docker compose up -d --wait` bu kontrolü bekler; npm run setup buna dayanır.
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-belediye} -d ${POSTGRES_DB:-benim_belediyem}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  db-data:

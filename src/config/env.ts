@@ -41,10 +41,21 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: optionalSecret,
 });
 
+/**
+ * Postgres bağlantı adresi. Protokol şartı bilinçli: yanlış şemayla verilen bir
+ * adres (örn. `mysql://`) Prisma tarafında çok daha geç ve anlamsız bir hatayla
+ * patlardı.
+ */
+const postgresUrl = z.url({
+  protocol: /^postgres(ql)?$/,
+  error: "postgresql:// ile başlayan bir bağlantı adresi olmalı",
+});
+
 const serverEnvSchema = z.object({
-  // adım 2'de zorunlu olur (Prisma + Postgres)
-  DATABASE_URL: optionalSecret,
-  DIRECT_URL: optionalSecret,
+  // Uygulamanın çalışma anı bağlantısı — Neon'da HAVUZLU (-pooler) adres
+  DATABASE_URL: postgresUrl,
+  // Migration'ların kullandığı HAVUZSUZ adres; havuzlayıcı DDL çalıştıramaz
+  DIRECT_URL: postgresUrl,
 
   // adım 4b / 4c'de zorunlu olur (Auth.js)
   AUTH_SECRET: optionalSecret,

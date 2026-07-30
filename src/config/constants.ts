@@ -29,3 +29,11 @@ export const APP_VERSION = "0.1.0" as const;
  * sorusunu cevaplar. Vercel bu değişkeni her dağıtımda kendisi doldurur.
  */
 export const BUILD_COMMIT: string = (process.env.VERCEL_GIT_COMMIT_SHA ?? "local").slice(0, 7);
+
+/**
+ * Sağlık ucunun veritabanı kontrolü için üst sınır.
+ *
+ * Kısa tutuluyor: cevap vermeyen bir veritabanında sağlık ucu askıda kalırsa
+ * izleme aracı "yavaş" ile "çökmüş" arasındaki farkı göremez.
+ */
+export const HEALTH_DB_TIMEOUT_MS = 3_000;

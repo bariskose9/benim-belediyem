@@ -60,6 +60,14 @@ test.describe("sağlık ucu", () => {
     expect(body.data.commit).toBeTruthy();
   });
 
+  test("gerçek veritabanına ulaşabildiğini doğrular", async ({ request }) => {
+    // Taklit yok: burada gerçekten Postgres'e SELECT 1 atılıyor.
+    const body = await (await request.get("/api/health")).json();
+
+    expect(body.data.app).toBe("ok");
+    expect(body.data.db).toBe("ok");
+  });
+
   test("sağlık ucu önbelleklenmez", async ({ request }) => {
     const response = await request.get("/api/health");
     expect(response.headers()["cache-control"]).toContain("no-store");

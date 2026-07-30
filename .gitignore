@@ -7,6 +7,9 @@
 # Bağımlılıklar
 node_modules/
 
+# Üretilen kod — kaynak değil, `prisma generate` her kurulumda yeniden üretir
+src/generated/
+
 # Build çıktıları
 .next/
 out/
