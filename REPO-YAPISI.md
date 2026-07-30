@@ -16,9 +16,11 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 ├── package-lock.json
 ├── tsconfig.json
 ├── next.config.ts
-├── tailwind.config.ts
+├── postcss.config.mjs             ← Tailwind v4 · `tailwind.config.ts` YOK, aşağıya bak
+├── components.json                ← shadcn/ui yapılandırması
 ├── eslint.config.mjs
 ├── .prettierrc
+├── .prettierignore
 ├── vitest.config.ts
 ├── playwright.config.ts
 ├── docker-compose.yml             ← local Postgres
@@ -153,11 +155,20 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 │       └── messages.ts            ← kullanıcıya görünen TÜM Türkçe metinler
 │
 └── tests/
+    ├── setup.ts                   ← Vitest ortak hazırlığı (DOM temizliği, matcher'lar)
     ├── unit/
     ├── integration/
     ├── e2e/
     └── fixtures/
 ```
+
+## `tailwind.config.ts` neden yok
+
+Tailwind CSS v4 yapılandırmayı JS dosyasından CSS'e taşıdı. Renk, spacing ve radius
+token'ları artık `src/app/globals.css` içindeki `@theme` bloğunda tanımlanır;
+`tailwind.config.ts` üretilmiyor ve gerekmiyor. Eski bir Tailwind sürümüne dönmek
+yeni projeyi geride başlatmak olurdu. Karar `docs/project/roadmap.md` teknik borç
+tablosunda kayıtlı.
 
 ## Değişmez kurallar
 - `CLAUDE.md` **kökte**, klasör içinde değil.

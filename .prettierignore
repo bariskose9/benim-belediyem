@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+build/
+coverage/
+playwright-report/
+test-results/
+next-env.d.ts
+package-lock.json
+
+# Elle yazılan Türkçe dokümanlar Prettier tarafından yeniden biçimlendirilmez:
+# tablo hizalamaları ve satır sonları kasıtlıdır, otomatik biçimlendirme
+# okunabilirliği bozuyor ve her commit'e alakasız fark ekliyor
+# (docs/standards/08-git-workflow.md: biçimlendirme ile davranış aynı commit'te olmaz).
+*.md
