@@ -33,18 +33,33 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
   `registeredDistrict`, `gender`, `maritalStatus`, `registeredAddress`,
   `simulationBehavior` (`normal` / `timeout` / `error` / `not_found`)
 
+  - `gender` ve `maritalStatus` enum'larında ayrıca `unspecified` değeri vardır:
+    proje sahibinin kaydında bu alanlar **istenmez ve doldurulmaz** (veri
+    minimizasyonu). Sahte kayıtların hepsinde gerçek bir değer bulunur
+
 > Bu tablo **dış kurum veritabanı** gibi ele alınır. Uygulama buraya doğrudan
 > JOIN atmaz; yalnızca `/api/mock-kps/*` ucu üzerinden okur (ADR-003).
 > `simulationBehavior`, hata yollarını test edebilmek için özel kayıtları işaretler.
 
 ## Çekirdek
 
-- **User** — `nationalIdEncrypted` (unique, şifreli, nullable), `nationalIdMasked`,
-  `fullName`, `birthDate`, `email`, `emailVerifiedAt`, `phone`, `phoneVerifiedAt`,
+- **User** — `nationalIdEncrypted` (şifreli, nullable), `nationalIdHash`
+  (**unique**, tuzlanmış özet, nullable), `nationalIdMasked`,
+  `fullName`, `birthDate`, `email` (unique), `emailVerifiedAt`, `phone`, `phoneVerifiedAt`,
   `passwordHash` (nullable), `role` (`user` / `admin`),
   `identityStatus` (`unverified` / `kps_verified`), `isStaff`,
-  `staffMemberId` (nullable), `registeredProvince`, `registeredDistrict`,
+  `staffMemberId` (unique, nullable), `registeredProvince`, `registeredDistrict`,
   `kpsSyncedAt`, `deletedAt`
+
+  - **Tekilliği şifreli kolon değil özet kolonu zorlar.** Doğru şifreleme aynı
+    girdiden her seferinde farklı çıktı üretir (rastgele nonce), dolayısıyla
+    şifreli kolon üzerinde unique index çalışmaz. Arama ve tekillik
+    `nationalIdHash` üzerinden yürür (`NATIONAL_ID_HASH_SALT`);
+    `05-auth-security.md` "şifrelenerek saklanır; arama için ayrıca tuzlanmış
+    özet tutulur" kuralının karşılığı budur
+  - `staffMemberId` unique: bir personel kaydına iki hesap bağlanamaz
+  - Hesap silindiğinde `email` ve `nationalIdHash` anonimleştirilir; aksi hâlde
+    aynı kimlikle yeniden kayıt olmak engellenirdi (PRD §5.11)
 
   - `isStaff`, `role` ve `identityStatus` **yalnızca sunucuda** hesaplanır;
     istemciden gelen değer yok sayılır ve hata döner (`05-auth-security.md`)
@@ -164,8 +179,14 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
 
 ## Kurumsal (Hakkımızda)
 
-- **OrgUnit** — `name`, `unitType` (`directorate` / `branch` / `section`),
-  `parentId`, `sortOrder`, `deletedAt` *(kendine referanslı ağaç)*
+- **OrgUnit** — `name`, `unitType`, `parentId`, `sortOrder`, `deletedAt`
+  *(kendine referanslı ağaç)*
+
+  - `unitType` altı kademelidir: `presidency` / `general_secretariat` /
+    `deputy_general_secretariat` / `directorate` / `branch` / `section`.
+    İlk üçü `fake-data-guide.md`'nin istediği üst yapıdır (Başkanlık → Genel
+    Sekreterlik → Genel Sekreter Yardımcılığı); onları `directorate` saymak
+    ağacı yanlış etiketlerdi
 - **StaffMember** — `orgUnitId`, `fullName`, `title`, `workEmail`,
   `extensionNumber` (unique), `startYear`, `nationalIdHash` (unique, nullable), `deletedAt`
   *(`nationalIdHash` yalnızca personel eşleştirmesi için; düz kimlik numarası saklanmaz)*
@@ -195,7 +216,16 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
 - Tüm tarihler UTC saklanır, ekranda `Europe/Istanbul`'a çevrilir
 - Enum değerleri **İngilizce**; kullanıcıya gösterilen karşılıkları `src/config/` altında
 - Eşzamanlılık kritik olan yerler benzersiz indeks + transaction ile korunur:
-  `DoctorSlot`, `SeatReservation`, `MembershipPayment`, `Order.idempotencyKey`
+  `DoctorSlot` (doktor + saat) · `SeatReservation` (etkinlik + koltuk) ·
+  `MembershipPayment` (üyelik + dönem) · `Payment.idempotencyKey` ·
+  `RateLimitCounter` (anahtar + pencere) · `CartItem` (sepet + ürün)
+
+  *(Çift ödemenin engellendiği yer **ödeme** kaydıdır, sipariş değil: bir ödeme
+  birden fazla sipariş üretebilir. `Order` üzerinde `idempotencyKey` yoktur.)*
+- Aktif randevunun tekilliğini `Appointment.slotId` üzerinde bir unique index
+  **sağlamaz**: iptal edilen randevu 3 yıl saklanır ve aynı slot yeniden
+  satılabilir. Koruma, `DoctorSlot.isBooked` üzerinde koşullu güncellemedir
+  (`... WHERE is_booked = false`), transaction içinde
 - Süreye bağlı her sorgu zaman koşulu içerir (ADR-007); bu koşul için indeks konur
 - İstemciden gelen `price`, `userId`, `role`, `isStaff` alanları **reddedilir**
 

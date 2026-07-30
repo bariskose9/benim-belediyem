@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Meyve ve Sebze görseli">
+  <title>Meyve ve Sebze</title>
+  <rect width="400" height="300" fill="#5f9e6a"/>
+  <rect x="16" y="16" width="368" height="268" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2"/>
+  <text x="200" y="150" fill="#ffffff" font-family="system-ui, sans-serif" font-size="26" font-weight="600" text-anchor="middle" dominant-baseline="middle">Meyve ve Sebze</text>
+  <text x="200" y="188" fill="#ffffff" fill-opacity="0.8" font-family="system-ui, sans-serif" font-size="15" text-anchor="middle" dominant-baseline="middle">Örnek görsel</text>
+</svg>

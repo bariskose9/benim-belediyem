@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:db": "vitest run --config vitest.db.config.ts",
     "test:e2e": "playwright test",
     "setup": "npm ci && docker compose up -d --wait && prisma migrate dev && prisma db seed",
     "db:up": "docker compose up -d --wait",

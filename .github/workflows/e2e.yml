@@ -41,6 +41,11 @@ jobs:
       NEXT_PUBLIC_ENV_LABEL: local
       DATABASE_URL: postgresql://belediye:belediye@localhost:5432/benim_belediyem
       DIRECT_URL: postgresql://belediye:belediye@localhost:5432/benim_belediyem
+      # Tohumlama sahte üyelerin kimlik numarasını şifreleyip özetleyerek yazar.
+      # Bunlar .env.example'daki LOCAL değerlerdir; canlı anahtarla ilgisi yoktur
+      # (docs/standards/13-environments.md: canlı anahtar CI'da kullanılmaz).
+      NATIONAL_ID_ENCRYPTION_KEY: bG9jYWwtZGV2LW9ubHkta2V5LTMyLWJ5dGVzLXh4eHg=
+      NATIONAL_ID_HASH_SALT: local-dev-only-salt
 
     steps:
       - uses: actions/checkout@v6
@@ -76,6 +81,12 @@ jobs:
       # (docs/standards/13-environments.md).
       - name: Migration'ları uygula
         run: npx prisma migrate deploy
+
+      # Benzersiz index'lerin ve tohumlamanın idempotentliğinin gerçekten
+      # çalıştığı ancak ayakta bir PostgreSQL ile kanıtlanabilir. ci.yml'deki
+      # hızlı iş bilerek veritabanısız; bu yüzden bu kapı burada.
+      - name: Veritabanı testleri (Vitest)
+        run: npm run test:db
 
       # playwright.config.ts webServer'ı kendisi ayağa kaldırır (build + start).
       - name: E2E testleri

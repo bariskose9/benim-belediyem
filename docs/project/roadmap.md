@@ -8,7 +8,7 @@ Sıra kasıtlıdır: her adım bir öncekinin üzerine kurulur. Bir adım
 | 0 | Repo, Next.js, TypeScript, Tailwind, ESLint/Prettier, docs/, CLAUDE.md | Boş proje ayakta |
 | 1 | GitHub + Vercel + Neon bağlantısı, `/api/health`, CI pipeline | **Canlı boş sayfa** |
 | 2 | Docker Compose (local Postgres), Prisma kurulumu, ilk migration | Local DB çalışıyor |
-| 3 | Veri modeli + tüm tablolar + `fake-data-guide.md`'ye uygun seed | Veri hazır |
+| 3 | ~~Veri modeli + tüm tablolar + `fake-data-guide.md`'ye uygun seed~~ **BİTTİ** | 37 tablo + idempotent seed |
 | 4a | Sahte KPS servisi: `kps_citizens` seed, mock uç, gecikme/hata simülasyonu, hız sınırı | KPS sorgusu çalışıyor |
 | 4b | Auth: TCKN ile kayıt (KPS sorgusu + **e-posta ve telefon OTP**), giriş, çıkış, **veritabanı oturumu** (ADR-005), rol, korumalı route, **hız sınırı tablosu** (ADR-006), **bot koruması** (ADR-004) | Giriş çalışıyor |
 | 4c | Google ile giriş (OAuth) + hesap birleştirme + personel eşleştirmesi + erişim kademeleri | Test + PR + deploy |
@@ -49,3 +49,6 @@ Buraya sadece **bilinen ve kabul edilmiş** eksikler yazılır. Boş bırakılma
 | 12 | **`npm audit` geliştirme bağımlılıklarında 9 yüksek uyarı veriyor** | `eslint-config-next` → `minimatch` → `brace-expansion@1.x`; upstream'de yamalı 1.x sürümü **yok**. Yalnızca lint sırasında çalışır, üretim paketine girmez. Üretim bağımlılıklarında 0 açık var | Next.js bağımlılığını yükseltince |
 | 13 | **`prisma.config.ts` Prisma'nın `env()` yardımcısını kullanmıyor** | `env()` değişkeni yapılandırma yüklenirken zorunlu kılıyor ve veritabanına hiç bağlanmayan `prisma generate` komutunu bile başarısız kılıyor (Docker derlemesi ve Vercel `postinstall` bu yüzden patlıyordu). Eksik değişken zaten `src/config/env.ts` tarafından açılışta yakalanıyor | Prisma bu davranışı düzeltirse |
 | ~~14~~ | ~~**Docker imajı yerel makinede doğrulanamadı**~~ | **ÖDENDİ (2026-07-31):** imaj derlendi (264MB), kap `healthy` durumuna geçti, root olmayan `nextjs` kullanıcısıyla çalıştı, `/api/health` veritabanına bağlanıp `db: ok` döndü, anasayfa 200 verdi. İmaj ayrıca her PR'da CI'da derleniyor | — |
+| 15 | **Örnek üye hesaplarının şifresi yazılmıyor** — `password_hash` boş | Şifre özetleme kütüphanesi (argon2 / bcrypt cost >= 12) kimlik doğrulama adımının kararıdır. Adım 3'te rastgele bir algoritma seçmek, adım 4b'de tüm kayıtları geçersiz kılardı | Adım 4b (giriş) |
+| 16 | **Ürün görselleri kategori başına tek yer tutucu** | 45 ürün + 31 menü kalemi için ayrı görsel üretmek, ekran olmadan doğrulanamayacak 76 dosya demekti. Kategori başına üretilmiş SVG yer tutucu (11 dosya) 404 vermez ve `alt` metni taşır | Adım 8-9 (market ve restoran ekranları) |
+| 17 | **Dolu doktor slotlarının çoğunda randevu kaydı yok** | Rehber slotların %30'unu dolu istiyor (~1960 slot). Hepsine gerçek randevu yazmak, tek kullanıcıya yüzlerce randevu vermek ve "aynı branşta aynı gün tek randevu" kuralını (PRD §5.1) seed'in kendisinde ihlal etmek olurdu. Dolu slotların bir kısmı sahipli, geri kalanı "başkasının randevusu" — uygulama zaten başkasının randevusunu göstermez | Ödenmesi gerekmiyor — bilinçli tasarım |

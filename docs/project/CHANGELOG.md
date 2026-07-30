@@ -4,6 +4,33 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 3
+- `prisma/schema.prisma` — `data-model.md`'deki **37 tablonun tamamı**, 26 enum,
+  yabancı anahtarlar, index'ler ve eşzamanlılık için benzersiz index'ler
+- `prisma/migrations/*_add_core_data_model` — tek migration; boş baseline'ın üstüne
+  yalnızca `CREATE TABLE` / `CREATE INDEX` ekler, hiçbir şey silmez
+- `prisma/seed/` — modül modül tohumlama: 200 sahte KPS vatandaşı, 35 birimlik
+  teşkilat şeması, 100 personel, 90 üye hesabı, 45 market ürünü, 31 menü kalemi,
+  4 üyelik paketi, 26 doktor + 6552 slot, 3 mekân + 576 koltuk + 12 etkinlik.
+  Sabit kimlikler ve sabit tohumlu üreteç sayesinde **idempotent ve deterministik**
+- `src/lib/national-id.ts` — kimlik numarası doğrulama (kontrol basamağı),
+  maskeleme, tuzlanmış özet (HMAC-SHA256) ve AES-256-GCM şifreleme.
+  Bağımlılık eklenmedi; `node:crypto` kullanıldı
+- `tests/db/` + `npm run test:db` — **gerçek veritabanına bağlanan** testler:
+  benzersiz index'lerin çalıştığı ve tohumlamanın idempotentliği kanıtlanıyor.
+  CI'da `e2e.yml` içinde, PostgreSQL servisi ayakken koşuyor
+- `docs/project/test-hesaplari.md` — tohumlama tarafından üretilir; sınır durum
+  kayıtlarının (18 yaş altı, tam bugün 18, timeout, error, bulunamayan numara)
+  ve örnek hesapların listesi. Production'da üretilmez
+- `public/images/market|restaurant/*.svg` — telifsiz, kategori başına yer tutucu görsel
+
+### Değişti — adım 3
+- `docs/project/data-model.md` — iki düzeltme: tekilliği şifreli kolon değil
+  `nationalIdHash` zorlar; `idempotencyKey` `Payment` üzerindedir, `Order` üzerinde değil.
+  Ayrıca `OrgUnit.unitType` altı kademeye çıktı (üst yapı için)
+- `.env.example` — `NATIONAL_ID_ENCRYPTION_KEY` / `NATIONAL_ID_HASH_SALT` artık
+  adım 3'ten itibaren zorunlu ve local varsayılan değerleri var; `OWNER_BIRTH_DATE` eklendi
+
 ### Eklendi — adım 2
 - `docker-compose.yml` — local PostgreSQL 18.4 (Neon'daki sürümle birebir aynı),
   sağlık kontrollü; `docker compose up -d --wait` bu kontrolü bekler
