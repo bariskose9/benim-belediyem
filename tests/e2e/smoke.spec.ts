@@ -48,6 +48,30 @@ test.describe("anasayfa duman testi", () => {
   });
 });
 
+test.describe("sağlık ucu", () => {
+  test("GET /api/health uygulamanın ayakta olduğunu bildirir", async ({ request }) => {
+    const response = await request.get("/api/health");
+
+    expect(response.status()).toBe(200);
+
+    const body = await response.json();
+    expect(body.data.status).toBe("ok");
+    expect(["local", "preview", "production"]).toContain(body.data.env);
+    expect(body.data.commit).toBeTruthy();
+  });
+
+  test("sağlık ucu önbelleklenmez", async ({ request }) => {
+    const response = await request.get("/api/health");
+    expect(response.headers()["cache-control"]).toContain("no-store");
+
+    const first = await response.json();
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    const second = await (await request.get("/api/health")).json();
+
+    expect(second.data.timestamp).not.toBe(first.data.timestamp);
+  });
+});
+
 test.describe("arama motoru görünürlüğü", () => {
   test("production dışındaki ortamlar taranmaya kapalıdır", async ({ page, request }) => {
     // docs/standards/13-environments.md: "Preview için noindex zorunlu."

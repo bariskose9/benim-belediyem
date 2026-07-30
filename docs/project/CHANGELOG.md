@@ -4,7 +4,32 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
-### Eklendi
+### Eklendi — adım 1
+- `GET /api/health` — uygulama sağlık ucu; ortam, sürüm, commit ve zaman damgası döner.
+  Yayın sonrası duman testinin ilk adımı bu (`CLAUDE.md §5.8`)
+- `src/lib/errors.ts` — tiplenmiş hata sınıfları. Her hatanın makine için `code`'u ve
+  kullanıcı için Türkçe mesajı var; beklenmeyen hatalar iç detay sızdırmadan
+  `InternalError`'a düşer
+- `src/lib/http.ts` — tek tip yanıt zarfı (`{ data }` / `{ error }`), tüm route
+  handler'lar yanıtı buradan üretir
+- `.github/workflows/ci.yml` — `format:check` → `lint` → `typecheck` → `test` → `build`
+  + bağımlılık denetimi. Build ortam doğrulamasını gerçekten çalıştırır
+- `.github/workflows/e2e.yml` — Playwright (masaüstü + 375px), tarayıcı önbellekli
+- `.github/pull_request_template.md` — Definition of Done kontrol listesiyle
+
+### Değişti — adım 1
+- `src/config/env.ts` — preview ortamında `NEXT_PUBLIC_APP_URL` artık Vercel'in
+  `NEXT_PUBLIC_VERCEL_URL` değişkeninden türetiliyor. Preview adresi her dalda
+  değiştiği için sabit bir değer doğru olamıyordu
+- `src/config/constants.ts` — `APP_VERSION` ve `BUILD_COMMIT` eklendi
+
+### Düzeltildi — adım 1
+- Sağlık ucu `Cache-Control` başlığı göndermiyordu. `export const dynamic =
+  "force-dynamic"` yalnızca Next'in render davranışını değiştiriyor, yanıt başlığı
+  eklemiyor — araya giren bir CDN "sağlıklı" cevabını dondurabilirdi. Artık
+  `no-store` gönderiliyor ve bu üç seviyede test ediliyor (unit, entegrasyon, E2E)
+
+### Eklendi — adım 0
 - Roadmap adım 0 — proje iskeleti: Next.js 16 (App Router), TypeScript 6 (strict),
   Tailwind CSS 4, shadcn/ui (Radix tabanlı), ESLint + Prettier
 - `src/config/env.ts` — ortam değişkenlerinin tek okuma noktası, Zod 4 ile doğrulanır;

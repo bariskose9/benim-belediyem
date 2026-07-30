@@ -112,9 +112,18 @@ export function parseEnv<T extends z.ZodType>(
   return result.data;
 }
 
+/**
+ * Preview dağıtımlarının adresi her dalda değişir, o yüzden elle sabitlenemez.
+ * Vercel her dağıtımda `NEXT_PUBLIC_VERCEL_URL` değişkenini kendisi doldurur;
+ * açıkça verilmiş bir değer varsa o her zaman kazanır (production kendi alan adını kullanır).
+ */
+const vercelAppUrl = process.env.NEXT_PUBLIC_VERCEL_URL
+  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+  : undefined;
+
 export const publicEnvSource = {
   NODE_ENV: process.env.NODE_ENV,
-  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || vercelAppUrl,
   NEXT_PUBLIC_ENV_LABEL: process.env.NEXT_PUBLIC_ENV_LABEL,
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
 };
