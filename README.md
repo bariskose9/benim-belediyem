@@ -88,6 +88,8 @@ Commit öncesi kapı: `npm run lint && npm run typecheck && npm run test && npm 
 | production | Neon `production` dalı | `prisma migrate deploy` |
 
 Üretimde `migrate dev` veya `db push` **asla** çalıştırılmaz.
+Vercel derleme komutu `vercel.json` içinde tanımlıdır ve her dağıtımda
+`prisma migrate deploy` çalıştırır — migration'ı elle uygulamak gerekmez.
 
 Local Docker imajının sürümü Neon'daki sürümle (PostgreSQL 18.4) bilerek aynı tutulur:
 sürüm farkı "local'de çalışıyordu canlıda çalışmıyor" sorununun en yaygın kaynağıdır.
