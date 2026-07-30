@@ -41,3 +41,9 @@ Buraya sadece **bilinen ve kabul edilmiş** eksikler yazılır. Boş bırakılma
 | 4 | **Yönetici paneli yok** — sipariş ve destek durumları zamanlayıcıyla simüle ediliyor | Faz 2'ye bırakıldı (PRD §2) | Faz 2 |
 | 5 | **Veritabanı oturumu her istekte bir okuma yapıyor** | Anında iptal edilebilirlik için bilinçli tercih (ADR-005) | p95 yanıt süresi SLO'yu zorlarsa |
 | 6 | **Bot koruması ABD merkezli servise bağlı** (Cloudflare) | Ücretsiz ve çerezsiz tek makul seçenek (ADR-004) | Yurt içi işleyici zorunluluğu doğarsa |
+| 7 | **`tailwind.config.ts` yok** — Tailwind v4 CSS-first yapılandırma | v4 bu dosyayı üretmiyor; token'lar `globals.css` içinde. v3'e dönmek projeyi eski sürümle başlatmak olurdu | Ödenmesi gerekmiyor — `REPO-YAPISI.md` güncellendi |
+| 8 | **TypeScript 6 kullanılıyor, 7 değil** | `typescript-eslint` TS 7'yi desteklemiyor (peer `<6.1.0`); TS 7'ye çıkmak lint kapısını devre dışı bırakırdı | `typescript-eslint` TS 7 desteği yayınlayınca |
+| 9 | **ESLint 9 kullanılıyor, 10 değil** | `eslint-config-next`'in bağımlılıkları (`eslint-plugin-import`, `jsx-a11y`) en fazla 9 kabul ediyor | Next.js bu eklentileri ESLint 10'a taşıyınca |
+| 10 | **Sıkı (nonce tabanlı) CSP yok** — baseline başlıklar var | Next hidrasyon için satır içi script kullanıyor; nonce imzası middleware gerektiriyor, iskelet aşamasında erken | Adım 18 (güvenlik denetimi) |
+| 11 | **CI'da `bundle-size` / `lighthouse` / `axe` kapıları yok** | Ölçülecek gerçek sayfa yok; boş sayfada performans bütçesi ölçmek yanıltıcı olurdu | Adım 18 |
+| 12 | **`npm audit` geliştirme bağımlılıklarında 9 yüksek uyarı veriyor** | `eslint-config-next` → `minimatch` → `brace-expansion@1.x`; upstream'de yamalı 1.x sürümü **yok**. Yalnızca lint sırasında çalışır, üretim paketine girmez. Üretim bağımlılıklarında 0 açık var | Next.js bağımlılığını yükseltince |
