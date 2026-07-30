@@ -90,11 +90,14 @@ const serverEnvSchema = z.object({
   SMS_PROVIDER_KEY: optionalSecret,
   TURNSTILE_SECRET_KEY: optionalSecret,
 
-  // adım 4b'de zorunlu olur (proje sahibi hesabı — PRD.md §5.0)
+  // Tohumlama okur, hepsi boşsa hesabı atlar (PRD.md §5.0 "Tek gerçek hesap").
+  // Uygulama çalışma anında bu değerleri KULLANMAZ; burada yalnızca yazım
+  // hatası erken yakalansın diye tanımlılar.
   OWNER_TCKN: optionalSecret,
   OWNER_FULL_NAME: optionalSecret,
   OWNER_EMAIL: optionalSecret,
   OWNER_PHONE: optionalSecret,
+  OWNER_BIRTH_DATE: optionalSecret,
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;

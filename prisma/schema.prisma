@@ -1,9 +1,29 @@
 // Şemanın TEK kaynağı burasıdır (docs/standards/04-database.md).
 // Veritabanına elle tablo/kolon eklenmez; her değişiklik migration ile yapılır.
 //
-// Adım 2'de bilerek MODEL YOK: bu adımın amacı migration boru hattının
-// (local `migrate dev`, preview/production `migrate deploy`) çalıştığını
-// kanıtlamak. Gerçek tablolar adım 3'te data-model.md'ye göre tek seferde gelir.
+// Kaynak: docs/project/data-model.md · kurallar: docs/standards/04-database.md
+//
+// İSİMLENDİRME
+//   model  → PascalCase tekil        (Appointment)
+//   tablo  → @@map ile çoğul snake   (appointments)
+//   kolon  → @map ile snake_case     (created_at)
+//   FK     → <tekil>_id              (user_id)
+//   enum   → değerler İngilizce; kullanıcıya gösterilen karşılıkları src/config/ altında
+//
+// HER TABLODA
+//   id · createdAt · updatedAt · isSeedData
+//   (append-only tablolarda updatedAt YOKTUR: güncellenmeyen kayıtta anlamsızdır
+//    ve "hiç değişmedi" güvencesini zayıflatır)
+//   deletedAt yalnızca data-model.md'nin saydığı 8 tabloda: User, Address,
+//   SupportTicket, SavedCard, Product, MenuItem, StaffMember, OrgUnit
+//
+// PARA
+//   Decimal(10,2) — float ASLA (0.1 + 0.2 != 0.3 hatası parada kabul edilemez)
+//
+// SİLME DAVRANIŞI
+//   Cascade  → üst kayıt gidince anlamı kalmayan alt kayıt (sepet kalemi, oturum)
+//   Restrict → mali değeri veya denetim değeri olan her şey (sipariş, ödeme, üyelik)
+//   Zaten varsayılan silme yöntemi soft delete'tir; Restrict "yanlışlıkla silinmesin" der.
 
 generator client {
   // Prisma 7'de `prisma-client-js` deprecated; yeni projelerde `prisma-client`
@@ -21,4 +41,1148 @@ datasource db {
   //   · migration adresi → prisma.config.ts (havuzsuz DIRECT_URL)
   //   · uygulama adresi  → src/lib/db.ts içindeki driver adapter (havuzlu DATABASE_URL)
   // Gerekçe: docs/project/decisions/ADR-008-prisma-driver-adapter.md
+}
+
+// ===========================================================================
+// ENUM'LAR
+//
+// 04-database.md: "Enum benzeri alanlar için Prisma enum kullanılır, serbest
+// metin değil." Serbest metinde yazım hatası veriyi bozar ve sorgu sessizce boş
+// döner; enum'da aynı hata derleme zamanında yakalanır.
+// ===========================================================================
+
+/// Sahte KPS'in hata yollarını test edebilmek için kayda iliştirilen davranış (ADR-003).
+enum SimulationBehavior {
+  normal
+  timeout
+  error
+  not_found
+}
+
+/// `unspecified`: proje sahibinin kaydında bu alan İSTENMEZ ve doldurulmaz
+/// (veri minimizasyonu). Sahte kayıtların hepsinde gerçek bir değer bulunur.
+enum Gender {
+  male
+  female
+  unspecified
+}
+
+enum MaritalStatus {
+  single
+  married
+  divorced
+  widowed
+  unspecified
+}
+
+/// "Ziyaretçi" bir rol DEĞİLDİR — oturumun yokluğudur (data-model.md).
+enum UserRole {
+  user
+  admin
+}
+
+enum IdentityStatus {
+  unverified
+  kps_verified
+}
+
+enum OtpPurpose {
+  register_email
+  register_phone
+  password_reset
+}
+
+enum OtpChannel {
+  mock
+  email
+  email_sms_simulation
+}
+
+enum KpsQueryResult {
+  success
+  mismatch
+  not_found
+  rate_limited
+  timeout
+}
+
+enum NotificationType {
+  order_status
+  seat_hold_expired
+  membership_renewal_reminder
+  membership_payment_failed
+  support_ticket_update
+  account
+}
+
+enum RelatedEntityType {
+  order
+  appointment
+  seat_reservation
+  membership
+  support_ticket
+}
+
+enum CartStatus {
+  active
+  converted
+  abandoned
+}
+
+/// Sepete girebilen üç modül. `gym` YOKTUR — üyelik sepete girmez, kendi akışı vardır.
+enum CartItemType {
+  market
+  restaurant
+  event
+}
+
+enum FulfillmentType {
+  market_delivery
+  restaurant_delivery
+  ticket
+}
+
+enum OrderStatus {
+  received
+  preparing
+  on_the_way
+  delivered
+  cancelled
+}
+
+enum CardBrand {
+  visa
+  mastercard
+}
+
+/// `insufficient_funds` uygulamada cüzdan olduğu anlamına gelmez; sahte ödeme
+/// sağlayıcısının döndürdüğü bir kart hatasıdır (PRD §5.6).
+enum PaymentStatus {
+  success
+  declined
+  insufficient_funds
+}
+
+enum DoctorTitle {
+  professor
+  associate_professor
+  specialist
+  physician
+}
+
+enum AppointmentStatus {
+  booked
+  cancelled
+}
+
+enum EventCategory {
+  concert
+  theatre
+  kids
+}
+
+enum SeatReservationStatus {
+  held
+  sold
+}
+
+enum MembershipStatus {
+  active
+  payment_pending
+  cancelled
+  expired
+}
+
+enum MembershipPaymentKind {
+  renewal
+  early_exit_fee
+}
+
+enum MembershipPaymentStatus {
+  success
+  failed
+}
+
+/// Teşkilat şemasının altı kademesi. data-model.md yalnızca alt üç kademeyi
+/// (directorate / branch / section) sayıyordu; fake-data-guide.md'nin istediği
+/// üst yapı (Başkanlık → Genel Sekreterlik → Genel Sekreter Yardımcılığı) o üç
+/// değere sığmıyor. Üst kademeleri "directorate" saymak ağacı yanlış etiketlerdi.
+enum OrgUnitType {
+  presidency
+  general_secretariat
+  deputy_general_secretariat
+  directorate
+  branch
+  section
+}
+
+/// Kadro unvanları (fake-data-guide.md → "Kadro dağılımı"). Rehberde unvana göre
+/// filtreleme yapıldığı için serbest metin değil enum.
+enum StaffTitle {
+  department_head
+  branch_manager
+  chief
+  engineer
+  specialist
+  technician
+  officer
+  contracted
+}
+
+enum SupportTicketStatus {
+  open
+  in_review
+  resolved
+  closed
+}
+
+/// Denetim kaydına yazılabilecek işlemler. Liste kapalıdır: yeni bir işlem
+/// eklemek migration gerektirir ve bu KASITLIDIR — denetim sözlüğü kontrolsüz
+/// büyürse denetim kaydı aranamaz hale gelir.
+enum AuditAction {
+  login
+  logout
+  register
+  password_reset
+  kps_query
+  order_create
+  order_cancel
+  payment_attempt
+  appointment_create
+  appointment_cancel
+  seat_reserve
+  membership_create
+  membership_cancel
+  membership_payment
+  support_ticket_create
+  support_ticket_close
+  consent_change
+  data_export
+  account_delete
+  role_change
+}
+
+enum AuditEntityType {
+  user
+  session
+  order
+  payment
+  appointment
+  seat_reservation
+  membership
+  membership_payment
+  support_ticket
+  consent_record
+}
+
+enum ConsentType {
+  necessary_cookies
+  analytics_cookies
+  marketing_cookies
+  terms_of_use
+  privacy_notice
+}
+
+// ===========================================================================
+// SAHTE KPS — dış servis simülasyonu, uygulama tablolarından AYRI
+// ===========================================================================
+
+/// Taklit edilen DIŞ KURUM veritabanı (ADR-003). Uygulama buraya JOIN atmaz;
+/// yalnızca /api/mock-kps/* ucu üzerinden okur.
+///
+/// `nationalId` burada DÜZ METİNDİR ve bu bilinçlidir: gerçek KPS de numarayı
+/// düz tutar, yoksa numarayla sorgulanamaz. Uygulamanın kendi tablolarında
+/// (User, StaffMember) düz metin kimlik numarası kolonu YOKTUR —
+/// docs/standards/05-auth-security.md "Kimlik verisinin saklanması".
+/// Bu tablodaki kayıtların tamamı sentetiktir ve hiçbir gerçek kişiyi temsil etmez.
+model KpsCitizen {
+  id                 String             @id @default(cuid())
+  nationalId         String             @unique @map("national_id")
+  firstName          String             @map("first_name")
+  lastName           String             @map("last_name")
+  birthDate          DateTime           @map("birth_date") @db.Date
+  birthPlace         String             @map("birth_place")
+  fatherName         String             @map("father_name")
+  motherName         String             @map("mother_name")
+  registeredProvince String             @map("registered_province")
+  registeredDistrict String             @map("registered_district")
+  gender             Gender
+  maritalStatus      MaritalStatus      @map("marital_status")
+  registeredAddress  String             @map("registered_address")
+  simulationBehavior SimulationBehavior @default(normal) @map("simulation_behavior")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  @@index([simulationBehavior])
+  @@map("kps_citizens")
+}
+
+// ===========================================================================
+// ÇEKİRDEK
+// ===========================================================================
+
+/// Kimlik numarası ÜÇ kolonda tutulur ve hiçbiri düz metin değildir:
+///   nationalIdEncrypted → şifreli değer (rastgele nonce ile; her seferinde farklı)
+///   nationalIdHash      → aramak ve tekilliği zorlamak için tuzlanmış özet (unique)
+///   nationalIdMasked    → ekranda gösterilecek maskeli hali (123*****90)
+/// Şifreli kolon unique DEĞİLDİR: doğru şifreleme aynı girdiden her seferinde
+/// farklı çıktı üretir, dolayısıyla üzerinde unique index çalışmaz. Tekilliği
+/// özet kolonu sağlar (NATIONAL_ID_HASH_SALT ile).
+///
+/// role, identityStatus ve isStaff YALNIZCA sunucuda hesaplanır; istemciden
+/// gelen değer yok sayılır (05-auth-security.md "Yetki kaynağı").
+model User {
+  id                  String         @id @default(cuid())
+  nationalIdEncrypted String?        @map("national_id_encrypted")
+  nationalIdHash      String?        @unique @map("national_id_hash")
+  nationalIdMasked    String?        @map("national_id_masked")
+  fullName            String         @map("full_name")
+  birthDate           DateTime?      @map("birth_date") @db.Date
+  email               String?        @unique
+  emailVerifiedAt     DateTime?      @map("email_verified_at")
+  phone               String?
+  phoneVerifiedAt     DateTime?      @map("phone_verified_at")
+  passwordHash        String?        @map("password_hash")
+  role                UserRole       @default(user)
+  identityStatus      IdentityStatus @default(unverified) @map("identity_status")
+  isStaff             Boolean        @default(false) @map("is_staff")
+  staffMemberId       String?        @unique @map("staff_member_id")
+
+  // Nüfus adresinin TAMAMI saklanmaz — yalnızca il/ilçe (veri minimizasyonu).
+  registeredProvince String?   @map("registered_province")
+  registeredDistrict String?   @map("registered_district")
+  kpsSyncedAt        DateTime? @map("kps_synced_at")
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  isSeedData Boolean   @default(false) @map("is_seed_data")
+  deletedAt  DateTime? @map("deleted_at")
+
+  staffMember      StaffMember?      @relation(fields: [staffMemberId], references: [id], onDelete: Restrict)
+  accounts         Account[]
+  sessions         Session[]
+  otpChallenges    OtpChallenge[]
+  addresses        Address[]
+  notifications    Notification[]
+  carts            Cart[]
+  orders           Order[]
+  savedCards       SavedCard[]
+  payments         Payment[]
+  appointments     Appointment[]
+  seatReservations SeatReservation[]
+  memberships      Membership[]
+  supportTickets   SupportTicket[]
+  auditLogs        AuditLog[]
+  consentRecords   ConsentRecord[]
+
+  @@index([role])
+  @@index([identityStatus])
+  @@index([isStaff])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+/// Auth.js hesap tablosu — giriş yöntemlerini tutar (credentials / google).
+/// Ayrı bir `AuthMethod` tablosu YOKTUR; Account zaten aynı işi yapar.
+///
+/// DİKKAT — `refresh_token`, `access_token`, `expires_at`, `token_type`,
+/// `id_token`, `session_state` alan adları bilerek snake_case'tir. Auth.js'in
+/// Prisma adaptörü OAuth sağlayıcısından gelen nesneyi doğrudan Prisma'ya
+/// yazar; alan adları birebir bunlar olmazsa adaptör çalışmaz. Bu, proje
+/// isimlendirme kuralının dış kütüphane sözleşmesi karşısındaki tek istisnasıdır.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @map("refresh_token")
+  access_token      String? @map("access_token")
+  expires_at        Int?    @map("expires_at")
+  token_type        String? @map("token_type")
+  scope             String?
+  id_token          String? @map("id_token")
+  session_state     String? @map("session_state")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+/// Veritabanı oturumu (ADR-005). JWT değil: anında iptal edilebilirlik için.
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime @map("expires_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
+  @@map("sessions")
+}
+
+/// Auth.js doğrulama jetonu tablosu — adaptör sözleşmesi gereği bulunur.
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime @map("expires_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  @@unique([identifier, token])
+  @@index([expires])
+  @@map("verification_tokens")
+}
+
+/// Tek kullanımlık kod. Kod ve hedef adres DÜZ METİN saklanmaz — yalnızca özet
+/// (05-auth-security.md "Tek kullanımlık kod (OTP) kuralları").
+/// `userId` nullable: kayıt akışında henüz hesap yoktur, kod geçici kayıt
+/// kimliğine (`registrationId`) bağlanır.
+model OtpChallenge {
+  id              String     @id @default(cuid())
+  userId          String?    @map("user_id")
+  registrationId  String?    @map("registration_id")
+  purpose         OtpPurpose
+  channel         OtpChannel
+  destinationHash String     @map("destination_hash")
+  codeHash        String     @map("code_hash")
+  expiresAt       DateTime   @map("expires_at")
+  attemptCount    Int        @default(0) @map("attempt_count")
+  consumedAt      DateTime?  @map("consumed_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([registrationId])
+  @@index([expiresAt])
+  @@index([destinationHash, purpose])
+  @@map("otp_challenges")
+}
+
+/// Hız sınırı sayacı (ADR-006 — Redis yerine Postgres).
+/// `key` kişisel veri İÇERMEZ: amaç + tuzlanmış IP/kimlik özeti.
+/// unique(key, windowStartedAt): aynı pencerede ikinci sayaç satırı açılamaz,
+/// böylece eşzamanlı istekler sayacı sıfırlayamaz.
+model RateLimitCounter {
+  id              String   @id @default(cuid())
+  key             String
+  windowStartedAt DateTime @map("window_started_at")
+  count           Int      @default(0)
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  @@unique([key, windowStartedAt])
+  @@index([windowStartedAt])
+  @@map("rate_limit_counters")
+}
+
+/// KPS sorgu denetim kaydı — append-only, updatedAt yok.
+/// SORGULANAN KİMLİK NUMARASI İÇİN KOLON YOKTUR: olmayan kolona yanlışlıkla
+/// yazılamaz (05-auth-security.md "Her sorgu denetim kaydına yazılır —
+/// sorgulanan numara yazılmadan").
+model KpsQueryLog {
+  id          String         @id @default(cuid())
+  actorIpHash String         @map("actor_ip_hash")
+  sessionId   String?        @map("session_id")
+  result      KpsQueryResult
+  durationMs  Int            @map("duration_ms")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  @@index([createdAt])
+  @@index([result])
+  @@map("kps_query_logs")
+}
+
+/// Teslimat adresi — nüfus adresinden ayrıdır, kullanıcı kendi girer.
+model Address {
+  id          String @id @default(cuid())
+  userId      String @map("user_id")
+  title       String
+  fullAddress String @map("full_address")
+  district    String
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  isSeedData Boolean   @default(false) @map("is_seed_data")
+  deletedAt  DateTime? @map("deleted_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orders Order[]
+
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("addresses")
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  userId      String             @map("user_id")
+  type        NotificationType
+  title       String
+  body        String
+  isRead      Boolean            @default(false) @map("is_read")
+  relatedType RelatedEntityType? @map("related_type")
+  relatedId   String?            @map("related_id")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ===========================================================================
+// SEPET, SİPARİŞ VE ÖDEME
+// ===========================================================================
+
+/// `userId` nullable: ziyaretçi de sepete ürün ekleyebilir. Ziyaretçi sepeti
+/// çerezdeki `anonymousId` ile taşınır, giriş yapılınca birleştirilir (PRD §4).
+model Cart {
+  id          String     @id @default(cuid())
+  userId      String?    @map("user_id")
+  anonymousId String?    @map("anonymous_id")
+  status      CartStatus @default(active)
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user  User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@index([userId])
+  @@index([anonymousId])
+  @@index([status, updatedAt])
+  @@map("carts")
+}
+
+/// unique(cartId, itemType, refId): aynı ürün sepete iki ayrı satır olarak
+/// giremez — adet artırılır. Sepet birleştirmede (ziyaretçi → üye) de bu kural
+/// çift satır oluşmasını veritabanı seviyesinde engeller.
+model CartItem {
+  id        String       @id @default(cuid())
+  cartId    String       @map("cart_id")
+  itemType  CartItemType @map("item_type")
+  refId     String       @map("ref_id")
+  quantity  Int
+  unitPrice Decimal      @map("unit_price") @db.Decimal(10, 2)
+  note      String?
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, itemType, refId])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+/// Karışık sepet tek ödemeyle BİRDEN FAZLA sipariş üretir — modül başına bir
+/// tane. Aynı ödemeye bağlı siparişler aynı `paymentId`'yi paylaşır (PRD §6.1).
+/// `ticket` türünde teslimat alanları boştur ve durum doğrudan `delivered` olur.
+model Order {
+  id                String          @id @default(cuid())
+  userId            String          @map("user_id")
+  paymentId         String          @map("payment_id")
+  fulfillmentType   FulfillmentType @map("fulfillment_type")
+  subtotalAmount    Decimal         @map("subtotal_amount") @db.Decimal(10, 2)
+  deliveryFee       Decimal         @map("delivery_fee") @db.Decimal(10, 2)
+  discountAmount    Decimal         @map("discount_amount") @db.Decimal(10, 2)
+  totalAmount       Decimal         @map("total_amount") @db.Decimal(10, 2)
+  status            OrderStatus     @default(received)
+  cancelledAt       DateTime?       @map("cancelled_at")
+  cancelReason      String?         @map("cancel_reason")
+  deliveryAddressId String?         @map("delivery_address_id")
+  // Teslimat zaman aralığı serbest metindir ("2026-08-02 10:00-12:00"): sabit
+  // bir sözlüğü yoktur ve bu fazda üzerinden zaman sorgusu yapılmaz.
+  deliverySlot      String?         @map("delivery_slot")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user            User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  payment         Payment     @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  deliveryAddress Address?    @relation(fields: [deliveryAddressId], references: [id], onDelete: Restrict)
+  items           OrderItem[]
+
+  @@index([userId, createdAt])
+  @@index([paymentId])
+  @@index([status])
+  @@map("orders")
+}
+
+/// Fiyat sipariş anında KOPYALANIR; ürün fiyatı sonradan değişirse geçmiş
+/// sipariş bozulmaz.
+model OrderItem {
+  id        String       @id @default(cuid())
+  orderId   String       @map("order_id")
+  itemType  CartItemType @map("item_type")
+  refId     String       @map("ref_id")
+  quantity  Int
+  unitPrice Decimal      @map("unit_price") @db.Decimal(10, 2)
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+/// TAM KART NUMARASI ASLA SAKLANMAZ — yalnızca son 4 hane (05-auth-security.md).
+model SavedCard {
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  brand      CardBrand
+  last4      String
+  expMonth   Int       @map("exp_month")
+  expYear    Int       @map("exp_year")
+  holderName String    @map("holder_name")
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  isSeedData Boolean   @default(false) @map("is_seed_data")
+  deletedAt  DateTime? @map("deleted_at")
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  payments    Payment[]
+  memberships Membership[]
+
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("saved_cards")
+}
+
+/// Ödeme BAĞIMSIZ bir kayıttır; siparişler ona bağlanır — tersi değil. Böylece
+/// bir ödeme birden fazla siparişi karşılayabilir. Append-only: updatedAt yok.
+///
+/// unique(idempotencyKey): çift tıklama, yeniden deneme veya ağ kopması
+/// sonrası tekrarlanan istek İKİNCİ KEZ TAHSİLAT YAPAMAZ. Bu kontrol
+/// uygulamada değil veritabanında durur; "önce kontrol et sonra yaz" iki
+/// eşzamanlı istekte yetersizdir (04-database.md "Eşzamanlılık").
+model Payment {
+  id                String        @id @default(cuid())
+  userId            String        @map("user_id")
+  savedCardId       String?       @map("saved_card_id")
+  brand             CardBrand
+  cardLast4         String        @map("card_last4")
+  fakeTransactionId String        @unique @map("fake_transaction_id")
+  status            PaymentStatus
+  amount            Decimal       @db.Decimal(10, 2)
+  idempotencyKey    String        @unique @map("idempotency_key")
+  attemptedAt       DateTime      @map("attempted_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  savedCard SavedCard? @relation(fields: [savedCardId], references: [id], onDelete: Restrict)
+  orders    Order[]
+
+  @@index([userId, attemptedAt])
+  @@index([status])
+  @@map("payments")
+}
+
+// ===========================================================================
+// SAĞLIK (personele özel)
+// ===========================================================================
+
+model Specialty {
+  id   String @id @default(cuid())
+  name String @unique
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  doctors Doctor[]
+
+  @@map("specialties")
+}
+
+model Doctor {
+  id          String      @id @default(cuid())
+  specialtyId String      @map("specialty_id")
+  fullName    String      @map("full_name")
+  title       DoctorTitle
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  specialty Specialty    @relation(fields: [specialtyId], references: [id], onDelete: Restrict)
+  slots     DoctorSlot[]
+
+  @@unique([specialtyId, fullName])
+  @@index([specialtyId])
+  @@map("doctors")
+}
+
+/// unique(doctorId, startsAt): AYNI DOKTORA AYNI SAATTE İKİNCİ SLOT AÇILAMAZ.
+/// Randevu alma işlemi bu satırı `isBooked = false` koşuluyla günceller
+/// (koşullu UPDATE + transaction); "önce boş mu diye bak, sonra yaz" iki
+/// eşzamanlı istekte aynı saati iki kişiye verirdi.
+model DoctorSlot {
+  id       String   @id @default(cuid())
+  doctorId String   @map("doctor_id")
+  startsAt DateTime @map("starts_at")
+  isBooked Boolean  @default(false) @map("is_booked")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  doctor       Doctor        @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@unique([doctorId, startsAt])
+  @@index([startsAt, isBooked])
+  @@map("doctor_slots")
+}
+
+/// `slotId` bilerek unique DEĞİL: iptal edilen randevu 3 yıl saklanır ve aynı
+/// slot yeniden satılabilir, o zaman aynı slota biri iptal biri aktif iki kayıt
+/// düşer. Aktif randevunun tekilliğini `DoctorSlot.isBooked` üzerindeki koşullu
+/// güncelleme sağlar.
+model Appointment {
+  id          String            @id @default(cuid())
+  userId      String            @map("user_id")
+  slotId      String            @map("slot_id")
+  status      AppointmentStatus @default(booked)
+  cancelledAt DateTime?         @map("cancelled_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  slot DoctorSlot @relation(fields: [slotId], references: [id], onDelete: Restrict)
+
+  @@index([userId, status])
+  @@index([slotId])
+  @@map("appointments")
+}
+
+// ===========================================================================
+// ETKİNLİK
+// ===========================================================================
+
+model Venue {
+  id      String @id @default(cuid())
+  name    String @unique
+  address String
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  seats  VenueSeat[]
+  events Event[]
+
+  @@map("venues")
+}
+
+model VenueSeat {
+  id         String @id @default(cuid())
+  venueId    String @map("venue_id")
+  block      String
+  rowLabel   String @map("row_label")
+  seatNumber Int    @map("seat_number")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  venue        Venue             @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  reservations SeatReservation[]
+
+  @@unique([venueId, block, rowLabel, seatNumber])
+  @@index([venueId])
+  @@map("venue_seats")
+}
+
+model Event {
+  id        String        @id @default(cuid())
+  venueId   String        @map("venue_id")
+  name      String
+  category  EventCategory
+  performer String
+  startsAt  DateTime      @map("starts_at")
+  basePrice Decimal       @map("base_price") @db.Decimal(10, 2)
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  venue        Venue             @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  reservations SeatReservation[]
+
+  @@index([venueId])
+  @@index([startsAt])
+  @@index([category])
+  @@map("events")
+}
+
+/// unique(eventId, seatId): AYNI KOLTUK İKİ KEZ SATILAMAZ. İki kullanıcı aynı
+/// anda denerse biri veritabanı hatası alır ve uygulama 409 döner (PRD §5.2).
+///
+/// Süresi dolmuş `held` kayıt okuma anında yok sayılır (ADR-007); koltuğu
+/// yeniden satmak için o satır aynı transaction içinde güncellenir —
+/// `holdExpiresAt` bu yüzden indekslidir.
+model SeatReservation {
+  id            String                @id @default(cuid())
+  eventId       String                @map("event_id")
+  seatId        String                @map("seat_id")
+  userId        String                @map("user_id")
+  status        SeatReservationStatus @default(held)
+  holdExpiresAt DateTime?             @map("hold_expires_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  event Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  seat  VenueSeat @relation(fields: [seatId], references: [id], onDelete: Restrict)
+  user  User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([eventId, seatId])
+  @@index([userId])
+  @@index([eventId, status])
+  @@index([holdExpiresAt])
+  @@map("seat_reservations")
+}
+
+// ===========================================================================
+// MARKET
+// ===========================================================================
+
+model ProductCategory {
+  id   String @id @default(cuid())
+  name String @unique
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  products Product[]
+
+  @@map("product_categories")
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  categoryId  String  @map("category_id")
+  name        String
+  description String
+  imageUrl    String  @map("image_url")
+  price       Decimal @db.Decimal(10, 2)
+  stock       Int
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  isSeedData Boolean   @default(false) @map("is_seed_data")
+  deletedAt  DateTime? @map("deleted_at")
+
+  category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@unique([categoryId, name])
+  @@index([categoryId])
+  @@index([name])
+  @@index([deletedAt])
+  @@map("products")
+}
+
+// ===========================================================================
+// RESTORAN
+// ===========================================================================
+
+model MenuCategory {
+  id   String @id @default(cuid())
+  name String @unique
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  items MenuItem[]
+
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id          String  @id @default(cuid())
+  categoryId  String  @map("category_id")
+  name        String
+  description String
+  imageUrl    String  @map("image_url")
+  price       Decimal @db.Decimal(10, 2)
+  isAvailable Boolean @default(true) @map("is_available")
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  isSeedData Boolean   @default(false) @map("is_seed_data")
+  deletedAt  DateTime? @map("deleted_at")
+
+  category MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@unique([categoryId, name])
+  @@index([categoryId])
+  @@index([isAvailable])
+  @@index([deletedAt])
+  @@map("menu_items")
+}
+
+// ===========================================================================
+// SPOR SALONU (personele özel)
+// ===========================================================================
+
+/// `discountPercent` TUTULMAZ: indirim, taahhütsüz paketin fiyatından hesaplanıp
+/// yalnızca ekranda gösterilir. İki alan tutmak sapma riski yaratır (data-model.md).
+model MembershipPlan {
+  id               String  @id @default(cuid())
+  name             String  @unique
+  commitmentMonths Int     @map("commitment_months")
+  monthlyPrice     Decimal @map("monthly_price") @db.Decimal(10, 2)
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  memberships        Membership[] @relation("MembershipPlanCurrent")
+  pendingMemberships Membership[] @relation("MembershipPlanPending")
+
+  @@map("membership_plans")
+}
+
+/// Paket değişimi bir SONRAKİ tahsilat tarihinde yürürlüğe girer (PRD §5.6);
+/// bekleyen paket bu yüzden ayrı iki alanda tutulur.
+model Membership {
+  id                     String           @id @default(cuid())
+  userId                 String           @map("user_id")
+  planId                 String           @map("plan_id")
+  savedCardId            String?          @map("saved_card_id")
+  startsAt               DateTime         @map("starts_at")
+  commitmentEndsAt       DateTime?        @map("commitment_ends_at")
+  status                 MembershipStatus @default(active)
+  autoRenewEnabled       Boolean          @default(true) @map("auto_renew_enabled")
+  nextBillingAt          DateTime?        @map("next_billing_at")
+  cancelledAt            DateTime?        @map("cancelled_at")
+  pendingPlanId          String?          @map("pending_plan_id")
+  pendingPlanEffectiveAt DateTime?        @map("pending_plan_effective_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user        User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  plan        MembershipPlan      @relation("MembershipPlanCurrent", fields: [planId], references: [id], onDelete: Restrict)
+  pendingPlan MembershipPlan?     @relation("MembershipPlanPending", fields: [pendingPlanId], references: [id], onDelete: Restrict)
+  savedCard   SavedCard?          @relation(fields: [savedCardId], references: [id], onDelete: Restrict)
+  payments    MembershipPayment[]
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status, nextBillingAt])
+  @@map("memberships")
+}
+
+/// unique(membershipId, periodStart): ÇİFT TAHSİLATI VERİTABANI SEVİYESİNDE
+/// ENGELLER. Günlük yenileme görevi iki kez çalışsa bile ikinci satır yazılamaz
+/// (PRD §5.6 "Otomatik tahsilat zamanı"). Append-only: updatedAt yok.
+model MembershipPayment {
+  id             String                  @id @default(cuid())
+  membershipId   String                  @map("membership_id")
+  periodStart    DateTime                @map("period_start")
+  periodEnd      DateTime                @map("period_end")
+  amount         Decimal                 @db.Decimal(10, 2)
+  kind           MembershipPaymentKind
+  status         MembershipPaymentStatus
+  attemptedAt    DateTime                @map("attempted_at")
+  idempotencyKey String                  @unique @map("idempotency_key")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Restrict)
+
+  @@unique([membershipId, periodStart])
+  @@index([membershipId])
+  @@map("membership_payments")
+}
+
+// ===========================================================================
+// KURUMSAL (Hakkımızda)
+// ===========================================================================
+
+/// Kendine referanslı ağaç: daire başkanlığı → şube müdürlüğü → şeflik.
+model OrgUnit {
+  id        String      @id @default(cuid())
+  name      String
+  unitType  OrgUnitType @map("unit_type")
+  parentId  String?     @map("parent_id")
+  sortOrder Int         @default(0) @map("sort_order")
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  isSeedData Boolean   @default(false) @map("is_seed_data")
+  deletedAt  DateTime? @map("deleted_at")
+
+  parent   OrgUnit?      @relation("OrgUnitTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children OrgUnit[]     @relation("OrgUnitTree")
+  staff    StaffMember[]
+
+  @@index([parentId])
+  @@index([unitType])
+  @@index([deletedAt])
+  @@map("org_units")
+}
+
+/// Personel rehberi. `nationalIdHash` YALNIZCA personel eşleştirmesi içindir —
+/// düz kimlik numarası saklanmaz (05-auth-security.md). Cep telefonu, adres,
+/// doğum tarihi gibi kişisel alan TUTULMAZ; rehber yalnızca kurumsal iletişim
+/// bilgisi gösterir (fake-data-guide.md "Gösterilmeyecekler").
+model StaffMember {
+  id              String     @id @default(cuid())
+  orgUnitId       String     @map("org_unit_id")
+  fullName        String     @map("full_name")
+  title           StaffTitle
+  workEmail       String     @unique @map("work_email")
+  extensionNumber Int        @unique @map("extension_number")
+  startYear       Int        @map("start_year")
+  nationalIdHash  String?    @unique @map("national_id_hash")
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  isSeedData Boolean   @default(false) @map("is_seed_data")
+  deletedAt  DateTime? @map("deleted_at")
+
+  orgUnit OrgUnit @relation(fields: [orgUnitId], references: [id], onDelete: Restrict)
+  user    User?
+
+  @@index([orgUnitId])
+  @@index([title])
+  @@index([fullName])
+  @@index([deletedAt])
+  @@map("staff_members")
+}
+
+// ===========================================================================
+// DESTEK
+// ===========================================================================
+
+model SupportTicket {
+  id          String              @id @default(cuid())
+  userId      String              @map("user_id")
+  subject     String
+  description String
+  status      SupportTicketStatus @default(open)
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  isSeedData Boolean   @default(false) @map("is_seed_data")
+  deletedAt  DateTime? @map("deleted_at")
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  attachments TicketAttachment[]
+
+  @@index([userId, status])
+  @@index([deletedAt])
+  @@map("support_tickets")
+}
+
+model TicketAttachment {
+  id        String @id @default(cuid())
+  ticketId  String @map("ticket_id")
+  fileUrl   String @map("file_url")
+  fileName  String @map("file_name")
+  sizeBytes Int    @map("size_bytes")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
+}
+
+// ===========================================================================
+// DENETİM VE GİZLİLİK
+// ===========================================================================
+
+/// Append-only: güncellenmez ve silinmez (04-database.md "Denetim ve saklama").
+/// IP düz saklanmaz, özetlenir.
+model AuditLog {
+  id         String          @id @default(cuid())
+  userId     String?         @map("user_id")
+  action     AuditAction
+  entityType AuditEntityType @map("entity_type")
+  entityId   String?         @map("entity_id")
+  ipHash     String          @map("ip_hash")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// Çerez rızası giriş yapmamış ziyaretçiden de alınır; o durumda rıza çerezdeki
+/// rastgele `anonymousId`'ye bağlanır. Kullanıcı sonradan giriş yaparsa kayıt
+/// hesabına bağlanır (PRD §5.10). Append-only.
+model ConsentRecord {
+  id          String      @id @default(cuid())
+  userId      String?     @map("user_id")
+  anonymousId String?     @map("anonymous_id")
+  consentType ConsentType @map("consent_type")
+  isGranted   Boolean     @map("is_granted")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([anonymousId])
+  @@map("consent_records")
 }

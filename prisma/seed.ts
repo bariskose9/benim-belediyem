@@ -1,19 +1,22 @@
 /**
- * Sahte veri tohumlama (docs/standards/04-database.md · docs/project/fake-data-guide.md).
+ * Sahte veri tohumlama — ÇALIŞTIRICI
+ * (docs/standards/04-database.md · docs/project/fake-data-guide.md).
  *
- * KURAL: bu betik idempotent olmalı — tekrar çalıştırıldığında veri katlanmaz.
- * Bunu sağlamanın yolu `create` değil `upsert` kullanmak ve her kaydın sabit,
- * öngörülebilir bir anahtarı olması.
+ * Bu dosya yalnızca bağlantıyı kurar ve `seedAll()` çağırır. Asıl iş
+ * `prisma/seed/` altındadır; böylece aynı fonksiyonu testler de çağırabilir
+ * (tests/db/seed-idempotency.test.ts) ve tek dosya 300 satırı geçmez.
  *
- * Adım 2'de tablo olmadığı için henüz tohumlanacak veri yok. İskelet burada
- * duruyor ki `npm run setup` daha ilk günden eksiksiz çalışsın ve adım 3'te
- * yalnızca içi doldurulsun.
+ * KURAL: idempotent — tekrar çalıştırıldığında veri katlanmaz.
+ * Tüm örnek veri açıkça sahtedir: uydurma isimler, test aralığında kart
+ * numaraları, sentetik kimlik numaraları. Tek istisna, ortam değişkenlerinden
+ * okunan proje sahibi kaydıdır (PRD §5.0) — o değerler depoya hiç yazılmaz.
  */
 import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../src/generated/prisma/client.js";
+import { seedAll } from "./seed/index.js";
 
 // Tohumlama toplu yazma yapar; havuzlayıcı üzerinden değil doğrudan bağlanır
 // (ADR-008). Prisma 7'de istemci adapter olmadan oluşturulamaz.
@@ -29,10 +32,16 @@ if (!connectionString) {
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
 async function main(): Promise<void> {
-  // Adım 3: data-model.md'deki tablolar buraya, fake-data-guide.md kurallarıyla.
-  // Tüm örnek veri açıkça sahtedir: uydurma isimler, test aralığında kart
-  // numaraları, gerçek TCKN yok.
-  console.warn("Seed: henüz tablo yok (roadmap adım 3'te dolacak).");
+  const startedAt = Date.now();
+  // `console.warn`: proje `console.log`'u yasaklıyor (hata ayıklama çıktısı
+  // bırakılmasın diye), ama tohumlamanın ne yaptığını görmek gerekiyor.
+  const summary = await seedAll(prisma, { log: (message) => console.warn(`  · ${message}`) });
+
+  console.warn("\nTohumlama özeti:");
+  for (const [table, value] of Object.entries(summary)) {
+    console.warn(`  ${table.padEnd(20)} ${value}`);
+  }
+  console.warn(`\nTamamlandı (${((Date.now() - startedAt) / 1000).toFixed(1)} sn).`);
 }
 
 main()

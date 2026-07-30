@@ -58,6 +58,7 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 │       ├── fake-data-guide.md     ← seed kuralları, fiyat bantları, sahte KPS, teşkilat şeması
 │       ├── roadmap.md             ← adımlar + teknik borç
 │       ├── CHANGELOG.md
+│       ├── test-hesaplari.md      ← ÜRETİLİR · seed yazar, elle düzenlenmez
 │       └── decisions/
 │           ├── ADR-000-sablon.md
 │           ├── ADR-001-tek-repo-nextjs.md
@@ -69,13 +70,21 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 │           └── ADR-007-suresi-dolan-kayitlar-tembel-temizlik.md
 │
 ├── prisma/
-│   ├── schema.prisma
-│   ├── seed.ts                    ← sahte veri (idempotent)
+│   ├── schema.prisma              ← şemanın TEK kaynağı (37 tablo)
+│   ├── seed.ts                    ← yalnızca çalıştırıcı; asıl iş seed/ altında
+│   ├── seed/
+│   │   ├── index.ts               ← seedAll() · testler de bunu çağırır
+│   │   ├── types.ts
+│   │   ├── lib/                   ← deterministik üreteç, TCKN, tarih/para yardımcıları
+│   │   ├── data/                  ← ad havuzları, katalog, teşkilat şeması
+│   │   └── steps/                 ← modül başına bir tohumlama adımı
 │   └── migrations/
 │
 ├── public/
 │   ├── logo.svg
 │   └── images/                    ← ürün ve menü görselleri
+│       ├── market/                ← kategori başına yer tutucu SVG
+│       └── restaurant/
 │
 ├── src/
 │   ├── app/
@@ -148,7 +157,7 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 │   ├── lib/
 │   │   ├── db.ts  auth.ts  http.ts  cache.ts  errors.ts  logger.ts  utils.ts
 │   │   ├── rate-limit.ts          ← Postgres sayacı (ADR-006)
-│   │   ├── crypto.ts              ← kimlik numarası şifreleme/özet
+│   │   ├── crypto.ts              ← kimlik numarası doğrulama/maskeleme/özet/şifreleme
 │   │   └── turnstile.ts           ← bot doğrulama jetonu (ADR-004)
 │   ├── config/
 │   │   ├── env.ts                 ← env okuma TEK YERDEN, Zod ile doğrulanır
@@ -158,11 +167,22 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 │
 └── tests/
     ├── setup.ts                   ← Vitest ortak hazırlığı (DOM temizliği, matcher'lar)
-    ├── unit/
-    ├── integration/
-    ├── e2e/
+    ├── unit/                      ← Prisma taklit edilir · npm run test
+    ├── integration/               ← Prisma taklit edilir · npm run test
+    ├── db/                        ← GERÇEK veritabanı · npm run test:db
+    ├── e2e/                       ← Playwright · npm run test:e2e
     └── fixtures/
 ```
+
+## `MEMORY.md` nedir
+
+Oturumlar arası **devir dosyası**: projenin o anki durumu (neyin bittiği, neyin
+sırada olduğu, hangi tuzağa düşüldüğü) burada tutulur ve her yeni oturumda
+otomatik okunur. Depoda değil, `~/.claude/projects/.../memory/` altında durur.
+
+**Sınır:** `MEMORY.md` **durum** tutar, **plan** tutmaz. Adımların listesi ve
+teknik borç tek yerdedir: `docs/project/roadmap.md`. İkisi çelişirse `roadmap.md`
+doğrudur.
 
 ## `tailwind.config.ts` neden yok
 
