@@ -23,9 +23,10 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 ├── .prettierignore
 ├── vitest.config.ts
 ├── playwright.config.ts
-├── docker-compose.yml             ← local Postgres
+├── docker-compose.yml             ← local Postgres (sürümü Neon ile aynı)
 ├── Dockerfile                     ← çok aşamalı build
 ├── .dockerignore
+├── prisma.config.ts               ← Prisma 7 yapılandırması (şema yolu, seed, migration adresi)
 │
 ├── .github/
 │   ├── workflows/
@@ -149,10 +150,11 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 │   │   ├── rate-limit.ts          ← Postgres sayacı (ADR-006)
 │   │   ├── crypto.ts              ← kimlik numarası şifreleme/özet
 │   │   └── turnstile.ts           ← bot doğrulama jetonu (ADR-004)
-│   └── config/
-│       ├── env.ts                 ← env okuma TEK YERDEN, Zod ile doğrulanır
-│       ├── constants.ts           ← süreler, limitler, fiyat kuralları
-│       └── messages.ts            ← kullanıcıya görünen TÜM Türkçe metinler
+│   ├── config/
+│   │   ├── env.ts                 ← env okuma TEK YERDEN, Zod ile doğrulanır
+│   │   ├── constants.ts           ← süreler, limitler, fiyat kuralları
+│   │   └── messages.ts            ← kullanıcıya görünen TÜM Türkçe metinler
+│   └── generated/prisma/          ← `prisma generate` çıktısı · COMMIT EDİLMEZ
 │
 └── tests/
     ├── setup.ts                   ← Vitest ortak hazırlığı (DOM temizliği, matcher'lar)

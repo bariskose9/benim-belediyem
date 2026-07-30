@@ -9,8 +9,8 @@ etkinlik ve üyelik akışlarını tek çatı altında toplayan bir öğrenme/po
 ## Durum
 
 Proje `docs/project/roadmap.md`'deki adımlara göre ilerliyor.
-Şu an **adım 1 tamamlandı**: iskelet ayakta, canlıya çıktı, CI çalışıyor.
-Hizmet sayfaları henüz yok.
+Şu an **adım 2 tamamlandı**: iskelet ayakta, canlıya çıktı, CI çalışıyor,
+local veritabanı ve migration boru hattı hazır. Hizmet sayfaları henüz yok.
 
 - Canlı: **https://benim-belediyem.vercel.app**
 - Sağlık ucu: **https://benim-belediyem.vercel.app/api/health**
@@ -29,10 +29,14 @@ Hizmet sayfaları henüz yok.
 git clone https://github.com/bariskose9/benim-belediyem.git
 cd benim-belediyem
 nvm use                 # .nvmrc'deki Node sürümüne geçer
-npm ci                  # bağımlılıkları kilit dosyasından kurar
-cp .env.example .env    # sonra .env içindeki değerleri doldur
+cp .env.example .env    # local için hazır değerlerle gelir
+npm run setup           # tek komut: kurulum + Docker Postgres + migration + seed
 npm run dev             # http://localhost:3000
 ```
+
+`npm run setup` sırayla şunları yapar: `npm ci` → Docker Postgres'i ayağa kaldırıp
+sağlıklı olmasını bekler → migration'ları uygular → seed çalıştırır.
+Sıfırdan yaklaşık **2–3 dakika** sürer. Docker'ın açık olması gerekir.
 
 `.env` doldurulmadan uygulama **açılışta** hangi değişkenin eksik olduğunu
 söyleyerek durur — çalışma anında gizemli hata vermez.
@@ -66,8 +70,34 @@ Ayrıntı: `docs/standards/13-environments.md`
 | `npm run typecheck` | TypeScript tip denetimi |
 | `npm run test` | Unit + entegrasyon testleri (Vitest) |
 | `npm run test:e2e` | Uçtan uca testler (Playwright, masaüstü + 375px) |
+| `npm run setup` | Sıfırdan kurulum: bağımlılık + Docker + migration + seed |
+| `npm run db:up` / `db:down` | Local Postgres'i başlat / durdur |
+| `npm run db:migrate` | Şema değişikliğinden migration üretir (**yalnızca local**) |
+| `npm run db:deploy` | Mevcut migration'ları uygular (preview/production'ın komutu) |
+| `npm run db:reset` | Veritabanını sıfırlar, migration + seed'i baştan çalıştırır |
+| `npm run db:studio` | Prisma Studio — veritabanını tarayıcıdan gör |
 
 Commit öncesi kapı: `npm run lint && npm run typecheck && npm run test && npm run build`
+
+## Veritabanı
+
+| Ortam | Nerede | Migration komutu |
+| --- | --- | --- |
+| local | Docker (`postgres:18.4-alpine`) | `prisma migrate dev` — migration **üretir** |
+| preview | Neon `preview` dalı | `prisma migrate deploy` — sadece **uygular** |
+| production | Neon `production` dalı | `prisma migrate deploy` |
+
+Üretimde `migrate dev` veya `db push` **asla** çalıştırılmaz.
+
+Local Docker imajının sürümü Neon'daki sürümle (PostgreSQL 18.4) bilerek aynı tutulur:
+sürüm farkı "local'de çalışıyordu canlıda çalışmıyor" sorununun en yaygın kaynağıdır.
+
+İki ayrı bağlantı adresi vardır ve karıştırılmaz:
+
+- `DATABASE_URL` — **havuzlu**, uygulamanın çalışma anı bağlantısı
+- `DIRECT_URL` — **havuzsuz**, migration'lar için (havuzlayıcı DDL çalıştıramaz)
+
+Gerekçe: `docs/project/decisions/ADR-008-prisma-driver-adapter.md`
 
 ## Ortamlar
 

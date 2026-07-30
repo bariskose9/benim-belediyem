@@ -1,0 +1,11 @@
+-- Baseline (temel) migration — roadmap adım 2.
+--
+-- Bilerek BOŞ: bu adımın amacı tablo yaratmak değil, migration boru hattının
+-- uçtan uca çalıştığını kanıtlamak:
+--   · local            → prisma migrate dev
+--   · preview/production → prisma migrate deploy
+-- Bu dosya uygulandığında `_prisma_migrations` tablosu oluşur ve sonraki
+-- migration'lar için sağlam bir başlangıç noktası kaydedilir.
+--
+-- Gerçek tablolar adım 3'te docs/project/data-model.md'ye göre tek seferde gelir.
+-- Geri alma: bu migration hiçbir şey yaratmadığı için geri alınacak bir şey yok.

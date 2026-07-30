@@ -1,0 +1,35 @@
+# İmaja girmemesi gerekenler: hem imaj küçülür hem sır sızmaz.
+
+.git/
+.github/
+node_modules/
+.next/
+out/
+build/
+coverage/
+playwright-report/
+test-results/
+src/generated/
+
+# Sırlar — imaj katmanlarına ASLA girmez
+.env
+.env.*
+!.env.example
+
+# Geliştirme ve doküman
+docs/
+tests/
+*.md
+!README.md
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Kapta anlamsız olanlar
+Dockerfile
+.dockerignore
+docker-compose.yml
+playwright.config.ts
+vitest.config.ts
+.vercel/

@@ -16,6 +16,11 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_APP_URL: "http://localhost:3000",
       NEXT_PUBLIC_ENV_LABEL: "local",
+      // Unit/entegrasyon testleri gerçek veritabanına bağlanmaz (Prisma taklit
+      // ediliyor), ama env doğrulaması bu değişkenleri zorunlu kıldığı için
+      // geçerli biçimde bir değer bulunmalı.
+      DATABASE_URL: "postgresql://test:test@localhost:5432/test",
+      DIRECT_URL: "postgresql://test:test@localhost:5432/test",
     },
     coverage: {
       provider: "v8",
