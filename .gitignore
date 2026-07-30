@@ -1,0 +1,43 @@
+# Ortam değişkenleri — ASLA commit edilmez
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Bağımlılıklar
+node_modules/
+
+# Build çıktıları
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Test ve kapsam
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.nyc_output/
+
+# Loglar
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
+
+# Editör
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Vercel
+.vercel
+
+# Yüklenen dosyalar yerelde tutulmaz (Vercel Blob kullanılır)
+public/uploads/
