@@ -36,12 +36,14 @@ ARG DIRECT_URL=postgresql://build:build@localhost:5432/build
 # değildir: ikisi de yalnızca sunucuda okunuyor, derleme çıktısına girmiyor
 # (NEXT_PUBLIC_ öneki yok). Çalışma anında ortamdan gelen gerçek değerler kazanır.
 ARG NATIONAL_ID_HASH_SALT=docker-build-placeholder-salt
+ARG NATIONAL_ID_ENCRYPTION_KEY=bG9jYWwtZGV2LW9ubHkta2V5LTMyLWJ5dGVzLXh4eHg=
 ARG MOCK_KPS_API_KEY=docker-build-placeholder-key-at-least-32-chars
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
     NEXT_PUBLIC_ENV_LABEL=$NEXT_PUBLIC_ENV_LABEL \
     DATABASE_URL=$DATABASE_URL \
     DIRECT_URL=$DIRECT_URL \
     NATIONAL_ID_HASH_SALT=$NATIONAL_ID_HASH_SALT \
+    NATIONAL_ID_ENCRYPTION_KEY=$NATIONAL_ID_ENCRYPTION_KEY \
     MOCK_KPS_API_KEY=$MOCK_KPS_API_KEY
 
 RUN npx prisma generate

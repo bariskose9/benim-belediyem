@@ -17,12 +17,13 @@ Sürüm sütunu **fiilen kurulu** olanı gösterir; `package.json` ile birebir a
 | ORM | Prisma | 7 | Ham SQL sadece performans gerekçesiyle, ADR ile |
 | Veritabanı | PostgreSQL | 18 | Local Docker imajı Neon'daki yama sürümüyle eşitlenir |
 | Auth | Auth.js (NextAuth v5) | 5 (beta) | Web: httpOnly cookie · Mobil: Bearer JWT · aşağıya bak |
+| Şifre özetleme | `argon2` (argon2id) | 0.45.1 | Parametreler `src/config/constants.ts` içinde · ADR-011 |
 | Bot koruması | Cloudflare Turnstile | — | Giriş gerektirmeyen formlarda zorunlu · ADR ile kabul edildi |
 | Validasyon | Zod | 4 | Her API girişinde zorunlu |
-| Form | React Hook Form + Zod resolver | — | |
-| Sunucu durumu | TanStack Query | 5 | |
+| Form | React Hook Form + Zod resolver | 7.83 / 5.5 | |
+| Sunucu durumu | TanStack Query | 5 | Henüz kurulu değil — ilk gerçek liste ekranında eklenir |
 | İstemci durumu | Zustand (sadece gerekiyorsa) | 5 | Redux kullanılmaz |
-| Tarih | date-fns (+ `tr` yerel ayarı) | 4 | `moment.js` kullanılmaz |
+| Tarih | date-fns (+ `tr` yerel ayarı) | 4.4.0 | `moment.js` kullanılmaz |
 | Unit test | Vitest + Testing Library | 4 | |
 | E2E test | Playwright | 1.62 | Masaüstü + 375px mobil viewport |
 | Erişilebilirlik denetimi | `@axe-core/playwright` | — | CI'da kritik ihlal = kırmızı |

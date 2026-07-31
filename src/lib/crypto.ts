@@ -104,14 +104,20 @@ export function hashPseudonym(value: string, salt: string, domain: string): stri
 }
 
 /**
- * AES-256-GCM ile şifreler. Her çağrıda RASTGELE nonce kullanılır, dolayısıyla
- * aynı numara her seferinde farklı şifreli metin üretir. Bu yüzden şifreli kolon
- * üzerinde unique index KURULAMAZ; tekilliği `hashNationalId` sağlar.
+ * AES-256-GCM ile herhangi bir metni şifreler. Her çağrıda RASTGELE nonce
+ * kullanılır, dolayısıyla aynı girdi her seferinde farklı şifreli metin üretir.
+ * Bu yüzden şifreli kolon üzerinde unique index KURULAMAZ; tekilliği özet
+ * kolonu sağlar.
  *
  * GCM seçildi çünkü şifrelemeye ek olarak bütünlük etiketi üretir: kayıt
  * veritabanında kurcalanırsa çözme işlemi sessizce yanlış sonuç vermez, hata verir.
+ *
+ * Genel amaçlı ad kullanılıyor çünkü adım 4b-1'den itibaren kimlik numarasının
+ * yanında KPS yanıtının tamamı ve iletişim bilgisi de aynı zarfla şifreleniyor
+ * (ADR-012). Bir JSON yükünü `encryptNationalId` adlı bir fonksiyondan geçirmek
+ * okuyanı yanıltırdı.
  */
-export function encryptNationalId(value: string, keyBase64: string): string {
+export function encryptSecret(value: string, keyBase64: string): string {
   const key = readKey(keyBase64);
   const iv = randomBytes(IV_BYTES);
   const cipher = createCipheriv("aes-256-gcm", key, iv);
@@ -126,11 +132,11 @@ export function encryptNationalId(value: string, keyBase64: string): string {
 }
 
 /** Şifreli değeri çözer. Biçim bozuksa veya etiket tutmuyorsa hata fırlatır. */
-export function decryptNationalId(envelope: string, keyBase64: string): string {
+export function decryptSecret(envelope: string, keyBase64: string): string {
   const parts = envelope.split(".");
 
   if (parts.length !== 4 || parts[0] !== ENVELOPE_VERSION) {
-    throw new Error("Şifreli kimlik numarasının biçimi tanınmıyor.");
+    throw new Error("Şifreli değerin biçimi tanınmıyor.");
   }
 
   const key = readKey(keyBase64);
@@ -142,6 +148,18 @@ export function decryptNationalId(envelope: string, keyBase64: string): string {
     decipher.update(Buffer.from(parts[3], "base64")),
     decipher.final(),
   ]).toString("utf8");
+}
+
+/**
+ * Kimlik numarasına özel adlar. Zarf biçimi `encryptSecret` ile AYNIDIR —
+ * mevcut veritabanı kayıtları geçerliliğini korur, çağıran koda dokunulmaz.
+ */
+export function encryptNationalId(value: string, keyBase64: string): string {
+  return encryptSecret(value, keyBase64);
+}
+
+export function decryptNationalId(envelope: string, keyBase64: string): string {
+  return decryptSecret(envelope, keyBase64);
 }
 
 function readKey(keyBase64: string): Buffer {

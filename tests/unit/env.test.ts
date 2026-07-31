@@ -50,12 +50,17 @@ describe("genel ortam değişkenleri", () => {
 const LOCAL_DB_URL = "postgresql://belediye:belediye@localhost:5432/benim_belediyem";
 
 const validServerEnv = {
+  // Sunucu şeması ortam etiketini de okuyor: "production'da sahte OTP kanalı
+  // kullanılamaz" kuralı ortamı bilmeden uygulanamaz (adım 4b-1).
+  NEXT_PUBLIC_ENV_LABEL: "local",
   DATABASE_URL: LOCAL_DB_URL,
   DIRECT_URL: LOCAL_DB_URL,
   // Adım 4a'dan itibaren zorunlu: hız sınırı IP'yi bu tuzla özetliyor,
   // sahte KPS ucu bu anahtar olmadan hiçbir isteği kabul etmiyor.
   NATIONAL_ID_HASH_SALT: "test-only-salt",
   MOCK_KPS_API_KEY: "test-only-mock-kps-key-at-least-32-chars",
+  // Adım 4b-1'den itibaren zorunlu: KPS yükü bu anahtarla şifreleniyor.
+  NATIONAL_ID_ENCRYPTION_KEY: "bG9jYWwtZGV2LW9ubHkta2V5LTMyLWJ5dGVzLXh4eHg=",
 };
 
 describe("sunucu ortam değişkenleri", () => {
@@ -91,6 +96,25 @@ describe("sunucu ortam değişkenleri", () => {
     );
   });
 
+  it("şifreleme anahtarı ZORUNLUDUR — eksikse kayıt ucu ham kripto hatası verirdi", () => {
+    const { NATIONAL_ID_ENCRYPTION_KEY: _omitted, ...withoutKey } = validServerEnv;
+
+    expect(() => parseEnv(serverEnvSchema, withoutKey, "test")).toThrowError(
+      /NATIONAL_ID_ENCRYPTION_KEY/,
+    );
+  });
+
+  it("yanlış uzunluktaki şifreleme anahtarını AÇILIŞTA reddeder", () => {
+    // Aksi hâlde hata ilk kayıt denemesinde, kullanıcının önünde çıkardı.
+    expect(() =>
+      parseEnv(
+        serverEnvSchema,
+        { ...validServerEnv, NATIONAL_ID_ENCRYPTION_KEY: "Y29rLWtpc2E=" },
+        "test",
+      ),
+    ).toThrowError(/NATIONAL_ID_ENCRYPTION_KEY/);
+  });
+
   it("boş string'i 'verilmemiş' sayar", () => {
     // `.env` dosyalarında `KEY=` yaygındır; bu boş metin değil, eksik değer demektir.
     const parsed = parseEnv(serverEnvSchema, { ...validServerEnv, SENTRY_DSN: "" }, "test");
@@ -109,6 +133,76 @@ describe("sunucu ortam değişkenleri", () => {
     expect(() =>
       parseEnv(serverEnvSchema, { ...validServerEnv, WEATHER_DEFAULT_LAT: "120" }, "test"),
     ).toThrowError(/WEATHER_DEFAULT_LAT/);
+  });
+});
+
+/**
+ * Bu blok bir GÜVENLİK DEĞİŞMEZİni koruyor: sahte OTP kanalı doğrulama kodunu
+ * ekranda gösteriyor, `05-auth-security.md` bunu production'da kesin olarak
+ * yasaklıyor. Kural şemada durduğu için yanlış yapılandırılmış bir production
+ * dağıtımı hiç AÇILMIYOR — kodu ekranda göstermesindense açılmaması tercih edildi.
+ */
+describe("doğrulama kodu kanalı ile ortam tutarlılığı", () => {
+  const productionEnv = {
+    ...validServerEnv,
+    NEXT_PUBLIC_ENV_LABEL: "production",
+    OTP_EMAIL_CHANNEL: "email",
+    OTP_PHONE_CHANNEL: "email_sim",
+  };
+
+  it("production'da gerçek kanallarla geçerlidir", () => {
+    const parsed = parseEnv(serverEnvSchema, productionEnv, "test");
+
+    expect(parsed.OTP_EMAIL_CHANNEL).toBe("email");
+    expect(parsed.OTP_PHONE_CHANNEL).toBe("email_sim");
+  });
+
+  it("production'da sahte e-posta kanalını reddeder", () => {
+    expect(() =>
+      parseEnv(serverEnvSchema, { ...productionEnv, OTP_EMAIL_CHANNEL: "mock" }, "test"),
+    ).toThrowError(/OTP_EMAIL_CHANNEL/);
+  });
+
+  it("production'da sahte telefon kanalını reddeder", () => {
+    expect(() =>
+      parseEnv(serverEnvSchema, { ...productionEnv, OTP_PHONE_CHANNEL: "mock" }, "test"),
+    ).toThrowError(/OTP_PHONE_CHANNEL/);
+  });
+
+  it("local ve preview'da sahte kanala izin verir", () => {
+    for (const label of ["local", "preview"] as const) {
+      const parsed = parseEnv(
+        serverEnvSchema,
+        { ...validServerEnv, NEXT_PUBLIC_ENV_LABEL: label },
+        "test",
+      );
+
+      expect(parsed.OTP_EMAIL_CHANNEL).toBe("mock");
+      expect(parsed.OTP_PHONE_CHANNEL).toBe("mock");
+    }
+  });
+
+  it("gerçek SMS kanalını her ortamda reddeder", () => {
+    // Gerçek SMS sağlayıcısı PRD §2 uyarınca kapsam dışı. Değer seçilebilir
+    // olsaydı, hiçbir şey göndermeyen bir kanal sessizce devreye girerdi.
+    for (const label of ["local", "preview", "production"] as const) {
+      expect(() =>
+        parseEnv(
+          serverEnvSchema,
+          { ...productionEnv, NEXT_PUBLIC_ENV_LABEL: label, OTP_PHONE_CHANNEL: "sms" },
+          "test",
+        ),
+      ).toThrowError(/OTP_PHONE_CHANNEL/);
+    }
+  });
+
+  it("production'da e-posta anahtarı eksikse uygulama YİNE DE açılır", () => {
+    // Bilinçli tercih: anahtar eksikken tüm uygulamanın açılmaması `main`'i
+    // deploy edilemez hale getirirdi (CLAUDE.md §6.1). Eksik anahtarın bedeli
+    // yalnızca kayıt ucunun 503 dönmesidir.
+    const parsed = parseEnv(serverEnvSchema, productionEnv, "test");
+
+    expect(parsed.EMAIL_API_KEY).toBeUndefined();
   });
 });
 

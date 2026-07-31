@@ -30,5 +30,23 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !isCI,
     timeout: 180_000,
+    env: {
+      /**
+       * BOT KORUMASI E2E'DE KAPALI — ve bunu açıkça yazıyoruz.
+       *
+       * Turnstile anahtarları boş bırakılınca `src/lib/turnstile.ts`'in
+       * BELGELENMİŞ local atlaması devreye giriyor (ADR-004: atlama yalnızca
+       * local'de geçerli). Gerekçe: aksi hâlde her E2E koşusu Cloudflare'a
+       * ağdan bağımlı olurdu ve dış servis yavaşladığında testler kararsızlaşırdı.
+       *
+       * Bunun bedeli açıkça kabul ediliyor: bu testler bot kapısını
+       * DOĞRULAMIYOR. Kapının kendisi `tests/unit/turnstile.test.ts` ve
+       * `tests/integration/registrations-route.test.ts` içinde kapsanıyor,
+       * ayrıca tarayıcıda elle doğrulandı. Sessizce atlanan bir güvenlik
+       * kapısı, hiç test edilmemiş olmasından kötüdür — o yüzden burada yazılı.
+       */
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: "",
+      TURNSTILE_SECRET_KEY: "",
+    },
   },
 });
