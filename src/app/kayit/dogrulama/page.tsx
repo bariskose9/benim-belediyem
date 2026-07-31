@@ -42,7 +42,11 @@ export default async function RegisterVerifyPage() {
       <StepHeader
         step={3}
         title={copy.steps.verify.title}
-        description={copy.steps.verify.description}
+        // Local ve preview'da e-posta GÖNDERİLMİYOR; "gönderdik" demek
+        // kullanıcıyı gelmeyecek bir postayı beklemeye iter (yaşandı).
+        description={
+          isProductionEnv ? copy.steps.verify.description : copy.steps.verify.descriptionSimulated
+        }
       />
 
       <VerificationPanels
@@ -51,7 +55,7 @@ export default async function RegisterVerifyPage() {
         initialEmailVerified={state.emailVerified}
         initialPhoneVerified={state.phoneVerified}
         turnstileSiteKey={publicEnv.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-        showSimulationHint={!isProductionEnv}
+        isSimulated={!isProductionEnv}
       />
     </>
   );

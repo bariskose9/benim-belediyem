@@ -125,7 +125,9 @@ async function submitIdentity(page: Page, nationalId: string, birthYear: string)
  * `form` veya CSS sınıfı gibi yapıya bağlı seçiciler biçim değişince kırılırdı.
  */
 async function revealCode(panel: ReturnType<Page["locator"]>): Promise<string> {
-  await panel.getByRole("button", { name: "Yeni kod gönder" }).click();
+  // Test ortamında düğme "Kodu göster" der (gönderim yok, gösterim var);
+  // production'da "Yeni kod gönder". E2E her zaman test ortamında koşuyor.
+  await panel.getByRole("button", { name: "Kodu göster" }).click();
 
   const notice = panel.getByText(/Test ortamı — doğrulama kodu:/);
   await expect(notice).toBeVisible();

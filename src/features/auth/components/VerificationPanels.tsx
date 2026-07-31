@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2Icon, ClockIcon, InfoIcon, MailIcon, SmartphoneIcon } from "lucide-react";
+import { CheckCircle2Icon, ClockIcon, MailIcon, SmartphoneIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useId, useState } from "react";
 
@@ -33,8 +33,8 @@ export type VerificationPanelsProps = {
   initialEmailVerified: boolean;
   initialPhoneVerified: boolean;
   turnstileSiteKey: string | undefined;
-  /** Local ve preview'da kodun nasıl görüleceğini anlatan yönerge. */
-  showSimulationHint?: boolean;
+  /** Test ortamında düğme "Kodu göster" der; production'da "Yeni kod gönder". */
+  isSimulated?: boolean;
 };
 
 export function VerificationPanels(props: VerificationPanelsProps) {
@@ -62,13 +62,6 @@ export function VerificationPanels(props: VerificationPanelsProps) {
         <AlertDescription>{copy.smsSimulationNotice}</AlertDescription>
       </Alert>
 
-      {props.showSimulationHint ? (
-        <Alert role="status">
-          <InfoIcon aria-hidden="true" />
-          <AlertDescription>{copy.simulationHint}</AlertDescription>
-        </Alert>
-      ) : null}
-
       {!emailVerified || !phoneVerified ? (
         <Alert role="status">
           <ClockIcon aria-hidden="true" />
@@ -82,6 +75,7 @@ export function VerificationPanels(props: VerificationPanelsProps) {
         destination={props.emailMasked}
         verified={emailVerified}
         turnstileToken={turnstileToken}
+        isSimulated={props.isSimulated}
         onVerified={handleVerified}
       />
 
@@ -91,6 +85,7 @@ export function VerificationPanels(props: VerificationPanelsProps) {
         destination={props.phoneMasked}
         verified={phoneVerified}
         turnstileToken={turnstileToken}
+        isSimulated={props.isSimulated}
         onVerified={handleVerified}
       />
 
@@ -108,6 +103,7 @@ type ChannelPanelProps = {
   destination: string;
   verified: boolean;
   turnstileToken: string;
+  isSimulated?: boolean;
   onVerified: (channel: "email" | "phone", completed: boolean) => void;
 };
 
@@ -117,6 +113,7 @@ function ChannelPanel({
   destination,
   verified,
   turnstileToken,
+  isSimulated,
   onVerified,
 }: ChannelPanelProps) {
   const [code, setCode] = useState("");
@@ -236,13 +233,16 @@ function ChannelPanel({
                 {/* Ayrı bir bekleme süresi YOK (src/config/constants.ts gerekçesi);
                     düğme yalnızca istek sürerken kilitli kalıyor. Asıl koruma
                     "aynı hedefe 3 kod / 15 dakika" hız sınırında. */}
+                {/* Test ortamında düğme ne YAPTIĞINI söylüyor: gönderim yok,
+                    kodu ekranda gösteriyor. "Yeni kod gönder" yazsaydı
+                    kullanıcı yine postasına bakardı. */}
                 <Button
                   type="button"
-                  variant="outline"
+                  variant={isSimulated ? "default" : "outline"}
                   onClick={handleResend}
                   disabled={isResending}
                 >
-                  {copy.resend}
+                  {isSimulated ? copy.revealCode : copy.resend}
                 </Button>
               </div>
             </form>

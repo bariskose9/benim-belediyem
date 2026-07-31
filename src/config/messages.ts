@@ -83,8 +83,21 @@ export const messages = {
         },
         verify: {
           title: "Doğrulama kodları",
+
+          /**
+           * İKİ AYRI METİN VAR ve bu zorunlu.
+           *
+           * Local ve preview'da hiçbir e-posta GÖNDERİLMİYOR (sahte kanal),
+           * kod ekranda gösteriliyor. "Kod gönderdik" demek o ortamlarda
+           * düpedüz yanlış bilgi olur: kullanıcı posta kutusuna bakıp bekler.
+           * Bu fiilen yaşandı, o yüzden metin ortama göre değişiyor.
+           */
           description:
             "E-posta adresinize ve telefonunuza birer kod gönderdik. " +
+            "Hesabınız ikisi de doğrulanınca açılır.",
+          descriptionSimulated:
+            "TEST ORTAMI — hiçbir e-posta gönderilmez. Kodlarınız aşağıda, " +
+            "her panelde “Kodu göster” düğmesine bastığınızda EKRANDA çıkar. " +
             "Hesabınız ikisi de doğrulanınca açılır.",
         },
         done: { title: "Kayıt tamamlandı", description: "" },
@@ -167,14 +180,12 @@ export const messages = {
          * değişince kayboluyor. Test edenin ne yapacağını bilmesi için
          * ekranda açıkça yazıyor. Production'da bu metin GÖSTERİLMEZ.
          */
-        simulationHint:
-          "Test ortamı: doğrulama kodunu görmek için aşağıdaki “Yeni kod gönder” " +
-          "düğmesine basın. Canlı sitede kod yalnızca e-posta ile gelir.",
-
         codeLabel: "6 haneli kod",
         submit: "Doğrula",
         submitting: "Doğrulanıyor…",
         resend: "Yeni kod gönder",
+        /** Test ortamında düğme ne yaptığını dürüstçe söylüyor: gönderim yok, gösterim var. */
+        revealCode: "Kodu göster",
         remainingAttempts: "Kalan deneme hakkı: {count}",
         verified: "Doğrulandı",
         pending: "Bekliyor",
