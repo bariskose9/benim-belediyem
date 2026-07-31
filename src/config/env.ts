@@ -71,8 +71,24 @@ const serverEnvBaseSchema = z.object({
   GOOGLE_CLIENT_ID: optionalSecret,
   GOOGLE_CLIENT_SECRET: optionalSecret,
 
-  // adım 4b'de zorunlu olur (kimlik numarası şifreleme — data-model.md)
-  NATIONAL_ID_ENCRYPTION_KEY: optionalSecret,
+  /**
+   * Kimlik numarası ve KPS yükü şifreleme anahtarı (data-model.md · ADR-012).
+   *
+   * ADIM 4b-1'DEN İTİBAREN ZORUNLU. Opsiyonel bırakılsaydı uygulama açılır ama
+   * kayıt ucu çalışma anında ham bir kripto hatasıyla 500 dönerdi — sessizce
+   * bozuk bir kurulum. `EMAIL_API_KEY`'den farkı şu: e-posta anahtarı üçüncü
+   * bir servisten alınır ve meşru olarak henüz elde olmayabilir; bu anahtar
+   * `openssl rand -base64 32` ile üretilir ve her ortamda zaten tanımlıdır.
+   *
+   * 32 baytlık base64 olduğu ayrıca kontrol ediliyor: yanlış uzunluktaki bir
+   * değer aksi hâlde ilk kayıt denemesinde patlardı.
+   */
+  NATIONAL_ID_ENCRYPTION_KEY: z
+    .string()
+    .trim()
+    .refine((value) => Buffer.from(value, "base64").length === 32, {
+      error: "32 bayt (base64 kodlu) olmalı. Üretmek için: openssl rand -base64 32",
+    }),
 
   // Takma ad (pseudonym) özetlerinin gizli tuzu. Adım 4a'dan itibaren ZORUNLU:
   // hız sınırı ve denetim kaydı IP adresini bu tuzla özetleyerek saklıyor

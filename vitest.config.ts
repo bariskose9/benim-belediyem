@@ -33,6 +33,9 @@ export default defineConfig({
       DIRECT_URL: "postgresql://test:test@localhost:5432/test",
       // Adım 4a'dan itibaren zorunlu (IP özeti + sahte KPS ucunun anahtarı).
       NATIONAL_ID_HASH_SALT: "test-only-salt",
+      // Adım 4b-1'den itibaren zorunlu: KPS yükü ve kimlik numarası
+      // bu anahtarla şifreleniyor (ADR-012).
+      NATIONAL_ID_ENCRYPTION_KEY: "bG9jYWwtZGV2LW9ubHkta2V5LTMyLWJ5dGVzLXh4eHg=",
       MOCK_KPS_API_KEY: "test-only-mock-kps-key-at-least-32-chars",
     },
     coverage: {

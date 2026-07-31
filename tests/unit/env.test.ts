@@ -59,6 +59,8 @@ const validServerEnv = {
   // sahte KPS ucu bu anahtar olmadan hiçbir isteği kabul etmiyor.
   NATIONAL_ID_HASH_SALT: "test-only-salt",
   MOCK_KPS_API_KEY: "test-only-mock-kps-key-at-least-32-chars",
+  // Adım 4b-1'den itibaren zorunlu: KPS yükü bu anahtarla şifreleniyor.
+  NATIONAL_ID_ENCRYPTION_KEY: "bG9jYWwtZGV2LW9ubHkta2V5LTMyLWJ5dGVzLXh4eHg=",
 };
 
 describe("sunucu ortam değişkenleri", () => {
@@ -92,6 +94,25 @@ describe("sunucu ortam değişkenleri", () => {
     expect(() => parseEnv(serverEnvSchema, withoutSalt, "test")).toThrowError(
       /NATIONAL_ID_HASH_SALT/,
     );
+  });
+
+  it("şifreleme anahtarı ZORUNLUDUR — eksikse kayıt ucu ham kripto hatası verirdi", () => {
+    const { NATIONAL_ID_ENCRYPTION_KEY: _omitted, ...withoutKey } = validServerEnv;
+
+    expect(() => parseEnv(serverEnvSchema, withoutKey, "test")).toThrowError(
+      /NATIONAL_ID_ENCRYPTION_KEY/,
+    );
+  });
+
+  it("yanlış uzunluktaki şifreleme anahtarını AÇILIŞTA reddeder", () => {
+    // Aksi hâlde hata ilk kayıt denemesinde, kullanıcının önünde çıkardı.
+    expect(() =>
+      parseEnv(
+        serverEnvSchema,
+        { ...validServerEnv, NATIONAL_ID_ENCRYPTION_KEY: "Y29rLWtpc2E=" },
+        "test",
+      ),
+    ).toThrowError(/NATIONAL_ID_ENCRYPTION_KEY/);
   });
 
   it("boş string'i 'verilmemiş' sayar", () => {
