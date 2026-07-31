@@ -6,7 +6,7 @@
 ---
 
 benim-belediyem projesinde roadmap adım 4b'ye geçiyoruz. Başlamadan önce
-MEMORY.md'ye ve ~/Desktop/baris_projects/benim-belediyem/ içindeki CLAUDE.md +
+MEMORY.md'ye ve ~/baris_projects/benim-belediyem/ içindeki CLAUDE.md +
 docs/ klasörüne bak. MEMORY.md'deki TUZAKLAR bölümünü mutlaka oku.
 
 ## DURUM
