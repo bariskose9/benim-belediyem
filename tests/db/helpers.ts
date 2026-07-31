@@ -54,10 +54,46 @@ export async function cleanupTestData(): Promise<void> {
 
   await prisma.payment.deleteMany({ where: { id: startsWith } });
   await prisma.savedCard.deleteMany({ where: { id: startsWith } });
+
+  // Kayıt akışı (adım 4b-1). `otpChallenge` ve `auditLog` kullanıcıya bağlı
+  // olduğu için ondan ÖNCE silinmeli.
+  await prisma.otpChallenge.deleteMany({ where: { id: startsWith } });
+  await prisma.auditLog.deleteMany({ where: { id: startsWith } });
+  await prisma.registrationDraft.deleteMany({ where: { id: startsWith } });
+
   await prisma.user.deleteMany({ where: { id: startsWith } });
 
   await prisma.kpsQueryLog.deleteMany({ where: { id: startsWith } });
   await prisma.rateLimitCounter.deleteMany({ where: { id: startsWith } });
+}
+
+/**
+ * Kayıt akışının ürettiği kayıtlar `cuid()` ile kimlik alır, `testId()` önekiyle
+ * DEĞİL — çünkü kimlikleri uygulama üretiyor. Bu yüzden onları e-posta ve
+ * kimlik özetinden bulup siliyoruz.
+ *
+ * Tohumlanmış sahte veriye dokunmaz: yalnızca verilen değerlerle eşleşenleri siler.
+ */
+export async function cleanupRegistration(email: string, nationalIdHash: string): Promise<void> {
+  const users = await prisma.user.findMany({
+    where: { OR: [{ email }, { nationalIdHash }] },
+    select: { id: true },
+  });
+  const userIds = users.map((user) => user.id);
+
+  const drafts = await prisma.registrationDraft.findMany({
+    where: { nationalIdHash },
+    select: { id: true },
+  });
+
+  await prisma.otpChallenge.deleteMany({
+    where: {
+      OR: [{ userId: { in: userIds } }, { registrationId: { in: drafts.map((d) => d.id) } }],
+    },
+  });
+  await prisma.auditLog.deleteMany({ where: { userId: { in: userIds } } });
+  await prisma.registrationDraft.deleteMany({ where: { nationalIdHash } });
+  await prisma.user.deleteMany({ where: { id: { in: userIds } } });
 }
 
 /**

@@ -2,7 +2,7 @@
 
 import { CheckCircle2Icon, ClockIcon, InfoIcon, MailIcon, SmartphoneIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useId, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -125,6 +125,7 @@ function ChannelPanel({
   const [revealedCode, setRevealedCode] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const titleId = useId();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -181,64 +182,74 @@ function ChannelPanel({
   const Icon = channel === "email" ? MailIcon : SmartphoneIcon;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Icon aria-hidden="true" className="size-4" />
-          {title}
-          {/* Durum renkle DEĞİL, metin + ikonla anlatılıyor (WCAG 2.1 AA). */}
-          <span
-            className={
-              verified
-                ? "ml-auto inline-flex items-center gap-1 text-sm font-medium text-primary"
-                : "ml-auto text-sm font-medium text-muted-foreground"
-            }
-          >
-            {verified ? <CheckCircle2Icon aria-hidden="true" className="size-4" /> : null}
-            {verified ? copy.verified : copy.pending}
-          </span>
-        </CardTitle>
-      </CardHeader>
+    // `<section aria-labelledby>` — adı olan bir bölüm ekran okuyucuda
+    // gezinilebilir bir "bölge" olarak görünür, böylece kullanıcı iki panel
+    // arasında doğrudan atlayabilir (07-ui-design-system.md · WCAG 2.1 AA).
+    <section aria-labelledby={titleId}>
+      <Card>
+        <CardHeader>
+          <CardTitle id={titleId} className="flex items-center gap-2 text-base">
+            <Icon aria-hidden="true" className="size-4" />
+            {title}
+            {/* Durum renkle DEĞİL, metin + ikonla anlatılıyor (WCAG 2.1 AA). */}
+            <span
+              className={
+                verified
+                  ? "ml-auto inline-flex items-center gap-1 text-sm font-medium text-primary"
+                  : "ml-auto text-sm font-medium text-muted-foreground"
+              }
+            >
+              {verified ? <CheckCircle2Icon aria-hidden="true" className="size-4" /> : null}
+              {verified ? copy.verified : copy.pending}
+            </span>
+          </CardTitle>
+        </CardHeader>
 
-      <CardContent className="flex flex-col gap-4">
-        <p className="text-sm text-muted-foreground">{destination}</p>
+        <CardContent className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">{destination}</p>
 
-        {/* Doğrulandıktan sonra kod ekranda KALMAZ: işi bitmiş bir kodu
-            göstermeye devam etmek hem kafa karıştırır hem gereksiz. */}
-        {revealedCode && !verified ? <SimulationCodeNotice code={revealedCode} /> : null}
+          {/* Doğrulandıktan sonra kod ekranda KALMAZ: işi bitmiş bir kodu
+              göstermeye devam etmek hem kafa karıştırır hem gereksiz. */}
+          {revealedCode && !verified ? <SimulationCodeNotice code={revealedCode} /> : null}
 
-        {verified ? null : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-            <FormAlert message={error} />
-            <FormAlert message={notice} variant="info" />
+          {verified ? null : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+              <FormAlert message={error} />
+              <FormAlert message={notice} variant="info" />
 
-            <TextField
-              label={copy.codeLabel}
-              value={code}
-              onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
-              inputMode="numeric"
-              maxLength={OTP_CODE_LENGTH}
-              // iOS ve Android klavyesi SMS/e-posta kodunu otomatik doldurur.
-              autoComplete="one-time-code"
-              required
-            />
+              <TextField
+                label={copy.codeLabel}
+                value={code}
+                onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
+                inputMode="numeric"
+                maxLength={OTP_CODE_LENGTH}
+                // iOS ve Android klavyesi SMS/e-posta kodunu otomatik doldurur.
+                autoComplete="one-time-code"
+                required
+              />
 
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button type="submit" disabled={isSubmitting || code.length !== OTP_CODE_LENGTH}>
-                {isSubmitting ? copy.submitting : copy.submit}
-              </Button>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button type="submit" disabled={isSubmitting || code.length !== OTP_CODE_LENGTH}>
+                  {isSubmitting ? copy.submitting : copy.submit}
+                </Button>
 
-              {/* Ayrı bir bekleme süresi YOK (src/config/constants.ts gerekçesi);
-                  düğme yalnızca istek sürerken kilitli kalıyor. Asıl koruma
-                  "aynı hedefe 3 kod / 15 dakika" hız sınırında. */}
-              <Button type="button" variant="outline" onClick={handleResend} disabled={isResending}>
-                {copy.resend}
-              </Button>
-            </div>
-          </form>
-        )}
-      </CardContent>
-    </Card>
+                {/* Ayrı bir bekleme süresi YOK (src/config/constants.ts gerekçesi);
+                    düğme yalnızca istek sürerken kilitli kalıyor. Asıl koruma
+                    "aynı hedefe 3 kod / 15 dakika" hız sınırında. */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResend}
+                  disabled={isResending}
+                >
+                  {copy.resend}
+                </Button>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+    </section>
   );
 }
 
