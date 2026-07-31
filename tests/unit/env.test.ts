@@ -52,6 +52,10 @@ const LOCAL_DB_URL = "postgresql://belediye:belediye@localhost:5432/benim_beledi
 const validServerEnv = {
   DATABASE_URL: LOCAL_DB_URL,
   DIRECT_URL: LOCAL_DB_URL,
+  // Adım 4a'dan itibaren zorunlu: hız sınırı IP'yi bu tuzla özetliyor,
+  // sahte KPS ucu bu anahtar olmadan hiçbir isteği kabul etmiyor.
+  NATIONAL_ID_HASH_SALT: "test-only-salt",
+  MOCK_KPS_API_KEY: "test-only-mock-kps-key-at-least-32-chars",
 };
 
 describe("sunucu ortam değişkenleri", () => {
@@ -62,6 +66,29 @@ describe("sunucu ortam değişkenleri", () => {
 
     expect(parsed.OTP_EMAIL_CHANNEL).toBe("mock");
     expect(parsed.NEWS_API_PROVIDER).toBe("gnews");
+  });
+
+  it("sahte KPS anahtarı ZORUNLUDUR — eksikse uygulama açılmaz", () => {
+    // Opsiyonel olsaydı, anahtar unutulduğunda uygulama sessizce açılır ve
+    // kimlik sorgu ucu herkese açık kalırdı (ADR-009). Kapı, atlanabiliyorsa
+    // kapı değildir.
+    const { MOCK_KPS_API_KEY: _omitted, ...withoutKey } = validServerEnv;
+
+    expect(() => parseEnv(serverEnvSchema, withoutKey, "test")).toThrowError(/MOCK_KPS_API_KEY/);
+  });
+
+  it("tahmin edilebilecek kadar kısa bir KPS anahtarını reddeder", () => {
+    expect(() =>
+      parseEnv(serverEnvSchema, { ...validServerEnv, MOCK_KPS_API_KEY: "secret" }, "test"),
+    ).toThrowError(/MOCK_KPS_API_KEY/);
+  });
+
+  it("özet tuzu ZORUNLUDUR — tuzsuz özet kaba kuvvetle çözülür", () => {
+    const { NATIONAL_ID_HASH_SALT: _omitted, ...withoutSalt } = validServerEnv;
+
+    expect(() => parseEnv(serverEnvSchema, withoutSalt, "test")).toThrowError(
+      /NATIONAL_ID_HASH_SALT/,
+    );
   });
 
   it("boş string'i 'verilmemiş' sayar", () => {
@@ -97,7 +124,7 @@ describe("veritabanı bağlantı adresleri", () => {
   it("postgresql ve postgres şemalarını kabul eder", () => {
     const parsed = parseEnv(
       serverEnvSchema,
-      { DATABASE_URL: "postgres://u:p@h:5432/d", DIRECT_URL: LOCAL_DB_URL },
+      { ...validServerEnv, DATABASE_URL: "postgres://u:p@h:5432/d" },
       "test",
     );
 

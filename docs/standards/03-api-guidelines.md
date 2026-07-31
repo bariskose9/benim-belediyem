@@ -43,3 +43,6 @@ Stack trace, SQL, dosya yolu **asla** yanıta konmaz.
 - Ödeme/sipariş gibi tekrarlanmaması gereken işlemlerde idempotency anahtarı kullanılır.
 - Uzun işlemler senkron beklemez.
 - Tüm endpoint'ler OpenAPI (Swagger) ile belgelenir; `/api/docs` altında yayınlanır.
+  **Tek istisna:** taklit edilen dış servis uçları (`/api/mock-kps/*`) belgelenmez —
+  gerekçe ADR-009. Bu istisna yalnızca dış kurum taklidi için geçerlidir;
+  uygulamanın kendi uçlarına genişletilemez.

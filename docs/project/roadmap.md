@@ -9,7 +9,7 @@ Sıra kasıtlıdır: her adım bir öncekinin üzerine kurulur. Bir adım
 | 1 | GitHub + Vercel + Neon bağlantısı, `/api/health`, CI pipeline | **Canlı boş sayfa** |
 | 2 | Docker Compose (local Postgres), Prisma kurulumu, ilk migration | Local DB çalışıyor |
 | 3 | ~~Veri modeli + tüm tablolar + `fake-data-guide.md`'ye uygun seed~~ **BİTTİ** | 37 tablo + idempotent seed |
-| 4a | Sahte KPS servisi: `kps_citizens` seed, mock uç, gecikme/hata simülasyonu, hız sınırı | KPS sorgusu çalışıyor |
+| 4a | ~~Sahte KPS servisi: `kps_citizens` seed, mock uç, gecikme/hata simülasyonu, hız sınırı~~ **BİTTİ** | KPS sorgusu çalışıyor (ADR-009, ADR-010) |
 | 4b | Auth: TCKN ile kayıt (KPS sorgusu + **e-posta ve telefon OTP**), giriş, çıkış, **veritabanı oturumu** (ADR-005), rol, korumalı route, **hız sınırı tablosu** (ADR-006), **bot koruması** (ADR-004) | Giriş çalışıyor |
 | 4c | Google ile giriş (OAuth) + hesap birleştirme + personel eşleştirmesi + erişim kademeleri | Test + PR + deploy |
 | 5 | Layout: navbar, logo, dark mode, responsive iskelet, tasarım token'ları | Görsel iskelet |
@@ -52,3 +52,6 @@ Buraya sadece **bilinen ve kabul edilmiş** eksikler yazılır. Boş bırakılma
 | 15 | **Örnek üye hesaplarının şifresi yazılmıyor** — `password_hash` boş | Şifre özetleme kütüphanesi (argon2 / bcrypt cost >= 12) kimlik doğrulama adımının kararıdır. Adım 3'te rastgele bir algoritma seçmek, adım 4b'de tüm kayıtları geçersiz kılardı | Adım 4b (giriş) |
 | 16 | **Ürün görselleri kategori başına tek yer tutucu** | 45 ürün + 31 menü kalemi için ayrı görsel üretmek, ekran olmadan doğrulanamayacak 76 dosya demekti. Kategori başına üretilmiş SVG yer tutucu (11 dosya) 404 vermez ve `alt` metni taşır | Adım 8-9 (market ve restoran ekranları) |
 | 17 | **Dolu doktor slotlarının çoğunda randevu kaydı yok** | Rehber slotların %30'unu dolu istiyor (~1960 slot). Hepsine gerçek randevu yazmak, tek kullanıcıya yüzlerce randevu vermek ve "aynı branşta aynı gün tek randevu" kuralını (PRD §5.1) seed'in kendisinde ihlal etmek olurdu. Dolu slotların bir kısmı sahipli, geri kalanı "başkasının randevusu" — uygulama zaten başkasının randevusunu göstermez | Ödenmesi gerekmiyor — bilinçli tasarım |
+| 18 | **`rate_limit_counters` tablosu hiç temizlenmiyor** | Her kimlik sorgusu ve her dış servis hatası bu tabloya satır yazıyor; süresi geçmiş satırları silecek planlı görev henüz yok (ADR-006 ve ADR-007 bunu öngörüyor). Tablo bugün için küçük ve sorgular index'li, ama sınırsız büyüyor | Adım 16 (planlı görevler) — temizlik hem hız sınırı hem devre kesici satırlarını kapsamalı |
+| 19 | **`MockKpsProvider` henüz hiçbir uçtan çağrılmıyor** | Servis, sağlayıcı ve korumalar hazır ve uçtan uca doğrulandı; ama onu tetikleyecek kayıt akışı adım 4b'nin işi. Erken bir HTTP ucu açmak, korunması gereken ikinci bir yüzey yaratırdı | Adım 4b (kayıt akışı) |
+| 20 | **`timeout` simülasyonu 6 sn sunucu zamanı harcıyor** | Çağıran 3 sn'de vazgeçse de sahte servis beklemeye devam ediyor; Vercel'de bu boşa giden fonksiyon süresi demek. Gerçek bir zaman aşımını taklit etmenin daha ucuz bir yolu yok | Ödenmesi gerekmiyor — yalnızca 3 sınır durum numarasında tetikleniyor |

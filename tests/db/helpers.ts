@@ -55,6 +55,9 @@ export async function cleanupTestData(): Promise<void> {
   await prisma.payment.deleteMany({ where: { id: startsWith } });
   await prisma.savedCard.deleteMany({ where: { id: startsWith } });
   await prisma.user.deleteMany({ where: { id: startsWith } });
+
+  await prisma.kpsQueryLog.deleteMany({ where: { id: startsWith } });
+  await prisma.rateLimitCounter.deleteMany({ where: { id: startsWith } });
 }
 
 /**

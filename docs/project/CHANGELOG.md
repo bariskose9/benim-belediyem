@@ -4,6 +4,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 4a (sahte KPS servisi)
+- `src/app/api/mock-kps/identity-queries/` — taklit edilen DIŞ KURUM ucu.
+  Yalnızca POST (kimlik numarası URL'e değil gövdeye yazılır), yapay gecikme
+  200–800 ms, `simulationBehavior` alanına göre `timeout` / `error` /
+  `not_found` üretimi. **Paylaşılan gizli başlık olmadan 401 döner** (ADR-009)
+- `src/features/identity/` — `IdentityProvider` arayüzü + `MockKpsProvider`.
+  Zaman aşımı 3 sn, en fazla 2 yeniden deneme (üstel geri çekilme), devre
+  kesici. **Yeniden deneme yalnızca zaman aşımı ve 5xx'te**; `not_found`,
+  `mismatch` ve 4xx iş sonucudur, tekrarlanmaz
+- `src/features/identity/services/identity-lookup.service.ts` — numara taraması
+  koruması: tek tip başarısızlık mesajı, **sabit yanıt süresi** (bulundu /
+  eşleşmedi / bulunamadı aynı sürer), her sorgu `KpsQueryLog`'a **numara
+  yazılmadan** kaydedilir
+- `src/lib/rate-limit.ts` — Postgres üzerinde hız sınırı sayacı (ADR-006).
+  5 deneme / 15 dakika, IP + oturum bazlı. IP tuzlanmış özet olarak saklanır.
+  **Sayaç kullanıcı denemesi başına artar**, iç yeniden denemeler artırmaz
+- `src/lib/circuit-breaker.ts` — devre kesici, mevcut `rate_limit_counters`
+  tablosu üzerinde (ADR-010). Yeni migration yok
+- `MOCK_KPS_API_KEY` ortam değişkeni — **zorunlu**, her ortamda farklı
+- `docs/project/decisions/ADR-009-*`, `ADR-010-*`
+- Testler: 54 yeni unit/entegrasyon + 6 veritabanı + 5 E2E. E2E, derlenmiş ve
+  çalışan uygulamaya dışarıdan başlıksız istek atıp 401 aldığını kanıtlıyor
+
+### Değişti — adım 4a
+- `NATIONAL_ID_HASH_SALT` artık **zorunlu** (IP özeti bunu kullanıyor)
+- `src/lib/crypto.ts` — `hashPseudonym()` eklendi: kimlik numarası dışındaki
+  tanımlayıcılar için alan ayrımlı (domain-separated) takma ad özeti
+- `src/app/robots.ts` — production'da `/api/mock-kps` açıkça kapatıldı
+
 ### Eklendi — adım 3
 - `prisma/schema.prisma` — `data-model.md`'deki **37 tablonun tamamı**, 26 enum,
   yabancı anahtarlar, index'ler ve eşzamanlılık için benzersiz index'ler
