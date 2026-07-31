@@ -31,6 +31,11 @@ jobs:
       # adres bekliyor. Gerçek veritabanıyla doğrulama e2e.yml'de yapılıyor.
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
       DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
+      # Adım 4a'dan itibaren zorunlu. Bunlar .env.example'daki LOCAL değerlerdir
+      # ve gizli değildir; canlı anahtarlar Vercel panelinde durur
+      # (docs/standards/13-environments.md: canlı anahtar CI'da kullanılmaz).
+      NATIONAL_ID_HASH_SALT: local-dev-only-salt
+      MOCK_KPS_API_KEY: local-dev-only-mock-kps-key-not-a-secret
 
     steps:
       - uses: actions/checkout@v6

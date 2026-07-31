@@ -65,7 +65,26 @@ const serverEnvSchema = z.object({
 
   // adım 4b'de zorunlu olur (kimlik numarası şifreleme — data-model.md)
   NATIONAL_ID_ENCRYPTION_KEY: optionalSecret,
-  NATIONAL_ID_HASH_SALT: optionalSecret,
+
+  // Takma ad (pseudonym) özetlerinin gizli tuzu. Adım 4a'dan itibaren ZORUNLU:
+  // hız sınırı ve denetim kaydı IP adresini bu tuzla özetleyerek saklıyor
+  // (ADR-006 → "IP adresi tuzlanmış özet olarak saklanır"). Tuz boşsa özet
+  // kaba kuvvetle çözülebilir hale gelirdi, o yüzden opsiyonel bırakılamaz.
+  NATIONAL_ID_HASH_SALT: z.string().trim().min(1),
+
+  /**
+   * Sahte KPS ucunun paylaşılan gizli anahtarı (ADR-009).
+   *
+   * ZORUNLU ve opsiyonel DEĞİL: eksikse uygulama açılışta durur. Alternatifi
+   * (boşsa korumayı atla) sessizce herkese açık bir kimlik sorgu ucu bırakırdı —
+   * depo ve site herkese açık olduğu için bu doğrudan numara taraması demek.
+   *
+   * 32 karakter alt sınırı tahmin edilebilir bir değerin ("test", "secret")
+   * yanlışlıkla kullanılmasını engeller. Üretmek için: openssl rand -base64 32
+   */
+  MOCK_KPS_API_KEY: z.string().trim().min(32, {
+    error: "En az 32 karakter olmalı. Üretmek için: openssl rand -base64 32",
+  }),
 
   // adım 14'te zorunlu olur (bilgi widget'ları)
   NEWS_API_KEY: optionalSecret,

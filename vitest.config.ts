@@ -11,6 +11,16 @@ export default defineConfig({
     setupFiles: ["./tests/setup.ts"],
     // E2E ayrı araçla (Playwright) çalışır, buraya karışmaz.
     include: ["tests/unit/**/*.test.{ts,tsx}", "tests/integration/**/*.test.{ts,tsx}"],
+    /**
+     * Varsayılan 5 sn yetmiyor ve sebebi testlerin yavaşlığı DEĞİL: her dosyanın
+     * ilk testi, o dosyanın modül ağacının derlenmesini bekliyor. Dosyalar
+     * paralel koştuğu için bu maliyet yüklü makinede 5 sn'yi aşabiliyor ve
+     * test yükün durumuna göre bazen kırmızı, bazen yeşil oluyordu.
+     *
+     * Süreye bağlı davranışlar sahte saatle test edildiği için (06-testing.md)
+     * hiçbir test gerçekten beklemiyor; bu sınır yalnızca derleme payı.
+     */
+    testTimeout: 20_000,
     // src/config/env.ts içe aktarıldığı anda doğrulama yaptığı için
     // testlerin de geçerli bir ortam görmesi gerekiyor.
     env: {
@@ -21,6 +31,9 @@ export default defineConfig({
       // geçerli biçimde bir değer bulunmalı.
       DATABASE_URL: "postgresql://test:test@localhost:5432/test",
       DIRECT_URL: "postgresql://test:test@localhost:5432/test",
+      // Adım 4a'dan itibaren zorunlu (IP özeti + sahte KPS ucunun anahtarı).
+      NATIONAL_ID_HASH_SALT: "test-only-salt",
+      MOCK_KPS_API_KEY: "test-only-mock-kps-key-at-least-32-chars",
     },
     coverage: {
       provider: "v8",

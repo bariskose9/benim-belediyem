@@ -46,6 +46,9 @@ jobs:
       # (docs/standards/13-environments.md: canlı anahtar CI'da kullanılmaz).
       NATIONAL_ID_ENCRYPTION_KEY: bG9jYWwtZGV2LW9ubHkta2V5LTMyLWJ5dGVzLXh4eHg=
       NATIONAL_ID_HASH_SALT: local-dev-only-salt
+      # Sahte KPS ucunun paylaşılan anahtarı (ADR-009). E2E, bu anahtar OLMADAN
+      # atılan isteğin 401 aldığını kanıtlıyor — koruma canlı sunucuda test edilir.
+      MOCK_KPS_API_KEY: local-dev-only-mock-kps-key-not-a-secret
 
     steps:
       - uses: actions/checkout@v6

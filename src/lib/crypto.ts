@@ -84,6 +84,26 @@ export function hashNationalId(value: string, salt: string): string {
 }
 
 /**
+ * Kimlik numarası DIŞINDAKİ tanımlayıcılar için takma ad (pseudonym) özeti —
+ * bugün IP adresi, ileride benzeri alanlar.
+ *
+ * Neden `hashNationalId` ile aynı fonksiyon kullanılmıyor: `domain` parametresi
+ * alan ayrımı yapar. Aynı tuzla özetlenen iki farklı alan (kimlik numarası ve
+ * IP) alan adı karışmadan özetlenirse, bir alanın özet tablosu diğerine karşı
+ * kullanılabilir. Alan adı önek olarak karıştığı için özetler artık kesişmez.
+ *
+ * `hashNationalId` bilerek dokunulmadı: onun ürettiği özetler veritabanında
+ * duruyor ve girdisi değişirse tüm mevcut kayıtlar bulunamaz hale gelirdi.
+ */
+export function hashPseudonym(value: string, salt: string, domain: string): string {
+  if (!salt) {
+    throw new Error("NATIONAL_ID_HASH_SALT tanımlı değil — takma ad özeti üretilemez.");
+  }
+
+  return createHmac("sha256", salt).update(`${domain}:${value}`).digest("hex");
+}
+
+/**
  * AES-256-GCM ile şifreler. Her çağrıda RASTGELE nonce kullanılır, dolayısıyla
  * aynı numara her seferinde farklı şifreli metin üretir. Bu yüzden şifreli kolon
  * üzerinde unique index KURULAMAZ; tekilliği `hashNationalId` sağlar.
