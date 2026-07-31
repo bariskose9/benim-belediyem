@@ -158,10 +158,15 @@ export const OTP_SEND_RATE_LIMIT_MAX = 3;
 export const OTP_SEND_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
 
 /**
- * "Tekrar gönder" düğmesinin bekleme süresi. Hız sınırından ayrı ve ondan kısa:
- * amacı korumak değil, kullanıcıyı üç hakkını arka arkaya harcamaktan korumak.
+ * AYRI BİR "TEKRAR GÖNDER" BEKLEME SÜRESİ YOK ve bu bilinçli bir karar.
+ *
+ * Önce 60 saniyelik bir bekleme konmuştu, sonra kaldırıldı: hiçbir standartta
+ * geçmiyor (05-auth-security.md yalnızca "aynı hedefe 3 kod / 15 dakika"
+ * diyor) ve local/preview'da kodun ekranda görüldüğü akışta kullanıcıyı
+ * boş yere bekletiyordu. Koruma zaten gönderim hız sınırında.
+ *
+ * Çift tıklama, düğmenin istek sürerken devre dışı kalmasıyla önleniyor.
  */
-export const OTP_RESEND_COOLDOWN_MS = 60_000;
 
 /** Dış e-posta servisine verilen süre. Aşılırsa kanal `unavailable` döner. */
 export const EMAIL_SEND_TIMEOUT_MS = 5_000;

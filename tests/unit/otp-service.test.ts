@@ -230,7 +230,7 @@ describe("issueOtp — kod üretimi ve gönderimi", () => {
     const first = await issue();
     if (first.outcome !== "sent") throw new Error("gönderilmeliydi");
 
-    const later = new Date(NOW.getTime() + 61_000);
+    const later = new Date(NOW.getTime() + 1_000);
     await issue({ now: later });
 
     expect(db.challenges[0].consumedAt).not.toBeNull();
@@ -255,18 +255,22 @@ describe("issueOtp — kod üretimi ve gönderimi", () => {
 });
 
 describe("issueOtp — gönderim hız sınırı ve bekleme süresi", () => {
-  it("60 saniye dolmadan tekrar kod istenemez", async () => {
+  it("arka arkaya kod istemek AYRI bir bekleme süresine takılmaz", async () => {
+    // Ayrı bir "tekrar gönder" beklemesi bilerek YOK (src/config/constants.ts):
+    // hiçbir standartta geçmiyor ve local/preview'da kodun ekranda görüldüğü
+    // akışta kullanıcıyı boş yere bekletiyordu. Koruma tamamen gönderim hız
+    // sınırında ("aynı hedefe 3 kod / 15 dakika") — aşağıdaki testler onu ölçüyor.
     await issue();
 
-    const tooSoon = await issue({ now: new Date(NOW.getTime() + 30_000) });
+    const soon = await issue({ now: new Date(NOW.getTime() + 1_000) });
 
-    expect(tooSoon.outcome).toBe("cooldown");
+    expect(soon.outcome).toBe("sent");
   });
 
   it("AYNI HEDEFE 15 dakikada 4. kod isteği reddedilir", async () => {
     // 05-auth-security.md: "Gönderim hız sınırına tabidir (aynı hedefe
     // 3 kod / 15 dakika)."
-    const times = [0, 61_000, 122_000, 183_000].map((offset) => new Date(NOW.getTime() + offset));
+    const times = [0, 1_000, 2_000, 3_000].map((offset) => new Date(NOW.getTime() + offset));
 
     for (const now of times.slice(0, 3)) {
       await expect(issue({ now })).resolves.toMatchObject({ outcome: "sent" });
@@ -276,11 +280,11 @@ describe("issueOtp — gönderim hız sınırı ve bekleme süresi", () => {
   });
 
   it("15 dakikalık pencere geçince yeniden kod istenebilir — SÜRE DOLUMU TESTİ", async () => {
-    for (const offset of [0, 61_000, 122_000]) {
+    for (const offset of [0, 1_000, 2_000]) {
       await issue({ now: new Date(NOW.getTime() + offset) });
     }
 
-    await expect(issue({ now: new Date(NOW.getTime() + 183_000) })).resolves.toEqual({
+    await expect(issue({ now: new Date(NOW.getTime() + 3_000) })).resolves.toEqual({
       outcome: "rate_limited",
     });
 
@@ -291,13 +295,13 @@ describe("issueOtp — gönderim hız sınırı ve bekleme süresi", () => {
   });
 
   it("farklı hedefler birbirinin bütçesini tüketmez", async () => {
-    for (const offset of [0, 61_000, 122_000]) {
+    for (const offset of [0, 1_000, 2_000]) {
       await issue({ now: new Date(NOW.getTime() + offset) });
     }
 
     await expect(
       issue({
-        now: new Date(NOW.getTime() + 183_000),
+        now: new Date(NOW.getTime() + 3_000),
         purpose: "register_phone",
         destinationKind: "phone",
         destinationValue: "05321234567",
@@ -381,14 +385,14 @@ describe("verifyOtp — doğrulama, süre ve deneme hakkı", () => {
     if (issued.outcome !== "sent") throw new Error("gönderilmeliydi");
 
     await issue({
-      now: new Date(NOW.getTime() + 61_000),
+      now: new Date(NOW.getTime() + 1_000),
       purpose: "register_phone",
       destinationKind: "phone",
       destinationValue: "05321234567",
     });
 
     await expect(
-      verify(issued.revealedCode!, new Date(NOW.getTime() + 62_000), "register_phone"),
+      verify(issued.revealedCode!, new Date(NOW.getTime() + 2_000), "register_phone"),
     ).resolves.toMatchObject({ outcome: "invalid" });
   });
 
@@ -397,17 +401,17 @@ describe("verifyOtp — doğrulama, süre ve deneme hakkı", () => {
     // diğeri geçersizleşmez."
     const email = await issue();
     const phone = await issue({
-      now: new Date(NOW.getTime() + 61_000),
+      now: new Date(NOW.getTime() + 1_000),
       purpose: "register_phone",
       destinationKind: "phone",
       destinationValue: "05321234567",
     });
     if (email.outcome !== "sent" || phone.outcome !== "sent") throw new Error("gönderilmeliydi");
 
-    await verify(email.revealedCode!, new Date(NOW.getTime() + 62_000));
+    await verify(email.revealedCode!, new Date(NOW.getTime() + 2_000));
 
     await expect(
-      verify(phone.revealedCode!, new Date(NOW.getTime() + 63_000), "register_phone"),
+      verify(phone.revealedCode!, new Date(NOW.getTime() + 3_000), "register_phone"),
     ).resolves.toEqual({ outcome: "verified" });
   });
 

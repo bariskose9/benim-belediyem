@@ -103,26 +103,3 @@ export async function findConsumedPurposes(registrationId: string): Promise<OtpP
 
   return rows.map((row) => row.purpose);
 }
-
-/**
- * En son üretilen kodun son kullanma anı — "tekrar gönder" bekleme süresi için.
- *
- * NEDEN `expiresAt`, NEDEN `createdAt` DEĞİL: `createdAt` veritabanının kendi
- * saatinden geliyor (`@default(now())`), `expiresAt` ise servisin saatinden.
- * İkisini karıştırmak bekleme süresini iki farklı saate bağlar; sunucu ile
- * veritabanı arasındaki en küçük kayma bile kuralı kayarlaştırır ve testi
- * sahte saatle çalıştırmayı imkânsız kılar. Üretim anı `expiresAt - OTP_TTL_MS`
- * ile birebir geri hesaplanabiliyor, dolayısıyla tek saat yetiyor.
- */
-export async function findLastChallengeExpiresAt(
-  registrationId: string,
-  purpose: OtpPurpose,
-): Promise<Date | null> {
-  const row = await prisma.otpChallenge.findFirst({
-    where: { registrationId, purpose },
-    orderBy: { expiresAt: "desc" },
-    select: { expiresAt: true },
-  });
-
-  return row?.expiresAt ?? null;
-}

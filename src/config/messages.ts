@@ -162,11 +162,19 @@ export const messages = {
           "SMS simülasyonu: gerçek SMS sağlayıcısı olmadığı için telefon kodunuz da " +
           "e-posta adresinize gönderildi.",
 
+        /**
+         * Local ve preview'da kod, gönderim yanıtında dönüyor ve sayfa
+         * değişince kayboluyor. Test edenin ne yapacağını bilmesi için
+         * ekranda açıkça yazıyor. Production'da bu metin GÖSTERİLMEZ.
+         */
+        simulationHint:
+          "Test ortamı: doğrulama kodunu görmek için aşağıdaki “Yeni kod gönder” " +
+          "düğmesine basın. Canlı sitede kod yalnızca e-posta ile gelir.",
+
         codeLabel: "6 haneli kod",
         submit: "Doğrula",
         submitting: "Doğrulanıyor…",
         resend: "Yeni kod gönder",
-        resendCountdown: "Yeni kod {seconds} saniye sonra istenebilir",
         remainingAttempts: "Kalan deneme hakkı: {count}",
         verified: "Doğrulandı",
         pending: "Bekliyor",

@@ -1,6 +1,5 @@
 import {
   OTP_MAX_ATTEMPTS,
-  OTP_RESEND_COOLDOWN_MS,
   OTP_SEND_RATE_LIMIT_MAX,
   OTP_SEND_RATE_LIMIT_WINDOW_MS,
   OTP_TTL_MS,
@@ -9,7 +8,6 @@ import { isProductionEnv } from "@/config/env";
 import {
   createOtpChallenge,
   findConsumedPurposes,
-  findLastChallengeExpiresAt,
   findPendingChallenge,
   incrementAttemptCount,
   invalidatePendingChallenges,
@@ -44,7 +42,6 @@ export type IssueOtpInput = {
 export type IssueOtpResult =
   | { outcome: "sent"; expiresAt: Date; revealedCode?: string }
   | { outcome: "rate_limited" }
-  | { outcome: "cooldown"; retryAfterMs: number }
   | { outcome: "unavailable" };
 
 export type VerifyOtpInput = {
@@ -71,9 +68,6 @@ export type VerifyOtpResult =
 export async function issueOtp(input: IssueOtpInput): Promise<IssueOtpResult> {
   const now = input.now ?? new Date();
   const destinationHash = hashDestination(input.destinationValue);
-
-  const cooldown = await checkResendCooldown(input.registrationId, input.purpose, now);
-  if (cooldown) return cooldown;
 
   // "Aynı hedefe 3 kod / 15 dakika" — mevcut hız sınırı mekanizması kullanılıyor,
   // ikinci bir mekanizma KURULMUYOR (ADR-006).
@@ -182,29 +176,6 @@ export async function readVerifiedPurposes(registrationId: string): Promise<Set<
  */
 function revealCodeIfAllowed(code: string | undefined): string | undefined {
   return isProductionEnv ? undefined : code;
-}
-
-/**
- * "Tekrar gönder" bekleme süresi. Hız sınırından AYRI ve ondan kısa: amacı
- * korumak değil, kullanıcıyı üç kod hakkını arka arkaya harcamaktan korumak.
- */
-async function checkResendCooldown(
-  registrationId: string,
-  purpose: OtpPurpose,
-  now: Date,
-): Promise<{ outcome: "cooldown"; retryAfterMs: number } | null> {
-  const lastExpiresAt = await findLastChallengeExpiresAt(registrationId, purpose);
-
-  if (!lastExpiresAt) return null;
-
-  // Üretim anı son kullanma anından geri hesaplanıyor; böylece bekleme süresi
-  // veritabanı saatine değil, servisin saatine bağlı kalıyor (repository notu).
-  const lastIssuedAt = lastExpiresAt.getTime() - OTP_TTL_MS;
-  const elapsed = now.getTime() - lastIssuedAt;
-
-  if (elapsed >= OTP_RESEND_COOLDOWN_MS) return null;
-
-  return { outcome: "cooldown", retryAfterMs: OTP_RESEND_COOLDOWN_MS - elapsed };
 }
 
 /** Özet kapsamı — aynı kod farklı kayıtlarda farklı özet üretsin diye. */

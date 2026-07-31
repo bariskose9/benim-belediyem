@@ -18,6 +18,7 @@ import {
   OtpInvalidError,
   OtpSendRateLimitedError,
   OtpTooManyAttemptsError,
+  RegistrationClosedError,
   RegistrationExpiredError,
   WeakPasswordError,
 } from "@/features/auth/errors";
@@ -41,6 +42,7 @@ import type {
 import { checkPasswordPolicy } from "@/features/auth/services/password-policy.service";
 import { hashPassword } from "@/features/auth/services/password.service";
 import { isAdultOn } from "@/features/auth/services/registration-age.service";
+import { isRegistrationOpen } from "@/features/auth/services/registration-availability";
 import { matchStaffMember } from "@/features/auth/services/staff-matching.service";
 import type {
   RegistrationContact,
@@ -100,6 +102,11 @@ export async function startRegistration(
   input: StartRegistrationInput,
 ): Promise<StartRegistrationResult> {
   const now = input.now ?? new Date();
+
+  // Ekranda formu gizlemek YETKİLENDİRME DEĞİLDİR (05-auth-security.md):
+  // aynı kontrol sunucuda da yapılıyor, yoksa doğrudan uca istek atan biri
+  // kimliğini doğrulatıp hiç gelmeyecek bir kodu beklerdi.
+  if (!isRegistrationOpen()) throw new RegistrationClosedError();
 
   await assertBotCheckPassed(input.payload.turnstileToken, input.actorIp);
 
@@ -407,7 +414,6 @@ async function sendCode(
   });
 
   if (result.outcome === "rate_limited") throw new OtpSendRateLimitedError();
-  if (result.outcome === "cooldown") throw new OtpSendRateLimitedError();
   if (result.outcome === "unavailable") throw new OtpChannelUnavailableError();
 
   return result.revealedCode;
