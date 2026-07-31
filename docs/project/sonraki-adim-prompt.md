@@ -1,154 +1,142 @@
-# Sonraki oturum için hazır prompt — adım 4b
+# Sonraki oturum için hazır prompt — adım 4b-2
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 4b bitince güncellenir veya silinir.
+> Adım 4b-2 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım 4b'ye geçiyoruz. Başlamadan önce
-MEMORY.md'ye ve ~/baris_projects/benim-belediyem/ içindeki CLAUDE.md +
-docs/ klasörüne bak. MEMORY.md'deki TUZAKLAR bölümünü mutlaka oku.
+benim-belediyem projesinde roadmap adım **4b-2**'ye geçiyoruz. Başlamadan önce
+`CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu üçü:
+
+- `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
+  Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
+- `docs/project/roadmap.md` — teknik borç listesi
+- `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
 
 ## DURUM
 
-Roadmap adım 0-4a bitti ve `main`'e merge edildi (PR #1-#6).
+Roadmap adım **0 → 4b-1 bitti ve `main`'de canlıda** (PR #1-#9).
+4b-1 merge commit'i `4f698ea`.
 
-- Canlı: https://benim-belediyem.vercel.app · sağlık ucu /api/health
-- Depo public: github.com/bariskose9/benim-belediyem
-- 37 tablo + seed: 200 sahte KPS vatandaşı, 100 personel, 90 üye
-- Test hesapları ve sınır durum numaraları: docs/project/test-hesaplari.md
-- Testler: 134 unit/entegrasyon + 25 veritabanı (npm run test:db) + 28 E2E
+- Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
+- **Kayıt akışı canlıda ÇALIŞIYOR**: TCKN → KPS → 18 yaş → iki bağımsız OTP
+- Preview ve production veritabanları **dolu**: 200 KPS vatandaşı, 100 personel,
+  90 üye. Gerçek kullanıcı 0
+- Testler: **263** unit/entegrasyon · **36** veritabanı · **50** E2E
+- Cloudflare Turnstile ve Resend **kurulu ve çalışıyor** (altyapi-durumu.md)
 
-**Adım 4a'da kurulan ve HAZIR BEKLEYEN parçalar — bunları YENİDEN YAZMA, KULLAN:**
+## ⚠️ 4b-1'DE DOĞRULANAN KRİTİK BULGU — 4b-2'NİN ANA MESELESİ
 
-- `lookupIdentity()` (src/features/identity/services/) — kimlik sorgusunun
-  tamamı: hız sınırı, devre kesici, denetim kaydı, sabit yanıt süresi, tek tip
-  hata mesajı. Uçtan uca doğrulandı. Sadece onu çağıracak uç ve ekran yok.
-- `consumeRateLimit()` + `rateLimitKey()` (src/lib/rate-limit.ts) — her yeni
-  korumalı uç bunu kullanacak. Yeni bir hız sınırı mekanizması KURMA.
-- `hashActorIp()` ve `readActorIp()` — IP'yi okuma ve tuzlama.
-- `encryptNationalId` / `hashNationalId` / `maskNationalId` (src/lib/crypto.ts).
-- ADR-009 (dış servis ucu koruması) ve ADR-010 (devre kesici) okunmalı.
+**Auth.js v5'in Credentials sağlayıcısı veritabanı oturumunu DESTEKLEMİYOR.**
+Şifreyle girişte `strategy: "jwt"` zorunlu kılınıyor; `database` stratejisi
+`UnsupportedStrategy` fırlatıyor. Bu doğrudan **ADR-005** (oturum veritabanında)
+ile çakışıyor.
 
-## YAPILACAK — roadmap adım 4b
+Bu yüzden 4b-1 bilerek **`next-auth` KURMADI** ve `User` kaydını Auth.js
+adaptörüne göre şekillendirmedi. İki kapı da açık:
 
-"Auth: TCKN ile kayıt (KPS sorgusu + e-posta ve telefon OTP), giriş, çıkış,
-veritabanı oturumu (ADR-005), rol, korumalı route, hız sınırı (ADR-006),
-bot koruması (ADR-004)"
+- **(a)** Elle yazılmış veritabanı oturumu — mevcut `Session` tablosu, ADR-005'e
+  sadık. Çıkış ve şifre değişimi gerçekten tüm oturumları düşürür
+- **(b)** Auth.js + JWT — **ADR-005'i değiştiren yeni bir ADR gerektirir** ve
+  "çıkışta oturum sunucuda geçersizleşir" kuralı kırılır
 
-### Bu adım TEK PR OLMAYACAK — üç parçaya böleceksin
+**Kararı dokümantasyona bakarak ver, tahminle değil** (`source-driven-development`).
+Emin değilsen "emin değilim" de.
 
-Her parça ayrı dal, ayrı PR, kendi başına çalışır ve test edilebilir olacak.
-Bir parça merge edilmeden sonrakine geçme.
+## 4b-1'DE KURULAN ve HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
-- **4b-1** → dal `feature/auth-register`
-  Kayıt akışı + OtpChannel adaptörü + 18 yaş kontrolü
-- **4b-2** → dal `feature/auth-session`
-  Giriş, çıkış, veritabanı oturumu, rol, korumalı route
-- **4b-3** → dal `feature/auth-recovery`
-  Şifre sıfırlama + bot koruması + hesap sayımı koruması
+- `hashPassword()` / `verifyPassword()` (`src/features/auth/services/password.service.ts`)
+  — argon2id, ADR-011. **Hiçbir kimlik doğrulama kütüphanesine bağlı değil**,
+  bilerek böyle bırakıldı
+- `checkPasswordPolicy()` — uzunluk + yaygın şifre listesi + kişisel veri kontrolü
+- `consumeRateLimit()` + `rateLimitKey(purpose, kind, value)` (`src/lib/rate-limit.ts`)
+  — `kind` artık `"ip" | "session" | "destination"`. **Yeni hız sınırı mekanizması KURMA**
+- `verifyTurnstileToken()` (`src/lib/turnstile.ts`) — bot kapısı.
+  PRD giriş formunda **2 başarısız denemeden sonra** istiyor
+- `recordAuditLog()` (`src/lib/audit.ts`) — `AuditAction.login` / `logout` hazır
+- `secureCookieDefaults` (`src/lib/cookies.ts`) — httpOnly + sameSite + secure
+- `ensureAnonymousId()` (`src/lib/anonymous-id.ts`) — hız sınırının oturum bacağı
+- `issueOtp()` / `verifyOtp()` (`src/features/otp/`) — 4b-3'te şifre sıfırlama
+  bunu kullanacak, `OtpPurpose.password_reset` enum'da hazır
+- `Session` ve `Account` tabloları şemada **mevcut**, Auth.js şekliyle uyumlu
+- Demo hesapların şifresi **var**: `Test1234!` (10 hesap, `docs/project/test-hesaplari.md`)
 
-`main`'e doğrudan commit yok (CLAUDE.md §6.1).
+## YAPILACAK — roadmap adım 4b-2
 
-Bu oturumda **sadece 4b-1'in planını** sun. Diğer ikisinin kapsamını bir
-cümleyle özetle, detaylandırma.
+"Giriş, çıkış, veritabanı oturumu (ADR-005), rol, korumalı route"
 
 ### Kapsam
 
-1. **Kayıt akışı (PRD §5.0):** TCKN + doğum yılı → `lookupIdentity()` →
-   **18 yaş kontrolü sunucuda, KPS'ten gelen doğum tarihinden** → kimlik
-   alanları salt okunur gösterilir → kullanıcı e-posta, telefon, şifre girer
-   → **iki ayrı OTP** (e-posta + telefon) → ikisi de doğrulanmadan hesap AÇILMAZ
-2. **`OtpChannel` adaptörü** (PRD "Doğrulama kodu kanalı") — aşağıdaki
-   çelişki çözüldükten sonra
-3. **Giriş:** TCKN + şifre. Giriş anında KPS sorgulanmaz. 2 başarısız
-   denemeden sonra bot doğrulaması
-4. **Çıkış + veritabanı oturumu (ADR-005):** Auth.js `database` stratejisi,
-   çerez sadece oturum kimliği taşır. Çıkış ve şifre değişimi tüm oturumları
-   ANINDA düşürür
-5. **Şifre sıfırlama:** TCKN → kayıtlı e-postaya 6 haneli kod. **Hesap sayımı
-   koruması: numara kayıtlı olsun olmasın aynı mesaj VE aynı yanıt süresi**
-6. **Rol ve korumalı route:** yetki SUNUCUDA hesaplanır, UI'da buton gizlemek
-   yetki değildir
-7. **Bot koruması (ADR-004, Cloudflare Turnstile):** jeton sunucuda doğrulanır
+1. **Giriş:** TCKN + şifre. **Giriş anında KPS sorgulanmaz** (PRD §5.0 — hız ve
+   dayanıklılık için). **2 başarısız denemeden sonra bot doğrulaması**
+2. **Oturum:** ADR-005 — çerez yalnızca oturum kimliği taşır, oturum
+   veritabanında. Yukarıdaki (a)/(b) kararına bağlı
+3. **Çıkış:** oturum sunucu tarafında geçersizleşir. Şifre değişimi **tüm**
+   oturumları anında düşürür
+4. **Rol ve korumalı route:** yetki **sunucuda** hesaplanır. UI'da buton gizlemek
+   yetki değildir. `isStaff` / `role` / `identityStatus` istemciden gelemez
+5. **Erişim kademeleri** (PRD §5.0 tablosu): ziyaretçi okur, üye kendi kaydını
+   yönetir, hastane ve spor salonu **yalnızca personele** açık
 
-## ÖNCE PLAN SUN, ONAYIMI BEKLE
+### Bu adımda özellikle dikkat
 
-Kod yazmadan önce her zaman (CLAUDE.md §3 kapı 2).
+- **Hesap sayımı koruması:** "böyle bir kullanıcı yok" ile "şifre yanlış"
+  AYNI mesajı ve mümkünse aynı süreyi vermeli. Kayıt akışındaki 409 bilinçli bir
+  istisnaydı, **buraya kopyalanmaz**
+- Giriş denemesi hız sınırına tabidir (`05-auth-security.md`)
+- Süreye bağlı her kural için **süre dolumu testi zorunlu**: oturum ömrü 7 gün,
+  kayan yenileme
+- Her giriş ve çıkış **denetim kaydına** yazılır (kimlik numarası YAZILMADAN)
+- Bu adımda EKRAN VAR: CLAUDE.md §6.3 1c tarayıcı kapısı geçerli
 
-## ⚠️ PLANDAN ÖNCE ÇÖZÜLECEK İKİ MESELE
+## TUZAKLAR — daha önce vakit kaybettirenler
 
-### A. OTP kodu çelişkisi — önce bunu çöz
+**Prisma 7**
+- `datasource` bloğunda `url` / `directUrl` **yok**; bağlantı driver adapter'dan
+  (`@prisma/adapter-pg`, ADR-008)
+- Migration adresi `prisma.config.ts` içinde; `env()` yardımcısı **kullanılmaz**
+- `migrate dev` üretilen istemciyi her zaman tazelemiyor → `npx prisma generate`
+- `migrate dev` `migration_lock.toml`'daki Türkçe yorumu eziyor → commit öncesi
+  `git checkout` ile geri al
 
-PRD §5.0 kodun local ve preview'da **ekranda gösterileceğini** söylüyor.
-Bu prompt'un önceki sürümü tam tersini söylüyordu. İkisi aynı anda olmaz.
+**Test**
+- Sunucu tarafı test dosyalarına `/** @vitest-environment node */` docblock'u
+  ŞART; yoksa `serverEnv` hata veriyor
+- **E2E kendi korumalarımıza takılır ve bu doğrudur.** Sınırı kapatma, testi
+  kurala uydur: her teste ayrı kimlik numarası (paylaşılırsa taslaklar
+  birbirini siler), ayrı `x-forwarded-for` IP (5 deneme/15 dk), ayrı
+  e-posta/telefon (3 kod/15 dk). IP bloğu **her koşuda rastgele** olmalı, yoksa
+  ikinci koşu birincinin sayacını devralır
+- `AbortSignal.timeout` sahte zamanlayıcıyla ele geçirilemiyor
+- Playwright `webServer.env` Next'in `.env` değerlerini **ezer**
 
-Bana sor ve karara bağla: PRD'yi mi güncelliyoruz, davranışı mı değiştiriyoruz?
-Kod hiçbir yerde görünmeyecekse **local'de kayıt akışını nasıl test edeceğimi
-somut olarak anlat** (terminal çıktısı, dosya, geliştirme ucu — hangisiyse).
-Bu çözülmeden 4b-1 planlanamaz.
+**Arayüz**
+- shadcn `Alert` varsayılan `role="alert"` (assertive) veriyor; sayfada duran
+  bilgi kutuları `role="status"` olmalı
+- **Metin ortama göre değişmeli.** "Kod gönderdik" demek local/preview'da
+  yalandır — hiçbir e-posta gönderilmiyor. Kullanıcı bu yüzden bir kez
+  gelmeyecek postayı bekledi. Gönderim ima eden her metnin test ortamı
+  karşılığı var (`messages.ts` → `*Simulated`)
 
-Ayrıca: telefon OTP'si production'da da e-postaya gidiyorsa bu **gerçek bir
-telefon doğrulaması değildir.** Ekranda ve dokümanda açıkça "SMS simülasyonu"
-olarak etiketle ve `roadmap.md` teknik borç bölümüne şunu ekle:
-"telefon doğrulaması simüle ediliyor, gerçek SMS sağlayıcısı eklenene kadar
-güvenlik katkısı yok".
-
-### B. Preview ve production veritabanları BOŞ
-
-Adım 4a bitiminde fark edildi: her iki Neon dalında da migration'lar çalışmış
-ama **seed hiç çalışmamış**. `kps_citizens = 0`, `users = 0`, `staff_members = 0`.
-Sadece local dolu.
-
-Sonuç: kayıt akışı canlıda ve preview'da **çalışmaz** — girilen her kimlik
-numarası "bulunamadı" döner ve neden olduğu anlaşılmaz.
-
-Tuzak: seed'i çalıştırmak `NATIONAL_ID_ENCRYPTION_KEY` ve `NATIONAL_ID_HASH_SALT`
-istiyor, ama Vercel bu değerleri geri vermiyor (`vercel env pull` → `[SENSITIVE]`).
-Uzak veritabanları boş olduğu için anahtarları yenilemek uzak tarafta bedelsiz.
-
-**Ama dikkat: local veritabanı DOLU ve mevcut anahtarla şifrelenmiş.** Anahtar
-yenilenirse local'deki şifreli kayıtlar da okunamaz hale gelir. Planında
-local için `npm run db:reset` adımını da yaz ve yenileme sırasını net belirt.
-
-Production veritabanına yazmak onayımı gerektiriyor (CLAUDE.md §7) — sor.
-
-## BU ADIMDA ÖZELLİKLE DİKKAT
-
-- **Şifre kütüphanesi yeni bir bağımlılık** (argon2 veya bcrypt cost>=12).
-  `00-stack.md` tabloda olmayan her paket için ONAY + ADR şartı koyuyor.
-  Planda hangisini neden seçtiğini yaz, kurmadan önce sor. Teknik borç #15.
-- **Veri minimizasyonu (PRD §5.0):** KPS'ten gelen baba adı, anne adı, doğum
-  yeri, medeni hal ve nüfus adresi **veritabanına YAZILMAZ**, sadece kayıt
-  ekranında gösterilir. Kalıcı tutulanlar: ad, soyad, doğum tarihi, şifreli
-  TCKN, nüfus il/ilçe, son senkron tarihi. Bunu bir testle kanıtla.
-- **KPS yanıtı en fazla 15 dakika önbellekte** tutulur ve önbellek anahtarı
-  TCKN **değil**, oturuma bağlı rastgele bir kimliktir.
-- Kimlik numarası: log'a, hata mesajına, URL'e, önbellek anahtarına yazılmaz.
-  Adım 4a'da bunun için testler var, aynı disiplini sürdür.
-- Auth.js v5 + Prisma 7 driver adapter uyumunu **varsayma, doğrula** — Prisma 7
-  bağlantıyı şemadan değil adaptörden alıyor (ADR-008), Auth.js Prisma
-  adapter'ı bununla çalışmayabilir. Emin değilsen "emin değilim" de.
-- Süreye bağlı her kural için süre dolumu testi zorunlu (06-testing.md):
-  OTP 5 dakika, oturum süresi, hız sınırı penceresi.
-- Sunucu tarafı testlerinde dosya başına `/** @vitest-environment node */`
-  docblock'u gerekiyor — yoksa `serverEnv` erişimi hata veriyor.
-- Bu adımda EKRAN VAR: CLAUDE.md §6.3 1c tarayıcı kapısı geçerli, tıklayarak
-  doğrula (mutlu yol, hata yolu, yükleniyor/boş/hata, dark mode, 375px).
+**Diğer**
+- `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
+  `--org-id org-still-water-86075112` şart
+- `psql` **kurulu değil** → uzak sorgu için `npx tsx` + Prisma betiği
+- Vercel ortam değişkeni değişikliği kendiliğinden yayına girmez →
+  `npx vercel redeploy <url>`
+- `fish` kabuğu `VAR=deger komut` sözdizimini desteklemiyor → scratchpad'e
+  `.sh` yazıp `bash dosya.sh`
+- ESLint `console.log`'u yasaklıyor; `console.error` / `console.warn` serbest
+- Prettier `.md` dosyalarını biçimlendirmiyor
 
 ## KOMUTLAR
 
-npm run db:up · db:migrate · db:reset · db:studio
-npm run test · test:db · test:e2e · lint · typecheck · build
-gh PATH'te kurulu. vercel ve neonctl PATH'te DEĞİL — `npx vercel ...` kullan.
+`npm run db:up · db:migrate · db:reset · db:studio`
+`npm run test · test:db · test:e2e · lint · typecheck · format:check · build`
+`gh` PATH'te. `vercel` ve `neonctl` için `npx`.
 
 ## BENİMLE İLETİŞİM
 
-Kodu okuyup anlayamıyorum. Her adımı Türkçe, kod göstermeden, en fazla 5 maddede
-anlat. Sadece "ne" değil "neden" de söyle. Emin olmadığın yerde "emin değilim"
-de, uydurma.
-
-## NOT
-
-iCloud kopya dosyası sorunu proje `~/baris_projects` altına taşınarak çözüldü.
-Tekrarlarsa MEMORY.md'deki kurtarma adımlarına bak. Bu artık aktif bir iş değil.
+Kodu okuyup anlayamıyorum. Her adımı **Türkçe, kod göstermeden, en fazla 5
+maddede** anlat. Sadece "ne" değil **"neden"** de söyle. Emin olmadığın yerde
+**"emin değilim"** de, uydurma. Bir şeyi bozduğunu fark edersen hemen söyle.

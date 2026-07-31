@@ -4,6 +4,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — oturum devri altyapısı
+- `docs/standards/15-oturum-devri.md` — **her projede aynı**: bir bilginin
+  hangi dosyaya yazılacağını söyleyen yönlendirme tablosu ve oturum sonu
+  protokolü. Gerekçesi gerçek bir hata: bir oturumda Cloudflare hesabı açılmıştı,
+  sonraki oturum bunu bilmediği için kullanıcıya aynı işi tekrar yaptırdı
+- `docs/project/altyapi-durumu.md` — **projeye özel**: hangi hesap açık, panelde
+  ne yapılandırılmış, hangi ortam değişkeni hangi ortamda tanımlı, ajan hangi
+  araçlara erişebiliyor. Gizli anahtar DEĞERİ yazılmaz, yalnızca adı ve yeri
+- `CLAUDE.md` kaynak hiyerarşisine `altyapi-durumu.md` eklendi: kullanıcıya
+  "şunu aç" demeden önce okunması zorunlu
+
+### Değiştirildi — canlı ortam
+- Cloudflare Turnstile **gerçek anahtarlarla** devrede (preview + production);
+  canlıda gerçek onay kutusu çıktığı doğrulandı. Teknik borç #21 kapandı
+- Resend anahtarı production'a girildi, **canlıda kayıt açıldı**.
+  Teknik borç #22 kapandı, yerine #25 doğdu (doğrulanmış alan adı olmadığı için
+  yalnızca hesabın kayıtlı e-postasına gönderim yapılabiliyor)
+
 ### Eklendi — adım 4b-1 (TCKN ile kayıt)
 - `src/app/kayit/` — üç adımlı kayıt akışı: kimlik doğrulama →
   salt okunur kimlik + iletişim/şifre → **iki bağımsız doğrulama kodu**.
