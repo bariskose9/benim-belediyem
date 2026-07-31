@@ -37,8 +37,18 @@ export function ok<T>(data: T, options?: OkOptions): NextResponse<ApiSuccess<T>>
   });
 }
 
+/**
+ * 201 yanıtı — HER ZAMAN `no-store`.
+ *
+ * `ok()`'teki gibi seçmeli değil: "oluşturuldu" yanıtları bu projede kimlik
+ * bilgisi, maskeli iletişim bilgisi veya doğrulama durumu taşıyor ve araya
+ * giren bir CDN bunları başka bir kullanıcıya servis edemez.
+ */
 export function created<T>(data: T): NextResponse<ApiSuccess<T>> {
-  return NextResponse.json({ data }, { status: 201 });
+  return NextResponse.json(
+    { data },
+    { status: 201, headers: { "Cache-Control": "no-store, max-age=0" } },
+  );
 }
 
 export function noContent(): NextResponse {

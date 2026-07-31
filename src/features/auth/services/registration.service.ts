@@ -454,8 +454,31 @@ function requirePasswordHash(draft: RegistrationDraftRow): string {
   return draft.passwordHash;
 }
 
+/**
+ * İstemciye gidecek kimlik görünümü.
+ *
+ * ALANLAR TEK TEK YAZILIYOR, `...identity` ile yayılmıyor. Gerekçe: taslakta
+ * saklanan nesne KPS kaydına ek olarak DÜZ KİMLİK NUMARASINI da taşıyor
+ * (şifreyi ve numarayı sonradan doğrulayabilmek için). Yayma kullanılsaydı
+ * `getRegistrationState` tam numarayı yanıta koyardı — tam olarak
+ * `05-auth-security.md`'nin yasakladığı şey. Beyaz liste, yayılmadan daha
+ * uzun ama yanlışlıkla alan eklenmesine kapalı.
+ */
 function toIdentityView(identity: IdentityRecord, nationalId: string): RegistrationIdentityView {
-  return { ...identity, nationalIdMasked: maskNationalId(nationalId) };
+  return {
+    firstName: identity.firstName,
+    lastName: identity.lastName,
+    birthDate: identity.birthDate,
+    birthPlace: identity.birthPlace,
+    fatherName: identity.fatherName,
+    motherName: identity.motherName,
+    registeredProvince: identity.registeredProvince,
+    registeredDistrict: identity.registeredDistrict,
+    gender: identity.gender,
+    maritalStatus: identity.maritalStatus,
+    registeredAddress: identity.registeredAddress,
+    nationalIdMasked: maskNationalId(nationalId),
+  };
 }
 
 function encryptionKey(): string {

@@ -9,14 +9,28 @@ const isProduction = process.env.NODE_ENV === "production";
  * enjekte ediyor ve bunu nonce ile imzalamak middleware gerektiriyor. Sıkı
  * (nonce tabanlı) CSP adım 18'de yapılacak — roadmap.md teknik borç #9.
  */
+/**
+ * Cloudflare Turnstile (ADR-004) üç ayrı CSP yönergesine ihtiyaç duyuyor:
+ * betiği bu alan adından yükleniyor, bulmacayı bir iframe içinde gösteriyor
+ * ve doğrulama için aynı alan adına XHR atıyor.
+ *
+ * Bu satırlar olmadan widget SESSİZCE bozulur: testler geçer, sunucu hata
+ * vermez, yalnızca tarayıcıda kutu hiç görünmez ve kayıt formu gönderilemez.
+ * Tarayıcıda fiilen tıklanarak doğrulanmasının sebebi budur.
+ */
+const TURNSTILE_ORIGIN = "https://challenges.cloudflare.com";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   // dev sunucusu hot reload için eval kullanıyor; üretimde kapalı
-  `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline' ${TURNSTILE_ORIGIN}${isProduction ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  `connect-src 'self' ${TURNSTILE_ORIGIN}`,
+  // Yalnızca Turnstile'a izin veriliyor; `frame-ancestors 'none'` aşağıda
+  // duruyor, yani bizim sayfamız hâlâ hiçbir yere gömülemez.
+  `frame-src 'self' ${TURNSTILE_ORIGIN}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
