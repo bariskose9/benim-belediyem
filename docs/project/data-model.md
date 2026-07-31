@@ -81,6 +81,17 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
   `codeHash`, `expiresAt`, `attemptCount`, `consumedAt`
   *(kod ve hedef adres düz metin saklanmaz)*
 
+- **RegistrationDraft** — yarım kalmış kayıt; KPS yanıtının 15 dakikalık
+  önbelleği (ADR-012). `tokenHash` (**unique**, çerezdeki jetonun SHA-256 özeti),
+  `nationalIdHash`, `kpsPayloadEncrypted` (AES-256-GCM), `contactEncrypted`,
+  `emailHash`, `phoneHash`, `passwordHash` (argon2id), `actorIpHash`, `expiresAt`
+  - **Düz metin hiçbir kolonda yok** — ne kimlik numarası, ne e-posta, ne telefon
+  - Önbellek anahtarı kimlik numarası **değil**, jetonun özetidir (PRD §5.0)
+  - `otp_challenges.registrationId` buraya işaret eder ama **yabancı anahtar
+    yoktur**: taslak hesap açılınca silinir, kod kayıtları 24 saat yaşamaya
+    devam eder (gerekçe ADR-012)
+  - Süresi dolan satır **okuma anında** silinir (ADR-007); hesap oluşunca da silinir
+
 - **RateLimitCounter** — `key` (amaç + tuzlanmış kimlik özeti), `windowStartedAt`,
   `count` · unique: `key + windowStartedAt` (ADR-006)
   *(anahtar kişisel veri içermez; IP ve kimlik numarası hash'lenir)*
@@ -236,6 +247,7 @@ Süresi dolan kayıtları temizleyen planlı görev günde bir çalışır (ADR-
 
 | Tablo | Süre | Süre dolunca |
 |---|---|---|
+| `RegistrationDraft` | 15 dakika | Silinir — okuma anında da, hesap açılınca da (ADR-012) |
 | `OtpChallenge` | 24 saat | Silinir |
 | `RateLimitCounter` | 24 saat | Silinir |
 | `Session` | Süre + 7 gün | Silinir |

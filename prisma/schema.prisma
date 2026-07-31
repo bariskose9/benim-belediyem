@@ -480,6 +480,46 @@ model OtpChallenge {
   @@map("otp_challenges")
 }
 
+/// Yarım kalmış kayıt işlemi — KPS yanıtının kısa ömürlü önbelleği (ADR-012).
+///
+/// PRD §5.0: "Tam KPS yanıtı en fazla 15 dakika önbellekte tutulur. Önbellek
+/// anahtarı kimlik numarası DEĞİL, oturuma bağlı rastgele bir kimliktir."
+/// Sunucusuz ortamda bellek içi önbellek çalışmadığı için (ADR-006'daki aynı
+/// gerekçe) önbellek burada, kısa ömürlü bir satır olarak duruyor.
+///
+/// DÜZ METİN HİÇBİR ŞEY YOK: kimlik numarası, e-posta, telefon ve KPS yanıtı
+/// ya şifreli (AES-256-GCM) ya da tuzlanmış özet olarak saklanır.
+///
+/// `tokenHash`: çerezdeki jetonun kendisi DEĞİL, SHA-256 özeti tutulur. Böylece
+/// veritabanı dökümü tek başına kullanılabilir bir çerez vermez.
+///
+/// FK YOK — `otp_challenges.registration_id` buraya bağlanmıyor. Taslak hesap
+/// açılınca siliniyor ama kod kayıtları denetim ve gönderim hız sınırı için
+/// yaşamaya devam etmeli; Cascade onları silerdi, SetNull bağı koparırdı.
+/// `04-database.md`'nin yabancı anahtar kuralı bu kısa ömürlü ebeveyn için
+/// bilinçli olarak esnetildi (ADR-012).
+model RegistrationDraft {
+  id                  String  @id @default(cuid())
+  tokenHash           String  @unique @map("token_hash")
+  nationalIdHash      String  @map("national_id_hash")
+  kpsPayloadEncrypted String  @map("kps_payload_encrypted")
+  contactEncrypted    String? @map("contact_encrypted")
+  emailHash           String? @map("email_hash")
+  phoneHash           String? @map("phone_hash")
+  passwordHash        String? @map("password_hash")
+  actorIpHash         String  @map("actor_ip_hash")
+
+  expiresAt DateTime @map("expires_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  @@index([expiresAt])
+  @@index([nationalIdHash])
+  @@map("registration_drafts")
+}
+
 /// Hız sınırı sayacı (ADR-006 — Redis yerine Postgres).
 /// `key` kişisel veri İÇERMEZ: amaç + tuzlanmış IP/kimlik özeti.
 /// unique(key, windowStartedAt): aynı pencerede ikinci sayaç satırı açılamaz,
