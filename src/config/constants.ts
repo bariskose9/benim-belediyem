@@ -96,3 +96,113 @@ export const KPS_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
  * yoksa doldurma bazı çağrılarda hiç devreye girmez ve fark yeniden açılır.
  */
 export const KPS_CONSTANT_RESPONSE_MS = 1_500;
+
+// ===========================================================================
+// KAYIT AKIŞI (PRD §5.0 "Kayıt akışı" · adım 4b-1)
+// ===========================================================================
+
+/**
+ * Kayıt taslağının ömrü. PRD: "Tam KPS yanıtı en fazla 15 dakika önbellekte
+ * tutulur (kayıt akışı yarıda kalırsa tekrar sorgu atılmasın diye)."
+ *
+ * Bu sınır KPS yükünün kendisi içindir; taslak satırı süresi dolduğunda okuma
+ * anında silinir (ADR-007) ve kullanıcı akışa baştan başlar.
+ */
+export const REGISTRATION_DRAFT_TTL_MS = 15 * 60_000;
+
+/**
+ * Taslağı taşıyan çerezin adı. Çerez YALNIZCA rastgele bir jeton taşır;
+ * kimlik numarası, e-posta ve KPS verisi çerezde bulunmaz — sunucudaki
+ * satırda şifreli durur (ADR-012).
+ */
+export const REGISTRATION_COOKIE_NAME = "bb_registration" as const;
+
+/** Jetonun bayt uzunluğu. 32 bayt = 256 bit; tahmin edilmesi pratikte imkânsız. */
+export const REGISTRATION_TOKEN_BYTES = 32;
+
+/**
+ * Ziyaretçiyi tanımlayan rastgele kimlik. Hız sınırının "oturum" bacağını
+ * besler (ADR-006) ve ileride ziyaretçi sepeti ile çerez rızası da bunu kullanır
+ * (PRD §4 "Ziyaretçi sepeti", §5.10 "Çerez rızası").
+ *
+ * Kişisel veri DEĞİLDİR: içeriği rastgeledir, kimseye bağlanmaz.
+ */
+export const ANONYMOUS_ID_COOKIE_NAME = "bb_anon" as const;
+export const ANONYMOUS_ID_BYTES = 32;
+export const ANONYMOUS_ID_TTL_MS = 365 * 24 * 60 * 60_000;
+
+/** 18 yaş sınırı (PRD §5.0 adım 4b). Sunucuda, KPS'ten gelen doğum tarihinden hesaplanır. */
+export const MIN_REGISTRATION_AGE_YEARS = 18;
+
+// ===========================================================================
+// TEK KULLANIMLIK KOD — OTP (05-auth-security.md "Token ömürleri" · PRD §5.0)
+//
+// Bu değerler standartta SABİT olarak tanımlı; değiştirilecekse ADR yazılır.
+// ===========================================================================
+
+/** 6 hane. Baştaki sıfır korunur ("000123" geçerli bir koddur). */
+export const OTP_CODE_LENGTH = 6;
+
+/**
+ * 5 dakika. PRD gerekçesi: kod e-posta ile taşınıyor ve e-posta 30-60 saniye
+ * gecikebiliyor; 3 dakikalık pencerede kullanıcı süreyi doldurup "tekrar gönder"e
+ * basıyor ve gönderim hız sınırına takılıyordu.
+ */
+export const OTP_TTL_MS = 5 * 60_000;
+
+/** 3 deneme hakkı. Aşılırsa kod kilitlenir ve yeni kod istenmesi gerekir. */
+export const OTP_MAX_ATTEMPTS = 3;
+
+/** Gönderim hız sınırı: aynı hedefe 3 kod / 15 dakika (05-auth-security.md). */
+export const OTP_SEND_RATE_LIMIT_MAX = 3;
+export const OTP_SEND_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * "Tekrar gönder" düğmesinin bekleme süresi. Hız sınırından ayrı ve ondan kısa:
+ * amacı korumak değil, kullanıcıyı üç hakkını arka arkaya harcamaktan korumak.
+ */
+export const OTP_RESEND_COOLDOWN_MS = 60_000;
+
+/** Dış e-posta servisine verilen süre. Aşılırsa kanal `unavailable` döner. */
+export const EMAIL_SEND_TIMEOUT_MS = 5_000;
+
+// ===========================================================================
+// ŞİFRE (05-auth-security.md · ADR-011)
+// ===========================================================================
+
+/** Standartta sabit: en az 8 karakter. */
+export const PASSWORD_MIN_LENGTH = 8;
+
+/**
+ * Üst sınır neden var: argon2 girdi uzunluğunu kesmez, yani sınırsız uzun bir
+ * şifre sınırsız CPU demektir (hizmet dışı bırakma yolu). 128 karakter hiçbir
+ * gerçek kullanıcıyı kısıtlamaz.
+ */
+export const PASSWORD_MAX_LENGTH = 128;
+
+/**
+ * argon2id parametreleri (ADR-011). OWASP "Password Storage Cheat Sheet"
+ * asgarisinin (19 MiB / 2 tur) üzerinde, Vercel fonksiyon belleğine rahat sığar.
+ * Donanım hızlanınca yükseltilecek tek yer burasıdır.
+ */
+export const ARGON2_MEMORY_COST_KIB = 65_536;
+export const ARGON2_TIME_COST = 3;
+export const ARGON2_PARALLELISM = 1;
+
+// ===========================================================================
+// BOT KORUMASI — Cloudflare Turnstile (ADR-004 · integrations.md)
+// ===========================================================================
+
+/** Jetonun doğrulandığı Cloudflare ucu. Jeton tek kullanımlıktır. */
+export const TURNSTILE_VERIFY_URL =
+  "https://challenges.cloudflare.com/turnstile/v0/siteverify" as const;
+
+/** Widget betiğinin adresi — CSP'de de bu alan adına izin verilir. */
+export const TURNSTILE_SCRIPT_ORIGIN = "https://challenges.cloudflare.com" as const;
+
+/**
+ * Doğrulama çağrısının üst sınırı. Yeniden DENENMEZ: jeton tek kullanımlık
+ * olduğu için ikinci deneme Cloudflare'dan `timeout-or-duplicate` alır ve
+ * kullanıcıyı haksız yere reddeder.
+ */
+export const TURNSTILE_TIMEOUT_MS = 3_000;

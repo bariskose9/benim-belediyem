@@ -51,7 +51,15 @@ const postgresUrl = z.url({
   error: "postgresql:// ile başlayan bir bağlantı adresi olmalı",
 });
 
-const serverEnvSchema = z.object({
+const serverEnvBaseSchema = z.object({
+  /**
+   * Ortam etiketi burada İKİNCİ kez okunuyor ve bu bilinçli: aşağıdaki
+   * `superRefine` "production'da sahte kanal kullanılamaz" kuralını uygularken
+   * ortamı bilmek zorunda. Şemanın kendi içinde okunması, kuralın testten
+   * doğrudan çalıştırılabilmesini sağlıyor (`__testing.serverEnvSchema`).
+   */
+  NEXT_PUBLIC_ENV_LABEL: z.enum(ENV_LABELS),
+
   // Uygulamanın çalışma anı bağlantısı — Neon'da HAVUZLU (-pooler) adres
   DATABASE_URL: postgresUrl,
   // Migration'ların kullandığı HAVUZSUZ adres; havuzlayıcı DDL çalıştıramaz
@@ -117,6 +125,57 @@ const serverEnvSchema = z.object({
   OWNER_EMAIL: optionalSecret,
   OWNER_PHONE: optionalSecret,
   OWNER_BIRTH_DATE: optionalSecret,
+});
+
+/**
+ * Doğrulama kodu kanallarının ortamla tutarlılığı.
+ *
+ * Buradaki tek kural bir GÜVENLİK DEĞİŞMEZİdir ve gevşetilemez:
+ * `05-auth-security.md` "local ve preview ortamlarında sabit kod kullanılabilir;
+ * production'da ASLA" diyor. Sahte kanal kodu ekrana bastığı için, production'da
+ * sahte kanal seçilmiş bir dağıtım kodu herkese gösterirdi. Bu yüzden yanlış
+ * yapılandırılmış bir production dağıtımının AÇILMAMASI tercih edildi.
+ *
+ * Buna karşılık `EMAIL_API_KEY` eksikliği açılışı DURDURMAZ. Gerekçe: e-posta
+ * anahtarı henüz girilmemişken uygulamanın tamamı açılamasaydı `main` deploy
+ * edilemez hale gelir ve CLAUDE.md §6.1 ("main her zaman çalışır ve deploy
+ * edilebilir") kırılırdı. Anahtar yoksa yalnızca kayıt ucu 503 döner; anasayfa,
+ * sağlık ucu ve diğer sayfalar ayakta kalır.
+ */
+const serverEnvSchema = serverEnvBaseSchema.superRefine((env, ctx) => {
+  if (env.OTP_PHONE_CHANNEL === "sms") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["OTP_PHONE_CHANNEL"],
+      message:
+        "Gerçek SMS sağlayıcısı bu projede yok (PRD §2 kapsam dışı). " +
+        "Kullanılabilir değerler: mock (local/preview) veya email_sim (production).",
+    });
+  }
+
+  if (env.NEXT_PUBLIC_ENV_LABEL !== "production") {
+    return;
+  }
+
+  if (env.OTP_EMAIL_CHANNEL === "mock") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["OTP_EMAIL_CHANNEL"],
+      message:
+        "Production'da sahte kanal kullanılamaz — sahte kanal doğrulama kodunu ekranda gösterir " +
+        "(docs/standards/05-auth-security.md). Production'da değer 'email' olmalı.",
+    });
+  }
+
+  if (env.OTP_PHONE_CHANNEL === "mock") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["OTP_PHONE_CHANNEL"],
+      message:
+        "Production'da sahte kanal kullanılamaz — sahte kanal doğrulama kodunu ekranda gösterir " +
+        "(docs/standards/05-auth-security.md). Production'da değer 'email_sim' olmalı.",
+    });
+  }
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
