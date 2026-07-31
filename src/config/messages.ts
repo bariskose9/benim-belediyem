@@ -154,13 +154,17 @@ export const messages = {
 
         emailLabel: "E-posta adresi",
         emailHelp: "Doğrulama kodu bu adrese gönderilir.",
+        /** Test ortamında gönderim YOK; söz vermemek için ayrı metin. */
+        emailHelpSimulated: "Test ortamında bu adrese e-posta gönderilmez, kod ekranda gösterilir.",
         phoneLabel: "Cep telefonu",
         phoneHelp: "Örnek: 05321234567",
         passwordLabel: "Şifre",
         passwordHelp: "En az 8 karakter.",
         passwordConfirmLabel: "Şifre (tekrar)",
         submit: "Doğrulama kodlarını gönder",
+        submitSimulated: "Doğrulama kodlarını oluştur",
         submitting: "Kodlar gönderiliyor…",
+        submittingSimulated: "Kodlar oluşturuluyor…",
       },
 
       verify: {
@@ -174,6 +178,9 @@ export const messages = {
         smsSimulationNotice:
           "SMS simülasyonu: gerçek SMS sağlayıcısı olmadığı için telefon kodunuz da " +
           "e-posta adresinize gönderildi.",
+        smsSimulationNoticeSimulated:
+          "SMS simülasyonu: bu projede gerçek SMS gönderilmez. Canlı sitede telefon " +
+          "kodu e-posta adresine gider; burada iki kod da ekranda gösterilir.",
 
         /**
          * Local ve preview'da kod, gönderim yanıtında dönüyor ve sayfa

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { REGISTRATION_COOKIE_NAME } from "@/config/constants";
+import { isProductionEnv } from "@/config/env";
 import { messages } from "@/config/messages";
 import { ContactForm } from "@/features/auth/components/ContactForm";
 import { IdentitySummary } from "@/features/auth/components/IdentitySummary";
@@ -44,7 +45,7 @@ export default async function RegisterContactPage() {
 
       <IdentitySummary identity={state.identity} />
 
-      <ContactForm />
+      <ContactForm isSimulated={!isProductionEnv} />
     </>
   );
 }

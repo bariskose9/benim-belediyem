@@ -151,7 +151,8 @@ test("kayıt akışı baştan sona tamamlanır", async ({ page }, testInfo) => {
   await page.getByLabel("Cep telefonu").fill(phoneFor(citizen.nationalId));
   await page.getByLabel("Şifre", { exact: true }).fill(PASSWORD);
   await page.getByLabel("Şifre (tekrar)").fill(PASSWORD);
-  await page.getByRole("button", { name: "Doğrulama kodlarını gönder" }).click();
+  // Test ortamında düğme "oluştur" der (gönderim yok); production'da "gönder".
+  await page.getByRole("button", { name: "Doğrulama kodlarını oluştur" }).click();
 
   await expect(page).toHaveURL(/\/kayit\/dogrulama$/);
 

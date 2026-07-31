@@ -18,7 +18,7 @@ import { apiRequest } from "@/features/auth/components/api-client";
 
 const copy = messages.auth.register;
 
-export function ContactForm() {
+export function ContactForm({ isSimulated }: { isSimulated?: boolean }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -60,7 +60,8 @@ export function ContactForm() {
 
       <TextField
         label={copy.contact.emailLabel}
-        help={copy.contact.emailHelp}
+        // Test ortamında gönderim yok; söz vermeyen metin gösteriliyor.
+        help={isSimulated ? copy.contact.emailHelpSimulated : copy.contact.emailHelp}
         type="email"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
@@ -103,7 +104,13 @@ export function ContactForm() {
       />
 
       <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
-        {isSubmitting ? copy.contact.submitting : copy.contact.submit}
+        {isSubmitting
+          ? isSimulated
+            ? copy.contact.submittingSimulated
+            : copy.contact.submitting
+          : isSimulated
+            ? copy.contact.submitSimulated
+            : copy.contact.submit}
       </Button>
     </form>
   );

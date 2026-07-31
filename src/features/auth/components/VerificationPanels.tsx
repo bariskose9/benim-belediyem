@@ -59,7 +59,9 @@ export function VerificationPanels(props: VerificationPanelsProps) {
           bilgi için yanlış (WCAG 2.1 AA). Yalnızca gerçek hatalar alert. */}
       <Alert role="status">
         <SmartphoneIcon aria-hidden="true" />
-        <AlertDescription>{copy.smsSimulationNotice}</AlertDescription>
+        <AlertDescription>
+          {props.isSimulated ? copy.smsSimulationNoticeSimulated : copy.smsSimulationNotice}
+        </AlertDescription>
       </Alert>
 
       {!emailVerified || !phoneVerified ? (
