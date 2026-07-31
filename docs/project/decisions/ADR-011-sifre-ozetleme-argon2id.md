@@ -50,10 +50,16 @@ adım 4b-2'nin oturum kararı bu seçimden bağımsız kalsın diye.
 | Next.js yapılandırması gerekiyor mu? | **Hayır.** `argon2`, Next.js 16'nın kendi "sunucuda paketlenmeden bırakılacaklar" (`serverExternalPackages`) varsayılan listesinde zaten yer alıyor. `next.config.ts`'e satır eklemek gereksiz olurdu |
 | Fiilen çalışıyor mu? | Evet — kurulum sonrası geliştirme makinesinde özet üretildi, doğru şifre `true`, yanlış şifre `false` döndü |
 
-**Henüz kanıtlanmamış tek nokta:** `output: standalone` modunda Next.js'in dosya
-izleyicisinin `argon2.musl.node` ikilisini Docker imajına kopyaladığı.
-Teorik olarak destekleniyor ama **kapta fiilen şifre özetlenerek doğrulanacak**;
-doğrulanmadan "çalışıyor" denmeyecek.
+**Alpine/standalone doğrulaması — YAPILDI (2026-08-01).** `output: standalone`
+modunda Next.js'in dosya izleyicisinin yerel ikiliyi imaja kopyalayıp
+kopyalamadığı tek açık soruydu. İmaj derlendi (268 MB) ve kapta fiilen sınandı:
+
+- `argon2.musl.node` imajda mevcut ve `ldd` çıktısı `libc.musl` bağımlılığını
+  gösteriyor — yani glibc değil, doğru ikili yüklenmiş
+- kapta üretilen özet `$argon2id$v=19$m=65536,p=1,t=3$...` ile başlıyor
+- doğru şifre `true`, yanlış şifre `false` döndü
+
+Artık "çalışıyor" demek için bir varsayıma dayanmıyoruz.
 
 ## Değerlendirilen alternatifler
 
