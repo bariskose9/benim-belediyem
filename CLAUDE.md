@@ -28,6 +28,10 @@ DİL (kod)      : İngilizce (değişken, fonksiyon, tablo, kolon, enum, commit 
 2. `docs/project/PRD.md` — iş gereksinimleri. Ne yapılacağının tek kaynağı.
 3. `docs/project/data-model.md` — veri modeli.
 4. `docs/project/decisions/ADR-*.md` — alınmış mimari kararlar. Bir ADR'ye aykırı kod yazma.
+5. `docs/project/altyapi-durumu.md` — **dış dünyanın durumu**: hangi hesap açık,
+   panelde ne yapılandırılmış, hangi ortam değişkeni nerede tanımlı.
+   **Kullanıcıya "şunu aç / şunu ayarla" demeden ÖNCE burayı oku** — zaten
+   yapılmış bir işi ona tekrar yaptırma.
 
 **Çakışma kuralı:** Kural ile benim isteğim çakışırsa **DUR, sor.** Kendi başına karar verme.
 
@@ -62,6 +66,7 @@ Hiçbir skill uygun değilse `[SKILL: yok]` yaz. Birden fazla kullandıysan heps
 | 4 | Test yaz, çalıştır, yeşil olduğunu göster | Her davranış değişikliğinde. Testsiz "bitti" deme |
 | 5 | `code-review-and-quality` çalıştır | Her commit öncesi |
 | 6 | `docs/standards/10-definition-of-done.md` kapılarını geç | "Tamamlandı" demeden önce |
+| 7 | `docs/standards/15-oturum-devri.md` protokolünü uygula | Her adım bitiminde, oturum kapanmadan |
 
 Bu kapılardan birini atlamak için gerekçe üretme. Zaman baskısı, "küçük değişiklik",
 "zaten çalışıyor" geçerli mazeret değildir.
