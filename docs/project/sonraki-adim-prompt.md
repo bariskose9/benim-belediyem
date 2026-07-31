@@ -63,6 +63,23 @@ Kapsam:
 
 Kod yazmadan önce her zaman (CLAUDE.md §3 kapı 2).
 
+## ⚠️ ÖNCE ÇÖZÜLMESİ GEREKEN: PREVIEW VE PRODUCTION VERİTABANLARI BOŞ
+
+Adım 4a bitiminde fark edildi: her iki Neon dalında da migration'lar çalışmış
+ama **seed hiç çalışmamış**. `kps_citizens = 0`, `users = 0`, `staff_members = 0`.
+Sadece local dolu.
+
+Sonuç: kayıt akışı canlıda ve preview'da **çalışmaz** — girilen her kimlik
+numarası "bulunamadı" döner ve neden olduğu anlaşılmaz.
+
+Tuzak: seed'i çalıştırmak `NATIONAL_ID_ENCRYPTION_KEY` ve `NATIONAL_ID_HASH_SALT`
+istiyor, ama Vercel bu değerleri geri vermiyor (`vercel env pull` → `[SENSITIVE]`).
+Veritabanları boş olduğu için **anahtarları yenilemek şu an bedelsiz** — sonra
+dolduğunda yenilemek tüm şifreli kayıtları okunamaz hale getirir.
+
+Planında bunu ayrı bir madde olarak ele al ve bana sor: production veritabanına
+yazmak onayımı gerektiriyor (CLAUDE.md §7).
+
 ## BU ADIMDA ÖZELLİKLE DİKKAT
 
 - **Şifre kütüphanesi yeni bir bağımlılık** (argon2 veya bcrypt cost>=12).
@@ -98,8 +115,15 @@ Kodu okuyup anlayamıyorum. Her adımı Türkçe, kod göstermeden, en fazla 5 m
 anlat. Sadece "ne" değil "neden" de söyle. Emin olmadığın yerde "emin değilim"
 de, uydurma.
 
-## TEMİZLİK İŞİ (küçük, ilk fırsatta)
+## TEMİZLİK İŞİ (küçük ama artık ciddi)
 
-Depo kökünde macOS senkron artığı dosyalar birikiyor: `package-lock 2.json`,
-`tsconfig 2.json`, `package 3.json` gibi. Git'e girmiyorlar ama yerel
-`npm run format:check`'i kırmızı gösteriyorlar. Bana sor, sonra sil.
+macOS senkron aracı depoya sürekli kopya dosya üretiyor: `package-lock 2.json`,
+`package 3.json`, `tsconfig 2.json` gibi. İki zararı var:
+
+1. Yerel `npm run format:check` kırmızı görünüyor (dosyalar takipsiz, CI'ya gitmiyor)
+2. **`.git` klasörünün içine de sızıyor.** Adım 4a'da `.git/refs/remotes/origin/main 2`
+   ve `.git/index 2` oluştu, `git pull` "bad object" hatasıyla kırıldı.
+   Kurtarma: `find .git -name "* [0-9]*" -delete` sonra `git fetch --prune`.
+
+`git add` yaparken `':!* [0-9].*' ':!* [0-9]'` ile dışla. Kalıcı çözüm için
+bana sor — klasörün senkron kapsamı dışına alınması gerekebilir.
