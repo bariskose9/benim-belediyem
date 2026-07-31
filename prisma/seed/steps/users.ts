@@ -1,3 +1,4 @@
+import { hashPassword } from "../../../src/features/auth/services/password.service.js";
 import { encryptNationalId, hashNationalId, maskNationalId } from "../../../src/lib/crypto.js";
 import { TEST_CARDS } from "../data/catalog.js";
 import { FAKE_NEIGHBOURHOODS, FAKE_STREETS, IZMIR_DISTRICTS } from "../data/people.js";
@@ -18,12 +19,24 @@ import type { SeedContext, SeededCitizen, SeededStaff, SeededUser } from "../typ
  * Hepsi sahte KPS havuzundan gelir; kimlik numarası ŞİFRELİ + ÖZETLİ + MASKELİ
  * saklanır, düz metin yazılmaz (05-auth-security.md).
  *
- * ⚠️ `passwordHash` bu adımda BOŞ bırakılır: şifre özetleme kütüphanesi
- * (argon2/bcrypt, cost >= 12) kimlik doğrulama adımında (roadmap 4b) seçilecek.
- * Şimdi rastgele bir algoritmayla yazmak, 4b'de tüm kayıtları geçersiz kılardı.
+ * ŞİFRE (adım 4b-1'de eklendi, teknik borç #15 kapandı): yalnızca DEMO
+ * hesaplara argon2id özeti yazılır. Arka plan hesaplarının şifresi YOKTUR ve
+ * bu bilinçlidir — onlar hiç giriş yapmayacak, yalnızca dolu kayıtların sahibi
+ * olsunlar diye varlar. 80 gereksiz argon2 özeti tohumlamayı ~8 saniye
+ * uzatırdı (argon2 kasıtlı olarak yavaştır, ADR-011).
  */
 
-/** Demo hesaplarda kullanılacak şifre — yalnızca local/preview (fake-data-guide.md). */
+/**
+ * Demo hesapların şifresi.
+ *
+ * SAHTE VERİDİR ve herkese açıktır — tıpkı `belediye:belediye` veritabanı
+ * şifresi gibi. `docs/project/test-hesaplari.md` bu değeri yazar; o dosya
+ * tohumlama tarafından üretilir, elle düzenlenmez.
+ *
+ * Gerçek bir kullanıcı bu şifreyle kayıt OLAMAZ: `checkPasswordPolicy`
+ * yaygın şifre listesini uygular ve kayıt akışı ayrıca 8 karakter alt sınırı
+ * ile kişisel veri kontrolünden geçer. Bu değer yalnızca tohumlamaya özeldir.
+ */
 export const DEMO_PASSWORD = "Test1234!";
 
 const DEMO_STAFF_CITIZEN_INDEXES = [100, 101, 102] as const;
@@ -54,6 +67,11 @@ export async function seedUsers(
     ...range(BACKGROUND_CITIZEN_RANGE).map((index) => ({ index, isDemoAccount: false })),
   ];
 
+  // Tek özet üretilip demo hesaplarda paylaşılıyor. Aynı şifre için ayrı ayrı
+  // özet üretmek 10 kez ~100 ms CPU harcardı ve sahte veride hiçbir şey
+  // kazandırmazdı; argon2'nin tuzu zaten özetin içinde.
+  const demoPasswordHash = await hashPassword(DEMO_PASSWORD);
+
   const rows = plan.map((entry, order) => {
     const citizen = citizens[entry.index];
     const staffMember = staffByCitizenIndex.get(entry.index);
@@ -71,7 +89,8 @@ export async function seedUsers(
       emailVerifiedAt: context.today,
       phone: fakePhone(order + 1),
       phoneVerifiedAt: context.today,
-      passwordHash: null,
+      // Yalnızca demo hesaplar giriş yapabilir (yukarıdaki gerekçe).
+      passwordHash: entry.isDemoAccount ? demoPasswordHash : null,
       role: "user" as const,
       identityStatus: "kps_verified" as const,
       isStaff: staffMember !== undefined,

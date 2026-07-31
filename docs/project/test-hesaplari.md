@@ -24,11 +24,14 @@
 
 ## Örnek üye hesapları
 
-Şifre (adım 4b'de yazılacak): `Test1234!`
+Şifre: `Test1234!`
 
-> Şu an `password_hash` alanı **boştur**: şifre özetleme kütüphanesi
-> (argon2/bcrypt) kimlik doğrulama adımında seçilecek. O adıma kadar bu
-> hesaplarla giriş yapılamaz; kayıtlar veri sahipliği için vardır.
+> Şifre **argon2id** ile özetlenerek yazılır (ADR-011). Aşağıdaki 10 demo
+> hesabın hepsi bu şifreyi kullanır. Giriş ekranı adım 4b-2'de gelecek.
+
+> Arka plandaki 80 hesabın şifresi **yoktur** ve olmayacak: onlar dolu
+> randevu ve satılmış koltuk gibi kayıtların sahibi olsunlar diye var,
+> giriş yapmaları beklenmiyor.
 
 | # | Ad Soyad | Kimlik numarası | E-posta | Personel mi? |
 |---|---|---|---|---|
