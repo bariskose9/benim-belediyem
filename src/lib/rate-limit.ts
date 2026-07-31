@@ -83,14 +83,24 @@ export async function resetRateLimit(key: string): Promise<void> {
 }
 
 /**
+ * Anahtarın hangi tanımlayıcıya bağlandığı.
+ *
+ * `destination` = doğrulama kodunun gönderildiği e-posta veya telefon.
+ * "Aynı hedefe 3 kod / 15 dakika" kuralı (05-auth-security.md) bunu kullanır.
+ */
+export type RateLimitKind = "ip" | "session" | "destination";
+
+/**
  * Anahtar üretir: `<amaç>:<tür>:<değer>`.
  *
- * IP adresi kişisel veridir ve düz haliyle saklanmaz; tuzlanmış özete çevrilir
- * (ADR-006 → "IP adresi tuzlanmış özet olarak saklanır"). Oturum kimliği zaten
- * rastgele bir jetondur, kişiye dair bilgi taşımaz, olduğu gibi kullanılır.
+ * IP adresi ve gönderim hedefi (e-posta / telefon) kişisel veridir ve düz
+ * haliyle saklanmaz; tuzlanmış özete çevrilir (ADR-006 → "anahtar kişisel veri
+ * içermez"). Oturum kimliği zaten rastgele bir jetondur, kişiye dair bilgi
+ * taşımaz, olduğu gibi kullanılır.
  */
-export function rateLimitKey(purpose: string, kind: "ip" | "session", value: string): string {
-  const safeValue = kind === "ip" ? hashActorIp(value) : value;
+export function rateLimitKey(purpose: string, kind: RateLimitKind, value: string): string {
+  const safeValue =
+    kind === "ip" ? hashActorIp(value) : kind === "destination" ? hashDestination(value) : value;
 
   return `${purpose}:${kind}:${safeValue}`;
 }
@@ -98,6 +108,24 @@ export function rateLimitKey(purpose: string, kind: "ip" | "session", value: str
 /** IP adresinin geri döndürülemez özeti — denetim kaydı da bunu yazar. */
 export function hashActorIp(ip: string): string {
   return hashPseudonym(ip, serverEnv.NATIONAL_ID_HASH_SALT, "ip");
+}
+
+/**
+ * Gönderim hedefinin (e-posta / telefon) geri döndürülemez özeti.
+ *
+ * `otp_challenges.destination_hash` ile AYNI fonksiyondan üretilir: aynı hedefe
+ * gönderilen kodlar hem tabloda hem sayaçta aynı değere düşmezse "aynı hedefe
+ * 3 kod" kuralı iki farklı hedefi sayıyor sanır ve hiç tetiklenmez.
+ *
+ * E-posta önce küçük harfe çevrilip kırpılır — `Ali@X.com` ile `ali@x.com`
+ * aynı posta kutusudur ve iki ayrı bütçe almamalıdır.
+ */
+export function hashDestination(destination: string): string {
+  return hashPseudonym(
+    destination.trim().toLowerCase(),
+    serverEnv.NATIONAL_ID_HASH_SALT,
+    "destination",
+  );
 }
 
 /**

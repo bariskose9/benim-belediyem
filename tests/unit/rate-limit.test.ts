@@ -156,6 +156,38 @@ describe("rateLimitKey — anahtar kişisel veri içermez", () => {
       rateLimitKey("kps_lookup", "ip", "203.0.113.43"),
     );
   });
+
+  it("gönderim hedefi (e-posta/telefon) anahtarda DÜZ HALİYLE geçmez", async () => {
+    // "Aynı hedefe 3 kod / 15 dakika" kuralı bu anahtarı kullanıyor
+    // (05-auth-security.md). E-posta adresi kişisel veridir, sayaç tablosunda
+    // düz metin duramaz.
+    const { rateLimitKey } = await import("@/lib/rate-limit");
+    const key = rateLimitKey("otp_send", "destination", "ayse@ornek.com");
+
+    expect(key).not.toContain("ayse@ornek.com");
+    expect(key).toMatch(/^otp_send:destination:[0-9a-f]{64}$/);
+  });
+
+  it("aynı e-posta büyük/küçük harf farkıyla AYNI bütçeye düşer", async () => {
+    // Aksi hâlde saldırgan `Ali@x.com`, `ALI@x.com`, `aLi@x.com` diyerek
+    // aynı posta kutusuna sınırsız kod gönderebilirdi.
+    const { rateLimitKey } = await import("@/lib/rate-limit");
+
+    expect(rateLimitKey("otp_send", "destination", "Ali@Ornek.com")).toBe(
+      rateLimitKey("otp_send", "destination", "  ali@ornek.com  "),
+    );
+  });
+
+  it("IP ve hedef özetleri birbirinden ayrı alanlarda üretilir", async () => {
+    // Aynı metin hem IP hem hedef olarak özetlenirse, bir alanın özet tablosu
+    // diğerine karşı kullanılabilirdi (crypto.ts → alan ayrımı gerekçesi).
+    const { rateLimitKey } = await import("@/lib/rate-limit");
+    const sameValue = "203.0.113.42";
+
+    expect(rateLimitKey("x", "ip", sameValue).split(":")[2]).not.toBe(
+      rateLimitKey("x", "destination", sameValue).split(":")[2],
+    );
+  });
 });
 
 describe("readActorIp — vekil başlığı", () => {
