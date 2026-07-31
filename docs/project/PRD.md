@@ -227,9 +227,10 @@ Kod gönderimi de KPS gibi **adaptör arkasındadır** (`OtpChannel`). Kayıtta 
 | **Telefon** | `SmsChannel` | `MockChannel` — kod ekranda gösterilir | **`EmailSmsSimulationChannel`** — kod, "SMS simülasyonu" başlığıyla kullanıcının e-postasına gönderilir |
 
 Türkiye'de gerçek SMS göndermek ücretsiz değildir ve marka/İYS onayı ister.
-Bu yüzden production'da telefon kodu da e-posta ile taşınır: **kod hiçbir ortamda
-ekranda görünmez**, böylece `05-auth-security.md` "production'da görünür kod asla"
-kuralı delinmez. `SmsChannel` arayüzü hazır durur; gerçek sağlayıcı eklenirse
+Bu yüzden production'da telefon kodu da e-posta ile taşınır: **kod production'da
+hiçbir koşulda ekranda görünmez** (local ve preview hariç), böylece
+`05-auth-security.md`'nin "local ve preview'da sabit kod kullanılabilir;
+production'da **asla**" kuralı delinmez. `SmsChannel` arayüzü hazır durur; gerçek sağlayıcı eklenirse
 yalnızca bu sınıf değişir, akış aynı kalır.
 
 **Bilinen sınır (kabul edilmiş bedel):** kod e-postadan geldiği için telefon

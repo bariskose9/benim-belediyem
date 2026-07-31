@@ -11,6 +11,7 @@ sayfayı çökertmez.
 | Kripto | **CoinGecko** public API | Gerekmiyor (demo) | Dakikada sınırlı | 5 dk |
 | Haber | **GNews.io** veya **NewsData.io** | Gerekiyor | Günde ~100 istek | 15 dk |
 | Bot koruması | **Cloudflare Turnstile** (`challenges.cloudflare.com`) | Gerekiyor (site + gizli anahtar) | Ayda 1M çözüme kadar ücretsiz | Önbelleklenmez — jeton tek kullanımlık |
+| Doğrulama kodu e-postası | **Resend** (`api.resend.com`) | Gerekiyor (API anahtarı + doğrulanmış gönderen) | Ayda 3.000 e-posta | Önbelleklenmez |
 
 ## Kurallar
 - Limitler değişebilir; entegrasyondan önce güncel dokümantasyon **kontrol edilir**
@@ -42,10 +43,10 @@ Kayıtta **iki kod birden** üretilir: biri e-posta adresi için, biri telefon i
 
 | Uygulama | Nerede | Davranış |
 |---|---|---|
-| `MockChannel` | local, preview | Kod ekranda gösterilir, gönderim yapılmaz |
-| `EmailChannel` | production — e-posta kodu | Ücretsiz e-posta servisi (örn. Resend free tier) ile gerçek gönderim |
+| `MockChannel` | local, preview | Kod ekranda gösterilir, gönderim yapılmaz. **Production'da SEÇİLEMEZ** — `src/config/env.ts` açılışta reddeder |
+| `EmailChannel` | production — e-posta kodu | Resend HTTP API'si ile gerçek gönderim (SDK yok, düz `fetch`) |
 | `EmailSmsSimulationChannel` | production — telefon kodu | Kod, "SMS simülasyonu" başlığıyla kullanıcının **e-postasına** gönderilir |
-| `SmsChannel` | henüz kullanılmıyor | Gerçek SMS; sağlayıcı eklenirse tek sınıf değişimiyle devreye girer |
+| ~~`SmsChannel`~~ | **yazılmadı** | Hiçbir şey göndermeyen boş bir sınıf ölü koddur. Yer tutucu olan şey `OtpChannelAdapter` arayüzünün kendisidir; gerçek sağlayıcı eklenirse tek yeni dosya yeter |
 
 Türkiye'de gerçek SMS ücretsiz değildir ve marka/İYS onayı gerektirir. Bu yüzden
 telefon kodu da e-posta ile taşınır; **kod hiçbir ortamda ekranda gösterilmez**
@@ -91,6 +92,9 @@ CRON_SECRET=                       # /api/cron/* uçlarını korur; eşleşmezse
 
 OTP_EMAIL_CHANNEL=mock    # mock | email          → e-posta kodu
 OTP_PHONE_CHANNEL=mock    # mock | email_sim | sms → telefon kodu
+# EMAIL_API_KEY boşsa uygulama AÇILIR ama kayıt ucu 503 döner ve kayıt ekranı
+# "kayıt geçici olarak kapalı" der. Böylece anahtar girilmeden de `main`
+# deploy edilebilir kalır (CLAUDE.md §6.1). Teknik borç #22.
 EMAIL_API_KEY=
 EMAIL_FROM=
 SMS_PROVIDER_KEY=         # şu an kullanılmıyor, ileride gerçek SMS için

@@ -134,6 +134,8 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 │   │   │    ├── services/         ← iş mantığı
 │   │   │    ├── repositories/     ← Prisma erişimi
 │   │   │    ├── schemas/          ← Zod
+│   │   │    ├── data/             ← statik veri (yaygın şifre listesi)
+│   │   │    ├── errors.ts         ← alana özel hata sınıfları (kod + durum)
 │   │   │    └── types.ts
 │   │   ├── identity/              ← IdentityProvider arayüzü + MockKpsProvider
 │   │   ├── otp/                   ← OtpChannel adaptörleri
@@ -157,8 +159,12 @@ kendi kafasına göre klasör açmaz veya isim değiştirmez.
 │   ├── lib/
 │   │   ├── db.ts  auth.ts  http.ts  cache.ts  errors.ts  logger.ts  utils.ts
 │   │   ├── rate-limit.ts          ← Postgres sayacı (ADR-006)
+│   │   ├── circuit-breaker.ts     ← devre kesici, aynı tablo (ADR-010)
 │   │   ├── crypto.ts              ← kimlik numarası doğrulama/maskeleme/özet/şifreleme
-│   │   └── turnstile.ts           ← bot doğrulama jetonu (ADR-004)
+│   │   ├── turnstile.ts           ← bot doğrulama jetonu (ADR-004)
+│   │   ├── audit.ts               ← denetim kaydı — audit_logs'a yazan TEK yer
+│   │   ├── anonymous-id.ts        ← ziyaretçi kimliği (hız sınırı + ileride sepet/rıza)
+│   │   └── cookies.ts             ← güvenli çerez varsayılanları (ADR-002)
 │   ├── config/
 │   │   ├── env.ts                 ← env okuma TEK YERDEN, Zod ile doğrulanır
 │   │   ├── constants.ts           ← süreler, limitler, fiyat kuralları

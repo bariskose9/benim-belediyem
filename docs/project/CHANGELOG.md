@@ -4,6 +4,53 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 4b-1 (TCKN ile kayıt)
+- `src/app/kayit/` — üç adımlı kayıt akışı: kimlik doğrulama →
+  salt okunur kimlik + iletişim/şifre → **iki bağımsız doğrulama kodu**.
+  Her adım gerçek bir adres; geri tuşu çalışıyor, her adımın kendi
+  yükleniyor/hata durumu var
+- `POST /api/registrations` + `GET|PATCH|DELETE /api/registrations/current` +
+  `.../current/otp-challenges` + `.../current/verifications`.
+  **Taslak kimliği URL'de geçmez**, httpOnly çerezde taşınır
+- `src/features/otp/` — `OtpChannel` adaptörü ve üç uygulaması:
+  `MockChannel` (local/preview, kodu ekrana döndürür), `EmailChannel`,
+  `EmailSmsSimulationChannel`. **Telefon kodu e-postaya gider ve simülasyon
+  olduğu ekranda da e-postada da açıkça yazar** (teknik borç #1)
+- `src/features/auth/` — kayıt servisi, **18 yaş kontrolü** (KPS'ten gelen
+  tarihten, İstanbul takvim günüyle), argon2id şifre özetleme, şifre
+  politikası, personel eşleştirme
+- `registration_drafts` tablosu (ADR-012) — KPS yanıtının 15 dakikalık şifreli
+  önbelleği. Düz metin kimlik numarası, e-posta, telefon veya kod hiçbir
+  kolonda yok; çerez yalnızca rastgele bir jeton taşıyor
+- `src/lib/turnstile.ts` — bot koruması, kayıt formunda **KPS sorgusundan önce**
+  (ADR-004). Cloudflare'a ulaşılamazsa akış DURUR, kapı atlanmaz
+- `src/lib/audit.ts` — `audit_logs` tablosuna ilk yazan. `src/lib/anonymous-id.ts` —
+  hız sınırının oturum bacağını besleyen rastgele ziyaretçi kimliği
+- Yeni bağımlılıklar: `argon2` (ADR-011), `react-hook-form`,
+  `@hookform/resolvers`, `date-fns`
+- Yeni ADR: **011** (argon2id) ve **012** (kayıt taslağı sunucuda şifreli)
+
+### Değiştirildi
+- `NATIONAL_ID_ENCRYPTION_KEY` artık **zorunlu** ve 32 bayt olduğu açılışta
+  doğrulanıyor. Opsiyonel bırakılsaydı uygulama açılır, kayıt ucu çalışma
+  anında ham bir kripto hatasıyla 500 dönerdi
+- Ortam doğrulaması **production'da sahte OTP kanalını reddediyor**: sahte kanal
+  kodu ekrana bastığı için yanlış yapılandırılmış bir production dağıtımının
+  hiç açılmaması tercih edildi
+- CSP'ye `challenges.cloudflare.com` eklendi (`script-src`, `frame-src`,
+  `connect-src`). Bu satırlar olmadan Turnstile SESSİZCE bozuluyordu
+- `created()` yanıtları artık her zaman `Cache-Control: no-store` taşıyor
+- Tohumlama demo hesaplara argon2id şifresi yazıyor (teknik borç #15 kapandı)
+
+### Düzeltildi
+- `getRegistrationState` yanıtı **tam kimlik numarasını sızdırıyordu**: kimlik
+  görünümü saklanan yükü olduğu gibi yayıyordu, o yük ise düz numarayı taşıyor.
+  Artık alanlar tek tek beyaz listeden geçiyor
+- Kontrol basamağı hatalı numara 422 yerine PRD'nin istediği **400** dönüyor;
+  farklı bir durum kodu, tek tip mesajın sildiği ayrımı geri sızdırıyordu
+- Doğrulama panelleri artık adlandırılmış bölge (`<section aria-labelledby>`);
+  bilgi kutuları ekran okuyucuyu kesen `role="alert"` yerine `role="status"`
+
 ### Eklendi — adım 4a (sahte KPS servisi)
 - `src/app/api/mock-kps/identity-queries/` — taklit edilen DIŞ KURUM ucu.
   Yalnızca POST (kimlik numarası URL'e değil gövdeye yazılır), yapay gecikme
