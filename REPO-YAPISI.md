@@ -4,7 +4,7 @@ Klasör ve dosya adları **birebir** budur. Claude Code bu şemaya uyar,
 kendi kafasına göre klasör açmaz veya isim değiştirmez.
 
 ```
-~/Desktop/baris_projects/benim-belediyem/
+~/baris_projects/benim-belediyem/
 ├── CLAUDE.md                      ← ZORUNLU · repo kökünde · Claude otomatik okur
 ├── REPO-YAPISI.md                 ← bu dosya
 ├── README.md                      ← proje tanıtımı + kurulum adımları
