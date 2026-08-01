@@ -253,6 +253,65 @@ export const LOGIN_BOT_CHECK_AFTER_FAILURES = 2;
 export const LOGIN_FAILURE_WINDOW_MS = LOGIN_RATE_LIMIT_WINDOW_MS;
 
 // ===========================================================================
+// ŞİFRE SIFIRLAMA (PRD §5.0 "Şifre sıfırlama" · adım 4b-3)
+//
+// Akışın tamamı HESAP SAYIMI KORUMASI etrafında kuruludur: kimlik numarası
+// kayıtlı olsun olmasın aynı mesaj, aynı davranış ve aynı süre döner.
+// ===========================================================================
+
+/**
+ * Sıfırlama akışını taşıyan çerez. Kayıt akışındaki desenin aynısı: çerezde
+ * YALNIZCA rastgele bir jeton var — kimlik numarası, e-posta ve kullanıcı
+ * kimliği tarayıcıya hiç gitmez.
+ */
+export const PASSWORD_RESET_COOKIE_NAME = "bb_password_reset" as const;
+
+/** 32 bayt = 256 bit; tahmin edilmesi pratikte imkânsız. */
+export const PASSWORD_RESET_TOKEN_BYTES = 32;
+
+/**
+ * Çerezin ömrü. Koddan (5 dk) uzun tutuluyor ki süresi dolan kodun ardından
+ * kullanıcı "yeni kod gönder" diyebilsin; kod kilidi zaten OTP tarafında.
+ */
+export const PASSWORD_RESET_FLOW_TTL_MS = 15 * 60_000;
+
+/**
+ * Kod isteme ucunun SABİT yanıt süresi (PRD §5.0: "aynı mesaj ve aynı yanıt
+ * süresi").
+ *
+ * Mesajı eşitleyip süreyi eşitlememek korumayı işe yaramaz kılar: kayıt varsa
+ * e-posta gönderilir, yoksa gönderilmez ve fark milisaniyeden okunur. Taban
+ * süre, production'daki gerçek e-posta çağrısından belirgin şekilde uzun
+ * seçildi — `KPS_CONSTANT_RESPONSE_MS` ile aynı gerekçe.
+ */
+export const PASSWORD_RESET_CONSTANT_RESPONSE_MS = 2_000;
+
+/** Deneme hız sınırı: giriş akışıyla aynı bütçe (5 / 15 dk), AYRI anahtar. */
+export const PASSWORD_RESET_RATE_LIMIT_MAX_ATTEMPTS = 5;
+export const PASSWORD_RESET_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * Gönderim bütçesi — "aynı hedefe 3 kod / 15 dakika" kuralının bu akıştaki
+ * karşılığı, ama anahtarı E-POSTA DEĞİL kimlik numarasının özeti.
+ *
+ * NEDEN: hedefe göre saymak yalnızca gerçek hesaplarda çalışırdı; kayıtsız
+ * numarada gönderilecek bir hedef yok. O zaman dördüncü istek kayıtlı numarada
+ * 429, kayıtsızda 201 döner ve hesap sayımı korumasının tamamı delinirdi.
+ * Numaranın özetine göre saymak iki yolu da aynı yerde durdurur.
+ */
+export const PASSWORD_RESET_SEND_RATE_LIMIT_MAX = 3;
+export const PASSWORD_RESET_SEND_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * Kayıtsız numara için açılan sahte kod kaydının bayt uzunluğu.
+ *
+ * 6 haneli bir kod DEĞİL, 32 rastgele bayt özetleniyor: kullanıcının
+ * girebileceği hiçbir 6 haneli değer bu özete denk gelemez, yani sahte akış
+ * "doğrulandı" durumuna KAZAEN de olsa geçemez.
+ */
+export const PASSWORD_RESET_DECOY_SECRET_BYTES = 32;
+
+// ===========================================================================
 // BOT KORUMASI — Cloudflare Turnstile (ADR-004 · integrations.md)
 // ===========================================================================
 

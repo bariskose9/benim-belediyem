@@ -9,7 +9,7 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-01 · roadmap adım 4b-2 sonrası
+**Son güncelleme:** 2026-08-02 · roadmap adım 4b-3 sonrası
 
 ---
 
@@ -47,6 +47,9 @@
   90 üye (10'unun şifresi var). Gerçek kullanıcı: 0
 - **Şema adım 4b-2'de DEĞİŞMEDİ** — `sessions` tablosu adım 3'ten beri hazırdı,
   yeni migration yok
+- **Şema adım 4b-3'te de DEĞİŞMEDİ** — şifre sıfırlama, `otp_challenges`
+  tablosunun adım 3'ten beri var olan `user_id` alanını ilk kez kullanıyor.
+  Yeni tablo ve yeni migration yok
 
 ### Vercel
 - Derleme komutu: `prisma migrate deploy && next build` — yani **her deploy
@@ -78,7 +81,7 @@ Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
 | `OTP_PHONE_CHANNEL` | `mock` | `mock` | **`email_sim`** | Aynı — production'da `mock` yasak |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | test anahtarı | ✔ gerçek | ✔ gerçek | Kutu hiç görünmez |
 | `TURNSTILE_SECRET_KEY` | test anahtarı | ✔ gerçek | ✔ gerçek | local'de atlanır · preview/production'da kayıt **durur** (503) |
-| `EMAIL_API_KEY` · `EMAIL_FROM` | ✘ | ✘ | ✔ | Production'da kayıt ekranı "geçici olarak kapalı" der. Uygulama **açılır** |
+| `EMAIL_API_KEY` · `EMAIL_FROM` | ✘ | ✘ | ✔ | Production'da kayıt **ve şifre sıfırlama** ekranları "geçici olarak kapalı" der. Uygulama **açılır** |
 | `AUTH_SECRET` · `GOOGLE_*` | ✘ | ✘ | ✘ | Henüz kullanılmıyor — **yalnızca adım 4c** (Google ile giriş). Şifreyle giriş bunlara ihtiyaç duymuyor: oturum elle yazıldı, imzalanan bir jeton yok (ADR-005 güncelleme notu) |
 | `OWNER_*` | ✘ | ✘ | ✘ | Tohumlama proje sahibi hesabını **atlar** (kasıtlı: gerçek kişisel veri uzak ortama gitmiyor) |
 

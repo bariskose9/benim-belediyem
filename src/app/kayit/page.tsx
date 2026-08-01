@@ -5,7 +5,7 @@ import { publicEnv } from "@/config/env";
 import { messages } from "@/config/messages";
 import { IdentityForm } from "@/features/auth/components/IdentityForm";
 import { StepHeader } from "@/features/auth/components/StepHeader";
-import { isRegistrationOpen } from "@/features/auth/services/registration-availability";
+import { isRegistrationOpen } from "@/features/auth/services/auth-availability";
 
 /**
  * ADIM 1 — kimlik doğrulama.

@@ -4,6 +4,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 4b-3: şifre sıfırlama ve hesap sayımı koruması
+- **Şifre sıfırlama akışı (`/sifremi-unuttum` → `/sifremi-unuttum/dogrulama`)**:
+  kimlik numarası → kayıtlı e-posta adresine 6 haneli kod → kod + yeni şifre.
+  Kod kuralları kayıttakiyle aynı (5 dakika, 3 deneme, tek kullanımlık) ve aynı
+  OTP mekanizması kullanılıyor — yeni bir mekanizma kurulmadı
+- **Şifre değişince kullanıcının TÜM oturumları düşüyor** (ADR-005'in varlık
+  sebebi). 4b-2'de hazırlanan `revokeAllSessionsForUser()` artık çağrılıyor
+- **Hesap sayımı koruması üç katmanlı** (PRD §5.0): (1) kayıtlı ve kayıtsız
+  numara aynı yanıtı alıyor, (2) kayıtsız numara için de **kimseye ait olmayan
+  bir sahte kod kaydı** açılıyor — böylece ikinci ekran da aynı davranıyor
+  (aynı deneme hakkı, aynı kilitlenme, aynı mesajlar), (3) yanıt süresi sabit
+  bir tabana dolduruluyor. Yalnızca birinci ekranı eşitlemek korumayı yarım
+  bırakırdı: fark ikinci ekranda okunurdu
+- **Bot doğrulaması bu akışta ilk denemeden itibaren zorunlu** — giriş
+  ekranındaki "2 başarısız denemeden sonra" kuralı buraya geçmiyor (PRD)
+- **Kod önce doğrulanıyor, şifre politikası sonra**: sıra ters olsaydı kodu hiç
+  bilmeyen biri "bu şifre hesabın adını içeriyor" yanıtını alabilir ve hesap
+  sahibinin adını doğrulayabilirdi. Doğru kod politika hatasında **tüketilmiyor**;
+  kullanıcı aynı kodla daha güçlü bir şifre yazabiliyor
+- **Denetim kaydı**: `password_reset`, kimlik numarası ve düz IP yazılmadan
+- Giriş ekranına "Şifrenizi mi unuttunuz?" bağlantısı ve sıfırlama sonrası
+  "tüm cihazlardaki oturumlarınız kapatıldı" bilgisi eklendi
+- Testler: 46 yeni birim/entegrasyon + 6 E2E (masaüstü ve 375px).
+  Toplam: **363** unit/entegrasyon · 36 veritabanı · 74 E2E
+
+### Değiştirildi — adım 4b-3
+- `verifyOtp()` artık `consumeOnSuccess` seçeneği alıyor (varsayılan: eskisi
+  gibi tüketir) ve başarıda kayıt kimliğini döndürüyor. Kayıt akışının davranışı
+  değişmedi
+- `otp_challenges.user_id` ilk kez kullanılıyor: sıfırlama kodunun hangi hesaba
+  ait olduğu **yalnızca sunucuda** bu alanda duruyor, tarayıcıda değil.
+  **Şema değişmedi, migration yok** — alan adım 3'ten beri vardı
+- `registration-availability.ts` → `auth-availability.ts`: e-posta gönderimine
+  bağlı iki akış (kayıt ve şifre sıfırlama) aynı kuralı paylaşıyor; biri açılıp
+  diğerinin unutulmaması için kural tek yerde
+
 ### Eklendi — adım 4b-2: giriş, çıkış, oturum ve erişim kademeleri
 - **Giriş ekranı (`/giris`)**: T.C. kimlik numarası + şifre. Giriş anında KPS
   sorgulanmıyor (PRD §5.0 — hız ve dayanıklılık); sahte KPS çökse bile mevcut

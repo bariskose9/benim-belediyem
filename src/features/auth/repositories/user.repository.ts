@@ -90,6 +90,75 @@ export async function findAccountProfile(userId: string): Promise<AccountProfile
   });
 }
 
+/** Şifre sıfırlama kodunun gönderileceği hesap — kimlik ve hedef adres. */
+export type PasswordResetTargetRow = {
+  id: string;
+  email: string;
+};
+
+/**
+ * Şifre sıfırlama için hesabı bulur; yoksa `null`.
+ *
+ * E-POSTASI OLMAYAN HESAP DA `null` DÖNER ve bu bilinçli: kodun gideceği bir
+ * adres yoksa akış zaten tamamlanamaz. Çağıran bu durumu "hesap yok" ile AYNI
+ * biçimde ele alır (sahte kod kaydı açar), yani ayrım dışarıya sızmaz.
+ *
+ * Silinmiş hesap (`deletedAt`) hiç dönmez — filtre sorguda, çağıranın
+ * unutabileceği bir yerde değil.
+ */
+export async function findPasswordResetTargetByNationalIdHash(
+  nationalIdHash: string,
+): Promise<PasswordResetTargetRow | null> {
+  const user = await prisma.user.findFirst({
+    where: { nationalIdHash, deletedAt: null, email: { not: null } },
+    select: { id: true, email: true },
+  });
+
+  if (!user?.email) return null;
+
+  return { id: user.id, email: user.email };
+}
+
+/**
+ * Şifre politikasının "kendi verini şifre yapma" kontrolü için gereken alanlar.
+ *
+ * Kimlik numarası ŞİFRELİ dönüyor; çözme işi servis katmanında ve yalnızca
+ * karşılaştırma için yapılır, hiçbir yanıta veya log'a girmez.
+ */
+export type PasswordPolicyProfileRow = {
+  fullName: string;
+  email: string | null;
+  nationalIdEncrypted: string | null;
+};
+
+export async function findPasswordPolicyProfile(
+  userId: string,
+): Promise<PasswordPolicyProfileRow | null> {
+  return prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: { fullName: true, email: true, nationalIdEncrypted: true },
+  });
+}
+
+/**
+ * Şifreyi değiştirir.
+ *
+ * Kullanıcı kimliğini ÇAĞIRAN VERİR ve çağıran onu yalnızca doğrulanmış
+ * sıfırlama kaydından alır; istemciden gelen bir kimlik buraya hiç ulaşamaz
+ * (IDOR koruması, 05-auth-security.md).
+ *
+ * Silinmiş hesabın şifresi güncellenmez: `updateMany` + `deletedAt: null`
+ * filtresi, arada silinmiş bir hesap için sessizce 0 satır günceller.
+ */
+export async function updateUserPassword(userId: string, passwordHash: string): Promise<number> {
+  const result = await prisma.user.updateMany({
+    where: { id: userId, deletedAt: null },
+    data: { passwordHash },
+  });
+
+  return result.count;
+}
+
 export async function findUserIdByEmail(email: string): Promise<string | null> {
   const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
 
