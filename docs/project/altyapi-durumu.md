@@ -51,6 +51,14 @@
 ### Vercel
 - Derleme komutu: `prisma migrate deploy && next build` — yani **her deploy
   migration'ları kendisi uygular**, elle çalıştırmaya gerek yok
+- ⚠️ **Neon uykudayken deploy PATLIYOR** (2026-08-01'de yaşandı, PR #15 merge'ünde):
+  ücretsiz katmanda veritabanı boşta kalınca duruyor ve `prisma migrate deploy`
+  `P1001: Can't reach database server` ile ~5 saniyede vazgeçiyor. Derleme
+  başarısız olur ama **canlı site eski sürümle ayakta kalır** — kesinti olmaz.
+  Çözüm: veritabanını uyandır (`curl .../api/health` yeter, `db: ok` görene kadar)
+  sonra `npx vercel redeploy <basarisiz-deploy-url> --scope barisss`.
+  Merge sonrası sağlık ucundaki `commit` alanının değiştiğini **doğrula**;
+  değişmediyse dağıtım başarısız olmuştur
 - Ortam değişkeni değişikliği **kendiliğinden yayına girmez**; yeni bir dağıtım
   gerekir (`npx vercel redeploy <url>`)
 
