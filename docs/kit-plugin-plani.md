@@ -4,8 +4,32 @@
 > plugin'in içeriği (`CLAUDE.md` + `docs/standards/`) buradan çıkıyor.
 > İş bitince plugin kendi deposuna taşınır ve bu dosya orada yaşamaya devam eder.
 
-**Durum:** onaylandı, **henüz başlanmadı**
-**Karar tarihi:** 2026-08-01
+**Durum:** ✅ **YAPILDI ve doğrulandı** — 2026-08-01
+**Depo:** https://github.com/bariskose9/bariskose-skills · sürüm `1.0.1`
+
+## Doğrulama sonuçları (fiilen çalıştırıldı)
+
+| Kontrol | Sonuç |
+|---|---|
+| `claude plugin validate .` | ✔ geçti |
+| `claude plugin marketplace add bariskose9/bariskose-skills` | ✔ eklendi |
+| `claude plugin install proje-kiti@bariskose-skills` | ✔ kuruldu (scope: user) |
+| `claude plugin list` | ✔ `proje-kiti@bariskose-skills` · enabled |
+| `claude plugin details proje-kiti` | ✔ 2 skill: `yeni-proje`, `kit-senkron` |
+| Kit dosyaları kurulumla birlikte geldi mi | ✔ `dosyalar/docs/standards/00–17` + `sablonlar/` mevcut |
+| Token maliyeti | **~367 token** her oturumda sabit; skill çağrılınca `yeni-proje` ~3.8k, `kit-senkron` ~1.6k |
+
+**Açık kalan soru cevaplandı:** güncelleme **yeniden başlatma İSTİYOR.**
+`claude plugin update proje-kiti@bariskose-skills` çıktısı birebir şunu dedi:
+*"Plugin updated from 1.0.0 to 1.0.1 for scope user. **Restart to apply changes.**"*
+Yeni kurulumda da aynısı beklenir — kurduktan sonra Claude yeniden başlatılmalı.
+
+**Not:** `claude plugin update` **tam adı** ister (`proje-kiti@bariskose-skills`).
+Yalnızca `proje-kiti` yazınca "not found" diyor.
+
+---
+
+## Onaylanan plan (referans)
 
 ---
 
