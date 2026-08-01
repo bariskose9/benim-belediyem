@@ -5,7 +5,14 @@
 > İş bitince plugin kendi deposuna taşınır ve bu dosya orada yaşamaya devam eder.
 
 **Durum:** ✅ **YAPILDI ve doğrulandı** — 2026-08-01
-**Depo:** https://github.com/bariskose9/bariskose-skills · sürüm `1.0.1`
+**Depo:** https://github.com/bariskose9/bariskose-skills · sürüm `1.0.2`
+
+**1.0.2'de eklendi:** `/yeni-proje` artık her yeni projeye **salt okunur komutlar
+için hazır izin listesi** (`.claude/settings.json`) yazıyor — 15 gerçek oturumun
+taranmasıyla çıkarıldı (`npm run typecheck` 37 kez, `lint` 33, `test` 33,
+`format:check` 22, `npm view` 28, tarayıcı okuma çağrıları 22 kez elle
+onaylanmış). Durum değiştiren hiçbir şey listeye girmiyor. Ayrıca skill
+kullanıcıya **`Auto` modunu** öneriyor, `Bypass permissions`'ı değil.
 
 ## Doğrulama sonuçları (fiilen çalıştırıldı)
 
