@@ -39,6 +39,57 @@ export async function findUserIdByNationalIdHash(nationalIdHash: string): Promis
   return user?.id ?? null;
 }
 
+/** Giriş için gereken EN AZ alan. Ad, e-posta ve telefon burada okunmaz. */
+export type AuthUserRow = {
+  id: string;
+  passwordHash: string | null;
+};
+
+/**
+ * Şifreyle giriş için hesabı bulur.
+ *
+ * Silinmiş hesap (`deletedAt`) hiç dönmez — filtreyi sorguya koymak, çağıranın
+ * kontrolü unutabileceği bir yeri kapatır.
+ *
+ * `passwordHash` null olabilir ve bu normaldir: tohum verisindeki 80 arka plan
+ * hesabının şifresi yok, ileride yalnızca Google ile açılan hesapların da
+ * olmayacak (4c). Çağıran bu durumu "şifre yanlış" ile AYNI biçimde ele alır.
+ */
+export async function findAuthUserByNationalIdHash(
+  nationalIdHash: string,
+): Promise<AuthUserRow | null> {
+  return prisma.user.findFirst({
+    where: { nationalIdHash, deletedAt: null },
+    select: { id: true, passwordHash: true },
+  });
+}
+
+/** Hesabım ekranının gösterdiği alanlar — kimlik numarası YALNIZCA maskeli. */
+export type AccountProfileRow = {
+  fullName: string;
+  nationalIdMasked: string | null;
+  email: string | null;
+  phone: string | null;
+};
+
+/**
+ * Hesap özetini döner.
+ *
+ * Kimliği ÇAĞIRAN VERİR ve çağıran onu yalnızca oturumdan alır; istemciden
+ * gelen bir kullanıcı kimliği bu fonksiyona hiç ulaşamaz. IDOR koruması
+ * (05-auth-security.md) bu yüzden bir "sahiplik kontrolü" değil, tasarım
+ * gereği: başkasının kaydını isteyebileceği bir parametre yok.
+ *
+ * `nationalIdEncrypted` OKUNMUYOR: ekranın maskeli hâlden fazlasına ihtiyacı
+ * yok, çözülmeyen veri sızdırılamaz.
+ */
+export async function findAccountProfile(userId: string): Promise<AccountProfileRow | null> {
+  return prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: { fullName: true, nationalIdMasked: true, email: true, phone: true },
+  });
+}
+
 export async function findUserIdByEmail(email: string): Promise<string | null> {
   const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
 

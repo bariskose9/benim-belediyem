@@ -11,8 +11,9 @@ import { messages } from "@/config/messages";
  * temizleniyor, dolayısıyla doğrulanacak bir durum kalmıyor. Sayfa yenilense
  * de aynı mesaj görünür.
  *
- * Giriş ekranı adım 4b-2'de geliyor; metin bunu açıkça söylüyor ki kullanıcı
- * olmayan bir düğmeyi aramasın.
+ * Düğme adım 4b-2'den itibaren GİRİŞ EKRANINA gidiyor: kayıt biter bitmez
+ * yapılacak tek şey giriş yapmak, kullanıcıyı ana sayfaya atıp yolu kendisine
+ * arattırmak gereksiz bir adım olurdu.
  */
 const copy = messages.auth.register.success;
 
@@ -24,7 +25,7 @@ export default function RegisterDonePage() {
       <p className="text-muted-foreground">{copy.body}</p>
 
       <Button asChild>
-        <Link href="/">{copy.cta}</Link>
+        <Link href="/giris">{copy.cta}</Link>
       </Button>
     </div>
   );

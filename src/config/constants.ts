@@ -195,6 +195,64 @@ export const ARGON2_TIME_COST = 3;
 export const ARGON2_PARALLELISM = 1;
 
 // ===========================================================================
+// OTURUM (ADR-002 çerez · ADR-005 oturum veritabanında · 05-auth-security.md)
+//
+// Oturum Auth.js ile DEĞİL, elle yazılmış bir veritabanı oturumuyla taşınıyor.
+// Gerekçe ADR-005'in 2026-08-01 tarihli güncelleme notunda: Auth.js'in
+// `Credentials` sağlayıcısı JWT stratejisini zorunlu kılıyor, JWT ise
+// "çıkışta ve şifre değişiminde tüm oturumlar ANINDA düşer" sözünü tutamıyor.
+// ===========================================================================
+
+/** Çerez adı. Diğer çerezlerle aynı `bb_` öneki — hepsi tek bakışta görülsün. */
+export const SESSION_COOKIE_NAME = "bb_session" as const;
+
+/** Jetonun bayt uzunluğu. 32 bayt = 256 bit; tahmin edilmesi pratikte imkânsız. */
+export const SESSION_TOKEN_BYTES = 32;
+
+/** 7 gün — `05-auth-security.md` "Token ömürleri" tablosunda SABİT. */
+export const SESSION_TTL_MS = 7 * 24 * 60 * 60_000;
+
+/**
+ * Kayan yenileme eşiği: oturumun kalan ömrü bu değerin altına düşünce süresi
+ * yeniden 7 güne çekilir.
+ *
+ * NEDEN EŞİK VAR, NEDEN HER İSTEKTE UZATILMIYOR: standart "her istekte uzar"
+ * diyor ama bunu harfiyen uygulamak HER SAYFA AÇILIŞINDA bir veritabanı
+ * YAZMASI demek. Sunucusuz ortamda bu, okuma maliyetinin üstüne gereksiz bir
+ * yazma maliyeti bindirir (ADR-005 zaten yalnızca okuma maliyetini kabul
+ * ediyor). 6 gün eşiğiyle uzatma günde en fazla bir kez olur; kullanıcı
+ * açısından davranış aynıdır — uygulamayı kullandığı sürece oturumu düşmez.
+ */
+export const SESSION_REFRESH_THRESHOLD_MS = 6 * 24 * 60 * 60_000;
+
+// ===========================================================================
+// GİRİŞ (PRD §5.0 "Giriş akışı" · 05-auth-security.md)
+// ===========================================================================
+
+/**
+ * Giriş denemesi hız sınırı: 5 deneme / 15 dakika (05-auth-security.md
+ * "Rate limit: giriş denemesi"). Kimlik sorgusuyla aynı bütçe, ama AYRI
+ * anahtar — biri diğerinin sayacını tüketmemeli.
+ */
+export const LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 5;
+export const LOGIN_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * PRD §5.0: "2 başarısız denemeden sonra bot doğrulaması istenir."
+ *
+ * Sayaç YALNIZCA BAŞARISIZ denemede artar ve başarılı girişte sıfırlanır;
+ * şifresini doğru bilen kullanıcı bulmacayla hiç karşılaşmaz.
+ */
+export const LOGIN_BOT_CHECK_AFTER_FAILURES = 2;
+
+/**
+ * Başarısız deneme sayacının penceresi. Hız sınırıyla aynı tutuluyor: iki
+ * farklı pencere, "bulmaca çıktı ama sayaç sıfırlanmış" gibi kullanıcıya
+ * açıklanamayan durumlar üretirdi.
+ */
+export const LOGIN_FAILURE_WINDOW_MS = LOGIN_RATE_LIMIT_WINDOW_MS;
+
+// ===========================================================================
 // BOT KORUMASI — Cloudflare Turnstile (ADR-004 · integrations.md)
 // ===========================================================================
 

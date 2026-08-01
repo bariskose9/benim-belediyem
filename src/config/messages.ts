@@ -4,6 +4,23 @@
  * Neden tek dosya: metin koda dağılırsa hem tutarlılık kaybolur hem de ileride
  * ikinci bir dil eklenecekse her bileşeni tek tek açmak gerekir.
  */
+
+/**
+ * Bot kapısının metinleri — kayıt VE giriş akışının ikisi de aynı kapıyı
+ * kullanıyor (ADR-004). Metni iki yere kopyalamak, birini düzeltip diğerini
+ * unutmanın en kısa yoludur; bu yüzden tek yerde durup iki gruba da yayılıyor.
+ */
+const botCheckErrors = {
+  botCheckRequired: "Devam etmek için “Ben robot değilim” doğrulamasını tamamlayın.",
+  botCheckFailed: "Doğrulama geçersiz. Sayfayı yenileyip tekrar deneyin.",
+  /**
+   * ADR-004 bedel 2: Turnstile erişilemezse akış DURUR, atlanmaz.
+   * Mesaj bunu kullanıcıya anlaşılır biçimde söylüyor.
+   */
+  botCheckUnavailable:
+    "Güvenlik doğrulaması servisine şu an ulaşılamıyor. İşlemi biraz sonra tekrar deneyin.",
+} as const;
+
 export const messages = {
   app: {
     name: "benim-belediyem",
@@ -210,10 +227,8 @@ export const messages = {
 
       success: {
         title: "Hesabınız oluşturuldu",
-        body:
-          "Kaydınız tamamlandı. Giriş ekranı bir sonraki sürümde açılacak; " +
-          "o zamana kadar hesabınız hazır bekliyor.",
-        cta: "Ana sayfaya dön",
+        body: "Kaydınız tamamlandı. Artık T.C. kimlik numaranız ve şifrenizle giriş yapabilirsiniz.",
+        cta: "Giriş yap",
       },
 
       errors: {
@@ -231,14 +246,7 @@ export const messages = {
         registrationExpired:
           "Kayıt işleminin süresi doldu. Güvenliğiniz için baştan başlamanız gerekiyor.",
 
-        botCheckRequired: "Devam etmek için “Ben robot değilim” doğrulamasını tamamlayın.",
-        botCheckFailed: "Doğrulama geçersiz. Sayfayı yenileyip tekrar deneyin.",
-        /**
-         * ADR-004 bedel 2: Turnstile erişilemezse akış DURUR, atlanmaz.
-         * Mesaj bunu kullanıcıya anlaşılır biçimde söylüyor.
-         */
-        botCheckUnavailable:
-          "Güvenlik doğrulaması servisine şu an ulaşılamıyor. Kayıt işlemini biraz sonra tekrar deneyin.",
+        ...botCheckErrors,
 
         otpInvalid: "Kod hatalı. Lütfen e-postanıza gelen 6 haneli kodu kontrol edin.",
         otpExpired: "Kodun süresi doldu. Yeni bir kod isteyin.",
@@ -265,5 +273,138 @@ export const messages = {
         channelUnavailable: "Doğrulama kodu gönderilemedi. Lütfen biraz sonra tekrar deneyin.",
       },
     },
+
+    /** Giriş akışı (PRD §5.0 "Giriş akışı" · adım 4b-2). */
+    login: {
+      pageTitle: "Giriş Yap",
+      title: "Giriş yap",
+      description: "T.C. kimlik numaranız ve şifrenizle hesabınıza girin.",
+
+      nationalIdLabel: "T.C. kimlik numarası",
+      nationalIdHelp: "11 haneli kimlik numaranız",
+      passwordLabel: "Şifre",
+      submit: "Giriş yap",
+      submitting: "Giriş yapılıyor…",
+
+      registerPrompt: "Hesabınız yok mu?",
+      registerCta: "Kayıt olun",
+
+      /** Oturum gerektiren bir sayfadan yönlendirilen kullanıcıya sebebi söylenir. */
+      redirectedNotice: "Bu sayfayı görebilmek için önce giriş yapmanız gerekiyor.",
+
+      errors: {
+        /**
+         * TEK MESAJ — hem "böyle bir kullanıcı yok" hem "şifre yanlış" hem de
+         * "kimlik numarasının kontrol basamağı hatalı" durumunda AYNI metin,
+         * AYNI durum kodu (401) döner.
+         *
+         * HESAP SAYIMI KORUMASI (05-auth-security.md · PRD §5.0): farklı mesaj
+         * vermek "bu numarayla bir hesap var, sadece şifresini bilmiyorsun"
+         * bilgisini sızdırırdı. Kayıt akışındaki 409 bilinçli bir istisnaydı ve
+         * BURAYA KOPYALANMADI. Yanıt SÜRESİ de eşitleniyor: kullanıcı
+         * bulunamadığında sahte bir argon2 doğrulaması çalıştırılıyor
+         * (`login.service.ts`), yoksa zamanlama farkı aynı bilgiyi ele verirdi.
+         */
+        invalidCredentials:
+          "T.C. kimlik numarası veya şifre hatalı. Bilgilerinizi kontrol edip tekrar deneyin.",
+
+        /** Kaç deneme kaldığı söylenmez — o da bilgi sızdırır. */
+        tooManyAttempts:
+          "Çok fazla giriş denemesi yapıldı. Güvenliğiniz için lütfen 15 dakika sonra tekrar deneyin.",
+
+        ...botCheckErrors,
+      },
+    },
+
+    /** Çıkış — hem üst menüdeki düğme hem hesabım sayfası kullanıyor. */
+    logout: {
+      submit: "Çıkış yap",
+      submitting: "Çıkış yapılıyor…",
+    },
+
+    /** Hesabım sayfası — kullanıcının YALNIZCA kendi kaydı (PRD §5.0). */
+    account: {
+      pageTitle: "Hesabım",
+      title: "Hesabım",
+      description: "Hesabınızın bilgileri ve erişim durumunuz.",
+
+      fields: {
+        fullName: "Ad soyad",
+        nationalId: "T.C. kimlik numarası",
+        email: "E-posta adresi",
+        phone: "Cep telefonu",
+        identityStatus: "Kimlik durumu",
+        staffStatus: "Personel durumu",
+      },
+
+      identityStatusLabels: {
+        unverified: "Doğrulanmamış",
+        kps_verified: "Nüfus kayıtlarıyla doğrulandı",
+      },
+
+      staffStatusLabels: {
+        staff: "Kurum personeli",
+        citizen: "Vatandaş",
+      },
+
+      /** Kimlik numarası burada bile maskeli gösterilir (05-auth-security.md). */
+      maskedNotice: "Kimlik numaranız güvenlik gereği maskeli gösterilir.",
+    },
+
+    /**
+     * Erişim kademeleri (PRD §5.0 tablosu).
+     *
+     * ÜÇ FARKLI DURUM, ÜÇ FARKLI MESAJ — ve bu PRD'nin açık isteği:
+     * eksiğin ne olduğunu bilmeyen kullanıcı ne yapacağını da bilemez.
+     */
+    access: {
+      signInRequired: {
+        title: "Giriş yapmanız gerekiyor",
+        description: "Bu sayfayı görmek için hesabınızla giriş yapın.",
+        cta: "Giriş yap",
+      },
+      identityRequired: {
+        title: "Kimlik doğrulaması gerekiyor",
+        description:
+          "Bu hizmet için kimlik doğrulaması gerekiyor. Nüfus kayıtlarıyla doğrulama adımını tamamlayın.",
+        cta: "Kimlik doğrulamasına git",
+      },
+      /** Yönlendirme YOK: personel olmak kullanıcının tamamlayabileceği bir adım değil. */
+      staffOnly: {
+        title: "Bu hizmet yalnızca kurum personeline açıktır",
+        description:
+          "Hastane ve spor salonu hizmetleri belediyenin personel sağlık birimi ve " +
+          "personel spor tesisidir. Kayıt oluşturulamaz.",
+      },
+    },
+  },
+
+  /** Üst menü — oturum durumuna göre değişir. */
+  nav: {
+    home: "Ana sayfa",
+    login: "Giriş yap",
+    register: "Kayıt ol",
+    account: "Hesabım",
+    /** Ekran okuyucular için: menünün ne olduğu söylenmeli (WCAG 2.1 AA). */
+    label: "Ana menü",
+  },
+
+  /**
+   * Personele özel hizmetlerin iskeletleri. Modüllerin kendisi roadmap'te
+   * kendi adımlarında gelecek; bu sayfalar şimdilik YALNIZCA erişim kapısının
+   * çalıştığını gösteriyor ve bunu kullanıcıya dürüstçe söylüyor.
+   */
+  staffServices: {
+    hospital: {
+      pageTitle: "Hastane Randevusu",
+      title: "Hastane randevusu",
+      description: "Personel sağlık birimi randevu hizmeti.",
+    },
+    gym: {
+      pageTitle: "Spor Salonu",
+      title: "Spor salonu üyeliği",
+      description: "Personel spor tesisi üyelik hizmeti.",
+    },
+    comingSoon: "Bu hizmet henüz açılmadı; yakında burada olacak.",
   },
 } as const;

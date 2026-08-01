@@ -186,6 +186,42 @@ export class LeakedPasswordError extends AppError {
   }
 }
 
+/**
+ * Giriş başarısız — İKİ FARKLI SEBEP AYNI YANITI ÜRETİR:
+ * böyle bir hesap yok · şifre yanlış.
+ *
+ * HESAP SAYIMI KORUMASI (PRD §5.0 · 05-auth-security.md). Ayrı bir kod ya da
+ * ayrı bir durum kodu dönseydi, yanıtın KENDİSİ "bu numarayla hesap var"
+ * bilgisini verirdi. Kayıt akışındaki 409 (`IdentityAlreadyRegisteredError`)
+ * PRD'nin açıkça istediği bilinçli bir istisnaydı ve BURAYA KOPYALANMADI.
+ *
+ * Yanıt SÜRESİ de eşitleniyor — `login.service.ts` içindeki sahte argon2
+ * doğrulaması. Mesajı eşitleyip süreyi eşitlememek korumayı işe yaramaz kılar.
+ */
+export class InvalidCredentialsError extends AppError {
+  readonly code = "INVALID_CREDENTIALS";
+  readonly status = 401;
+
+  /**
+   * @param botCheckRequired Bir sonraki denemede bot doğrulaması gerekiyor mu.
+   *   Ekranın kutuyu ne zaman göstereceğini bilmesi için. Bu bilgi IP'ye
+   *   bağlıdır, hesaba değil — dolayısıyla hesap sayımına yol açmaz.
+   */
+  constructor(readonly botCheckRequired: boolean = false) {
+    super(messages.auth.login.errors.invalidCredentials);
+  }
+}
+
+/** Giriş denemesi hız sınırına takıldı (05-auth-security.md: 5 deneme / 15 dk). */
+export class LoginRateLimitedError extends AppError {
+  readonly code = "RATE_LIMITED";
+  readonly status = 429;
+
+  constructor() {
+    super(messages.auth.login.errors.tooManyAttempts);
+  }
+}
+
 /** Doğrulama kodu gönderilemedi (e-posta sağlayıcısı erişilemez veya yapılandırılmamış). */
 export class OtpChannelUnavailableError extends AppError {
   readonly code = "OTP_CHANNEL_UNAVAILABLE";

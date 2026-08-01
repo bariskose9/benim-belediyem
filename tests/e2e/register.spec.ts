@@ -1,4 +1,4 @@
-import { expect, test, type Page, type TestInfo } from "@playwright/test";
+import { expect, test, type Locator, type Page, type TestInfo } from "@playwright/test";
 
 import { cleanupRegistration, prisma } from "../db/helpers";
 
@@ -235,7 +235,10 @@ test("kayıt akışının ilk adımı yalnızca klavyeyle tamamlanabilir", async
   await assignOwnIp(page);
   await page.goto("/kayit");
 
-  await page.keyboard.press("Tab");
+  // Sayfanın başında üst menü var; forma kaç Tab'da gelindiği menü değiştikçe
+  // değişir. Sabit bir sayı yazmak testi biçime bağlar — asıl kanıtlanan şey
+  // "fareye hiç dokunmadan forma ulaşılıp gönderilebiliyor mu".
+  await tabUntilFocused(page, page.getByLabel("T.C. kimlik numarası"));
   await page.keyboard.type(citizen.nationalId);
   await page.keyboard.press("Tab");
   await page.keyboard.type(citizen.birthYear);
@@ -244,6 +247,17 @@ test("kayıt akışının ilk adımı yalnızca klavyeyle tamamlanabilir", async
 
   await expect(page).toHaveURL(/\/kayit\/bilgiler$/);
 });
+
+/** Hedef alan odaklanana kadar Tab'a basar. Fare kullanılmaz. */
+async function tabUntilFocused(page: Page, target: Locator, maxTabs = 15): Promise<void> {
+  for (let pressed = 0; pressed < maxTabs; pressed += 1) {
+    await page.keyboard.press("Tab");
+
+    if (await target.evaluate((element) => element === document.activeElement)) return;
+  }
+
+  throw new Error(`Alan ${maxTabs} Tab içinde klavyeyle odaklanamadı.`);
+}
 
 test("375px'te yatay kaydırma yoktur", async ({ page }, testInfo) => {
   const citizen = citizenFor(testInfo);

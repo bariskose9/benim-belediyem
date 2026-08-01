@@ -74,7 +74,7 @@ export async function writeTestAccountsDoc(
     `Şifre: \`${DEMO_PASSWORD}\``,
     "",
     "> Şifre **argon2id** ile özetlenerek yazılır (ADR-011). Aşağıdaki 10 demo",
-    "> hesabın hepsi bu şifreyi kullanır. Giriş ekranı adım 4b-2'de gelecek.",
+    "> hesabın hepsi bu şifreyi kullanır. `/giris` adresinden giriş yapılabilir.",
     "",
     "> Arka plandaki 80 hesabın şifresi **yoktur** ve olmayacak: onlar dolu",
     "> randevu ve satılmış koltuk gibi kayıtların sahibi olsunlar diye var,",

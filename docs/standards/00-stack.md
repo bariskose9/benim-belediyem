@@ -16,7 +16,8 @@ Sürüm sütunu **fiilen kurulu** olanı gösterir; `package.json` ile birebir a
 | Backend | Next.js Route Handlers (`src/app/api/**`) | — | Ayrı Express sunucusu kurulmaz |
 | ORM | Prisma | 7 | Ham SQL sadece performans gerekçesiyle, ADR ile |
 | Veritabanı | PostgreSQL | 18 | Local Docker imajı Neon'daki yama sürümüyle eşitlenir |
-| Auth | Auth.js (NextAuth v5) | 5 (beta) | Web: httpOnly cookie · Mobil: Bearer JWT · aşağıya bak |
+| Oturum (şifreyle giriş) | Paket yok — elle yazılmış veritabanı oturumu | — | Jeton httpOnly çerezde, oturum `sessions` tablosunda · ADR-002 · ADR-005 |
+| Auth (Google ile giriş) | Auth.js (NextAuth v5) | 5 (beta) | **Henüz kurulu değil**, adım 4c'de değerlendirilecek · aşağıya bak |
 | Şifre özetleme | `argon2` (argon2id) | 0.45.1 | Parametreler `src/config/constants.ts` içinde · ADR-011 |
 | Bot koruması | Cloudflare Turnstile | — | Giriş gerektirmeyen formlarda zorunlu · ADR ile kabul edildi |
 | Validasyon | Zod | 4 | Her API girişinde zorunlu |
@@ -47,11 +48,23 @@ Bunlar tercih değil, **kısıt**. Kısıt kalkınca yükseltilir.
 | ESLint | 9 | 10 | `eslint-config-next`'in içindeki `eslint-plugin-import` ve `eslint-plugin-jsx-a11y` en fazla ESLint 9 kabul ediyor |
 | Node.js | 24 | 26 | 24 Active LTS; 26 henüz LTS değil (`00-stack.md` "Node.js LTS" kuralı) |
 
-## Auth.js v5 uyarısı
+## Auth.js v5 uyarısı — artık yalnızca 4c (Google ile giriş) için geçerli
 
-`next-auth` v5 hâlâ **beta** yayınlanıyor (`5.0.0-beta.*`); `latest` etiketi v4'te.
-Adım 4b'ye gelindiğinde "beta ile devam mı, v4 mü" kararı verilecek ve gerekirse
-ADR yazılacak. Şu an bir bağımlılık kurulu değil.
+**Şifreyle giriş Auth.js kullanmıyor.** Adım 4b-2'de karar verildi ve kaynaktan
+doğrulandı: `@auth/core`, `Credentials` sağlayıcısını yalnızca JWT oturum
+stratejisiyle çalıştırıyor (`packages/core/src/lib/utils/assert.ts` →
+_"Signing in with credentials only supported if JWT strategy is enabled"_).
+JWT ise ADR-005'in tek varlık sebebini — çıkışın ve şifre değişiminin oturumu
+**anında** düşürmesi — teknik olarak sağlayamıyor. Bu yüzden oturum elle
+yazıldı: `sessions` tablosu, httpOnly çerezde rastgele jeton, jetonun
+veritabanında yalnızca özeti. Ayrıntı: ADR-005'in 2026-08-01 tarihli güncelleme notu.
+
+Geriye **Google ile giriş** kalıyor (adım 4c). `next-auth` v5 hâlâ **beta**
+yayınlanıyor (`5.0.0-beta.*`); `latest` etiketi v4'te. OAuth sağlayıcıları
+`database` stratejisiyle çalışıyor, yani Google'ı Auth.js'e yaptırıp aynı
+`Session` tablosuna yazdırmak mümkün görünüyor — ama çerez adı ve biçimi
+bizimkinden farklı, birleştirme gerekiyor. Karar 4c'de, dokümana bakılarak
+verilecek. Şu an bir bağımlılık kurulu değil.
 
 ## Kullanılmayacaklar
 - Redux / MobX — TanStack Query + Zustand yeterli

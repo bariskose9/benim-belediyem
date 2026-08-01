@@ -41,6 +41,32 @@ Böylece her iki istemci de **aynı iptal mekanizmasını** kullanır: tek tablo
 | İmzalı JWT (durumsuz) | Veritabanı okuması yok, sunucusuzda hızlı | Oturum iptal **edilemez**; standardın üç kuralı da ihlal edilir | Güvenlik gereksinimi karşılanmıyor |
 | JWT + iptal listesi | Kısmen hızlı | Yine veritabanı okuması gerekiyor, üstelik iki mekanizma birden bakılıyor | JWT'nin avantajı kalmıyor, karmaşıklık artıyor |
 
+## Güncelleme — 2026-08-01 (adım 4b-2 uygulanırken)
+
+**Karar geçerli, mekanizma değişti: Auth.js kullanılmıyor, oturum elle yazıldı.**
+
+Yukarıda "Auth.js `database` oturum stratejisi" yazıyor. Uygulamaya geçerken
+`@auth/core` kaynak kodunda şu kontrol bulundu
+(`packages/core/src/lib/utils/assert.ts`):
+
+> `"Signing in with credentials only supported if JWT strategy is enabled"`
+
+Yani Auth.js'in `Credentials` (şifreyle giriş) sağlayıcısı **JWT'yi zorunlu
+kılıyor** ve `database` stratejisiyle çalışmıyor. JWT'ye geçmek bu ADR'nin tek
+varlık sebebini ortadan kaldırırdı: şifresini değiştiren kullanıcının eski
+oturumu 7 gün daha açık kalırdı.
+
+Bu yüzden `next-auth` **kurulmadı** ve oturum elle yazıldı:
+
+- `sessions` tablosu, çerezde yalnızca 32 baytlık rastgele jeton
+- Jetonun **özeti** saklanıyor (veritabanı sızsa bile çerez üretilemez)
+- Çıkış, şifre değişimi ve "tüm cihazlardan çık" satır silmekle **anında** etkili
+
+Kararın özü (oturum veritabanında, anında iptal edilebilir) korunduğu için yeni
+bir ADR yazılmadı. **Google ile giriş (adım 4c) hâlâ Auth.js ile yapılabilir** —
+OAuth sağlayıcıları `database` stratejisini destekliyor; ama çerez adı ve biçimi
+bizimkinden farklı, birleştirme gerekiyor. O karar 4c'de verilecek.
+
 ## Sonuçlar
 
 - **Olumlu:** çıkış ve şifre değişimi gerçekten çalışır; "tüm cihazlardan çıkış"

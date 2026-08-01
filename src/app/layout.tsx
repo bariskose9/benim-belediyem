@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { EnvBanner } from "@/components/layout/EnvBanner";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 import { isProductionEnv, publicEnv } from "@/config/env";
 import { messages } from "@/config/messages";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body className="min-h-dvh">
         <EnvBanner />
+        <SiteHeader />
         {children}
       </body>
     </html>

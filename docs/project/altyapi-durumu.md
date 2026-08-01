@@ -9,7 +9,7 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-01 · roadmap adım 4b-1 sonrası
+**Son güncelleme:** 2026-08-01 · roadmap adım 4b-2 sonrası
 
 ---
 
@@ -45,6 +45,8 @@
 - `preview` ve `production` dalları **ayrı veritabanı** — veri paylaşmazlar
 - İkisi de tohumlandı (2026-08-01): 200 sahte KPS vatandaşı · 100 personel ·
   90 üye (10'unun şifresi var). Gerçek kullanıcı: 0
+- **Şema adım 4b-2'de DEĞİŞMEDİ** — `sessions` tablosu adım 3'ten beri hazırdı,
+  yeni migration yok
 
 ### Vercel
 - Derleme komutu: `prisma migrate deploy && next build` — yani **her deploy
@@ -69,7 +71,7 @@ Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | test anahtarı | ✔ gerçek | ✔ gerçek | Kutu hiç görünmez |
 | `TURNSTILE_SECRET_KEY` | test anahtarı | ✔ gerçek | ✔ gerçek | local'de atlanır · preview/production'da kayıt **durur** (503) |
 | `EMAIL_API_KEY` · `EMAIL_FROM` | ✘ | ✘ | ✔ | Production'da kayıt ekranı "geçici olarak kapalı" der. Uygulama **açılır** |
-| `AUTH_SECRET` · `GOOGLE_*` | ✘ | ✘ | ✘ | Henüz kullanılmıyor — adım 4b-2 / 4c |
+| `AUTH_SECRET` · `GOOGLE_*` | ✘ | ✘ | ✘ | Henüz kullanılmıyor — **yalnızca adım 4c** (Google ile giriş). Şifreyle giriş bunlara ihtiyaç duymuyor: oturum elle yazıldı, imzalanan bir jeton yok (ADR-005 güncelleme notu) |
 | `OWNER_*` | ✘ | ✘ | ✘ | Tohumlama proje sahibi hesabını **atlar** (kasıtlı: gerçek kişisel veri uzak ortama gitmiyor) |
 
 **Anahtarlar ortama özeldir** (`13-environments.md`): `NATIONAL_ID_*` değerleri

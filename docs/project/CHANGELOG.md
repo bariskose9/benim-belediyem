@@ -4,6 +4,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 4b-2: giriş, çıkış, oturum ve erişim kademeleri
+- **Giriş ekranı (`/giris`)**: T.C. kimlik numarası + şifre. Giriş anında KPS
+  sorgulanmıyor (PRD §5.0 — hız ve dayanıklılık); sahte KPS çökse bile mevcut
+  kullanıcılar girebiliyor
+- **Veritabanı oturumu (ADR-005)**: `sessions` tablosu, httpOnly çerezde 32
+  baytlık rastgele jeton, veritabanında jetonun **özeti**. 7 gün ömür, kalan
+  ömür 6 günün altına düşünce kayan yenileme. Süresi dolan satır okuma anında
+  siliniyor (ADR-007)
+- **Çıkış (`DELETE /api/sessions/current`)**: oturum satırı siliniyor, çerez
+  düşüyor. Adres bir oturum kimliği taşımıyor — herkes yalnızca kendi çerezini
+  düşürebilir
+- **"Tüm oturumları düşür" mekanizması** kuruldu (şifre değişimi için); ekranı
+  4b-3'te gelecek
+- **Hesap sayımı koruması**: "böyle bir hesap yok" ile "şifre yanlış" aynı
+  durum kodunu, aynı mesajı ve **aynı süreyi** üretiyor — hesap bulunamadığında
+  sahte bir argon2 doğrulaması çalıştırılıyor. Sahte özetin parametrelerinin
+  gerçek ayarlarla aynı kaldığını bir test koruyor
+- **Giriş hız sınırı** 5 deneme / 15 dakika (IP + ziyaretçi bacağı) ve
+  **2 başarısız denemeden sonra bot doğrulaması** (PRD §5.0)
+- **Erişim kademeleri (PRD §5.0)**: `/hesabim` oturum istiyor; `/hastane` ve
+  `/spor-salonu` yalnızca personele açık. Eksiğine göre farklı mesaj — kimlik
+  doğrulanmamışsa yönlendirme var, personel değilse yok
+- **Üst menü** oturum durumuna göre değişiyor (sunucuda okunuyor, istemciden
+  gelen bir bayrağa güvenilmiyor)
+- Açık yönlendirme koruması: `?donus=` yalnızca kendi yollarımızı kabul ediyor
+- Testler: 54 yeni birim/entegrasyon + 12 E2E (masaüstü ve 375px).
+  Toplam: 317 unit/entegrasyon · 36 veritabanı · 62 E2E
+
+### Değiştirildi
+- `docs/standards/00-stack.md` — "Auth" satırı ikiye ayrıldı: şifreyle giriş
+  paketsiz (elle yazılmış veritabanı oturumu), Auth.js uyarısı artık yalnızca
+  4c (Google ile giriş) için geçerli
+- `ADR-005` — 2026-08-01 tarihli güncelleme notu: karar geçerli, mekanizma
+  Auth.js değil elle yazılmış oturum; gerekçesi kaynak koddan doğrulandı
+- Kayıt tamamlandı ekranındaki düğme artık giriş ekranına gidiyor
+
 ### Eklendi — yeni proje başlangıç kiti
 - `docs/standards/16-yeni-proje-kurulumu.md` — **her projede aynı**: yeni bir
   projeye başlarken hangi dosyanın nereye kopyalanacağı, hangisinin projeye göre
