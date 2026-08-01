@@ -68,6 +68,29 @@ export async function consumeRateLimit({
 }
 
 /**
+ * Sayacı ARTIRMADAN okur.
+ *
+ * Neden gerekli: giriş ekranında "2 başarısız denemeden sonra bot doğrulaması"
+ * (PRD §5.0) kuralı, denemeyi saymadan önce "şu ana kadar kaç kez başarısız
+ * olmuş" sorusunu sormak zorunda. `consumeRateLimit` ile sorulsaydı sorunun
+ * kendisi cevabı değiştirirdi.
+ *
+ * Aynı pencere hizalamasını kullanır; ayrı bir sayaç mekanizması DEĞİLDİR.
+ */
+export async function peekRateLimit(
+  key: string,
+  windowMs: number,
+  now = new Date(),
+): Promise<number> {
+  const counter = await prisma.rateLimitCounter.findUnique({
+    where: { key_windowStartedAt: { key, windowStartedAt: alignWindowStart(now, windowMs) } },
+    select: { count: true },
+  });
+
+  return counter?.count ?? 0;
+}
+
+/**
  * Pencere başlangıcını `windowMs`'in tam katına yuvarlar.
  *
  * Hizalama şart: her istek kendi başlangıç anını yazsaydı, her istek yeni bir

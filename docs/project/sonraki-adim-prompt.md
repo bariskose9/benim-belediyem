@@ -1,11 +1,11 @@
-# Sonraki oturum için hazır prompt — adım 4b-2
+# Sonraki oturum için hazır prompt — adım 4b-3
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 4b-2 bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 4b-3 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **4b-2**'ye geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **4b-3**'e geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu üçü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
@@ -15,129 +15,85 @@ benim-belediyem projesinde roadmap adım **4b-2**'ye geçiyoruz. Başlamadan ön
 
 ## DURUM
 
-Roadmap adım **0 → 4b-1 bitti ve `main`'de canlıda** (PR #1-#11).
+Roadmap adım **0 → 4b-2 bitti** (PR #1-#15).
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- **Kayıt akışı canlıda ÇALIŞIYOR**: TCKN → KPS → 18 yaş → iki bağımsız OTP
+- **Kayıt canlıda çalışıyor**: TCKN → KPS → 18 yaş → iki bağımsız OTP
+- **Giriş, çıkış, oturum ve erişim kademeleri çalışıyor** (4b-2)
 - Preview ve production veritabanları **dolu**: 200 KPS vatandaşı, 100 personel,
-  90 üye. Gerçek kullanıcı 0
-- Testler: **263** unit/entegrasyon · **36** veritabanı · **50** E2E
+  90 üye (10'unun şifresi `Test1234!`). Gerçek kullanıcı 0
+- Testler: **317** unit/entegrasyon · **36** veritabanı · **62** E2E
 - Cloudflare Turnstile ve Resend **kurulu ve çalışıyor** (altyapi-durumu.md)
-- **Giriş / çıkış / oturum HENÜZ YOK.** 4b-2'nin tamamı bu.
+- **Şifre sıfırlama HENÜZ YOK.** 4b-3'ün tamamı bu
 
-## ÖNCE ÇÖZÜLECEK MESELELER
+## 4b-2'DEN DEVRALINAN KARARLAR — yeniden tartışma
 
-**Yok — 4b-2'nin tek açık kararı verildi.** Aşağıyı oku ve uygula, yeniden tartışma.
-
-### Oturum stratejisi kararı (verildi, kaynaktan doğrulandı)
-
-Soru şuydu: şifreyle giriş Auth.js ile mi yapılacak, elle mi?
-
-`@auth/core` kaynak kodunda (`packages/core/src/lib/utils/assert.ts`) şu kontrol
-var ve hata fırlatıyor:
-
-> `"Signing in with credentials only supported if JWT strategy is enabled"`
-
-Yani **Auth.js'in `Credentials` sağlayıcısı `database` oturum stratejisiyle
-çalışmıyor** — JWT'yi zorunlu kılıyor. Bu doğrudan **ADR-005** ile çakışıyor
-(oturum veritabanında, çünkü çıkış ve şifre değişimi oturumu **gerçekten**
-düşürebilsin).
-
-**KARAR: (a) elle yazılmış veritabanı oturumu.** ADR-005 yürürlükte kalıyor,
-yeni ADR yazılmıyor, **`next-auth` KURULMUYOR**.
-
-Gerekçe:
-- ADR-005'in tek varlık sebebi anında iptal edilebilirlik. JWT'ye geçmek o sözü
-  bozardı: kullanıcı şifresini değiştirse bile eski oturum 7 gün açık kalırdı
-- `Session` tablosu, güvenli çerez varsayılanları, hız sınırı, denetim kaydı ve
-  argon2id şifre doğrulama **zaten yazılmış**; eksik parça küçük
-- CLAUDE.md: bir ADR'ye aykırı kod yazılmaz
-
-**Bu kararın 4c'ye etkisi (Google ile giriş) — HENÜZ BELİRSİZ.** Auth.js OAuth
-sağlayıcılarıyla `database` stratejisini destekliyor, yani Google'ı Auth.js'e
-yaptırıp aynı `Session` tablosuna yazdırmak mümkün görünüyor; ama çerez adı ve
-biçimi bizimkinden farklı, birleştirme gerekir. **Emin değilim** — 4c'de yine
-dokümana bakılarak karar verilecek. 4b-2'yi engellemez.
-
-**Yan iş:** karar verildiğine göre `docs/standards/00-stack.md` içindeki
-"Auth" satırı ve "Auth.js v5 uyarısı" bölümü 4b-2 PR'ında güncellenmeli —
-şu an "Auth.js kullanılacak" diyor, artık yalnızca 4c için geçerli.
+**Oturum Auth.js ile DEĞİL, elle yazıldı.** Gerekçe ADR-005'in 2026-08-01 tarihli
+güncelleme notunda: `@auth/core` kaynağında `Credentials` sağlayıcısı JWT'yi
+zorunlu kılıyor, JWT ise "çıkışta ve şifre değişiminde oturum ANINDA düşer"
+sözünü tutamıyor. `next-auth` **kurulu değil** ve 4b-3'te de kurulmayacak.
+Google ile giriş (4c) ayrı bir karar.
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
-- `hashPassword()` / `verifyPassword()` (`src/features/auth/services/password.service.ts`)
-  — argon2id, ADR-011. **Hiçbir kimlik doğrulama kütüphanesine bağlı değil**,
-  bilerek böyle bırakıldı
-- `checkPasswordPolicy()` — uzunluk + yaygın şifre listesi + kişisel veri kontrolü
-- `consumeRateLimit()` + `resetRateLimit()` + `rateLimitKey(purpose, kind, value)`
-  (`src/lib/rate-limit.ts`) — `kind`: `"ip" | "session" | "destination"`.
-  **Yeni hız sınırı mekanizması KURMA**
-- `hashActorIp()` / `readActorIp()` — denetim kaydı ve hız sınırı için IP işleme
-- `verifyTurnstileToken()` (`src/lib/turnstile.ts`) — bot kapısı.
-  PRD giriş formunda **2 başarısız denemeden sonra** istiyor
-- `recordAuditLog()` (`src/lib/audit.ts`) — `AuditAction.login` / `logout` hazır
-- `secureCookieDefaults` (`src/lib/cookies.ts`) — httpOnly + sameSite=lax + secure
-  (`secure` local'de bilerek kapalı, gerekçesi dosyada yazılı)
-- `ensureAnonymousId()` (`src/lib/anonymous-id.ts`) — hız sınırının oturum bacağı
-- `ok()` / `created()` / `noContent()` / `fail()` (`src/lib/http.ts`) ve
-  `src/lib/errors.ts` hata sınıfları — **tek tip hata formatı**, yeniden kurma
-- `matchStaffMember()` (`src/features/auth/services/staff-matching.service.ts`)
-  — `isStaff` hesaplaması
-- `issueOtp()` / `verifyOtp()` (`src/features/otp/`) — 4b-3'te şifre sıfırlama
-  bunu kullanacak, `OtpPurpose.password_reset` enum'da hazır
-- `Session` tablosu şemada **mevcut** (`session_token` benzersiz, `expires_at`,
-  `user_id` index'li, kullanıcı silinince cascade)
-- Kayıt akışı bileşenleri (`TextField`, `FormAlert`, `TurnstileWidget`,
-  `StepHeader`) — giriş ekranı bunları kullanır, yenisini yazma
-- Demo hesapların şifresi **var**: `Test1234!` (10 hesap, `docs/project/test-hesaplari.md`)
+4b-1'den gelenler hâlâ geçerli, üstüne 4b-2'nin bıraktıkları:
 
-## YAPILACAK — roadmap adım 4b-2
+- `issueSession()` / `readSession()` / `revokeSession()` /
+  **`revokeAllSessionsForUser()`** (`src/features/auth/services/session.service.ts`)
+  — sonuncusu **şifre değişiminde çağrılacak olan fonksiyon**, hazır ve test edilmiş
+- `getCurrentSession()` / `writeSessionCookie()` / `clearSessionCookie()`
+  (`session-context.ts`) — çerez tarafı
+- `evaluateAccess()` (`access-control.ts`) ve `guardPage()` (`page-guard.ts`)
+  — korumalı sayfa kapısı
+- `DUMMY_PASSWORD_HASH` + `login.service.ts` içindeki hesap sayımı koruması deseni
+  — **4b-3'ün şifre sıfırlama ucu AYNI deseni kullanmalı**: kimlik numarası
+  kayıtlı olsun olmasın aynı mesaj ve aynı süre (PRD §5.0)
+- `peekRateLimit()` (`src/lib/rate-limit.ts`) — sayacı artırmadan okur;
+  "N başarısız denemeden sonra bot doğrulaması" kuralı bunu kullanıyor
+- `issueOtp()` / `verifyOtp()` (`src/features/otp/`) — `OtpPurpose.password_reset`
+  enum'da **hazır**, yeni OTP mekanizması kurma
+- `checkPasswordPolicy()` · `hashPassword()` · `verifyPassword()` — şifre kuralları
+- `sanitizeRedirectPath()` (`src/lib/redirect.ts`) — açık yönlendirme koruması
+- `TextField` / `FormAlert` / `TurnstileWidget` / `LoginForm` — ekran bileşenleri
+- `AuditAction.password_reset` enum'da hazır
 
-"Giriş, çıkış, veritabanı oturumu (ADR-005), rol, korumalı route"
+## YAPILACAK — roadmap adım 4b-3
 
-Dal: `feature/giris-oturum`
+"Şifre sıfırlama + hesap sayımı koruması"
 
-### Kapsam — onaylanmış sıra
+Dal: `feature/sifre-sifirlama`
 
-1. **Oturum çekirdeği:** oturum aç / oku / kapat servisi. Kriptografik rastgele
-   oturum jetonu, **7 gün ömür, kayan yenileme** (`05-auth-security.md`).
-   Çerez yalnızca oturum kimliğini taşır, içinde kullanıcı bilgisi olmaz
-2. **Giriş ucu ve ekranı:** TCKN + şifre. **Giriş anında KPS sorgulanmaz**
-   (PRD §5.0 — hız ve dayanıklılık). Hız sınırı + **2 başarısız denemeden sonra
-   bot doğrulaması**
-3. **Çıkış:** oturum satırı silinir, çerez düşer. **Şifre değişimi kullanıcının
-   TÜM oturumlarını düşürür** — mekanizma bu adımda kurulur, ekranı 4b-3'te gelir
-4. **Yetki:** `role` / `isStaff` / `identityStatus` **her istekte sunucuda
-   veritabanından** okunur. İstemciden asla gelmez. UI'da buton gizlemek yetki
-   değildir
-5. **Korumalı route + erişim kademeleri** (PRD §5.0 tablosu): ziyaretçi okur,
-   üye kendi kaydını yönetir, **hastane ve spor salonu yalnızca personele**.
-   Erişemeyen kullanıcıya eksiğine göre **farklı mesaj** (kimlik doğrulanmamış →
-   yönlendirme · personel değil → yönlendirme YOK)
-6. **`00-stack.md` güncellemesi** — yukarıdaki "yan iş"
-7. **Testler:** unit (jeton üretimi, **süre dolumu**, kayan yenileme, hesap
-   sayımı koruması) · entegrasyon (giriş/çıkış uçları, IDOR, yetki reddi) ·
-   E2E (giriş → korumalı sayfa → çıkış, ve giriş yapmadan korumalı sayfa)
-8. **Kapılar:** CLAUDE.md §6.3 — lint/typecheck/test/build → güvenlik denetimi →
+### Kapsam (PRD §5.0 "Şifre sıfırlama")
+
+1. **Kod isteme ucu ve ekranı:** kullanıcı kimlik numarasını girer → kayıtlı
+   e-posta adresine 6 haneli kod gider. **Bot doğrulaması ZORUNLU** (kayıttaki
+   gibi, ilk denemeden itibaren — giriş ekranındaki "2 denemeden sonra" kuralı
+   BURAYA GEÇMEZ, PRD burada baştan istiyor)
+2. **Hesap sayımı koruması:** numara kayıtlı olsun olmasın **aynı mesaj, aynı
+   yanıt süresi**. Kayıtlı değilse hiçbir kod üretilmez ama yanıt ayırt edilemez
+3. **Kod doğrulama + yeni şifre:** OTP kuralları kayıttakiyle aynı (5 dk,
+   3 deneme, tek kullanımlık). Yeni şifre `checkPasswordPolicy()`'den geçer
+4. **Şifre değişince `revokeAllSessionsForUser()` çağrılır** — kullanıcının TÜM
+   oturumları düşer (ADR-005'in varlık sebebi). Mekanizma hazır, çağrılması yeter
+5. **Denetim kaydı:** `AuditAction.password_reset`, kimlik numarası YAZILMADAN
+6. **Testler:** unit (süre dolumu, deneme hakkı) · entegrasyon (kayıtlı ve
+   kayıtsız numara AYNI yanıt, hız sınırı, oturumların düşmesi) · E2E
+   (sıfırla → yeni şifreyle giriş → eski oturumun düştüğü)
+7. **Kapılar:** CLAUDE.md §6.3 — lint/typecheck/test/build → güvenlik denetimi →
    **tarayıcıda fiilen tıklayarak** doğrulama (dark mode + 375px dahil) →
    commit önerisi raporu → onay → PR
-9. **Oturum devri:** `roadmap.md`, `CHANGELOG.md`, `altyapi-durumu.md` güncellenir,
-   bu dosya 4b-3 için **yeniden yazılır**
+8. **Oturum devri:** `roadmap.md`, `CHANGELOG.md`, `altyapi-durumu.md` güncellenir,
+   bu dosya 4c için **yeniden yazılır**
 
 ### Bu adımda özellikle dikkat
 
-- **Hesap sayımı koruması:** "böyle bir kullanıcı yok" ile "şifre yanlış"
-  AYNI mesajı ve mümkünse **aynı süreyi** vermeli (kullanıcı yoksa da sahte bir
-  argon2 doğrulaması çalıştırılır, yoksa yanıt süresi hesabın varlığını ele verir).
-  Kayıt akışındaki 409 bilinçli bir istisnaydı, **buraya kopyalanmaz**
-- Giriş denemesi hız sınırına tabidir (`05-auth-security.md`: 5 deneme / 15 dk)
-- **Süreye bağlı her kural için süre dolumu testi zorunlu**
-- Her giriş ve çıkış **denetim kaydına** yazılır — **kimlik numarası YAZILMADAN**
-- Yeni bağımlılık **kurulmuyor**, yeni ortam değişkeni **gerekmiyor**.
-  `AUTH_SECRET` / `GOOGLE_*` hâlâ 4c'nin işi
-- Şema muhtemelen değişmiyor (`Session` hazır). Migration gerekirse **önce
-  kullanıcıya söyle**
-- Bu adımda EKRAN VAR: CLAUDE.md §6.3 1c tarayıcı kapısı geçerli
+- Local ve preview'da e-posta GÖNDERİLMİYOR, kod ekranda gösteriliyor. Metin
+  ortama göre değişmeli (`messages.ts` → `*Simulated`) — "kod gönderdik" demek
+  o ortamlarda yalan olur
+- Production'da e-posta Resend ile gerçekten gidiyor ama **doğrulanmış alan adı
+  yok**: yalnızca hesabın kayıtlı adresine ulaşıyor (teknik borç #25)
+- Şema muhtemelen değişmiyor. Migration gerekirse **önce kullanıcıya söyle**
+- Yeni bağımlılık ve yeni ortam değişkeni **gerekmiyor**
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
 
@@ -153,29 +109,40 @@ Dal: `feature/giris-oturum`
 - Sunucu tarafı test dosyalarına `/** @vitest-environment node */` docblock'u
   ŞART; yoksa `serverEnv` hata veriyor
 - **E2E kendi korumalarımıza takılır ve bu doğrudur.** Sınırı kapatma, testi
-  kurala uydur: her teste ayrı kimlik numarası (paylaşılırsa taslaklar
-  birbirini siler), ayrı `x-forwarded-for` IP (5 deneme/15 dk), ayrı
-  e-posta/telefon (3 kod/15 dk). IP bloğu **her koşuda rastgele** olmalı, yoksa
-  ikinci koşu birincinin sayacını devralır
+  kurala uydur: her teste ayrı kimlik numarası, ayrı `x-forwarded-for` IP,
+  ayrı e-posta/telefon. IP bloğu **her koşuda rastgele** olmalı
+- **Prisma taklidi GERÇEK davranışı taşımalı.** 4b-2'de bir taklit yalnızca
+  `where.id` ve `where.userId`'yi biliyordu; yeni bir silme yolu eklenince
+  sessizce "hiçbir şey silinmedi" dedi ve testi yanlış yeşil gösterdi
+- **Playwright `getByRole("alert")` KULLANMA.** Next.js her sayfaya ekran
+  okuyucular için boş bir `role="alert"` duyurucusu koyuyor; rol bazlı arama
+  önce onu buluyor ve hata hiç görünmese bile test geçiyor. Mesajı METİNLE ara
+- **E2E `afterAll` temizliği eş zamanlı projeyi vurabilir.** "Bu hesabın tüm
+  oturumlarını sil" denince masaüstü projesi bitince mobil projedeki açık
+  oturumlar da silindi. Bir saatlik pay filtresi (`createdAt < now - 1h`) kondu
+- **Playwright'ın `webServer.env`'i derlemeye gömülüyor.** E2E, Turnstile
+  anahtarlarını boş bırakıyor; o koşudan sonra `.next` klasöründe anahtarsız bir
+  derleme kalıyor ve elle tarayıcı testinde bot kutusu HİÇ görünmüyor. Elle test
+  öncesi `rm -rf .next && npm run build`
+- **Cold start:** `npm run build && npm run start` biter bitmez 5 işçi aynı anda
+  giriş yapınca ilk isteklerin route modülü yüklemesi 10 sn'yi bulabiliyor.
+  Giriş sonrası yönlendirme beklerken 15 sn pay verildi
 - `AbortSignal.timeout` sahte zamanlayıcıyla ele geçirilemiyor
-- Playwright `webServer.env` Next'in `.env` değerlerini **ezer**
 
 **Arayüz**
 - shadcn `Alert` varsayılan `role="alert"` (assertive) veriyor; sayfada duran
   bilgi kutuları `role="status"` olmalı
-- **Metin ortama göre değişmeli.** "Kod gönderdik" demek local/preview'da
-  yalandır — hiçbir e-posta gönderilmiyor. Kullanıcı bu yüzden bir kez
-  gelmeyecek postayı bekledi. Gönderim ima eden her metnin test ortamı
-  karşılığı var (`messages.ts` → `*Simulated`)
+- **Dark mode SINIF tabanlı** (`.dark`), `prefers-color-scheme` DEĞİL. Tarayıcıda
+  denerken `document.documentElement.classList.add("dark")` çalıştır; DevTools'un
+  renk şeması taklidi bu projede hiçbir şey değiştirmez
 
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
   `--org-id org-still-water-86075112` şart
-- `psql` **kurulu değil** → uzak sorgu için `npx tsx` + Prisma betiği
+- `psql` **kurulu değil** → uzak sorgu için `npx tsx` + Prisma betiği.
+  Betik proje kökünde olmalı; `/tmp` altından çalıştırılırsa `dotenv` bulunamıyor
 - Vercel ortam değişkeni değişikliği kendiliğinden yayına girmez →
   `npx vercel redeploy <url>`
-- `fish` kabuğu `VAR=deger komut` sözdizimini desteklemiyor → scratchpad'e
-  `.sh` yazıp `bash dosya.sh`
 - ESLint `console.log`'u yasaklıyor; `console.error` / `console.warn` serbest
 - Prettier `.md` dosyalarını biçimlendirmiyor
 
