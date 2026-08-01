@@ -4,6 +4,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — yeni proje başlangıç kiti
+- `docs/standards/16-yeni-proje-kurulumu.md` — **her projede aynı**: yeni bir
+  projeye başlarken hangi dosyanın nereye kopyalanacağı, hangisinin projeye göre
+  değişip hangisinin değişmediği. Amaç: iskeleti kurmak kullanıcının işi olmasın;
+  kullanıcı yalnızca analiz dokümanını ve (varsa) farklı stack'i versin
+- `docs/standards/sablonlar/` — dokuz doldurulabilir şablon (`PRD`, `roadmap`,
+  `altyapi-durumu`, `CHANGELOG`, `sonraki-adim-prompt`, `data-model`,
+  `integrations`, `fake-data-guide`, `ADR-000`) + klasör indeksi `OKUBENI.md`.
+  Her şablonun başında **neden var olduğu** ve **ne zaman güncellendiği** yazıyor;
+  doldurulunca o açıklama bloğu siliniyor
+- `16-yeni-proje-kurulumu.md` içine **"proje hafızası — dört dosya"** tablosu:
+  "hangi teknolojiyi kullandık" (`00-stack.md`), "hangi hesabı açtık"
+  (`altyapi-durumu.md`), "neden böyle yaptık" (ADR'ler), "nerede kaldık"
+  (`roadmap.md`). Gerekçe: oturum hafızasızdır, bu dört soru dosyaya yazılmazsa
+  bir daha cevaplanamaz
+
+### Değiştirildi — adım 4b-2 kararı
+- **Auth.js `Credentials` sağlayıcısının veritabanı oturumunu desteklemediği
+  kaynak koddan doğrulandı** (`@auth/core` → `assert.ts`: *"Signing in with
+  credentials only supported if JWT strategy is enabled"*). Bu yüzden 4b-2'de
+  şifreyle giriş **elle yazılmış veritabanı oturumuyla** yapılacak; ADR-005
+  (oturum veritabanında) yürürlükte kalıyor ve `next-auth` kurulmuyor.
+  Karar gerekçesi ve sonuçları `sonraki-adim-prompt.md` içinde
+
 ### Eklendi — oturum devri altyapısı
 - `docs/standards/15-oturum-devri.md` — **her projede aynı**: bir bilginin
   hangi dosyaya yazılacağını söyleyen yönlendirme tablosu ve oturum sonu
