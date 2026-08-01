@@ -136,6 +136,17 @@ Dal: `feature/sifre-sifirlama`
   denerken `document.documentElement.classList.add("dark")` çalıştır; DevTools'un
   renk şeması taklidi bu projede hiçbir şey değiştirmez
 
+**Yayın**
+- **Neon uykudayken production deploy PATLIYOR** — `prisma migrate deploy`
+  `P1001` verip ~5 saniyede vazgeçiyor. Canlı site eski sürümle ayakta kalır
+  (kesinti yok), ama yeni sürüm çıkmaz. Merge sonrası `/api/health` içindeki
+  `commit` alanının değiştiğini **mutlaka doğrula**; değişmediyse veritabanını
+  uyandırıp (`curl .../api/health` → `db: ok`) `npx vercel redeploy <url>`
+- **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR** (Managed mod, gerçek
+  anahtar): tarayıcı aracıyla tıklanamıyor. Canlıdaki tam giriş akışını
+  kullanıcının elle doğrulaması gerekiyor. Preview ve local'de aynı kod,
+  orada otomatik doğrulanabiliyor
+
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
   `--org-id org-still-water-86075112` şart
