@@ -34,7 +34,15 @@ export function LogoutButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleClick} disabled={isSubmitting}>
+    // `min-h-11`: dokunma hedefi en az 44x44px (07-ui-design-system.md).
+    // Üst menüde durduğu için mobilde parmakla isabet edilebilmeli.
+    <Button
+      variant="outline"
+      size="lg"
+      className="min-h-11"
+      onClick={handleClick}
+      disabled={isSubmitting}
+    >
       {isSubmitting ? messages.auth.logout.submitting : messages.auth.logout.submit}
     </Button>
   );

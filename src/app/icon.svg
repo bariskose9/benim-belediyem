@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!--
+    Sekme simgesi (favicon) — Logo.tsx'teki işaretin birebir aynısı.
+    Renkler burada SABİT: favicon tarayıcı arayüzünde çizilir, sayfanın CSS
+    değişkenlerine erişemez. #1e4b8d, `--primary` lacivertinin (oklch 0.42 0.12 258)
+    sRGB karşılığıdır — token değişirse bu dosya da elle güncellenmeli.
+  -->
+  <rect width="32" height="32" rx="8" fill="#1e4b8d" />
+  <g fill="#ffffff">
+    <path d="M16 4.6 26.4 9.4H5.6z" />
+    <rect x="5.2" y="10.4" width="21.6" height="2.2" rx="1.1" />
+    <path d="M7 23.4v-6.6a2.5 2.5 0 0 1 5 0v6.6z" />
+    <path d="M13.5 23.4v-6.6a2.5 2.5 0 0 1 5 0v6.6z" />
+    <path d="M20 23.4v-6.6a2.5 2.5 0 0 1 5 0v6.6z" />
+    <rect x="5.2" y="24.4" width="21.6" height="2.4" rx="1.2" />
+  </g>
+</svg>

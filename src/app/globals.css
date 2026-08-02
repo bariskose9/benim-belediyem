@@ -10,6 +10,14 @@
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
+  /* Marka vurgusu (turkuaz) — `--primary` lacivert, bu ikinci kademe.
+     Ayrı isim taşıyor çünkü shadcn'in `--accent` token'ı bileşenlerde
+     "üzerine gelince oluşan zemin" anlamında kullanılıyor; oraya marka
+     rengi koymak her hover'ı turkuaza çevirirdi. */
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-foreground: var(--brand-accent-foreground);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-surface-foreground: var(--brand-surface-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -52,6 +60,20 @@
   --radius-4xl: 48px;
 }
 
+/*
+  MARKA PALETİ — lacivert (`--primary`) + turkuaz vurgu (`--brand-accent`).
+  Kamu kurumu arayüzlerinin sade ve güven veren dili hedeflendi; hiçbir gerçek
+  kurumun rengi, arması veya logosu kopyalanmadı.
+
+  DEĞERLER TAHMİNLE SEÇİLMEDİ: her metin/zemin çifti oklch → sRGB'ye çevrilip
+  WCAG kontrast oranı hesaplandı (07-ui-design-system.md → "Metin kontrastı
+  >= 4.5:1"). En düşük çift 4.67:1, en düşük odak halkası 4.89:1 (gereken 3:1).
+  Bir tonu değiştirirken bu hesabı tekrarlamadan commit etme.
+
+  Tipografi ölçeği ALTI BASAMAK (07-ui-design-system.md): text-xs 12 · text-sm 14 ·
+  text-base 16 · text-lg 18 · text-xl 20 · text-3xl 30. Gövde metni text-base'dir;
+  text-sm yalnızca ikincil bilgi (etiket, yardım metni, üst menü) içindir.
+*/
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -59,69 +81,91 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  /* Kurumsal lacivert — düğme, bağlantı, logo karosu */
+  --primary: oklch(0.42 0.12 258);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.97 0.005 258);
+  --secondary-foreground: oklch(0.28 0.04 258);
+  --muted: oklch(0.97 0.005 258);
+  --muted-foreground: oklch(0.5 0.02 258);
+  --accent: oklch(0.97 0.005 258);
+  --accent-foreground: oklch(0.28 0.04 258);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: oklch(0.92 0.006 258);
+  --input: oklch(0.92 0.006 258);
+  /* Odak halkası: gri değil lacivert — klavye kullanıcısı nerede olduğunu görmeli */
+  --ring: oklch(0.55 0.12 258);
+  /* Turkuaz vurgu ve onun yumuşak zemini (rozet, etiket, ikon kutusu) */
+  --brand-accent: oklch(0.52 0.07 195);
+  --brand-accent-foreground: oklch(0.985 0 0);
+  --brand-surface: oklch(0.96 0.025 195);
+  --brand-surface-foreground: oklch(0.38 0.06 195);
+  --chart-1: oklch(0.42 0.12 258);
+  --chart-2: oklch(0.52 0.07 195);
+  --chart-3: oklch(0.62 0.09 258);
+  --chart-4: oklch(0.72 0.06 195);
+  --chart-5: oklch(0.5 0.02 258);
   --radius: 12px;
   /* Tarayıcının kendi denetimleri (kaydırma çubuğu, form alanları) da temaya uysun */
   color-scheme: light;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.42 0.12 258);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.97 0.005 258);
+  --sidebar-accent-foreground: oklch(0.28 0.04 258);
+  --sidebar-border: oklch(0.92 0.006 258);
+  --sidebar-ring: oklch(0.55 0.12 258);
+
+  /*
+    Sayfa çerçevesinin ölçüleri tek yerde (07-ui-design-system.md → "sayısal
+    değerler koda dağıtılmaz"). Üst menü, alt bilgi ve ana sayfa aynı hizada
+    dursun diye üçü de `page-shell` yardımcı sınıfını kullanıyor.
+  */
+  --page-max-width: 64rem;
+  --page-padding-inline: 1rem;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  /* Saf siyah değil: hafif lacivert kırıklı koyu zemin gözü daha az yorar
+     ve marka lacivertiyle aynı aileden görünür. */
+  --background: oklch(0.16 0.012 258);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.21 0.012 258);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.21 0.012 258);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  /* Koyu zeminde lacivert AÇILIR: aynı ton burada okunmazdı (kontrast 1.6:1) */
+  --primary: oklch(0.72 0.12 258);
+  --primary-foreground: oklch(0.2 0.03 258);
+  --secondary: oklch(0.28 0.012 258);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --muted: oklch(0.28 0.012 258);
+  --muted-foreground: oklch(0.72 0.02 258);
+  --accent: oklch(0.28 0.012 258);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.62 0.12 258);
+  --brand-accent: oklch(0.78 0.1 195);
+  --brand-accent-foreground: oklch(0.2 0.03 258);
+  --brand-surface: oklch(0.32 0.05 195);
+  --brand-surface-foreground: oklch(0.9 0.04 195);
   color-scheme: dark;
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
+  --chart-1: oklch(0.72 0.12 258);
+  --chart-2: oklch(0.78 0.1 195);
+  --chart-3: oklch(0.62 0.09 258);
+  --chart-4: oklch(0.62 0.06 195);
+  --chart-5: oklch(0.72 0.02 258);
+  --sidebar: oklch(0.21 0.012 258);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-primary: oklch(0.72 0.12 258);
+  --sidebar-primary-foreground: oklch(0.2 0.03 258);
+  --sidebar-accent: oklch(0.28 0.012 258);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.62 0.12 258);
 }
 
 @layer base {
@@ -134,4 +178,27 @@
   html {
     @apply font-sans;
   }
+  /*
+    Bağlantılarda GÖRÜNÜR odak halkası (WCAG 2.1 AA · 07-ui-design-system.md).
+    Düğmelerin kendi `focus-visible:ring` stili var; burası yalnızca `<a>` için.
+    `:focus-visible` seçildi ki fareyle tıklayanda halka çıkmasın, klavyeyle
+    gezende çıksın.
+  */
+  a:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+/*
+  Üst menü, ana içerik ve alt bilgi aynı genişlikte ve aynı hizada dursun diye
+  tek yardımcı sınıf. Ölçüler `--page-*` token'larından gelir; bileşenlere
+  `max-w-[64rem]` gibi sayısal değerler dağıtılmaz.
+*/
+@utility page-shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: var(--page-max-width);
+  padding-inline: var(--page-padding-inline);
 }

@@ -1,31 +1,30 @@
-# Sonraki oturum için hazır prompt — adım 5
+# Sonraki oturum için hazır prompt — adım 6
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 5 bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 6 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **5**'e geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **6**'ya geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
-- `docs/standards/07-ui-design-system.md` — bu adımın ana kural kaynağı
-- `docs/project/roadmap.md` — teknik borç listesi (34 madde)
+- `docs/project/PRD.md` §5.1 — bu adımın iş kuralları
+- `docs/project/data-model.md` — randevu tabloları **zaten var ve tohumlu**
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
 
 ## DURUM
 
-Roadmap adım **0 → 4c bitti** (PR #1-#20). PR #20 **2026-08-02'de merge edildi**;
-Google ile giriş canlıda.
+Roadmap adım **0 → 5 bitti**. Google ile giriş ve görsel iskelet canlıda.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - **Kayıt** çalışıyor: TCKN → KPS → 18 yaş → iki bağımsız OTP
-- **Giriş, çıkış, oturum, erişim kademeleri** çalışıyor
-- **Şifre sıfırlama** çalışıyor — şifre değişince tüm oturumlar düşer
-- **Google ile giriş** çalışıyor: PKCE + `state` + `nonce`, hesap birleştirme
-  kuralı, `dogrulanmamis` kademesinde açılan hesap
-- Testler: **401** unit/entegrasyon · **36** veritabanı · **92** E2E
+- **Giriş, çıkış, oturum, erişim kademeleri, şifre sıfırlama** çalışıyor
+- **Google ile giriş** çalışıyor (PKCE + `state` + `nonce`, hesap birleştirme kuralı)
+- **Görsel iskelet** çalışıyor: marka paleti (lacivert + turkuaz), kendi
+  kelime-logomuz, açık/koyu tema düğmesi, mobil açılır menü, alt bilgi,
+  ana sayfa hizmet ızgarası
 - Preview ve production veritabanları dolu: 200 KPS vatandaşı, 100 personel,
   90 üye (10'unun şifresi `Test1234!`). Gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında ilk iş:** o dalın **dal adresini**
@@ -36,124 +35,114 @@ Google ile giriş canlıda.
   `Error: 110200` ve `redirect_uri_mismatch` alırsın ve kodda hata ararsın.
   Kalıcı çözüm kendi alan adı → teknik borç #31
 
-## YAPILACAK — roadmap adım 5
+## YAPILACAK — roadmap adım 6
 
-"Layout: navbar, logo, dark mode, responsive iskelet, tasarım token'ları"
-→ çıktı: **görsel iskelet**
+"Hastane randevu modülü (personele özel)" → PRD §5.1
 
-Dal: `feature/layout` (öneri)
+Dal: `feature/hastane-randevu` (öneri)
 
-### Bu adımın doğası öncekilerden FARKLI
+### Kapsam (PRD §5.1'den birebir)
 
-4a-4c güvenlik ve iş mantığıydı; bu adım **görsel**. Bunun iki sonucu var:
-
-1. **"Testler yeşil" yetmez.** Bu adımın kanıtı ekran görüntüsüdür. Tarayıcıda
-   fiilen bak: masaüstü + 375px, açık + karanlık tema. Dördünü de göster
-2. **Kullanıcı kodu okuyamıyor ama ekranı görebiliyor** — bu adımda ona
-   gösterilecek şey var. Erken ve sık göster, sonunda topluca değil
-
-### Kapsam
-
-1. **Tasarım token'ları**: renk, boşluk, tipografi, yuvarlaklık, gölge.
-   Sayısal değerler bileşenlere dağıtılmaz (`07-ui-design-system.md`)
-2. **Dark mode SINIF tabanlı** (`.dark`) — zaten böyle kurulu, `prefers-color-scheme`
-   DEĞİL. Token seviyesinde desteklenmeli, bileşen bileşen `dark:` yamalarıyla değil
-3. **Navbar**: giriş yapmış / yapmamış iki durum. Oturum bilgisi zaten var
-   (`getCurrentSession()`), yeniden yazma
-4. **Logo**: henüz yok. Kullanıcıya sor — hazır bir görsel mi verecek, yoksa
-   metin tabanlı geçici bir işaret mi koyalım
-5. **Responsive iskelet**: mobile-first, 375px'te düzen bozulmayacak
-6. **Erişilebilirlik**: klavye ile gezinilebilirlik, odak halkası, kontrast
-   (WCAG 2.1 AA), `role="status"` / `role="alert"` ayrımı
-7. **Kapılar**: CLAUDE.md §6.3 — lint/typecheck/test/build → güvenlik denetimi
-   → **tarayıcıda fiilen tıklayarak** doğrulama → commit önerisi raporu → onay → PR
-8. **Oturum devri**: `roadmap.md`, `CHANGELOG.md`, `altyapi-durumu.md`
-   güncellenir, bu dosya adım 6 için **yeniden yazılır**
+1. Branş listesi → o branştaki doktorlar → doktorun uygun gün ve saatleri
+2. Üye randevu **oluşturur, görüntüler, iptal eder**
+3. **Kurallar — hepsi SUNUCUDA doğrulanır:**
+   - dolu saat seçilemez
+   - geçmiş tarihe randevu alınamaz
+   - aynı branşta aynı gün ikinci randevu alınamaz
+   - iptal en geç randevudan **2 saat** önce
+4. **Kabul kriteri:** iki kullanıcı aynı saati aynı anda seçemez → **409**.
+   Bu bir yarış durumu testi demek; tek başına uygulama mantığı yetmez,
+   veritabanı seviyesinde benzersizlik kısıtı gerekir
+5. **Erişim:** yalnızca personel (`guardPage("staff")` zaten hazır ve çalışıyor)
+6. **IDOR:** her randevu okuma/iptalinde "bu kayıt bu kullanıcıya mı ait"
 
 ### Bu adımda özellikle dikkat
 
-- **Mevcut ekranları bozma.** `/giris`, `/kayit`, `/sifremi-unuttum`,
-  `/hesabim`, `/hastane`, `/spor-salonu` çalışıyor ve E2E testleri var.
-  Layout değişikliği bu testleri kırarsa **testi değil layout'u düzelt**
-- Şema değişmiyor, migration yok
+- **Şema muhtemelen DEĞİŞMİYOR** — randevu tabloları adım 3'te kuruldu ve
+  tohumlandı. Önce `data-model.md`'yi oku; migration yazmadan önce var olanı gör
+- **Dolu slotların çoğunda randevu kaydı YOK** (teknik borç #17, bilinçli).
+  "Boş görünen slot" ile "gerçekten boş slot" aynı şey olmayabilir
+- Mevcut ekranları bozma; `/hastane` bugün erişim kapısını gösteren bir iskelet
 - Yeni bağımlılık eklemeden önce sor (CLAUDE.md §7)
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
-- `TextField` / `FormAlert` / `TurnstileWidget` / `Button` — mevcut bileşenler
-- `getCurrentSession()` (`session-context.ts`) — sunucu tarafında oturum okuma
-- `evaluateAccess()` (`access-control.ts`) · `guardPage()` (`page-guard.ts`)
-- `EnvBanner` — preview/local ortam etiketi, layout'a yerleşecek
+- **Tasarım token'ları** (`globals.css`): renk, boşluk, yuvarlaklık, tipografi.
+  Sayısal renk/ölçü değeri bileşene yazma. Marka vurgusu için `bg-brand-surface`
+  / `text-brand-surface-foreground`, ana renk için `primary`
+- **`page-shell`** yardımcı sınıfı — üst menü, içerik ve alt bilgi aynı hizada
+- `Logo` · `ThemeToggle` · `HeaderShell` · `SiteFooter` — çerçeve hazır
+- `src/config/navigation.ts` — hizmet kartları ve menü **tek listeden** geliyor.
+  Hastane sayfası artık hazırsa kartın rozetini "Yakında"dan çıkarmak için
+  buraya bakılır
+- `TextField` / `FormAlert` / `TurnstileWidget` / `Button` / `Card`
+- `getCurrentSession()` — **istek başına tek okuma** (React `cache`), istediğin
+  yerden çağır, ikinci sorgu açmaz
+- `evaluateAccess()` · `guardPage()` — erişim kapıları
 - `messages.ts` — kullanıcıya görünen tüm Türkçe metinler burada, dağıtma
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
 
 **Arayüz**
-- **Dark mode SINIF tabanlı** (`.dark`). Tarayıcıda denerken
-  `document.documentElement.classList.add("dark")` çalıştır; DevTools'un renk
-  şeması taklidi bu projede hiçbir şey değiştirmez
-- shadcn `Alert` varsayılan `role="alert"` (assertive) veriyor; sayfada duran
-  bilgi kutuları `role="status"` olmalı
-- **Playwright `getByRole("alert")` KULLANMA.** Next.js her sayfaya boş bir
-  `role="alert"` duyurucusu koyuyor; rol bazlı arama önce onu buluyor ve hata
-  hiç görünmese bile test geçiyor. Mesajı METİNLE ara
-
-**Ortam adresleri (adım 4c'de bir tur kaybettirdi)**
-- Vercel iki preview adresi üretir: **dal adresi** (`...-git-<dal>-...`, dal
-  boyunca sabit) ve **dağıtım adresi** (`...-<rastgele>-...`, her commit'te
-  değişir). Panellere yazılacak olan **dal adresi**. Uygulama `env.ts` →
-  `resolveVercelAppUrl` ile artık dal adresini tercih ediyor
-- Dal adresini tahmin etme: `npx vercel inspect <dagitim-url> --scope barisss`
-  çıktısındaki **Aliases** satırından oku
+- **Dark mode SINIF tabanlı** (`.dark`). Tema tercihi `localStorage`'da
+  (`benim-belediyem:tema`) ve sayfa boyanmadan önce `<head>`'deki satır içi
+  betikle uygulanıyor. DevTools'un renk şeması taklidi bu projede hiçbir şey
+  değiştirmez — düğmeyi kullan veya `document.documentElement.classList.add("dark")`
+- shadcn `Alert` varsayılan `role="alert"` (assertive); sayfada duran bilgi
+  kutuları `role="status"` olmalı
+- **Menü bağlantısı ile kart bağlantısı aynı sayfaya gidiyor.** Testte
+  "Hastane" diye aradığında ikisini birden bulur. Menü içinde ara:
+  `page.getByRole("navigation", { name: "Ana menü" }).getByRole("link", ...)`
+- **Aynı bağlantıyı masaüstü ve mobil için iki kez render etme.** Tek liste var,
+  CSS ile açılıp kapanıyor; ikinci kopya hem ekran okuyucuyu hem testi bozar
 
 **Test**
-- Sunucu tarafı test dosyalarına `/** @vitest-environment node */` docblock'u
-  ŞART; yoksa `serverEnv` hata veriyor
-- **E2E kendi korumalarımıza takılır ve bu doğrudur.** Sınırı kapatma, testi
-  kurala uydur: her teste ayrı kimlik numarası, ayrı `x-forwarded-for` IP,
-  ayrı e-posta/telefon. IP bloğu **her koşuda rastgele** olmalı
-- **E2E'yi 15 dakika içinde üst üste koşturma.** "Aynı hedefe 3 kod / 15 dakika"
-  sınırı sayaçları veritabanında; üçüncü koşuda `register.spec.ts` kırmızıya
-  döner ve bu bir regresyon DEĞİLDİR. Sayaçlar: `rate_limit_counters` tablosu,
-  `key LIKE 'otp_send%'`
-- **Playwright'ın `webServer.env`'i derlemeye gömülüyor.** E2E, Turnstile
-  anahtarlarını boş bırakıyor ve Google için **sahte** kimlik veriyor; o koşudan
-  sonra `.next` klasöründe o yapılandırmayla bir derleme kalıyor. Elle tarayıcı
-  testinden önce `rm -rf .next && npm run build`
-- **Playwright açık kalan sunucuyu yeniden kullanıyor** (`reuseExistingServer`).
-  Şüphelenince `lsof -ti:3000` ve süreci kapat
-- **Prisma taklidi GERÇEK davranışı taşımalı** — tanımadığı operatörde hata
-  fırlatmalı, sessizce yok saymamalı; taklitteki `createdAt` şu ana yakın olmalı
-- `AbortSignal.timeout` sahte zamanlayıcıyla ele geçirilemiyor
+- Sunucu tarafı test dosyalarına `/** @vitest-environment node */` docblock'u ŞART
+- **jsdom bu projede `localStorage` SAĞLAMIYOR** — global boş bir nesne geliyor,
+  `getItem` bile yok. Tarayıcı depolamasına dokunan testler
+  `tests/helpers/local-storage.ts` içindeki taklidi kullanır
+- **Playwright `getByRole("alert")` KULLANMA.** Next.js her sayfaya boş bir
+  `role="alert"` duyurucusu koyuyor; mesajı METİNLE ara
+- **E2E kendi korumalarımıza takılır ve bu doğrudur.** Her teste ayrı kimlik
+  numarası, ayrı `x-forwarded-for` IP, ayrı e-posta/telefon
+- **E2E'yi 15 dakika içinde üst üste koşturma** — OTP sayaçları veritabanında
+- **Playwright'ın `webServer`'ı 180 saniyede build + start yetiştiremeyebilir.**
+  Ortam değişkeni değişikliği (`webServer.env`) derleme önbelleğini geçersiz
+  kılıyor ve tam derleme gerekiyor. Çözüm: aynı ortam değişkenleriyle elle
+  `npm run build` + `npm run start`, sonra `npx playwright test`
+  (`reuseExistingServer` çalışan sunucuyu kullanır)
+- **Elle tarayıcı testinden önce `rm -rf .next && npm run build`** — E2E koşusu
+  `.next` içinde Turnstile'ı boş bırakan bir derleme bırakıyor
+- **Testler zaman aşımına düşüyorsa önce `uptime` çalıştır.** 2026-08-02'de
+  makine yükü 130'a çıkmıştı (arka planda %420 CPU yiyen bir masaüstü
+  uygulaması) ve argon2 pahalı olduğu için testler kırmızıya döndü; tek tek
+  koşturulduklarında hepsi geçiyordu. Yükü kontrol etmeden testi suçlama
+- **Prisma taklidi GERÇEK davranışı taşımalı** — tanımadığı operatörde hata fırlatmalı
 
 **Prisma 7**
-- `datasource` bloğunda `url` / `directUrl` **yok**; bağlantı driver adapter'dan
-  (`@prisma/adapter-pg`, ADR-008)
-- Migration adresi `prisma.config.ts` içinde; `env()` yardımcısı **kullanılmaz**
-- `migrate dev` üretilen istemciyi her zaman tazelemiyor → `npx prisma generate`
-- `migrate dev` `migration_lock.toml`'daki Türkçe yorumu eziyor → commit öncesi
-  `git checkout` ile geri al
+- `datasource` bloğunda `url` / `directUrl` **yok** (ADR-008)
+- Migration adresi `prisma.config.ts` içinde; `env()` yardımcısı kullanılmaz
+- `migrate dev` üretilen istemciyi tazelemiyor → `npx prisma generate`
+- `migrate dev` `migration_lock.toml`'daki Türkçe yorumu eziyor → `git checkout`
 
 **Yayın**
-- **Neon uykudayken production deploy PATLIYOR** — `prisma migrate deploy`
-  `P1001` verip ~5 saniyede vazgeçiyor. Canlı site eski sürümle ayakta kalır
-  (kesinti yok), ama yeni sürüm çıkmaz. Merge sonrası `/api/health` içindeki
-  `commit` alanının değiştiğini **mutlaka doğrula**; değişmediyse veritabanını
-  uyandırıp (`curl .../api/health` → `db: ok`) `npx vercel redeploy <url>`
-- **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR** (Managed mod, gerçek
-  anahtar): tarayıcı aracıyla tıklanamıyor. Canlıdaki tam akışı kullanıcının
-  elle doğrulaması gerekiyor
-- **Google uygulaması "Testing" modunda** — yalnızca Google Console → Audience →
-  Test users listesindeki e-postalar giriş yapabilir (teknik borç #34)
+- **Neon uykudayken production deploy PATLIYOR** (`P1001`). Merge sonrası
+  `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**;
+  değişmediyse veritabanını uyandırıp `npx vercel redeploy <url>`
+- **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR** — canlıdaki tam akışı
+  kullanıcının elle doğrulaması gerekiyor
+- **Google uygulaması "Testing" modunda** — yalnızca test kullanıcıları girebilir
+  (teknik borç #34)
 
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
   `--org-id org-still-water-86075112` şart
-- `psql` **kurulu değil** → uzak sorgu için `npx tsx` + Prisma betiği.
-  Betik proje kökünde olmalı; `/tmp` altından çalıştırılırsa `dotenv` bulunamıyor
-- Vercel ortam değişkeni değişikliği kendiliğinden yayına girmez →
-  `npx vercel redeploy <url>`
+- `psql` **kurulu değil** → uzak sorgu için `npx tsx` + Prisma betiği,
+  betik proje kökünde olmalı
 - ESLint `console.log`'u yasaklıyor; `console.error` / `console.warn` serbest
+- **ESLint efekt içinde `setState` çağırmayı yasaklıyor.** Adres değişince durum
+  sıfırlanacaksa React'in "render sırasında ayarla" desenini kullan
+  (`HeaderShell.tsx` içinde örneği var)
 - Prettier `.md` dosyalarını biçimlendirmiyor
 
 ## KOMUTLAR
