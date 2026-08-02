@@ -47,6 +47,31 @@ export default defineConfig({
        */
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: "",
       TURNSTILE_SECRET_KEY: "",
+
+      /**
+       * GOOGLE İSTEMCİSİ SAHTE — ve her ortamda sahte.
+       *
+       * Bu değerler tanımlı değilse "Google ile devam et" düğmesi bilerek hiç
+       * çizilmiyor (`isGoogleLoginConfigured`), dolayısıyla E2E CI'da düğmeyi
+       * bulamayıp kırmızıya dönüyordu. Gerçek anahtarı CI'ya taşımak yerine
+       * sahtesi veriliyor: testler zaten Google'ın giriş ekranına hiç
+       * girmiyor, yalnızca BİZİM ürettiğimiz adresin PKCE + `state` + `nonce`
+       * taşıdığını doğruluyor. Sahte kimlik bunun için yeterli.
+       *
+       * Değerler burada sabit: `.env`'deki gerçek anahtarları da eziyorlar.
+       * Böylece test sonucu geliştiricinin makinesindeki yapılandırmaya göre
+       * değişmiyor.
+       *
+       * BEDELİ AÇIKÇA KABUL EDİLİYOR: `openid-client` akışı başlatırken
+       * Google'ın `.well-known` belgesini ağdan okuyor (kimlik bilgisi
+       * göndermeden, salt okuma, süreç başına bir kez önbelleklenerek).
+       * Yani bu testler Google'ın erişilebilir olmasına bağlı. Alternatifi
+       * üretim koduna yalnızca test için bir "issuer adresini değiştir" kapısı
+       * açmaktı; dışarıdan yönlendirilebilen bir kimlik sağlayıcı adresi,
+       * ağ bağımlılığından daha büyük bir risk.
+       */
+      GOOGLE_CLIENT_ID: "e2e-test-client-id.apps.googleusercontent.com",
+      GOOGLE_CLIENT_SECRET: "e2e-test-client-secret",
     },
   },
 });
