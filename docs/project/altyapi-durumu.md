@@ -29,8 +29,16 @@
 - Widget adı: **`benim-belediyem`**
 - Mod: **Managed** (çoğu kullanıcı bulmaca görmez, onay kutusu yeter)
 - Pre-clearance: yok
-- **2 hostname tanımlı** — `benim-belediyem.vercel.app` çalıştığı fiilen
-  doğrulandı (canlıda gerçek onay kutusu çıkıyor)
+- **3 hostname tanımlı** — production (`benim-belediyem.vercel.app`) çalıştığı
+  fiilen doğrulandı; 2026-08-02'de `feature/sifre-sifirlama` dalının preview
+  adresi eklendi
+- ⚠️ **Her yeni dalın preview adresi listeye ELLE eklenir.** Eksikse widget hiç
+  çizilmez ve tarayıcı konsolunda `[Cloudflare Turnstile] Error: 110200`
+  (*domain not authorized*) görünür — **kodda hata arama, panele bak.**
+  `*.vercel.app` joker olarak kabul edilmiyor: `vercel.app` bize ait değil.
+  Adresi yazdıktan sonra panelde **Update/Save'e basmak şart** — 2026-08-02'de
+  bu atlandığı için hata ikinci kez araştırıldı, ~1 saat gitti.
+  Kalıcı çözüm kendi alan adı → teknik borç #31
 - Anahtar çifti üretildi: site key (tarayıcıya gider, gizli değil) + secret key
 
 ### Resend

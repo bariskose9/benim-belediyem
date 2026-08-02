@@ -15,7 +15,8 @@ benim-belediyem projesinde roadmap adım **4c**'ye geçiyoruz. Başlamadan önce
 
 ## DURUM
 
-Roadmap adım **0 → 4b-3 bitti** (PR #1-#16).
+Roadmap adım **0 → 4b-3 bitti** (PR #1-#17). PR #17 **2026-08-02'de merge
+edildi ve canlıya çıktı** (`b032bbc`); `/api/health` → `app: ok, db: ok`.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - **Kayıt canlıda çalışıyor**: TCKN → KPS → 18 yaş → iki bağımsız OTP
@@ -26,6 +27,11 @@ Roadmap adım **0 → 4b-3 bitti** (PR #1-#16).
   90 üye (10'unun şifresi `Test1234!`). Gerçek kullanıcı 0
 - Testler: **363** unit/entegrasyon · **36** veritabanı · **74** E2E
 - Cloudflare Turnstile ve Resend **kurulu ve çalışıyor** (altyapi-durumu.md)
+- ⚠️ **Yeni dal açtığında ilk iş:** o dalın preview adresini Cloudflare Turnstile
+  panelindeki `benim-belediyem` widget'ının **Hostname Management** listesine
+  ekle ve **Update'e bas**. Eklemezsen preview'da bot kutusu hiç çizilmez,
+  konsolda `Error: 110200` çıkar ve kodda hata ararsın (bu tuzağa iki kez
+  düşüldü — altyapi-durumu.md ve teknik borç #31)
 - **Google ile giriş HENÜZ YOK.** 4c'nin tamamı bu
 
 ## ÖNCEKİ ADIMLARDAN DEVRALINAN KARARLAR — yeniden tartışma
