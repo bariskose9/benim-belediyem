@@ -18,6 +18,18 @@ export default defineConfig({
     // Node ortamı: tarayıcı taklidi (jsdom) burada yalnızca yavaşlatırdı.
     environment: "node",
     include: ["tests/db/**/*.test.ts"],
+    /**
+     * Ortam değişkenleri TEST DOSYALARINDAN ÖNCE yüklenmeli.
+     *
+     * `tests/db/helpers.ts` zaten `dotenv/config` çağırıyor, ama artık bazı
+     * testler uygulama kodunu (servis katmanını) doğrudan içe aktarıyor ve
+     * `src/config/env.ts` içe aktarıldığı ANDA doğrulama yapıyor. ESM
+     * modülleri bildirim sırasına göre değerlendirdiği için `@/features/...`
+     * içe aktarımı `./helpers.js`'ten önce çalışıyor ve env henüz yüklenmemiş
+     * oluyordu. `setupFiles` bu yarışı tamamen ortadan kaldırıyor: kurulum
+     * dosyaları her test modülünden önce koşar.
+     */
+    setupFiles: ["dotenv/config"],
     // Testler aynı veritabanını paylaşır; paralel dosyalar birbirinin
     // kayıtlarını silerdi. Sıralı koşmak burada doğruluk şartıdır.
     fileParallelism: false,

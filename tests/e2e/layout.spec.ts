@@ -108,7 +108,18 @@ test.describe("üst menü", () => {
     await page.getByRole("button", { name: messages.nav.openMenu }).click();
     await mainMenu(page).getByRole("link", { name: messages.nav.hospital }).click();
 
-    await expect(page).toHaveURL(/\/hastane$/);
+    /**
+     * HEDEF `/hastane` DEĞİL, GİRİŞ EKRANI — ve bu doğru davranış.
+     *
+     * Hastane personele özel; giriş yapmamış ziyaretçi `guardPage` tarafından
+     * dönüş adresiyle birlikte `/giris`'e yollanıyor (PRD §5.0). Test önceden
+     * `/hastane$` bekliyordu ve geçiyordu, ama YANILTICI biçimde: yönlendirme
+     * tamamlanmadan önceki GEÇİCİ adresi yakalıyordu. Adım 6'da sayfaya
+     * `loading.tsx` eklenince o zamanlama değişti ve test kırmızıya döndü —
+     * yani test bir davranış değişikliğini değil, kendi kırılganlığını
+     * bildirdi. Beklenti artık kalıcı sonuca bakıyor.
+     */
+    await expect(page).toHaveURL(/\/giris\?.*donus=%2Fhastane/);
     // Yeni sayfada kullanıcıyı karşılayan şey menü değil içerik olmalı.
     await expect(page.getByRole("button", { name: messages.nav.openMenu })).toBeVisible();
   });
@@ -183,6 +194,15 @@ test.describe("hizmet ızgarası", () => {
 
     await page.getByRole("link", { name: new RegExp(messages.services.hospital.title) }).click();
 
-    await expect(page).toHaveURL(/\/hastane$/);
+    /**
+     * Kart hastane hizmetine götürüyor; ziyaretçi giriş yapmadığı için kapı
+     * onu dönüş adresiyle giriş ekranına yolluyor (PRD §5.0). Dönüş adresinin
+     * `/hastane` olması, kartın DOĞRU hedefe bağlandığının kanıtı — kart kırık
+     * olsaydı burada başka bir dönüş adresi görünürdü.
+     *
+     * Beklenti eskiden `/hastane$` idi ve yönlendirme öncesi geçici adresi
+     * yakaladığı için geçiyordu; ayrıntı yukarıdaki menü testinde yazılı.
+     */
+    await expect(page).toHaveURL(/\/giris\?.*donus=%2Fhastane/);
   });
 });
