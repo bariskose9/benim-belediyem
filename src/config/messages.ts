@@ -324,6 +324,57 @@ export const messages = {
 
         ...botCheckErrors,
       },
+
+      /**
+       * Google ile giriş (PRD §5.0 · adım 4c).
+       *
+       * Düğmenin metni "Google ile giriş yap" DEĞİL, "Google ile devam et":
+       * bu düğme hem giriş hem kayıt işini yapıyor ve hesabı olmayan kullanıcı
+       * "giriş yap" yazan bir düğmeye basmakta tereddüt ediyor.
+       */
+      google: {
+        cta: "Google ile devam et",
+        divider: "veya",
+
+        /**
+         * Google'ın kimlik doğrulamadığı KULLANICIYA DA söyleniyor.
+         * Kullanıcı, hastane randevusuna neden erişemediğini sonradan değil,
+         * en baştan bilmeli (PRD §5.0 "Google KİMLİK DOĞRULAMAZ").
+         */
+        identityNotice:
+          "Google ile giriş yalnızca e-posta adresinizi doğrular, kimliğinizi doğrulamaz. " +
+          "Hastane ve spor salonu hizmetleri için ayrıca T.C. kimlik doğrulaması gerekir.",
+
+        errors: {
+          /**
+           * TEK MESAJ — `state` uyuşmazlığı, PKCE hatası, geçersiz kimlik
+           * jetonu, Google'ın 5xx'i ve kullanıcının izni reddetmesi hepsi
+           * buraya düşer. Ayrıştırmak, saldırgana hangi korumaya takıldığını
+           * söylerdi (`callback/route.ts` içinde aynı gerekçe yazılı).
+           */
+          failed:
+            "Google ile giriş tamamlanamadı. Lütfen tekrar deneyin veya şifrenizle giriş yapın.",
+
+          /** Akış başka bir tarayıcıda başladı ya da 10 dakikayı aştı. */
+          expired:
+            "Google girişi zaman aşımına uğradı. Lütfen “Google ile devam et” düğmesine tekrar basın.",
+
+          /** Ortam değişkeni yok — kullanıcıya iç detay verilmez. */
+          unavailable: "Google ile giriş şu anda kullanılamıyor. Şifrenizle giriş yapabilirsiniz.",
+
+          tooManyAttempts: "Çok fazla deneme yapıldı. Lütfen bir süre bekleyip tekrar deneyin.",
+
+          /**
+           * HESAP BİRLEŞTİRME ENGELİ (PRD §5.0). İki sebep de aynı sonucu
+           * doğuruyor ama mesaj AYRI: kullanıcı neyi kanıtlaması gerektiğini
+           * bilmeli. Mesaj "bu e-postayla hesap var" demiyor — o bilgi hesap
+           * sayımına yol açardı; yalnızca ne yapması gerektiğini söylüyor.
+           */
+          verificationRequired:
+            "Bu hesaba Google bağlantısı eklemek için önce şifrenizle giriş yapmanız gerekiyor. " +
+            "Giriş yaptıktan sonra profilinizden Google hesabınızı bağlayabilirsiniz.",
+        },
+      },
     },
 
     /** Şifre sıfırlama (PRD §5.0 "Şifre sıfırlama" · adım 4b-3). */

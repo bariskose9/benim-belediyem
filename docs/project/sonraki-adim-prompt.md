@@ -1,117 +1,130 @@
-# Sonraki oturum için hazır prompt — adım 4c
+# Sonraki oturum için hazır prompt — adım 5
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 4c bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 5 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **4c**'ye geçiyoruz. Başlamadan önce
-`CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu üçü:
+benim-belediyem projesinde roadmap adım **5**'e geçiyoruz. Başlamadan önce
+`CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
-- `docs/project/roadmap.md` — teknik borç listesi
+- `docs/standards/07-ui-design-system.md` — bu adımın ana kural kaynağı
+- `docs/project/roadmap.md` — teknik borç listesi (34 madde)
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
 
 ## DURUM
 
-Roadmap adım **0 → 4b-3 bitti** (PR #1-#17). PR #17 **2026-08-02'de merge
-edildi ve canlıya çıktı** (`b032bbc`); `/api/health` → `app: ok, db: ok`.
+Roadmap adım **0 → 4c bitti** (PR #1-#20). PR #20 **2026-08-02'de merge edildi**;
+Google ile giriş canlıda.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- **Kayıt canlıda çalışıyor**: TCKN → KPS → 18 yaş → iki bağımsız OTP
-- **Giriş, çıkış, oturum ve erişim kademeleri çalışıyor** (4b-2)
-- **Şifre sıfırlama çalışıyor** (4b-3): `/sifremi-unuttum` → kod → yeni şifre →
-  **tüm oturumlar düşer**
-- Preview ve production veritabanları **dolu**: 200 KPS vatandaşı, 100 personel,
+- **Kayıt** çalışıyor: TCKN → KPS → 18 yaş → iki bağımsız OTP
+- **Giriş, çıkış, oturum, erişim kademeleri** çalışıyor
+- **Şifre sıfırlama** çalışıyor — şifre değişince tüm oturumlar düşer
+- **Google ile giriş** çalışıyor: PKCE + `state` + `nonce`, hesap birleştirme
+  kuralı, `dogrulanmamis` kademesinde açılan hesap
+- Testler: **401** unit/entegrasyon · **36** veritabanı · **92** E2E
+- Preview ve production veritabanları dolu: 200 KPS vatandaşı, 100 personel,
   90 üye (10'unun şifresi `Test1234!`). Gerçek kullanıcı 0
-- Testler: **363** unit/entegrasyon · **36** veritabanı · **74** E2E
-- Cloudflare Turnstile ve Resend **kurulu ve çalışıyor** (altyapi-durumu.md)
-- ⚠️ **Yeni dal açtığında ilk iş:** o dalın preview adresini Cloudflare Turnstile
-  panelindeki `benim-belediyem` widget'ının **Hostname Management** listesine
-  ekle ve **Update'e bas**. Eklemezsen preview'da bot kutusu hiç çizilmez,
-  konsolda `Error: 110200` çıkar ve kodda hata ararsın (bu tuzağa iki kez
-  düşüldü — altyapi-durumu.md ve teknik borç #31)
-- **Google ile giriş HENÜZ YOK.** 4c'nin tamamı bu
+- ⚠️ **Yeni dal açtığında ilk iş:** o dalın **dal adresini**
+  (`benim-belediyem-git-<dal>-barisss.vercel.app`, dağıtım adresini değil)
+  **iki panele** ekle: Cloudflare Turnstile → Hostname Management **ve**
+  Google Cloud → Auth Platform → Clients → Authorized redirect URIs
+  (sonuna `/api/auth/google/callback` ekleyerek). Eksikse sırasıyla
+  `Error: 110200` ve `redirect_uri_mismatch` alırsın ve kodda hata ararsın.
+  Kalıcı çözüm kendi alan adı → teknik borç #31
 
-## ÖNCEKİ ADIMLARDAN DEVRALINAN KARARLAR — yeniden tartışma
+## YAPILACAK — roadmap adım 5
 
-**Oturum Auth.js ile DEĞİL, elle yazıldı.** Gerekçe ADR-005'in 2026-08-01 tarihli
-güncelleme notunda: `@auth/core` kaynağında `Credentials` sağlayıcısı JWT'yi
-zorunlu kılıyor, JWT ise "çıkışta ve şifre değişiminde oturum ANINDA düşer"
-sözünü tutamıyor. `next-auth` **kurulu değil**.
+"Layout: navbar, logo, dark mode, responsive iskelet, tasarım token'ları"
+→ çıktı: **görsel iskelet**
 
-**4c'DE İLK KARAR VERİLECEK ŞEY BU:** Google ile giriş için Auth.js kurulacak
-mı, yoksa OAuth akışı da elle mi yazılacak? İkisinin de bedeli var:
-- Auth.js kurulursa iki ayrı oturum mekanizması olur (JWT + veritabanı) ya da
-  yalnızca OAuth adımı için kullanılıp oturum yine elle açılır
-- Elle yazılırsa PKCE, `state`, jeton değişimi ve `id_token` doğrulaması
-  bizim sorumluluğumuz olur
+Dal: `feature/layout` (öneri)
 
-**Kod yazmadan önce kullanıcıya sun ve onayını al** (CLAUDE.md §3 kapı 2).
-`AUTH_SECRET` ve `GOOGLE_*` ortam değişkenleri **hiçbir ortamda tanımlı değil**;
-gerekiyorsa kullanıcıdan istenecek.
+### Bu adımın doğası öncekilerden FARKLI
 
-## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
+4a-4c güvenlik ve iş mantığıydı; bu adım **görsel**. Bunun iki sonucu var:
 
-- `issueSession()` / `readSession()` / `revokeSession()` /
-  `revokeAllSessionsForUser()` (`session.service.ts`) — oturum çekirdeği
-- `getCurrentSession()` / `writeSessionCookie()` / `clearSessionCookie()`
-  (`session-context.ts`) — çerez tarafı
-- `evaluateAccess()` (`access-control.ts`) ve `guardPage()` (`page-guard.ts`)
-  — korumalı sayfa kapısı
-- `matchStaffMember()` (`staff-matching.service.ts`) — personel eşleştirmesi;
-  **4c'de Google ile açılan hesap KPS doğrulamasından geçince yine çağrılmalı**
-- `sanitizeRedirectPath()` (`src/lib/redirect.ts`) — açık yönlendirme koruması.
-  OAuth'ta yönlendirme adresleri beyaz listede olmalı (PRD §5.0)
-- `issueOtp()` / `verifyOtp()` / `issueDecoyChallenge()` / `findChallengeOwner()`
-  (`src/features/otp/`) — kod mekanizması. `verifyOtp` artık `consumeOnSuccess`
-  seçeneği alıyor: kodu doğrulayıp başka bir kuralda takılabileceğin yerlerde
-  kodu tüketmeden doğrulayabilirsin
-- `checkPasswordPolicy()` · `hashPassword()` · `verifyPassword()`
-- `isRegistrationOpen()` / `isPasswordResetOpen()` (`auth-availability.ts`)
-- `TextField` / `FormAlert` / `TurnstileWidget` / `LoginForm` /
-  `PasswordResetRequestForm` / `PasswordResetCompleteForm` — ekran bileşenleri
-- `accounts` tablosu şemada **hazır** (OAuth sağlayıcı bağlantıları için)
+1. **"Testler yeşil" yetmez.** Bu adımın kanıtı ekran görüntüsüdür. Tarayıcıda
+   fiilen bak: masaüstü + 375px, açık + karanlık tema. Dördünü de göster
+2. **Kullanıcı kodu okuyamıyor ama ekranı görebiliyor** — bu adımda ona
+   gösterilecek şey var. Erken ve sık göster, sonunda topluca değil
 
-## YAPILACAK — roadmap adım 4c
+### Kapsam
 
-"Google ile giriş (OAuth) + hesap birleştirme + personel eşleştirmesi +
-erişim kademeleri"
-
-Dal: `feature/google-ile-giris`
-
-### Kapsam (PRD §5.0 "Google ile giriş" ve "Hesap birleştirme kuralı")
-
-1. **Google ile giriş**: PKCE + `state` zorunlu, yönlendirme adresleri beyaz
-   listede
-2. **Google KİMLİK DOĞRULAMAZ** — yalnızca e-posta sahipliğini kanıtlar. Hesap
-   `identityStatus = dogrulanmamis` olarak açılır; KPS doğrulaması ayrı adım
-3. **Hesap birleştirme (güvenlik açısından kritik)**: aynı e-postalı hesap varsa
-   **otomatik birleştirilmez**. Yalnızca Google e-postayı doğrulanmış bildiriyorsa
-   **ve** mevcut hesabın e-postası da doğrulanmışsa birleşir; aksi hâlde şifre
-   veya OTP istenir
-4. **Erişim kademeleri**: doğrulanmamış kullanıcı hastane ve spor salonuna
-   erişemez (403, KPS adımına yönlendirme). Kademe tablosu PRD §5.0'da
-5. **Bir kimlik numarası yalnızca bir hesaba bağlanabilir**
-6. **Testler**: unit + entegrasyon (birleştirme kuralı, `state`/PKCE eksikse
-   red) + E2E
-7. **Kapılar**: CLAUDE.md §6.3 — lint/typecheck/test/build → güvenlik denetimi →
-   **tarayıcıda fiilen tıklayarak** doğrulama (dark mode + 375px dahil) →
-   commit önerisi raporu → onay → PR
+1. **Tasarım token'ları**: renk, boşluk, tipografi, yuvarlaklık, gölge.
+   Sayısal değerler bileşenlere dağıtılmaz (`07-ui-design-system.md`)
+2. **Dark mode SINIF tabanlı** (`.dark`) — zaten böyle kurulu, `prefers-color-scheme`
+   DEĞİL. Token seviyesinde desteklenmeli, bileşen bileşen `dark:` yamalarıyla değil
+3. **Navbar**: giriş yapmış / yapmamış iki durum. Oturum bilgisi zaten var
+   (`getCurrentSession()`), yeniden yazma
+4. **Logo**: henüz yok. Kullanıcıya sor — hazır bir görsel mi verecek, yoksa
+   metin tabanlı geçici bir işaret mi koyalım
+5. **Responsive iskelet**: mobile-first, 375px'te düzen bozulmayacak
+6. **Erişilebilirlik**: klavye ile gezinilebilirlik, odak halkası, kontrast
+   (WCAG 2.1 AA), `role="status"` / `role="alert"` ayrımı
+7. **Kapılar**: CLAUDE.md §6.3 — lint/typecheck/test/build → güvenlik denetimi
+   → **tarayıcıda fiilen tıklayarak** doğrulama → commit önerisi raporu → onay → PR
 8. **Oturum devri**: `roadmap.md`, `CHANGELOG.md`, `altyapi-durumu.md`
-   güncellenir, bu dosya adım 5 için **yeniden yazılır**
+   güncellenir, bu dosya adım 6 için **yeniden yazılır**
 
 ### Bu adımda özellikle dikkat
 
-- Google OAuth istemcisi **açılmamış**; kullanıcıdan istenmesi gerekecek
-  (Google Cloud Console → OAuth consent screen + istemci kimliği)
-- Yönlendirme adresi her ortam için ayrı tanımlanmalı (local, preview, production).
-  Preview adresleri dal başına değişiyor — bu bir sorun, çözümü kararlaştırılmalı
-- Şema muhtemelen değişmiyor (`accounts` tablosu hazır). Migration gerekirse
-  **önce kullanıcıya söyle**
+- **Mevcut ekranları bozma.** `/giris`, `/kayit`, `/sifremi-unuttum`,
+  `/hesabim`, `/hastane`, `/spor-salonu` çalışıyor ve E2E testleri var.
+  Layout değişikliği bu testleri kırarsa **testi değil layout'u düzelt**
+- Şema değişmiyor, migration yok
+- Yeni bağımlılık eklemeden önce sor (CLAUDE.md §7)
+
+## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
+
+- `TextField` / `FormAlert` / `TurnstileWidget` / `Button` — mevcut bileşenler
+- `getCurrentSession()` (`session-context.ts`) — sunucu tarafında oturum okuma
+- `evaluateAccess()` (`access-control.ts`) · `guardPage()` (`page-guard.ts`)
+- `EnvBanner` — preview/local ortam etiketi, layout'a yerleşecek
+- `messages.ts` — kullanıcıya görünen tüm Türkçe metinler burada, dağıtma
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
+
+**Arayüz**
+- **Dark mode SINIF tabanlı** (`.dark`). Tarayıcıda denerken
+  `document.documentElement.classList.add("dark")` çalıştır; DevTools'un renk
+  şeması taklidi bu projede hiçbir şey değiştirmez
+- shadcn `Alert` varsayılan `role="alert"` (assertive) veriyor; sayfada duran
+  bilgi kutuları `role="status"` olmalı
+- **Playwright `getByRole("alert")` KULLANMA.** Next.js her sayfaya boş bir
+  `role="alert"` duyurucusu koyuyor; rol bazlı arama önce onu buluyor ve hata
+  hiç görünmese bile test geçiyor. Mesajı METİNLE ara
+
+**Ortam adresleri (adım 4c'de bir tur kaybettirdi)**
+- Vercel iki preview adresi üretir: **dal adresi** (`...-git-<dal>-...`, dal
+  boyunca sabit) ve **dağıtım adresi** (`...-<rastgele>-...`, her commit'te
+  değişir). Panellere yazılacak olan **dal adresi**. Uygulama `env.ts` →
+  `resolveVercelAppUrl` ile artık dal adresini tercih ediyor
+- Dal adresini tahmin etme: `npx vercel inspect <dagitim-url> --scope barisss`
+  çıktısındaki **Aliases** satırından oku
+
+**Test**
+- Sunucu tarafı test dosyalarına `/** @vitest-environment node */` docblock'u
+  ŞART; yoksa `serverEnv` hata veriyor
+- **E2E kendi korumalarımıza takılır ve bu doğrudur.** Sınırı kapatma, testi
+  kurala uydur: her teste ayrı kimlik numarası, ayrı `x-forwarded-for` IP,
+  ayrı e-posta/telefon. IP bloğu **her koşuda rastgele** olmalı
+- **E2E'yi 15 dakika içinde üst üste koşturma.** "Aynı hedefe 3 kod / 15 dakika"
+  sınırı sayaçları veritabanında; üçüncü koşuda `register.spec.ts` kırmızıya
+  döner ve bu bir regresyon DEĞİLDİR. Sayaçlar: `rate_limit_counters` tablosu,
+  `key LIKE 'otp_send%'`
+- **Playwright'ın `webServer.env`'i derlemeye gömülüyor.** E2E, Turnstile
+  anahtarlarını boş bırakıyor ve Google için **sahte** kimlik veriyor; o koşudan
+  sonra `.next` klasöründe o yapılandırmayla bir derleme kalıyor. Elle tarayıcı
+  testinden önce `rm -rf .next && npm run build`
+- **Playwright açık kalan sunucuyu yeniden kullanıyor** (`reuseExistingServer`).
+  Şüphelenince `lsof -ti:3000` ve süreci kapat
+- **Prisma taklidi GERÇEK davranışı taşımalı** — tanımadığı operatörde hata
+  fırlatmalı, sessizce yok saymamalı; taklitteki `createdAt` şu ana yakın olmalı
+- `AbortSignal.timeout` sahte zamanlayıcıyla ele geçirilemiyor
 
 **Prisma 7**
 - `datasource` bloğunda `url` / `directUrl` **yok**; bağlantı driver adapter'dan
@@ -121,50 +134,6 @@ Dal: `feature/google-ile-giris`
 - `migrate dev` `migration_lock.toml`'daki Türkçe yorumu eziyor → commit öncesi
   `git checkout` ile geri al
 
-**Test**
-- Sunucu tarafı test dosyalarına `/** @vitest-environment node */` docblock'u
-  ŞART; yoksa `serverEnv` hata veriyor
-- **E2E kendi korumalarımıza takılır ve bu doğrudur.** Sınırı kapatma, testi
-  kurala uydur: her teste ayrı kimlik numarası, ayrı `x-forwarded-for` IP,
-  ayrı e-posta/telefon. IP bloğu **her koşuda rastgele** olmalı
-- **E2E'yi 15 dakika içinde üst üste koşturma.** "Aynı hedefe 3 kod / 15 dakika"
-  sınırı sayaçları veritabanında tutuyor; üçüncü koşuda `register.spec.ts`
-  kırmızıya döner ve bu bir regresyon DEĞİLDİR. Sayaçları görmek için
-  `rate_limit_counters` tablosuna `key LIKE 'otp_send%'` ile bak.
-  4b-3'ün E2E'si bu yüzden hesabını **kendisi oluşturup siliyor** ve her koşuda
-  yeni bir kimlik numarası üretiyor — yeni E2E yazarken aynı deseni kullan
-- **Prisma taklidi GERÇEK davranışı taşımalı.** `password-resets-route.test.ts`
-  içindeki taklit, tanımadığı bir Prisma operatörüyle karşılaşınca **hata
-  fırlatıyor**; sessizce yok saymak testi yanlış yeşil gösterir (yaşandı).
-  Taklitteki `createdAt` de **şu ana yakın** olmalı: sabit bir tarih yazınca
-  `createdAt >= X` filtreleri sessizce hiçbir şey döndürmedi
-- **Playwright `getByRole("alert")` KULLANMA.** Next.js her sayfaya ekran
-  okuyucular için boş bir `role="alert"` duyurucusu koyuyor; rol bazlı arama
-  önce onu buluyor ve hata hiç görünmese bile test geçiyor. Mesajı METİNLE ara
-- **Uzun E2E testlerine `test.slow()` koy.** Şifre sıfırlama akışı istek başına
-  2 saniye sabit süre harcıyor; varsayılan 30 saniyelik test bütçesi paket
-  yüklüyken yetmiyor
-- **E2E `afterAll` temizliği eş zamanlı projeyi vurabilir.** Bir saatlik pay
-  filtresi (`createdAt < now - 1h`) bunun için var
-- **Playwright'ın `webServer.env`'i derlemeye gömülüyor.** E2E, Turnstile
-  anahtarlarını boş bırakıyor; o koşudan sonra `.next` klasöründe anahtarsız bir
-  derleme kalıyor ve elle tarayıcı testinde bot kutusu HİÇ görünmüyor. Elle test
-  öncesi `rm -rf .next && npm run build`
-- **Playwright açık kalan sunucuyu yeniden kullanıyor** (`reuseExistingServer`).
-  Eski bir sunucu 3000'de duruyorsa testler ESKİ kodu test eder ve "sayfa yok"
-  diye patlar. Şüphelenince: `lsof -ti:3000` ve süreci kapat
-- **Cold start:** `npm run build && npm run start` biter bitmez 5 işçi aynı anda
-  giriş yapınca ilk isteklerin route modülü yüklemesi 10 sn'yi bulabiliyor.
-  Giriş sonrası yönlendirme beklerken 15 sn pay verildi
-- `AbortSignal.timeout` sahte zamanlayıcıyla ele geçirilemiyor
-
-**Arayüz**
-- shadcn `Alert` varsayılan `role="alert"` (assertive) veriyor; sayfada duran
-  bilgi kutuları `role="status"` olmalı
-- **Dark mode SINIF tabanlı** (`.dark`), `prefers-color-scheme` DEĞİL. Tarayıcıda
-  denerken `document.documentElement.classList.add("dark")` çalıştır; DevTools'un
-  renk şeması taklidi bu projede hiçbir şey değiştirmez
-
 **Yayın**
 - **Neon uykudayken production deploy PATLIYOR** — `prisma migrate deploy`
   `P1001` verip ~5 saniyede vazgeçiyor. Canlı site eski sürümle ayakta kalır
@@ -173,8 +142,9 @@ Dal: `feature/google-ile-giris`
   uyandırıp (`curl .../api/health` → `db: ok`) `npx vercel redeploy <url>`
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR** (Managed mod, gerçek
   anahtar): tarayıcı aracıyla tıklanamıyor. Canlıdaki tam akışı kullanıcının
-  elle doğrulaması gerekiyor. Preview ve local'de aynı kod, orada otomatik
-  doğrulanabiliyor
+  elle doğrulaması gerekiyor
+- **Google uygulaması "Testing" modunda** — yalnızca Google Console → Audience →
+  Test users listesindeki e-postalar giriş yapabilir (teknik borç #34)
 
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
