@@ -328,3 +328,78 @@ export const TURNSTILE_SCRIPT_ORIGIN = "https://challenges.cloudflare.com" as co
  * kullanıcıyı haksız yere reddeder.
  */
 export const TURNSTILE_TIMEOUT_MS = 3_000;
+
+// ===========================================================================
+// GOOGLE İLE GİRİŞ — OpenID Connect (PRD §5.0 · adım 4c)
+//
+// Google KİMLİK DOĞRULAMAZ; yalnızca bir e-posta hesabının sahipliğini kanıtlar.
+// Kimliği KPS doğrular, çalışan olmayı personel rehberi gösterir. Bu yüzden
+// Google ile açılan hesap `dogrulanmamis` kademesinde başlar.
+// ===========================================================================
+
+/**
+ * Google'ın OpenID Connect yayıncı adresi. Uç adresleri (yetkilendirme, jeton,
+ * JWKS) buradan KEŞFEDİLİR — koda gömülmez. Google bu adresleri zaman zaman
+ * değiştiriyor; keşif, değişikliği kendiliğinden takip eden tek yöntem.
+ */
+export const GOOGLE_ISSUER_URL = "https://accounts.google.com" as const;
+
+/**
+ * İstenen kapsamlar. Üçü de Google'ın "hassas olmayan" listesinde, yani
+ * uygulamanın Google incelemesinden geçmesi gerekmiyor.
+ *
+ * `profile` YALNIZCA ad için isteniyor. Daha fazlası istenmiyor: veri
+ * minimizasyonu (14-privacy-and-compliance.md) — toplanmayan veri sızmaz.
+ */
+export const GOOGLE_OAUTH_SCOPES = "openid email profile" as const;
+
+/**
+ * Yetkilendirme isteğinin dönüş adresi. Google panelindeki "Authorized redirect
+ * URIs" listesiyle KARAKTERİ KARAKTERİNE aynı olmalı; Google joker kabul etmez
+ * ve en ufak fark `redirect_uri_mismatch` hatası verir.
+ */
+export const GOOGLE_CALLBACK_PATH = "/api/auth/google/callback" as const;
+
+/**
+ * Akışı taşıyan tek kullanımlık çerez: `state`, PKCE doğrulayıcısı, `nonce` ve
+ * dönüş adresi burada durur.
+ *
+ * NEDEN ÇEREZ, neden veritabanı değil: bu üç değer yalnızca tarayıcı ile bizim
+ * aramızdaki TEK bir gidiş-dönüşü bağlar ve saniyeler yaşar. Veritabanına
+ * yazmak, henüz kimliği olmayan bir ziyaretçiye satır açmak demekti — bot
+ * trafiği tabloyu şişirirdi.
+ *
+ * Çerez `httpOnly`, yani sayfadaki JavaScript okuyamaz; XSS ile `state`
+ * çalınıp CSRF korumasının etrafından dolaşılamaz.
+ */
+export const GOOGLE_OAUTH_COOKIE_NAME = "bb_google_oauth" as const;
+
+/**
+ * Akışın ömrü. Kullanıcının Google ekranında hesap seçip şifre girmesine ve
+ * gerekirse iki adımlı doğrulamayı geçmesine yetecek kadar uzun; çalınan bir
+ * `state` değerinin işe yarayacağı pencereyi dar tutacak kadar kısa.
+ */
+export const GOOGLE_OAUTH_FLOW_TTL_MS = 10 * 60_000;
+
+/**
+ * Google'ın uçlarına yapılan çağrıların üst sınırı (CLAUDE.md §5.9: dış
+ * çağrılarda timeout zorunlu). Google çökerse giriş ekranı hata gösterir,
+ * sayfa ayakta kalır.
+ *
+ * BİRİM SANİYE, milisaniye değil: `openid-client` bu seçeneği saniye olarak
+ * alıyor ve kütüphanenin varsayılanı 30 saniye — sunucusuz bir fonksiyonu
+ * yarım dakika meşgul edecek kadar uzun. Keşifte verilen değer, o
+ * yapılandırmanın sonraki TÜM isteklerine de uygulanıyor.
+ */
+export const GOOGLE_OAUTH_TIMEOUT_SECONDS = 5;
+
+/**
+ * Akış başlatma ucunun IP başına bütçesi.
+ *
+ * Cömert: normal kullanıcı düğmeye bir kez basar, hesap seçme ekranından geri
+ * dönüp tekrar dener, belki üçüncü kez. 10 bunu rahatça karşılar. Amaç
+ * kullanıcıyı kısıtlamak değil, bu ucun Google'a karşı trafik üretmek için
+ * kullanılmasını engellemek (CLAUDE.md §5.5).
+ */
+export const GOOGLE_OAUTH_START_RATE_LIMIT = 10;
+export const GOOGLE_OAUTH_START_WINDOW_MS = 15 * 60_000;

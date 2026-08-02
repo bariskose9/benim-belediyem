@@ -4,6 +4,45 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 4c: Google ile giriş (OAuth)
+- **"Google ile devam et" ile giriş ve kayıt** (`/api/auth/google` →
+  Google → `/api/auth/google/callback`). Düğme metni bilerek "giriş yap" değil:
+  aynı düğme hesabı olmayanı da kaydediyor
+- **Üç koruma birlikte, hiçbiri isteğe bağlı değil**: `state` (CSRF), **PKCE**
+  (çalınan yetkilendirme kodu işe yaramaz), `nonce` (jeton tekrar oynatılamaz).
+  Biri tutmazsa akış oracıkta ölüyor, "yine de devam et" dalı yok
+- **Hesap birleştirme kuralı (PRD §5.0, güvenlik açısından kritik)**: aynı
+  e-postalı hesap varsa **otomatik birleştirilmiyor**. Birleşme yalnızca Google
+  e-postayı doğrulanmış bildiriyorsa **ve** bizdeki hesabın e-postası da
+  doğrulanmışsa oluyor; aksi hâlde oturum açılmıyor, hesap yazılmıyor, bağlantı
+  kurulmuyor. Bu olmasaydı saldırgan, kurbanın e-postasıyla açtığı bir Google
+  hesabıyla mevcut hesabı şifreyi hiç bilmeden devralabilirdi
+- **Google KİMLİK DOĞRULAMAZ** — hesap `dogrulanmamis` kademesinde açılıyor;
+  kimlik numarası, doğum tarihi ve personel yetkisi almıyor. Bu ekranda
+  kullanıcıya da açıkça yazıyor
+- **Oturum mevcut mekanizmayla açılıyor** (ADR-005): Google ile giren kullanıcı
+  "tüm cihazlardan çık", "şifre değişince oturum düşer" ve anında iptal
+  davranışını ek kod yazılmadan alıyor
+- **İşlem çerezi tek kullanımlık** — hata yolunda bile siliniyor; aynı `state`
+  ile ikinci deneme mümkün değil (tarayıcıda fiilen doğrulandı)
+- **Tüm hatalar tek ekrana çıkıyor**: `state` uyuşmazlığı, PKCE hatası, geçersiz
+  kimlik jetonu, Google'ın 5xx'i, iznin reddi. Ayrıştırmak saldırgana hangi
+  korumaya takıldığını söylerdi
+- **Hata kodları beyaz listeden geçiyor** — adres çubuğuna yazılan uydurma bir
+  metin ekrana basılmıyor (kimlik avı / metin enjeksiyonu koruması)
+- **Jeton saklanmıyor**: `accounts` tablosundaki `access_token` / `id_token`
+  alanları bilerek boş. Google API'si çağrılmıyor; saklanmayan jeton sızmaz
+- Testler: 34 yeni birim/entegrasyon + 9 E2E (masaüstü ve 375px).
+  Toplam: **397** unit/entegrasyon · 36 veritabanı · 83 E2E
+
+### Değiştirildi — adım 4c
+- `openid-client@6.8.4` eklendi — OpenID Foundation **sertifikalı** istemci.
+  Auth.js kurulmadı: iki ayrı oturum mekanizması doğurur ve ADR-005'in
+  jeton-özeti tasarımını bozardı. `npm audit`: 0 açık
+- `AUTH_SECRET` **gerekmiyor**: OAuth işlem çerezi `httpOnly` olduğu için
+  imzalanmıyor — yönetilecek bir sır eksildi
+- Şema **değişmedi**, migration **yok**: `accounts` tablosu adım 3'ten beri hazır
+
 ### Eklendi — adım 4b-3: şifre sıfırlama ve hesap sayımı koruması
 - **Şifre sıfırlama akışı (`/sifremi-unuttum` → `/sifremi-unuttum/dogrulama`)**:
   kimlik numarası → kayıtlı e-posta adresine 6 haneli kod → kod + yeni şifre.

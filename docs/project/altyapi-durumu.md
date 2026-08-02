@@ -9,7 +9,7 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-02 · roadmap adım 4b-3 sonrası
+**Son güncelleme:** 2026-08-02 · roadmap adım 4c sonrası
 
 ---
 
@@ -22,6 +22,7 @@
 | **Neon** | proje `lively-night-99128871`, org `org-still-water-86075112` | Free | PostgreSQL 18. İki dal: `production` (varsayılan) ve `preview` |
 | **Cloudflare** | Turnstile widget `benim-belediyem` | 1M çözüm/ay | Bot koruması (ADR-004) |
 | **Resend** | — | 3.000 e-posta/ay | Doğrulama kodu e-postası |
+| **Google Cloud** | proje `benim-belediyem` · OAuth istemcisi `benim-belediyem-web` | ücretsiz | Google ile giriş (adım 4c) |
 
 ## Panelde yapılandırılanlar
 
@@ -48,6 +49,34 @@
 - ⚠️ **Bunun sonucu:** Resend yalnızca **hesabın kayıtlı e-posta adresine**
   gönderim yapar. Canlıda kayıt olurken başka bir adres girilirse kod gelmez.
   Gerçek kullanıma açılacaksa alan adı satın alınıp doğrulanmalı
+
+### Google Cloud — OAuth (adım 4c)
+
+- Konsolun **"OAuth consent screen" sayfası ARTIK YOK.** Ayarlar
+  **Google Auth Platform** altında beşe bölündü: **Overview · Branding ·
+  Audience · Clients · Data Access**. Eski tariflere göre arama — 2026-08-02'de
+  bu yüzden vakit kaybedildi (`11-agent-workflow.md` → "ezberden değil güncelden")
+- İstemci: **Web application**, adı `benim-belediyem-web`
+- **Authorized redirect URIs** (Clients sayfası) — tam olarak bunlar kayıtlı:
+  - `http://localhost:3000/api/auth/google/callback`
+  - `https://benim-belediyem.vercel.app/api/auth/google/callback`
+- ⚠️ **"Authorized JavaScript origins" BOŞ ve öyle kalmalı.** Akış tamamen
+  sunucu tarafında; oraya yol içeren bir adres yazılırsa Google
+  *"URIs must not contain a path"* der. İlk denemede bu hataya düşüldü
+- ⚠️ **Her yeni dalın preview adresi buraya da ELLE eklenir** — Turnstile'daki
+  aynı tuzak (teknik borç #31). Google joker kabul etmiyor; adres birebir
+  eşleşmezse `redirect_uri_mismatch` alınır. Yani her yeni dalda **iki panel**:
+  Cloudflare hostname listesi + Google redirect URI listesi
+- **Uygulama "Testing" modunda** — yalnızca *Audience* sayfasındaki **Test
+  users** listesindeki e-postalar giriş yapabilir. Proje sahibinin Gmail'i
+  eklendi (2026-08-02). Herkese açılması için *Publish app* gerekiyor;
+  `openid`/`email`/`profile` hassas olmayan kapsamlar olduğu için Google
+  incelemesi gerekmediğini **doğrulamadım** — açmadan önce kontrol edilmeli
+- **Data Access sayfasına hiç girilmedi ve gerekmiyor**: kapsamlar çalışma
+  anında isteniyor, panele önceden yazılması zorunlu değil
+- İstemci parolası **yenilenmedi**. Kurulum sırasında ekran görüntüsüyle
+  sohbete girdi; risk düşük (depoya girmedi) ama canlıya açılmadan önce
+  *Clients → Add secret* ile yenilenmesi temiz olur
 
 ### Neon
 - `preview` ve `production` dalları **ayrı veritabanı** — veri paylaşmazlar
@@ -90,7 +119,8 @@ Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | test anahtarı | ✔ gerçek | ✔ gerçek | Kutu hiç görünmez |
 | `TURNSTILE_SECRET_KEY` | test anahtarı | ✔ gerçek | ✔ gerçek | local'de atlanır · preview/production'da kayıt **durur** (503) |
 | `EMAIL_API_KEY` · `EMAIL_FROM` | ✘ | ✘ | ✔ | Production'da kayıt **ve şifre sıfırlama** ekranları "geçici olarak kapalı" der. Uygulama **açılır** |
-| `AUTH_SECRET` · `GOOGLE_*` | ✘ | ✘ | ✘ | Henüz kullanılmıyor — **yalnızca adım 4c** (Google ile giriş). Şifreyle giriş bunlara ihtiyaç duymuyor: oturum elle yazıldı, imzalanan bir jeton yok (ADR-005 güncelleme notu) |
+| `GOOGLE_CLIENT_ID` · `GOOGLE_CLIENT_SECRET` | ✔ | ✔ | ✔ | Giriş ekranındaki **"Google ile devam et" düğmesi hiç çizilmez**. Kayıt ve şifreyle giriş etkilenmez — uygulama açılır (adım 4c, 2026-08-02) |
+| `AUTH_SECRET` · `AUTH_URL` | ✘ | ✘ | ✘ | **Hiç kullanılmıyor ve gerekmiyor.** Auth.js kurulmadı (ADR-005 güncelleme notu); OAuth işlem çerezi `httpOnly` olduğu için imzalanmıyor. `.env.example`'da duruyor ama boş kalabilir |
 | `OWNER_*` | ✘ | ✘ | ✘ | Tohumlama proje sahibi hesabını **atlar** (kasıtlı: gerçek kişisel veri uzak ortama gitmiyor) |
 
 **Anahtarlar ortama özeldir** (`13-environments.md`): `NATIONAL_ID_*` değerleri

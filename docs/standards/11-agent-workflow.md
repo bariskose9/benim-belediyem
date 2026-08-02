@@ -39,6 +39,36 @@ uygulanır**. Yüklenmeden yazılan etiket yanlış beyandır.
 Varsayım yapma. Sor. Yanlış varsayımla yazılmış 200 satır,
 sorulmuş 1 sorudan pahalıdır.
 
+## Dış dünya bilgisi: ezberden DEĞİL, güncelinden
+
+Ajanın eğitim verisi eskidir. Üçüncü parti paneller, API'ler, kütüphane sürümleri
+ve fiyatlandırma **haftalar içinde** değişir. Ezberden verilen yönlendirme,
+kullanıcıyı artık var olmayan bir ekranı aramaya gönderir.
+
+**Kural:** Kullanıcıya bir dış servis hakkında "şuraya gir, şuna bas" demeden
+**önce**, o bilgiyi bu oturumda güncel resmî kaynağından **bizzat gör**.
+
+Bu kapsama girenler:
+- Sağlayıcı panel gezinmesi (Google Cloud, Vercel, Cloudflare, Neon, Resend…)
+- Kütüphane API'si, sürüm numarası, bakım durumu → paket kaydı + resmî doküman
+- CLI komutu ve bayrakları
+- Ücretsiz katman sınırları, fiyat, kota
+- Ortam değişkeni adları ve zorunlulukları
+
+Nasıl doğrulanır: `WebFetch` ile resmî doküman · `npm view` ile paket kaydı ·
+`--help` ile CLI · sağlayıcının changelog'u. Ekran görüntüsü gerekiyorsa
+`browser-testing-with-devtools` ile fiilen aç.
+
+**Kaynağa ulaşılamıyorsa** "doğrulayamadım, ezberimden söylüyorum, arayüz
+değişmiş olabilir" diye **açıkça yaz**. Sessizce tahmin etme.
+
+**Neden bu kadar sert:** doğrulama ajan için saniyeler sürer; yanlış yönlendirme
+kullanıcının onlarca dakikasını yakar ve güveni bozar. Maliyet asimetriktir.
+Bu proje bunu iki kez ödedi: Turnstile hostname tuzağı (~1 saat, teknik borç #31)
+ve Google Cloud'un "OAuth consent screen" sayfasının artık var olmaması
+(sayfa "Google Auth Platform" altında Branding / Audience / Clients / Data Access
+olarak beşe bölünmüş — eski tarif kullanıcıyı olmayan bir menüye gönderdi).
+
 ## Kapsam kontrolü
 İstenmeyen iyileştirme yapma. "Bu arada şunu da düzelttim" yasak —
 gördüğün sorunu **bildir**, ayrı iş olarak planla.
