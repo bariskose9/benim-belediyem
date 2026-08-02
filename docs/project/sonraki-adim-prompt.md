@@ -134,6 +134,15 @@ Dal: `feature/hastane-randevu` (öneri)
 - **Google uygulaması "Testing" modunda** — yalnızca test kullanıcıları girebilir
   (teknik borç #34)
 
+**Git**
+- **YENİ DALI HER ZAMAN `main`'DEN AÇ.** 2026-08-02'de `feature/layout`, bir
+  önceki feature dalından açıldı. PR'lar `main`'e **squash** ile giriyor, yani
+  aynı değişiklikler iki farklı commit olarak görünüyor: PR "çakışıyor" durumuna
+  düşüyor ve **GitHub Actions hiç başlamıyor** (çakışan PR'da birleştirme
+  commit'i üretilemediği için). Belirti: PR'da yalnızca Vercel kontrolleri var,
+  CI ve E2E hiç görünmüyor. Çözüm: `git fetch origin main && git merge origin/main`
+  (force-push gerekmez). Önlem: `git checkout main && git pull && git checkout -b <yeni-dal>`
+
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
   `--org-id org-still-water-86075112` şart
