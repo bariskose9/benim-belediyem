@@ -4,6 +4,77 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 6: hastane randevu modülü (personele özel)
+
+- **Randevu akışı** `/hastane`: branş → doktor → gün → saat, hepsi tek adreste
+  ve adres çubuğunda taşınıyor (`?brans=…&doktor=…&gun=…`). Her adım sunucuda
+  çiziliyor; geri tuşu bir adım geri alıyor, bağlantı paylaşılabiliyor
+- **`/hastane/randevularim`**: yaklaşan ve geçmiş randevular, iptal düğmesi.
+  Sayfa hiçbir kullanıcı kimliği parametresi almıyor — kimlik oturumdan
+  geliyor, dolayısıyla unutulabilecek bir sahiplik kontrolü yok
+- **İki uç**: `POST /api/appointments` (201) ve `DELETE /api/appointments/{id}`
+  (204). İkisi de yalnızca personele açık; `userId` gövdeden değil oturumdan
+  okunuyor ve istemcinin gönderdiği değer şemadan hiç geçmiyor
+- **PRD §5.1'in dört kuralı da sunucuda**: dolu saat seçilemez · geçmiş tarihe
+  randevu alınamaz · **aynı branşta aktif randevu varken ikinci randevu
+  alınamaz** · iptal en geç randevudan 2 saat önce. Dördü de ayrı hata kodu ve
+  409 döndürüyor, çünkü ekranın hangi kuralın devreye girdiğini bilmesi gerekiyor
+- **Üçüncü kural canlı denemeden sonra sıkılaştırıldı (PRD §5.1 güncellendi).**
+  Önce "aynı branşta **aynı gün**" diye yazılıydı ve öyle uygulanmıştı; proje
+  sahibi preview'da deneyip gerçek randevu sistemlerinin böyle davranmadığını
+  belirtti. Artık o branşta bekleyen randevunuz varken **hiçbir güne** yeni
+  randevu alamıyorsunuz. "Aktif" = durumu `booked` ve saati henüz gelmemiş;
+  saati geçen randevu engel olmaktan çıkıyor, iptal edilen hiç sayılmıyor.
+  Kabul edilen bedel: kontrol randevusu önceden alınamıyor
+- **Kabul kriteri karşılandı — iki kullanıcı aynı saati alamaz.** Koruma
+  uygulama mantığında değil, `doctor_slots` üzerindeki koşullu güncellemede
+  (`WHERE is_booked = false`): PostgreSQL ikinci işlemi bekletiyor, birinci
+  commit edince WHERE'i yeniden değerlendiriyor ve satır artık koşulu
+  sağlamadığı için atlıyor → 409. Beş eşzamanlı istekle gerçek veritabanına
+  karşı sınandı; **koşul geçici olarak kaldırıldığında testin kırmızıya
+  döndüğü de doğrulandı** (beşi de saati alabildi)
+- **İptal randevuyu SİLMİYOR**: `status = cancelled` oluyor, kayıt 3 yıl
+  saklanıyor (data-model.md) ve saat yeniden satışa açılıyor. Randevusunu
+  iptal eden kullanıcı aynı gün yenisini alabiliyor — iptal bir cezaya
+  dönüşmüyor
+- **Denetim kaydı**: randevu oluşturma ve iptal `audit_logs`'a yazılıyor
+  (CLAUDE.md §5.11 iptali açıkça sayıyor). IP düz değil özetlenerek
+- **Hız sınırı yazma uçlarında**: 20 işlem / 15 dakika, **kullanıcı başına**.
+  IP bazlı değil — bu hizmet tek bir kurumun personeline açık ve hepsi aynı
+  dış IP'nin arkasından girebilir, IP sayacı onları birbirinin bütçesinden
+  yerdi. Kullanıcı kimliği sayaç anahtarında özetlenerek tutuluyor
+- **`src/lib/datetime.ts` (yeni)**: gün ve saat gösteriminin tek yeri. Ekranda
+  her tarih **İstanbul saatine** çevriliyor (veritabanında UTC saklanıyor) ve
+  gün şeridi günleri İstanbul takvimine göre grupluyor — UTC 21:00'den sonrası
+  İstanbul'da ertesi gündür. Etkinlik ve teslimat modülleri de bunu kullanacak
+- **`api-guard.ts` (yeni)**: korumalı uçların kapısı. `page-guard`'ın HTTP
+  karşılığı, ama kararı **aynı saf fonksiyon** veriyor (`evaluateAccess`) —
+  sayfada izin verilen bir işlem uçta reddedilemez, tersi de olamaz
+
+### Değiştirildi
+
+- `/hastane` artık gerçek içerik gösteriyor; "yakında" iskeleti yalnızca spor
+  salonunda kaldı (`StaffOnlyService` bileşenine dokunulmadı)
+- `rate-limit.ts` yeni bir anahtar türü tanıyor: `user`. Değer düz değil
+  özetlenerek yazılıyor — `rate_limit_counters` tablosunu okuyan biri hangi
+  hesabın ne zaman ne yaptığını çıkaramasın diye
+
+### Düzeltildi
+
+- **İki E2E testi yanıltıcı biçimde geçiyormuş.** `layout.spec.ts` içindeki
+  "açık hizmet kendi sayfasına götürür" ve "mobilde bağlantıya basınca menü
+  kapanır" testleri `/hastane$` adresini bekliyordu; oysa giriş yapmamış
+  ziyaretçi kapıdan geçemiyor ve `/giris`'e yönlendiriliyor. Testler
+  yönlendirme tamamlanmadan önceki **geçici adresi** yakalıyordu. Adım 6'da
+  sayfaya `loading.tsx` eklenince zamanlama değişti ve testler kırmızıya
+  döndü — yani bir davranış değişikliğini değil, kendi kırılganlıklarını
+  bildirdiler. Beklentiler kalıcı sonuca (`/giris?...donus=%2Fhastane`)
+  çevrildi
+- `tests/db/helpers.ts` temizliği artık uygulamanın ürettiği kayıtları da
+  siliyor. Randevu ve denetim satırları `cuid()` kimlik aldığı için test
+  önekiyle bulunamıyordu; kalan satırlar yabancı anahtar kısıtı yüzünden
+  (`Restrict`) tüm temizliği patlatıyordu
+
 ### Eklendi — adım 5: görsel iskelet (layout, tema, marka)
 - **Marka paleti**: kurumsal lacivert (`--primary`) + turkuaz vurgu
   (`--brand-accent`), açık ve koyu tema için ayrı ayrı. Değerler tahminle

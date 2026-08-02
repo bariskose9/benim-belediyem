@@ -38,7 +38,18 @@ export function testId(...parts: readonly (string | number)[]): string {
 export async function cleanupTestData(): Promise<void> {
   const startsWith = { startsWith: TEST_PREFIX };
 
-  await prisma.appointment.deleteMany({ where: { id: startsWith } });
+  /**
+   * Randevular ÜÇ ÖLÇÜTLE siliniyor, yalnızca kimlik önekiyle değil.
+   *
+   * Sebep: servis katmanını çağıran testlerde randevuyu UYGULAMA oluşturuyor
+   * ve kimliği `cuid()` oluyor — test öneki taşımıyor. O satırlar kalırsa
+   * `doctor_slots` silinemez (`appointments_slot_id_fkey` Restrict) ve
+   * temizlik tamamen patlar. Slot ve kullanıcı kimliği ise test önekli
+   * olduğu için kaydı oradan yakalıyoruz.
+   */
+  await prisma.appointment.deleteMany({
+    where: { OR: [{ id: startsWith }, { slotId: startsWith }, { userId: startsWith }] },
+  });
   await prisma.doctorSlot.deleteMany({ where: { id: startsWith } });
   await prisma.doctor.deleteMany({ where: { id: startsWith } });
   await prisma.specialty.deleteMany({ where: { id: startsWith } });
@@ -59,6 +70,18 @@ export async function cleanupTestData(): Promise<void> {
   // olduğu için ondan ÖNCE silinmeli.
   await prisma.otpChallenge.deleteMany({ where: { id: startsWith } });
   await prisma.auditLog.deleteMany({ where: { id: startsWith } });
+
+  /**
+   * UYGULAMANIN ÜRETTİĞİ denetim kayıtları da silinmeli.
+   *
+   * Yukarıdaki satır yalnızca kimliği test önekiyle başlayanları siliyor; oysa
+   * servis katmanını çağıran testlerde denetim kaydını UYGULAMA yazıyor ve
+   * kimliği `cuid()` oluyor. `audit_logs.user_id` üzerindeki yabancı anahtar
+   * `Restrict` olduğu için bu satırlar kalırsa test kullanıcısı silinemez ve
+   * bir sonraki koşu "kullanıcı zaten var" hatasıyla patlar.
+   */
+  await prisma.auditLog.deleteMany({ where: { userId: startsWith } });
+
   await prisma.registrationDraft.deleteMany({ where: { id: startsWith } });
 
   await prisma.user.deleteMany({ where: { id: startsWith } });

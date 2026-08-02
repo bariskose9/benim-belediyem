@@ -403,3 +403,51 @@ export const GOOGLE_OAUTH_TIMEOUT_SECONDS = 5;
  */
 export const GOOGLE_OAUTH_START_RATE_LIMIT = 10;
 export const GOOGLE_OAUTH_START_WINDOW_MS = 15 * 60_000;
+
+// ===========================================================================
+// HASTANE RANDEVU (PRD §5.1 · adım 6)
+//
+// Modül personele özeldir; erişim kapısı `access-control.ts` içinde ve bu
+// sabitlerden bağımsızdır. Buradakiler yalnızca İŞ KURALLARININ sayılarıdır.
+// ===========================================================================
+
+/**
+ * İptal penceresi: randevuya bu süreden az kalmışsa iptal edilemez (PRD §5.1).
+ *
+ * Ölçüt randevunun BAŞLANGIÇ ANIDIR, randevunun günü değil: "2 saat kala"
+ * kuralını gün başına bağlamak, sabah 09:00'daki randevuyu bir önceki gece
+ * yarısına kadar iptal edilebilir yapardı.
+ */
+export const APPOINTMENT_CANCEL_CUTOFF_MS = 2 * 60 * 60_000;
+
+/**
+ * Randevu ekranında ileriye dönük kaç gün gösterilir.
+ *
+ * Tohumlama 14 günlük slot üretiyor (`prisma/seed/steps/health.ts`); daha
+ * uzun bir pencere her zaman boş çıkan gün şeritleri gösterirdi. Sayı
+ * tohumlamadan bağımsız bir ÜRÜN kararıdır: hasta üç hafta sonrasını planlamaz.
+ */
+export const APPOINTMENT_VISIBLE_DAYS = 14;
+
+/**
+ * "Randevularım" ekranında gösterilen geçmiş randevu sayısı.
+ *
+ * Sınırsız liste dönülmez (03-api-guidelines.md). Yaklaşan randevular
+ * sınırlanmaz — onlar zaten kullanıcının aktif işidir ve doğal olarak azdır.
+ */
+export const APPOINTMENT_HISTORY_LIMIT = 20;
+
+/**
+ * Yazma uçlarının KULLANICI BAŞINA bütçesi (CLAUDE.md §5.5: "yazma
+ * endpoint'lerinde rate limit").
+ *
+ * NEDEN IP DEĞİL KULLANICI: bu hizmet belediye personeline açık ve personelin
+ * tamamı aynı binadan, tek bir dış IP'nin arkasından girebilir. IP bazlı bir
+ * sayaç o durumda meşru kullanıcıları birbirinin bütçesinden yerdi.
+ *
+ * Sınır cömert: normal kullanıcı bir randevu alır, belki iptal edip yenisini
+ * seçer. 20, çift tıklamayı ve kararsızlığı rahatça karşılar; amaç kullanıcıyı
+ * kısıtlamak değil, tek bir hesabın tüm takvimi otomatik doldurmasını önlemek.
+ */
+export const APPOINTMENT_WRITE_RATE_LIMIT_MAX = 20;
+export const APPOINTMENT_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;

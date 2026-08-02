@@ -326,7 +326,24 @@ gecikebilir. 3 dakikalık pencerede kullanıcı kodu girmeye çalışırken sür
 - Branş listesi → o branştaki doktorlar → doktorun uygun gün ve saatleri
 - Üye randevu oluşturur, görüntüler, iptal eder
 - **Kurallar:** dolu saat seçilemez · geçmiş tarihe randevu alınamaz ·
-  aynı branşta aynı gün ikinci randevu alınamaz · iptal en geç randevudan 2 saat önce
+  **aynı branşta aktif randevu varken ikinci randevu alınamaz** ·
+  iptal en geç randevudan 2 saat önce
+
+  > **2026-08-03 güncellemesi.** Kural önce "aynı branşta **aynı gün** ikinci
+  > randevu alınamaz" biçimindeydi ve adım 6 böyle uygulanmıştı. Canlı
+  > denemede proje sahibi gerçek randevu sistemlerinin böyle davranmadığını
+  > belirtti: bir branşta bekleyen randevunuz varken o branştan yeni randevu
+  > alamazsınız, sadece aynı güne değil hiçbir güne.
+  >
+  > **"Aktif" ne demek:** durumu `booked` VE saati henüz gelmemiş randevu.
+  > Saati geçen randevu engel olmaktan çıkar; iptal edilen randevu hiç engel
+  > sayılmaz (iptal bir cezaya dönüşmemeli).
+  >
+  > **Kabul edilen bedel:** kontrol randevusu önceden alınamıyor. Yarınki
+  > kardiyoloji randevusu dururken iki hafta sonrasına ikinci bir kardiyoloji
+  > randevusu açılamaz; önce ilki geçmeli. Bu bilinçli bir tercih — daha esnek
+  > bir kural (branş başına en fazla 2 aktif randevu) kullanıcıya "neden
+  > engellendim" sorusunu anlatılamaz hale getirirdi.
 - **Kabul kriteri:** İki kullanıcı aynı saati aynı anda seçemez (409 döner)
 
 ### 5.2 Etkinlik ve Rezervasyon

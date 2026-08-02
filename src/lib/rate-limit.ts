@@ -110,8 +110,13 @@ export async function resetRateLimit(key: string): Promise<void> {
  *
  * `destination` = doğrulama kodunun gönderildiği e-posta veya telefon.
  * "Aynı hedefe 3 kod / 15 dakika" kuralı (05-auth-security.md) bunu kullanır.
+ *
+ * `user` = giriş yapmış kullanıcının kimliği. Girişli akışlarda IP yerine bunu
+ * kullanmak gerekebiliyor: personele özel hizmetlerde (PRD §5.1, §5.6) tüm
+ * kullanıcılar aynı kurumun ağından, tek bir dış IP'nin arkasından girebilir
+ * ve IP bazlı bir sayaç onları birbirinin bütçesinden yerdi.
  */
-export type RateLimitKind = "ip" | "session" | "destination";
+export type RateLimitKind = "ip" | "session" | "destination" | "user";
 
 /**
  * Anahtar üretir: `<amaç>:<tür>:<değer>`.
@@ -120,12 +125,28 @@ export type RateLimitKind = "ip" | "session" | "destination";
  * haliyle saklanmaz; tuzlanmış özete çevrilir (ADR-006 → "anahtar kişisel veri
  * içermez"). Oturum kimliği zaten rastgele bir jetondur, kişiye dair bilgi
  * taşımaz, olduğu gibi kullanılır.
+ *
+ * KULLANICI KİMLİĞİ DE ÖZETLENİR. Tek başına rastgele bir cuid'dir, ama
+ * `users` tablosundaki satıra doğrudan işaret eder: düz yazılsaydı
+ * `rate_limit_counters` tablosunu okuyan biri hangi hesabın ne zaman ne yaptığını
+ * çıkarabilirdi. Özet bu bağı koparır, sayaç yine doğru çalışır.
  */
 export function rateLimitKey(purpose: string, kind: RateLimitKind, value: string): string {
   const safeValue =
-    kind === "ip" ? hashActorIp(value) : kind === "destination" ? hashDestination(value) : value;
+    kind === "ip"
+      ? hashActorIp(value)
+      : kind === "destination"
+        ? hashDestination(value)
+        : kind === "user"
+          ? hashUserId(value)
+          : value;
 
   return `${purpose}:${kind}:${safeValue}`;
+}
+
+/** Kullanıcı kimliğinin geri döndürülemez özeti — sayaç anahtarı için. */
+export function hashUserId(userId: string): string {
+  return hashPseudonym(userId, serverEnv.NATIONAL_ID_HASH_SALT, "user");
 }
 
 /** IP adresinin geri döndürülemez özeti — denetim kaydı da bunu yazar. */

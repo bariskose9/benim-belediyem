@@ -670,4 +670,127 @@ export const messages = {
     },
     comingSoon: "Bu hizmet henüz açılmadı; yakında burada olacak.",
   },
+
+  /** Hastane randevu modülü (PRD §5.1 · adım 6). */
+  hospital: {
+    pageTitle: "Hastane Randevusu",
+    title: "Hastane randevusu",
+    description: "Personel sağlık biriminden randevu alın. Randevular ücretsizdir.",
+
+    /**
+     * Doktor unvanlarının Türkçe karşılıkları.
+     *
+     * Veritabanındaki enum değerleri İngilizce (`professor`,
+     * `associate_professor`, …); kullanıcıya gösterilen karşılıkları burada
+     * (data-model.md → "Enum değerleri İngilizce; kullanıcıya gösterilen
+     * karşılıkları src/config/ altında").
+     */
+    doctorTitles: {
+      professor: "Prof. Dr.",
+      associate_professor: "Doç. Dr.",
+      specialist: "Uzm. Dr.",
+      physician: "Dr.",
+    },
+
+    /** Branş kartındaki doktor sayısı. */
+    doctorCount: (count: number) => `${count} doktor`,
+
+    /**
+     * Gün şeridindeki boş saat sayısı.
+     *
+     * Sayı gösteriliyor çünkü hiç boş saati olmayan güne tıklayıp boş liste
+     * görmek kullanıcıyı iki kez uğraştırır; şeritte görünen "0 boş" o günü
+     * baştan eler.
+     */
+    freeCount: (count: number) => (count === 0 ? "0 boş" : `${count} boş`),
+
+    /** Adım adım akışın gezinme metinleri. */
+    steps: {
+      specialty: "Branş seçin",
+      doctor: "Doktor seçin",
+      slot: "Gün ve saat seçin",
+      backToSpecialties: "Branşlar",
+      backToDoctors: "Doktorlar",
+      /** Ekran okuyucu, kullanıcının akışın neresinde olduğunu bilmeli. */
+      breadcrumbLabel: "Randevu adımları",
+    },
+
+    myAppointments: {
+      pageTitle: "Randevularım",
+      title: "Randevularım",
+      description: "Yaklaşan randevularınızı görüntüleyin ve iptal edin.",
+      link: "Randevularım",
+      upcomingHeading: "Yaklaşan randevular",
+      pastHeading: "Geçmiş ve iptal edilen randevular",
+      empty: "Henüz randevunuz yok. Branş seçerek randevu alabilirsiniz.",
+      pastEmpty: "Geçmiş randevunuz bulunmuyor.",
+      newAppointment: "Yeni randevu al",
+      statusCancelled: "İptal edildi",
+      statusPast: "Tamamlandı",
+    },
+
+    slots: {
+      /** Saat düğmesinin erişilebilir adı — yalnızca "09:20" yazmak yetmez. */
+      bookLabel: (time: string, doctor: string) => `${time} · ${doctor} · randevu al`,
+      booked: "Dolu",
+      bookedLabel: (time: string) => `${time} · dolu, seçilemez`,
+      booking: "Alınıyor…",
+      /** Kart üstündeki saat listesinin başlığı. */
+      heading: "Uygun saatler",
+    },
+
+    /**
+     * Boş durumlar. "Sonuç yok" demek yetmez; kullanıcıya NE YAPACAĞI söylenir
+     * (07-ui-design-system.md → zorunlu ekran durumları).
+     */
+    empty: {
+      specialties: "Şu an randevu verilen bir branş bulunmuyor.",
+      doctors: "Bu branşta şu an randevu veren doktor bulunmuyor. Başka bir branş seçin.",
+      slots: "Bu doktorun önümüzdeki günlerde boş saati kalmamış. Başka bir doktor seçin.",
+      daySlots: "Seçtiğiniz günde boş saat kalmamış. Başka bir gün seçin.",
+    },
+
+    /** Yükleniyor durumu — iskelet kutular çizilirken ekran okuyucuya söylenir. */
+    loading: "Randevu bilgileri yükleniyor…",
+
+    cancel: {
+      action: "İptal et",
+      pending: "İptal ediliyor…",
+      /** Geri alınamaz bir işlem; onay istenir (07-ui-design-system.md). */
+      confirmTitle: "Randevuyu iptal etmek istiyor musunuz?",
+      confirmBody:
+        "Randevunuz iptal edilecek ve saat başkalarına açılacak. Bu işlem geri alınamaz.",
+      confirmAction: "Evet, iptal et",
+      confirmDismiss: "Vazgeç",
+      /** İptal penceresi kapandığında düğmenin yerini bu açıklama alır. */
+      closed: "Randevuya 2 saatten az kaldığı için iptal edilemez.",
+      success: "Randevunuz iptal edildi.",
+    },
+
+    booked: {
+      success: "Randevunuz oluşturuldu.",
+    },
+
+    /**
+     * Hata metinleri. Dördü de KURAL ihlali, arıza değil: kullanıcıya ne
+     * olduğunu ve bundan sonra ne yapabileceğini söylerler.
+     */
+    errors: {
+      slotTaken: "Bu saat az önce başkası tarafından alındı. Lütfen listeden başka bir saat seçin.",
+      slotInPast: "Geçmiş bir saate randevu alınamaz. Lütfen ileri bir tarih seçin.",
+      slotNotFound: "Seçtiğiniz saat artık takvimde yok. Lütfen listeyi yenileyip tekrar deneyin.",
+      /**
+       * PRD §5.1 (2026-08-03 güncellemesi). Mesaj kullanıcıya İKİ çıkış yolu
+       * söylüyor: bekle ya da iptal et. "Randevunuz var" demek yeterli
+       * olmazdı — kullanıcı ne yapacağını bilemezdi.
+       */
+      activeSpecialtyAppointment:
+        "Bu branşta bekleyen bir randevunuz var. Yeni randevu alabilmek için mevcut randevunuzun tarihini bekleyin veya onu iptal edin.",
+      appointmentNotFound: "Randevu bulunamadı. Listeyi yenileyip tekrar deneyin.",
+      alreadyCancelled: "Bu randevu zaten iptal edilmiş.",
+      cancellationTooLate: "Randevuya 2 saatten az kaldığı için iptal edilemez.",
+      tooManyAttempts:
+        "Kısa sürede çok fazla randevu işlemi yaptınız. Lütfen 15 dakika sonra tekrar deneyin.",
+    },
+  },
 } as const;

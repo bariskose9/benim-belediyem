@@ -165,12 +165,23 @@ test("personel hastane ve spor salonunu görebilir", async ({ page }) => {
   await expect(page).toHaveURL(/\/hesabim$/, { timeout: POST_LOGIN_TIMEOUT_MS });
   await expect(page.getByText("Kurum personeli")).toBeVisible();
 
-  for (const path of ["/hastane", "/spor-salonu"]) {
-    await page.goto(path);
+  /**
+   * İKİ SAYFA ARTIK FARKLI ŞEYLER GÖSTERİYOR (roadmap adım 6).
+   *
+   * Hastane modülü açıldı ve gerçek içerik çiziyor; spor salonu hâlâ iskelet
+   * ve dürüstçe "yakında" diyor. Bu testin asıl sorusu ikisinde de aynı ve
+   * değişmedi: PERSONEL, "yalnızca kurum personeline açıktır" duvarını
+   * GÖRMEMELİ. Modülün kendi akışı `hospital.spec.ts` içinde sınanıyor.
+   */
+  await page.goto("/hastane");
+  await expect(
+    page.getByRole("heading", { name: messages.hospital.steps.specialty }),
+  ).toBeVisible();
+  await expect(page.getByText("yalnızca kurum personeline")).toHaveCount(0);
 
-    await expect(page.getByText("Bu hizmet henüz açılmadı")).toBeVisible();
-    await expect(page.getByText("yalnızca kurum personeline")).toHaveCount(0);
-  }
+  await page.goto("/spor-salonu");
+  await expect(page.getByText("Bu hizmet henüz açılmadı")).toBeVisible();
+  await expect(page.getByText("yalnızca kurum personeline")).toHaveCount(0);
 });
 
 test("yanlış şifre ile olmayan hesap AYNI mesajı verir", async ({ page, browser }) => {

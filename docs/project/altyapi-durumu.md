@@ -9,13 +9,19 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-02 · roadmap adım 5 sonrası
+**Son güncelleme:** 2026-08-03 · roadmap adım 6 sonrası
 
-> **Adım 5'te dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis, yeni
-> ortam değişkeni yok; adım tamamen arayüz tarafında kaldı. Tek dış iş, aşağıda
-> iki kez anlatılan tanıdık tuzak: `feature/layout` dalının preview adresi
-> **Cloudflare Turnstile hostname listesine** ve **Google OAuth redirect URI
-> listesine** elle eklenmeli (teknik borç #31).
+> **Adım 6'da dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis, yeni
+> ortam değişkeni, yeni bağımlılık ve yeni migration yok; randevu tabloları
+> adım 3'ten beri hazırdı. Tek dış iş, aşağıda iki kez anlatılan tanıdık tuzak:
+> `feature/hastane-randevu` dalının preview adresi **Cloudflare Turnstile
+> hostname listesine** ve **Google OAuth redirect URI listesine** elle
+> eklenmeli (teknik borç #31).
+>
+> ⚠️ **Uzak ortamlarda tohumlanmış doktor saatleri ~2026-08-15'te tükeniyor**
+> (teknik borç #38). Preview ve production 2026-08-01'de tohumlandı ve seed
+> 14 günlük takvim üretiyor. O tarihten sonra hastane ekranı çökmez, "boş saat
+> kalmamış" der; düzeltmek için seed'in yeniden koşturulması gerekir.
 
 ---
 
