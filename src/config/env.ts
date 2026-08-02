@@ -221,13 +221,33 @@ export function parseEnv<T extends z.ZodType>(
 }
 
 /**
- * Preview dağıtımlarının adresi her dalda değişir, o yüzden elle sabitlenemez.
- * Vercel her dağıtımda `NEXT_PUBLIC_VERCEL_URL` değişkenini kendisi doldurur;
- * açıkça verilmiş bir değer varsa o her zaman kazanır (production kendi alan adını kullanır).
+ * Preview dağıtımlarının adresi elle sabitlenemez, Vercel iki aday sunar:
+ *
+ *   `NEXT_PUBLIC_VERCEL_BRANCH_URL` → `...-git-<dal>-....vercel.app`, DAL BOYUNCA SABİT
+ *   `NEXT_PUBLIC_VERCEL_URL`        → `...-<rastgele>-....vercel.app`, HER DAĞITIMDA DEĞİŞİR
+ *
+ * ÖNCE DAL ADRESİ. Sebebi Google OAuth: `redirect_uri`, sağlayıcı panelindeki
+ * listeyle karakteri karakterine eşleşmek zorunda. Dağıtım adresi her commit'te
+ * değiştiği için panele önceden yazılamaz ve akış `redirect_uri_mismatch` ile
+ * ölür (2026-08-02'de adım 4c'de yaşandı). Aynı gerekçe Cloudflare Turnstile'ın
+ * hostname listesi için de geçerli.
+ *
+ * Açıkça verilmiş `NEXT_PUBLIC_APP_URL` her zaman kazanır — production kendi
+ * alan adını kullanır ve bu mantığa hiç girmez.
  */
-const vercelAppUrl = process.env.NEXT_PUBLIC_VERCEL_URL
-  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-  : undefined;
+export function resolveVercelAppUrl(env: {
+  branchHost?: string;
+  deploymentHost?: string;
+}): string | undefined {
+  const host = env.branchHost || env.deploymentHost;
+
+  return host ? `https://${host}` : undefined;
+}
+
+const vercelAppUrl = resolveVercelAppUrl({
+  branchHost: process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL,
+  deploymentHost: process.env.NEXT_PUBLIC_VERCEL_URL,
+});
 
 export const publicEnvSource = {
   NODE_ENV: process.env.NODE_ENV,

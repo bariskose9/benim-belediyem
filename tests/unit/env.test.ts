@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { __testing, parseEnv } from "@/config/env";
+import { __testing, parseEnv, resolveVercelAppUrl } from "@/config/env";
 
 const { publicEnvSchema, serverEnvSchema } = __testing;
 
@@ -44,6 +44,43 @@ describe("genel ortam değişkenleri", () => {
 
   it("hata mesajı ne yapılacağını söyler", () => {
     expect(() => parseEnv(publicEnvSchema, {}, "test")).toThrowError(/\.env\.example/);
+  });
+});
+
+/**
+ * Bu blok bir DAĞITIM DEĞİŞMEZİni koruyor: OAuth `redirect_uri`'si sağlayıcı
+ * panelindeki listeyle birebir eşleşmek zorunda. Dağıtım adresi her commit'te
+ * değiştiği için panele yazılamaz; dal adresi ise dal boyunca sabittir.
+ * Öncelik ters çevrilirse Google `redirect_uri_mismatch` verir (adım 4c).
+ */
+describe("preview adresinin seçimi", () => {
+  const BRANCH_HOST = "benim-belediyem-git-feature-x-barisss.vercel.app";
+  const DEPLOYMENT_HOST = "benim-belediyem-egg0uqrln-barisss.vercel.app";
+
+  it("iki adres de varken DAL adresini seçer", () => {
+    expect(resolveVercelAppUrl({ branchHost: BRANCH_HOST, deploymentHost: DEPLOYMENT_HOST })).toBe(
+      `https://${BRANCH_HOST}`,
+    );
+  });
+
+  it("dal adresi yoksa dağıtım adresine düşer", () => {
+    // Vercel bir gün dal değişkenini vermezse uygulama adressiz kalmamalı;
+    // yanlış adres, adres olmamasından iyidir (uygulama hiç açılmazdı).
+    expect(resolveVercelAppUrl({ deploymentHost: DEPLOYMENT_HOST })).toBe(
+      `https://${DEPLOYMENT_HOST}`,
+    );
+  });
+
+  it("boş string'i adres saymaz", () => {
+    // Vercel dışı ortamlarda değişken tanımlı ama boş gelebiliyor.
+    expect(resolveVercelAppUrl({ branchHost: "", deploymentHost: DEPLOYMENT_HOST })).toBe(
+      `https://${DEPLOYMENT_HOST}`,
+    );
+  });
+
+  it("hiçbiri yoksa tanımsız döner", () => {
+    // Local'de bu yol hiç çalışmaz; adres `.env` dosyasından gelir.
+    expect(resolveVercelAppUrl({})).toBeUndefined();
   });
 });
 
