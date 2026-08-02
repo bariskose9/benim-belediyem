@@ -43,6 +43,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
   imzalanmıyor — yönetilecek bir sır eksildi
 - Şema **değişmedi**, migration **yok**: `accounts` tablosu adım 3'ten beri hazır
 
+### Düzeltildi — adım 4c (preview'da tarayıcı denemesinde yakalandı)
+- **Preview'ın adresi artık DAL adresinden alınıyor** (`VERCEL_BRANCH_URL`),
+  dağıtım adresinden değil. Dağıtım adresi her commit'te değiştiği için
+  (`...-egg0uqrln-...`) Google paneline önceden yazılamıyordu ve her dönüş
+  `redirect_uri_mismatch` ile ölecekti. Dal adresi (`...-git-<dal>-...`) dal
+  boyunca sabit. Aynı düzeltme giriş sonrası yönlendirmede Turnstile'ın
+  hostname kontrolünü de kurtarıyor — iki hata tek sebepten geliyormuş
+- **E2E'ye sahte Google istemcisi verildi.** Anahtarlar yokken düğme bilerek
+  çizilmiyor, dolayısıyla CI'da testler düğmeyi bulamıyordu. Gerçek anahtar
+  CI'ya taşınmadı: testler Google'ın giriş ekranına hiç girmiyor, yalnızca
+  bizim ürettiğimiz adresi doğruluyor
+
 ### Eklendi — adım 4b-3: şifre sıfırlama ve hesap sayımı koruması
 - **Şifre sıfırlama akışı (`/sifremi-unuttum` → `/sifremi-unuttum/dogrulama`)**:
   kimlik numarası → kayıtlı e-posta adresine 6 haneli kod → kod + yeni şifre.

@@ -67,6 +67,14 @@
   aynı tuzak (teknik borç #31). Google joker kabul etmiyor; adres birebir
   eşleşmezse `redirect_uri_mismatch` alınır. Yani her yeni dalda **iki panel**:
   Cloudflare hostname listesi + Google redirect URI listesi
+- ⚠️ **Panele DAL adresi yazılır, dağıtım adresi DEĞİL.** Vercel iki farklı
+  preview adresi üretir ve ikisi de çalışır:
+  - `benim-belediyem-git-<dal>-barisss.vercel.app` → **dal boyunca sabit**, panele yazılacak olan bu
+  - `benim-belediyem-<rastgele>-barisss.vercel.app` → **her commit'te değişir**, panele yazılamaz
+  Uygulama 2026-08-02'ye kadar Google'a ikincisini gönderiyordu; düzeltildi
+  (`env.ts` → `resolveVercelAppUrl`, artık `NEXT_PUBLIC_VERCEL_BRANCH_URL`
+  tercih ediliyor). Dal adresini `npx vercel inspect <dagitim-url> --scope barisss`
+  çıktısındaki **Aliases** satırından okuyabilirsin — tahmin etme, oradan bak
 - **Uygulama "Testing" modunda** — yalnızca *Audience* sayfasındaki **Test
   users** listesindeki e-postalar giriş yapabilir. Proje sahibinin Gmail'i
   eklendi (2026-08-02). Herkese açılması için *Publish app* gerekiyor;
