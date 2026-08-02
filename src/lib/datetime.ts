@@ -33,28 +33,6 @@ export function istanbulDayKey(instant: Date): string {
   }).format(instant);
 }
 
-/**
- * Verilen anın düştüğü İSTANBUL GÜNÜNÜN sınırlarını UTC olarak verir.
- *
- * `start` o günün 00:00'ı, `end` ERTESİ günün 00:00'ıdır; yani aralık
- * `[start, end)` biçiminde yarı açıktır. Kapalı aralık kullanmak, tam gece
- * yarısına denk gelen bir kaydı iki güne birden saydırırdı.
- *
- * Veritabanı sorgusu bu sınırlarla yazılır (`gte` / `lt`): günü SQL tarafında
- * hesaplatmak `starts_at` üzerindeki index'i kullanılamaz hale getirirdi.
- */
-export function istanbulDayBoundsUtc(instant: Date): { start: Date; end: Date } {
-  const start = startOfIstanbulDay(instant);
-
-  // Bir sonraki günün başlangıcı 24 saat eklenerek DEĞİL, 36 saat ileri
-  // gidilip yeniden gün başına yuvarlanarak bulunuyor. Türkiye 2016'dan beri
-  // sabit UTC+03 kullanıyor, ama yaz saati yeniden gelirse 24 saatlik toplama
-  // yılda iki kez yanlış sınır üretirdi; bu yol o durumda da doğru kalır.
-  const end = startOfIstanbulDay(new Date(start.getTime() + 36 * 60 * 60_000));
-
-  return { start, end };
-}
-
 /** Ekranda gösterilecek saat: `09:20`. */
 export function formatIstanbulTime(instant: Date): string {
   return new Intl.DateTimeFormat(LOCALE, {
@@ -96,61 +74,4 @@ export function formatIstanbulDateTime(instant: Date): string {
  */
 export function toMachineDateTime(instant: Date): string {
   return instant.toISOString();
-}
-
-/** Verilen anın düştüğü İstanbul gününün 00:00'ı, UTC olarak. */
-function startOfIstanbulDay(instant: Date): Date {
-  const offsetMs = istanbulOffsetMs(instant);
-
-  // Anı İstanbul duvar saatine taşı, günün başına yuvarla, sonra UTC'ye
-  // geri döndür. Yuvarlama UTC yardımcılarıyla yapılıyor çünkü `setHours`
-  // sunucunun kendi saat dilimini kullanır.
-  const wallClock = new Date(instant.getTime() + offsetMs);
-  const wallClockDayStart = Date.UTC(
-    wallClock.getUTCFullYear(),
-    wallClock.getUTCMonth(),
-    wallClock.getUTCDate(),
-  );
-
-  return new Date(wallClockDayStart - offsetMs);
-}
-
-/**
- * İstanbul'un o andaki UTC farkı, milisaniye cinsinden (bugün sabit +3 saat).
- *
- * Sabit `3 * 60 * 60_000` yazmak daha kısa olurdu ama 2016 öncesinde Türkiye
- * yaz saati uyguluyordu ve karar geri alınabilir. Farkı çalışma anında
- * sormak, o gün kodun hiç değişmemesi demek.
- */
-function istanbulOffsetMs(instant: Date): number {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: DISPLAY_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }).formatToParts(instant);
-
-  const read = (type: Intl.DateTimeFormatPartTypes): number =>
-    Number(parts.find((part) => part.type === type)?.value ?? "0");
-
-  // `hour12: false` bazı ortamlarda gece yarısını 24 olarak veriyor; 0'a çekmek
-  // gerekiyor, yoksa fark bir gün kayar.
-  const hour = read("hour") % 24;
-
-  const asIfUtc = Date.UTC(
-    read("year"),
-    read("month") - 1,
-    read("day"),
-    hour,
-    read("minute"),
-    read("second"),
-  );
-
-  // Saniye altı bilgi biçimlendirmede kayboluyor; farkın kendisi her zaman tam
-  // dakika olduğu için bunu geri eklemek gerekiyor, yoksa yuvarlama hatası olur.
-  return asIfUtc - (instant.getTime() - instant.getMilliseconds());
 }

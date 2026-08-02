@@ -113,8 +113,21 @@ Dal: `feature/sepet-odeme` (öneri)
 - **E2E'yi 15 dakika içinde üst üste koşturma.** Sayaçlar veritabanında;
   `/api/auth/google` bütçesi (10/15dk) tükenince Google testleri kırmızıya
   döner ve hata sanki kodda gibi görünür. Belirti: her koşuda BAŞKA bir
-  Google testi düşüyor. Çözüm: bekle, ya da `rate_limit_counters` içindeki
-  ilgili satırları sil
+  Google testi düşüyor, koşu SANİYELER sürüyor (zaman aşımı değil, anında
+  ret). Çözüm: `rate_limit_counters` tablosunu boşalt, sonra tek sefer koş.
+  2026-08-03'te bu yüzden yarım saat kaybedildi
+- **Sunucu ayaktayken `npx playwright test` çalıştırma — `.next`'i BOZUYOR.**
+  `webServer.reuseExistingServer` sunucuyu bulamazsa kendi `npm run build`'ini
+  başlatıyor ve çalışan sunucunun altından derlemeyi değiştiriyor. Sonuç:
+  sayfalar açılıyor ama JS parçaları **500** dönüyor, hiçbir düğme çalışmıyor
+  ve HER test dosyası kırmızıya dönüyor — kodda hata sanılıyor.
+  **Belirti:** tarayıcı konsolunda `Refused to execute script ... MIME type
+  ('text/plain')`. **Çözüm:** sunucuyu durdur, `rm -rf .next && npm run build`,
+  sunucuyu yeniden başlat. 2026-08-03'te bu yüzden 20 dakika kaybedildi
+- **Tohum verisi iş kurallarına UYMAK ZORUNDA.** Bir kural değiştiğinde
+  `prisma/seed/` içindeki karşılığı da değişmeli; yoksa tohumlanmış veri
+  uygulamanın kendi kuralını çiğner ve elle test ederken "kod bozuk" sanılır.
+  2026-08-03'te randevu kuralı sıkılaşınca `steps/health.ts` de güncellendi
 - **jsdom bu projede `localStorage` SAĞLAMIYOR** — `tests/helpers/local-storage.ts`
 - **Testler zaman aşımına düşüyorsa önce `uptime` çalıştır.** Yük yüksekse
   argon2 pahalı olduğu için testler kırmızıya döner; testi suçlamadan önce bak

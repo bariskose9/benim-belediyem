@@ -3,11 +3,11 @@ import {
   APPOINTMENT_WRITE_RATE_LIMIT_WINDOW_MS,
 } from "@/config/constants";
 import {
+  ActiveSpecialtyAppointmentError,
   AppointmentAlreadyCancelledError,
   AppointmentNotFoundError,
   AppointmentRateLimitedError,
   CancellationTooLateError,
-  SameDaySpecialtyError,
   SlotInPastError,
   SlotNotFoundError,
   SlotTakenError,
@@ -15,7 +15,7 @@ import {
 import {
   createAppointment,
   findOwnedAppointment,
-  hasActiveAppointmentInSpecialtyOnDay,
+  hasActiveAppointmentInSpecialty,
   markAppointmentCancelled,
 } from "@/features/appointments/repositories/appointment.repository";
 import {
@@ -25,7 +25,6 @@ import {
 } from "@/features/appointments/repositories/doctor-slot.repository";
 import { canCancelAt, isSlotInPast } from "@/features/appointments/services/appointment-rules";
 import { recordAuditLog } from "@/lib/audit";
-import { istanbulDayBoundsUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
 import { consumeRateLimit, hashActorIp, rateLimitKey } from "@/lib/rate-limit";
 
@@ -52,14 +51,14 @@ export type BookAppointmentInput = {
  * Randevu oluşturur.
  *
  * KONTROL SIRASI TESADÜF DEĞİL:
- *  1. Hız sınırı  → en ucuz kapı, veritabanı işlemi hiç açılmadan önce
- *  2. Saat var mı → yoksa devam etmenin anlamı yok
- *  3. Geçmiş mi   → saf kural, sorgu gerektirmiyor
- *  4. Aynı gün    → bir sorgu daha; saat kilitlenmeden ÖNCE
- *  5. Rezervasyon → satır kilidi burada alınır ve işlem hemen biter
+ *  1. Hız sınırı    → en ucuz kapı, veritabanı işlemi hiç açılmadan önce
+ *  2. Saat var mı   → yoksa devam etmenin anlamı yok
+ *  3. Geçmiş mi     → saf kural, sorgu gerektirmiyor
+ *  4. Aktif randevu → bir sorgu daha; saat kilitlenmeden ÖNCE
+ *  5. Rezervasyon   → satır kilidi burada alınır ve işlem hemen biter
  *
  * Rezervasyon en sona bırakıldı ki `doctor_slots` satırı mümkün olan en kısa
- * süre kilitli kalsın. Önce kilitlenip sonra "aynı gün randevun var mı" diye
+ * süre kilitli kalsın. Önce kilitlenip sonra "bu branşta randevun var mı" diye
  * sorulsaydı, o sorgu boyunca aynı saati isteyen herkes beklerdi.
  */
 export async function bookAppointment(
@@ -75,15 +74,13 @@ export async function bookAppointment(
     // İstemcinin gönderdiği tarih DEĞİL, veritabanındaki saat ölçü alınıyor.
     if (isSlotInPast(slot.startsAt, input.now)) throw new SlotInPastError();
 
-    const day = istanbulDayBoundsUtc(slot.startsAt);
-    const alreadyBooked = await hasActiveAppointmentInSpecialtyOnDay(tx, {
+    const alreadyBooked = await hasActiveAppointmentInSpecialty(tx, {
       userId: input.userId,
       specialtyId: slot.specialtyId,
-      dayStart: day.start,
-      dayEnd: day.end,
+      now: input.now,
     });
 
-    if (alreadyBooked) throw new SameDaySpecialtyError();
+    if (alreadyBooked) throw new ActiveSpecialtyAppointmentError();
 
     /**
      * PRD §5.1 KABUL KRİTERİ BURADA KARŞILANIYOR.

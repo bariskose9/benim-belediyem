@@ -163,7 +163,12 @@ function formatSlotKey(date: Date): string {
 
 /**
  * Dolu slotların bir kısmına gerçek randevu bağlar.
- * PRD §5.1 kuralına uyar: aynı kullanıcı, aynı branşta, aynı gün ikinci randevu alamaz.
+ *
+ * PRD §5.1 kuralına uyar: **aynı kullanıcının aynı branşta birden fazla AKTİF
+ * randevusu olamaz.** Kural 2026-08-03'te "aynı gün"den "aktif randevu"ya
+ * sıkılaştırıldı; tohum da onunla birlikte güncellendi. Aksi hâlde tohumlanmış
+ * veri, uygulamanın kendi kuralını çiğniyor olurdu — kullanıcı ekranda iki
+ * Dahiliye randevusu görür ama üçüncüsünü alamazdı.
  */
 async function seedAppointments(
   context: SeedContext,
@@ -181,8 +186,14 @@ async function seedAppointments(
   const specialtyByDoctor = new Map(doctors.map((doctor) => [doctor.id, doctor.specialtyId]));
   const takenPerUser = new Map<string, number>();
   const usedSlots = new Set<string>();
-  /** `kullanıcı:branş:gün` — aynı branşta aynı gün ikinci randevuyu engeller. */
-  const usedDaySpecialty = new Set<string>();
+  /**
+   * `kullanıcı:branş` — aynı branşta İKİNCİ AKTİF randevuyu engeller.
+   *
+   * Anahtarda gün YOK ve bu bilinçli: PRD §5.1 artık aynı branşta bekleyen
+   * randevusu olana hiçbir güne yeni randevu vermiyor. Gün anahtara girseydi
+   * tohum, uygulamanın reddedeceği bir veri üretirdi.
+   */
+  const usedSpecialty = new Set<string>();
   const rows: {
     id: string;
     userId: string;
@@ -201,13 +212,12 @@ async function seedAppointments(
       if ((takenPerUser.get(user.id) ?? 0) >= MAX_APPOINTMENTS_PER_USER) break;
       if (usedSlots.has(slot.id)) continue;
 
-      const dayKey = slot.startsAt.toISOString().slice(0, 10);
-      const guard = `${user.id}:${specialtyByDoctor.get(slot.doctorId)}:${dayKey}`;
+      const guard = `${user.id}:${specialtyByDoctor.get(slot.doctorId)}`;
 
-      if (usedDaySpecialty.has(guard)) continue;
+      if (usedSpecialty.has(guard)) continue;
 
       usedSlots.add(slot.id);
-      usedDaySpecialty.add(guard);
+      usedSpecialty.add(guard);
       takenPerUser.set(user.id, (takenPerUser.get(user.id) ?? 0) + 1);
 
       rows.push({

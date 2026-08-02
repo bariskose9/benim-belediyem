@@ -16,9 +16,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
   (204). İkisi de yalnızca personele açık; `userId` gövdeden değil oturumdan
   okunuyor ve istemcinin gönderdiği değer şemadan hiç geçmiyor
 - **PRD §5.1'in dört kuralı da sunucuda**: dolu saat seçilemez · geçmiş tarihe
-  randevu alınamaz · aynı branşta aynı gün ikinci randevu alınamaz · iptal en
-  geç randevudan 2 saat önce. Dördü de ayrı hata kodu ve 409 döndürüyor, çünkü
-  ekranın hangi kuralın devreye girdiğini bilmesi gerekiyor
+  randevu alınamaz · **aynı branşta aktif randevu varken ikinci randevu
+  alınamaz** · iptal en geç randevudan 2 saat önce. Dördü de ayrı hata kodu ve
+  409 döndürüyor, çünkü ekranın hangi kuralın devreye girdiğini bilmesi gerekiyor
+- **Üçüncü kural canlı denemeden sonra sıkılaştırıldı (PRD §5.1 güncellendi).**
+  Önce "aynı branşta **aynı gün**" diye yazılıydı ve öyle uygulanmıştı; proje
+  sahibi preview'da deneyip gerçek randevu sistemlerinin böyle davranmadığını
+  belirtti. Artık o branşta bekleyen randevunuz varken **hiçbir güne** yeni
+  randevu alamıyorsunuz. "Aktif" = durumu `booked` ve saati henüz gelmemiş;
+  saati geçen randevu engel olmaktan çıkıyor, iptal edilen hiç sayılmıyor.
+  Kabul edilen bedel: kontrol randevusu önceden alınamıyor
 - **Kabul kriteri karşılandı — iki kullanıcı aynı saati alamaz.** Koruma
   uygulama mantığında değil, `doctor_slots` üzerindeki koşullu güncellemede
   (`WHERE is_booked = false`): PostgreSQL ikinci işlemi bekletiyor, birinci
@@ -36,10 +43,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
   IP bazlı değil — bu hizmet tek bir kurumun personeline açık ve hepsi aynı
   dış IP'nin arkasından girebilir, IP sayacı onları birbirinin bütçesinden
   yerdi. Kullanıcı kimliği sayaç anahtarında özetlenerek tutuluyor
-- **`src/lib/datetime.ts` (yeni)**: gün ve saat gösteriminin tek yeri.
-  "Aynı gün" hesabı **İstanbul takvimine** göre yapılıyor, UTC'ye göre değil —
-  UTC 21:00'den sonrası İstanbul'da ertesi gündür ve kural yanlış günü
-  karşılaştırırdı. Etkinlik ve teslimat modülleri de bunu kullanacak
+- **`src/lib/datetime.ts` (yeni)**: gün ve saat gösteriminin tek yeri. Ekranda
+  her tarih **İstanbul saatine** çevriliyor (veritabanında UTC saklanıyor) ve
+  gün şeridi günleri İstanbul takvimine göre grupluyor — UTC 21:00'den sonrası
+  İstanbul'da ertesi gündür. Etkinlik ve teslimat modülleri de bunu kullanacak
 - **`api-guard.ts` (yeni)**: korumalı uçların kapısı. `page-guard`'ın HTTP
   karşılığı, ama kararı **aynı saf fonksiyon** veriyor (`evaluateAccess`) —
   sayfada izin verilen bir işlem uçta reddedilemez, tersi de olamaz

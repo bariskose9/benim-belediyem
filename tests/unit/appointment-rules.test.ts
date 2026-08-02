@@ -10,7 +10,7 @@ import {
   groupSlotsByIstanbulDay,
   isSlotInPast,
 } from "@/features/appointments/services/appointment-rules";
-import { istanbulDayBoundsUtc, istanbulDayKey } from "@/lib/datetime";
+import { istanbulDayKey } from "@/lib/datetime";
 
 /**
  * PRD §5.1'in zaman kuralları.
@@ -89,24 +89,6 @@ describe("İstanbul gün sınırı", () => {
   it("UTC gün başını hâlâ önceki güne yazar", () => {
     // UTC 2026-08-10 00:30 = İstanbul 2026-08-10 03:30 — aynı gün
     expect(istanbulDayKey(new Date("2026-08-10T00:30:00.000Z"))).toBe("2026-08-10");
-  });
-
-  it("gün sınırları UTC+3'e göre hesaplanır ve tam 24 saattir", () => {
-    const bounds = istanbulDayBoundsUtc(new Date("2026-08-10T06:00:00.000Z"));
-
-    expect(bounds.start.toISOString()).toBe("2026-08-09T21:00:00.000Z");
-    expect(bounds.end.toISOString()).toBe("2026-08-10T21:00:00.000Z");
-    expect(bounds.end.getTime() - bounds.start.getTime()).toBe(24 * 60 * 60_000);
-  });
-
-  /** Aralık yarı açık: gün başı içeride, ertesi gün başı dışarıda. */
-  it("gece yarısındaki randevu tek bir güne sayılır", () => {
-    const midnight = new Date("2026-08-09T21:00:00.000Z"); // İstanbul 2026-08-10 00:00
-    const bounds = istanbulDayBoundsUtc(midnight);
-
-    expect(bounds.start.getTime()).toBe(midnight.getTime());
-    expect(midnight.getTime() >= bounds.start.getTime()).toBe(true);
-    expect(midnight.getTime() < bounds.end.getTime()).toBe(true);
   });
 
   it("günün son anı ile ertesi günün ilk anı farklı günlere düşer", () => {

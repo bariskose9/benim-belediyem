@@ -118,8 +118,8 @@ describe("kural: geçmiş tarihe randevu alınamaz", () => {
   });
 });
 
-describe("kural: aynı branşta aynı gün ikinci randevu alınamaz", () => {
-  it("aynı branş + aynı gün ikinci randevuyu reddeder (farklı doktor olsa bile)", async () => {
+describe("kural: aynı branşta aktif randevu varken ikinci randevu alınamaz", () => {
+  it("aynı branşta ikinci randevuyu reddeder (farklı doktor olsa bile)", async () => {
     await bookAppointment({ userId: STAFF_USER, slotId: SLOT_SOON, actorIp: ACTOR_IP, now: NOW });
 
     await expect(
@@ -129,10 +129,25 @@ describe("kural: aynı branşta aynı gün ikinci randevu alınamaz", () => {
         actorIp: ACTOR_IP,
         now: NOW,
       }),
-    ).rejects.toMatchObject({ code: "SAME_DAY_SPECIALTY", status: 409 });
+    ).rejects.toMatchObject({ code: "ACTIVE_SPECIALTY_APPOINTMENT", status: 409 });
   });
 
-  it("FARKLI branşta aynı gün randevuya izin verir", async () => {
+  /**
+   * KURAL DEĞİŞİKLİĞİNİN ASIL TESTİ (2026-08-03).
+   *
+   * Eski kural "aynı gün"dü ve bu senaryoya İZİN VERİYORDU. Yeni kuralda
+   * bekleyen randevu hangi güne olursa olsun engelliyor — kontrol randevusu
+   * önceden alınamıyor, bu bilinçli olarak kabul edilmiş bedel (PRD §5.1).
+   */
+  it("aynı branşta FARKLI güne randevuyu da reddeder", async () => {
+    await bookAppointment({ userId: STAFF_USER, slotId: SLOT_SOON, actorIp: ACTOR_IP, now: NOW });
+
+    await expect(
+      bookAppointment({ userId: STAFF_USER, slotId: SLOT_NEXT_DAY, actorIp: ACTOR_IP, now: NOW }),
+    ).rejects.toMatchObject({ code: "ACTIVE_SPECIALTY_APPOINTMENT", status: 409 });
+  });
+
+  it("FARKLI branşta randevuya izin verir", async () => {
     await bookAppointment({ userId: STAFF_USER, slotId: SLOT_SOON, actorIp: ACTOR_IP, now: NOW });
 
     await expect(
@@ -145,11 +160,23 @@ describe("kural: aynı branşta aynı gün ikinci randevu alınamaz", () => {
     ).resolves.toMatchObject({ appointmentId: expect.any(String) });
   });
 
-  it("aynı branşta FARKLI gün randevuya izin verir", async () => {
+  /**
+   * Randevunun saati geçince engel kalkmalı: kullanıcı muayenesini olduktan
+   * sonra aynı branştan yeni randevu alabilmeli.
+   */
+  it("saati GEÇMİŞ randevu yeni randevuyu engellemez", async () => {
     await bookAppointment({ userId: STAFF_USER, slotId: SLOT_SOON, actorIp: ACTOR_IP, now: NOW });
 
+    // SOON_AT geçti; NEXT_DAY hâlâ gelecekte.
+    const afterVisit = new Date(SOON_AT.getTime() + 60_000);
+
     await expect(
-      bookAppointment({ userId: STAFF_USER, slotId: SLOT_NEXT_DAY, actorIp: ACTOR_IP, now: NOW }),
+      bookAppointment({
+        userId: STAFF_USER,
+        slotId: SLOT_NEXT_DAY,
+        actorIp: ACTOR_IP,
+        now: afterVisit,
+      }),
     ).resolves.toMatchObject({ appointmentId: expect.any(String) });
   });
 
@@ -166,8 +193,8 @@ describe("kural: aynı branşta aynı gün ikinci randevu alınamaz", () => {
     ).resolves.toMatchObject({ appointmentId: expect.any(String) });
   });
 
-  /** İptal bir cezaya dönüşmemeli: aynı gün yeniden randevu alınabilmeli. */
-  it("iptal edilmiş randevu aynı gün yeniden randevu almayı engellemez", async () => {
+  /** İptal bir cezaya dönüşmemeli: hemen yeniden randevu alınabilmeli. */
+  it("iptal edilmiş randevu yeniden randevu almayı engellemez", async () => {
     const first = await bookAppointment({
       userId: STAFF_USER,
       slotId: SLOT_SOON,

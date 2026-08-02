@@ -58,13 +58,20 @@ export class SlotNotFoundError extends AppError {
   }
 }
 
-/** Aynı branşta aynı gün ikinci randevu alınamaz (PRD §5.1). */
-export class SameDaySpecialtyError extends AppError {
-  readonly code = "SAME_DAY_SPECIALTY";
+/**
+ * Aynı branşta AKTİF randevu varken ikincisi alınamaz (PRD §5.1).
+ *
+ * Kural 2026-08-03'te "aynı gün"den "aktif randevu"ya çevrildi: bekleyen
+ * randevusu olan kullanıcı o branştan hiçbir güne yeni randevu alamıyor.
+ * Gerekçe ve kabul edilen bedel (kontrol randevusu önceden alınamıyor)
+ * PRD §5.1'in güncelleme notunda.
+ */
+export class ActiveSpecialtyAppointmentError extends AppError {
+  readonly code = "ACTIVE_SPECIALTY_APPOINTMENT";
   readonly status = 409;
 
   constructor() {
-    super(copy.sameDaySpecialty);
+    super(copy.activeSpecialtyAppointment);
   }
 }
 

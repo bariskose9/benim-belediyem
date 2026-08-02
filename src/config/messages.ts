@@ -779,8 +779,13 @@ export const messages = {
       slotTaken: "Bu saat az önce başkası tarafından alındı. Lütfen listeden başka bir saat seçin.",
       slotInPast: "Geçmiş bir saate randevu alınamaz. Lütfen ileri bir tarih seçin.",
       slotNotFound: "Seçtiğiniz saat artık takvimde yok. Lütfen listeyi yenileyip tekrar deneyin.",
-      sameDaySpecialty:
-        "Aynı branşta aynı gün için zaten bir randevunuz var. Önce mevcut randevunuzu iptal edin veya başka bir gün seçin.",
+      /**
+       * PRD §5.1 (2026-08-03 güncellemesi). Mesaj kullanıcıya İKİ çıkış yolu
+       * söylüyor: bekle ya da iptal et. "Randevunuz var" demek yeterli
+       * olmazdı — kullanıcı ne yapacağını bilemezdi.
+       */
+      activeSpecialtyAppointment:
+        "Bu branşta bekleyen bir randevunuz var. Yeni randevu alabilmek için mevcut randevunuzun tarihini bekleyin veya onu iptal edin.",
       appointmentNotFound: "Randevu bulunamadı. Listeyi yenileyip tekrar deneyin.",
       alreadyCancelled: "Bu randevu zaten iptal edilmiş.",
       cancellationTooLate: "Randevuya 2 saatten az kaldığı için iptal edilemez.",

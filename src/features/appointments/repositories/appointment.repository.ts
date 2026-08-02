@@ -142,26 +142,32 @@ export async function findOwnedAppointment(
 }
 
 /**
- * Kullanıcının belirli bir branşta, belirli bir GÜN aralığında aktif randevusu
- * var mı (PRD §5.1: "aynı branşta aynı gün ikinci randevu alınamaz").
+ * Kullanıcının belirli bir branşta AKTİF randevusu var mı
+ * (PRD §5.1: "aynı branşta aktif randevu varken ikinci randevu alınamaz").
  *
- * Aralık çağıran tarafından İSTANBUL TAKVİMİNE göre hesaplanıp veriliyor
- * (`istanbulDayBoundsUtc`); gün hesabını SQL'e yaptırmak `starts_at`
- * index'ini kullanılamaz hale getirirdi.
+ * "AKTİF" İKİ KOŞULUN BİRLİKTE SAĞLANMASIDIR:
+ *  · `status = booked`  → iptal edilen randevu engel SAYILMAZ. Aksi hâlde
+ *    iptal bir cezaya dönüşür ve kullanıcı fikrini değiştiremezdi
+ *  · `startsAt > now`   → saati geçen randevu engel olmaktan çıkar. Kullanıcı
+ *    muayenesini olduktan sonra yeni randevu alabilmeli
  *
- * İPTAL EDİLMİŞ RANDEVU SAYILMAZ (`status: "booked"`): randevusunu iptal eden
- * kullanıcı aynı gün yenisini alabilmeli, yoksa iptal bir cezaya dönüşürdü.
+ * Zaman koşulu `starts_at` index'ini kullanıyor (ADR-007: süreye bağlı her
+ * sorgu zaman koşulu içerir ve o koşul indekslidir).
+ *
+ * TARİH ARALIĞI YOK, GÜN HESABI YOK. Kural 2026-08-03'te "aynı gün"den
+ * "aktif randevu"ya çevrildi (PRD §5.1 güncelleme notu): bekleyen randevusu
+ * olan kullanıcı o branştan hiçbir güne yeni randevu alamıyor.
  */
-export async function hasActiveAppointmentInSpecialtyOnDay(
+export async function hasActiveAppointmentInSpecialty(
   tx: TransactionClient,
-  input: { userId: string; specialtyId: string; dayStart: Date; dayEnd: Date },
+  input: { userId: string; specialtyId: string; now: Date },
 ): Promise<boolean> {
   const existing = await tx.appointment.findFirst({
     where: {
       userId: input.userId,
       status: "booked",
       slot: {
-        startsAt: { gte: input.dayStart, lt: input.dayEnd },
+        startsAt: { gt: input.now },
         doctor: { specialtyId: input.specialtyId },
       },
     },
