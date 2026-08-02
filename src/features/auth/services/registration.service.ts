@@ -42,7 +42,7 @@ import type {
 import { checkPasswordPolicy } from "@/features/auth/services/password-policy.service";
 import { hashPassword } from "@/features/auth/services/password.service";
 import { isAdultOn } from "@/features/auth/services/registration-age.service";
-import { isRegistrationOpen } from "@/features/auth/services/registration-availability";
+import { isRegistrationOpen } from "@/features/auth/services/auth-availability";
 import { matchStaffMember } from "@/features/auth/services/staff-matching.service";
 import type {
   RegistrationContact,

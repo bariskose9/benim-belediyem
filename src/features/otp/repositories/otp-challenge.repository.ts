@@ -15,6 +15,14 @@ export type OtpChallengeRow = {
   expiresAt: Date;
   attemptCount: number;
   consumedAt: Date | null;
+  /**
+   * Kodun ait olduğu hesap. Kayıt akışında `null` (hesap henüz yok), şifre
+   * sıfırlamada dolu — akışın hangi hesabı sıfırladığı YALNIZCA burada yazar,
+   * tarayıcıda değil.
+   *
+   * Şifre sıfırlamanın sahte (kayıtsız numara) kayıtlarında da `null` olur.
+   */
+  userId: string | null;
 };
 
 export type CreateOtpChallengeInput = {
@@ -24,6 +32,8 @@ export type CreateOtpChallengeInput = {
   destinationHash: string;
   codeHash: string;
   expiresAt: Date;
+  /** Şifre sıfırlamada hesabın kimliği; kayıt akışında verilmez. */
+  userId?: string;
 };
 
 export async function createOtpChallenge(input: CreateOtpChallengeInput): Promise<string> {
@@ -57,6 +67,25 @@ export async function invalidatePendingChallenges(
   });
 }
 
+/**
+ * Kullanıcının BEKLEYEN tüm kodlarını geçersizleştirir.
+ *
+ * Şifre sıfırlama tamamlandığında çağrılır: kullanıcı üst üste iki kez kod
+ * istediyse eskisi hâlâ 5 dakika geçerli kalırdı. `05-auth-security.md`
+ * "kod doğrulanınca aynı anda tüm bekleyen kodlar geçersizleşir" diyor ve bu
+ * kural akış kimliğine değil HESABA bağlı olmalı.
+ */
+export async function invalidatePendingChallengesForUser(
+  userId: string,
+  purpose: OtpPurpose,
+  now: Date,
+): Promise<void> {
+  await prisma.otpChallenge.updateMany({
+    where: { userId, purpose, consumedAt: null },
+    data: { consumedAt: now },
+  });
+}
+
 /** Bekleyen (henüz tüketilmemiş) en yeni kodu getirir. */
 export async function findPendingChallenge(
   registrationId: string,
@@ -72,6 +101,37 @@ export async function findPendingChallenge(
       expiresAt: true,
       attemptCount: true,
       consumedAt: true,
+      userId: true,
+    },
+  });
+}
+
+/**
+ * Bu akışın EN YENİ kodunu getirir — tüketilmiş olsa bile.
+ *
+ * "Yeni kod gönder" bunu kullanır: üç kez hatalı deneyip kodunu kilitleyen
+ * kullanıcı, ekranda yazdığı gibi yeni bir kod isteyebilmeli. Bekleyen kod
+ * aramak yeterli olmazdı, çünkü kilitlenen kod tüketilmiş sayılıyor.
+ *
+ * `createdAfter` akışın ömrünü sınırlar: eski bir jeton sonsuza kadar yeni kod
+ * üretemez.
+ */
+export async function findLatestChallenge(
+  registrationId: string,
+  purpose: OtpPurpose,
+  createdAfter: Date,
+): Promise<OtpChallengeRow | null> {
+  return prisma.otpChallenge.findFirst({
+    where: { registrationId, purpose, createdAt: { gte: createdAfter } },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      purpose: true,
+      codeHash: true,
+      expiresAt: true,
+      attemptCount: true,
+      consumedAt: true,
+      userId: true,
     },
   });
 }

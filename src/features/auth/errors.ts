@@ -246,3 +246,62 @@ export class RegistrationClosedError extends AppError {
     super(messages.auth.register.errors.registrationClosed);
   }
 }
+
+/**
+ * Şifre sıfırlama akışı bulunamadı: çerez yok, süresi doldu ya da kodun
+ * kaydı kalmadı (adım 4b-3).
+ *
+ * HESAP SAYIMI KORUMASI: bu hata kayıtlı ve kayıtsız numarada TAM OLARAK aynı
+ * koşullarda çıkar. Kayıtsız numarada da bir sahte kod kaydı açıldığı için
+ * "kaydın yok" ile "hesabın yok" ayrımı istemciye hiç ulaşmaz
+ * (`password-reset.service.ts`).
+ */
+export class PasswordResetExpiredError extends AppError {
+  readonly code = "PASSWORD_RESET_EXPIRED";
+  readonly status = 404;
+
+  constructor() {
+    super(messages.auth.passwordReset.errors.resetExpired);
+  }
+}
+
+/** Sıfırlama denemesi hız sınırına takıldı (5 deneme / 15 dk, IP + ziyaretçi). */
+export class PasswordResetRateLimitedError extends AppError {
+  readonly code = "RATE_LIMITED";
+  readonly status = 429;
+
+  constructor() {
+    super(messages.auth.passwordReset.errors.tooManyAttempts);
+  }
+}
+
+/**
+ * Aynı kimlik numarasına 15 dakikada 3'ten fazla kod istendi.
+ *
+ * Sayaç KİMLİK NUMARASININ ÖZETİNE bağlı, hedef e-postaya değil: kayıtsız
+ * numarada gönderilecek bir hedef olmadığı için hedefe göre sayan bir sınır
+ * yalnızca gerçek hesaplarda tetiklenir ve hesabın varlığını ele verirdi.
+ */
+export class PasswordResetSendRateLimitedError extends AppError {
+  readonly code = "PASSWORD_RESET_SEND_RATE_LIMITED";
+  readonly status = 429;
+
+  constructor() {
+    super(messages.auth.passwordReset.errors.sendRateLimited);
+  }
+}
+
+/**
+ * Şifre sıfırlama production'da kapalı — e-posta sağlayıcısı yapılandırılmamış.
+ *
+ * KAPI EN BAŞTA: hesap arandıktan SONRA "gönderemedim" denseydi, kayıtlı numara
+ * 503, kayıtsız numara 201 alırdı ve hesap sayımı koruması delinirdi.
+ */
+export class PasswordResetClosedError extends AppError {
+  readonly code = "PASSWORD_RESET_CLOSED";
+  readonly status = 503;
+
+  constructor() {
+    super(messages.auth.passwordReset.errors.closed);
+  }
+}

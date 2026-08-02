@@ -50,10 +50,23 @@ export default async function LoginPage({
         </Alert>
       ) : null}
 
+      {params.durum === "sifre-yenilendi" ? (
+        <Alert role="status">
+          <AlertCircleIcon aria-hidden="true" />
+          <AlertDescription>{copy.passwordResetDoneNotice}</AlertDescription>
+        </Alert>
+      ) : null}
+
       <LoginForm
         turnstileSiteKey={publicEnv.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
         redirectTo={redirectTo}
       />
+
+      <p className="text-sm text-muted-foreground">
+        <Link href="/sifremi-unuttum" className="font-medium underline underline-offset-4">
+          {copy.forgotPasswordCta}
+        </Link>
+      </p>
 
       <p className="text-sm text-muted-foreground">
         {copy.registerPrompt}{" "}

@@ -288,9 +288,19 @@ export const messages = {
 
       registerPrompt: "Hesabınız yok mu?",
       registerCta: "Kayıt olun",
+      forgotPasswordCta: "Şifrenizi mi unuttunuz?",
 
       /** Oturum gerektiren bir sayfadan yönlendirilen kullanıcıya sebebi söylenir. */
       redirectedNotice: "Bu sayfayı görebilmek için önce giriş yapmanız gerekiyor.",
+
+      /**
+       * Şifre sıfırlamadan sonra buraya yönlendirilen kullanıcıya ne olduğu
+       * söylenir. Oturumlarının düştüğü de yazıyor: diğer cihazında oturumu
+       * kapanan kullanıcı bunu bir arıza sanmamalı (ADR-005).
+       */
+      passwordResetDoneNotice:
+        "Şifreniz güncellendi. Güvenliğiniz için tüm cihazlardaki oturumlarınız kapatıldı; " +
+        "yeni şifrenizle giriş yapabilirsiniz.",
 
       errors: {
         /**
@@ -311,6 +321,107 @@ export const messages = {
         /** Kaç deneme kaldığı söylenmez — o da bilgi sızdırır. */
         tooManyAttempts:
           "Çok fazla giriş denemesi yapıldı. Güvenliğiniz için lütfen 15 dakika sonra tekrar deneyin.",
+
+        ...botCheckErrors,
+      },
+    },
+
+    /** Şifre sıfırlama (PRD §5.0 "Şifre sıfırlama" · adım 4b-3). */
+    passwordReset: {
+      pageTitle: "Şifremi Unuttum",
+
+      request: {
+        title: "Şifremi unuttum",
+        description:
+          "T.C. kimlik numaranızı girin. Hesabınız varsa kayıtlı e-posta adresinize " +
+          "6 haneli bir kod göndereceğiz.",
+        descriptionSimulated:
+          "TEST ORTAMI — hiçbir e-posta gönderilmez. T.C. kimlik numaranızı girin; " +
+          "hesabınız varsa kodunuz bir sonraki ekranda EKRANDA gösterilir.",
+
+        nationalIdLabel: "T.C. kimlik numarası",
+        nationalIdHelp: "11 haneli kimlik numaranız",
+        submit: "Kod gönder",
+        submitting: "Gönderiliyor…",
+        submitSimulated: "Kod oluştur",
+        submittingSimulated: "Oluşturuluyor…",
+
+        backToLogin: "Giriş ekranına dön",
+      },
+
+      verify: {
+        title: "Yeni şifrenizi belirleyin",
+
+        /**
+         * HESAP SAYIMI KORUMASI METNE DE YANSIR (PRD §5.0): "kod gönderdik"
+         * denseydi, cümlenin kendisi numaranın kayıtlı olduğunu doğrulardı.
+         * "Hesabınız varsa" şartlı ifadesi kayıtlı ve kayıtsız numarada AYNI
+         * cümlenin gösterilmesini mümkün kılıyor.
+         */
+        description:
+          "Girdiğiniz numaraya ait bir hesap varsa, kayıtlı e-posta adresine 6 haneli " +
+          "bir kod gönderdik. Kod 5 dakika geçerlidir.",
+        /** Local ve preview'da gönderim YOK; söz vermemek için ayrı metin. */
+        descriptionSimulated:
+          "TEST ORTAMI — hiçbir e-posta gönderilmez. Girdiğiniz numaraya ait bir hesap " +
+          "varsa, “Kodu göster” düğmesi kodu EKRANDA gösterir. Kod 5 dakika geçerlidir.",
+
+        codeLabel: "6 haneli kod",
+        passwordLabel: "Yeni şifre",
+        passwordHelp: "En az 8 karakter.",
+        passwordConfirmLabel: "Yeni şifre (tekrar)",
+
+        submit: "Şifremi değiştir",
+        submitting: "Değiştiriliyor…",
+
+        resend: "Yeni kod gönder",
+        /** Test ortamında düğme ne yaptığını dürüstçe söylüyor: gönderim yok, gösterim var. */
+        revealCode: "Kodu göster",
+        resending: "Gönderiliyor…",
+
+        /**
+         * "Gönderildi" değil "hesabınız varsa gönderildi": kayıtsız numarada da
+         * bu ekran görülüyor ve kesin ifade hesabın varlığını doğrulardı.
+         */
+        resendNotice: "Hesabınız varsa yeni bir kod gönderildi.",
+
+        /**
+         * Yalnızca local ve preview'da görünür. Kayıt akışındaki kutunun aynısı.
+         */
+        simulationNotice:
+          "Test ortamı — doğrulama kodu: {code}. Bu kutu yalnızca local ve preview " +
+          "ortamlarında görünür, canlı sitede asla gösterilmez.",
+
+        /**
+         * Kayıtsız numarada da kod isteme adımı başarıyla tamamlanır ve
+         * kullanıcı bu ekrana gelir. Test ortamında kod hiç gösterilmez —
+         * gösterilecek bir kod üretilmediği için. Metin bunu ele vermez.
+         */
+        simulationNoCode:
+          "Test ortamı — gösterilecek bir kod yok. Girdiğiniz numaraya ait bir hesap " +
+          "bulunmadıysa bu normaldir.",
+      },
+
+      errors: {
+        /**
+         * Çerez yok, süresi doldu veya sıfırlama kaydı bulunamadı.
+         * Kayıtlı ve kayıtsız numarada AYNI koşullarda çıkar.
+         */
+        resetExpired:
+          "Şifre sıfırlama işleminin süresi doldu. Güvenliğiniz için baştan başlamanız gerekiyor.",
+
+        /** Kaç deneme kaldığı söylenmez — o da bilgi sızdırır. */
+        tooManyAttempts:
+          "Çok fazla deneme yaptınız. Güvenliğiniz için lütfen 15 dakika sonra tekrar deneyin.",
+
+        sendRateLimited:
+          "Çok fazla kod istediniz. Güvenliğiniz için lütfen 15 dakika sonra tekrar deneyin.",
+
+        /** Production'da e-posta sağlayıcısı yapılandırılmamışsa akış en baştan kapalı. */
+        closed: "Şifre sıfırlama şu an geçici olarak kapalı. Lütfen daha sonra tekrar deneyin.",
+
+        /** Kimlik numarası 11 haneli değil — hangi kuralın tutmadığı söylenmez. */
+        invalidNationalId: "Geçerli bir T.C. kimlik numarası girin.",
 
         ...botCheckErrors,
       },

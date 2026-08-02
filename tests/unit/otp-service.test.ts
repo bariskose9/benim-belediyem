@@ -315,7 +315,7 @@ describe("verifyOtp — doğrulama, süre ve deneme hakkı", () => {
     const issued = await issue();
     if (issued.outcome !== "sent") throw new Error("gönderilmeliydi");
 
-    await expect(verify(issued.revealedCode!)).resolves.toEqual({ outcome: "verified" });
+    await expect(verify(issued.revealedCode!)).resolves.toMatchObject({ outcome: "verified" });
   });
 
   it("kullanılmış kod ikinci kez kabul edilmez — tek kullanımlık", async () => {
@@ -346,7 +346,7 @@ describe("verifyOtp — doğrulama, süre ve deneme hakkı", () => {
 
     const justBefore = new Date(NOW.getTime() + 5 * 60_000 - 1_000);
 
-    await expect(verify(issued.revealedCode!, justBefore)).resolves.toEqual({
+    await expect(verify(issued.revealedCode!, justBefore)).resolves.toMatchObject({
       outcome: "verified",
     });
   });
@@ -412,7 +412,7 @@ describe("verifyOtp — doğrulama, süre ve deneme hakkı", () => {
 
     await expect(
       verify(phone.revealedCode!, new Date(NOW.getTime() + 3_000), "register_phone"),
-    ).resolves.toEqual({ outcome: "verified" });
+    ).resolves.toMatchObject({ outcome: "verified" });
   });
 
   it("readVerifiedPurposes yalnızca doğrulanmış kanalları döner", async () => {
