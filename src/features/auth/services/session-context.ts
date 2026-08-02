@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import { SESSION_COOKIE_NAME, SESSION_TTL_MS } from "@/config/constants";
 import type { SessionUserRow } from "@/features/auth/repositories/session.repository";
@@ -23,12 +24,18 @@ export async function readSessionToken(): Promise<string | undefined> {
 /**
  * Şu anki oturumu döner; yoksa `null`.
  *
- * Her çağrıda bir veritabanı okuması yapar — ADR-005'in kabul ettiği bedel.
+ * İSTEK BAŞINA BİR VERİTABANI OKUMASI — ADR-005'in kabul ettiği bedel.
  * Karşılığında rol ve personel durumu HER İSTEKTE güncel gelir.
+ *
+ * `cache()` neden gerekli: aynı sayfayı çizerken oturum birden fazla yerden
+ * okunuyor (üst menü + sayfanın kendisi, korumalı sayfalarda ayrıca
+ * `page-guard`). Sarmalanmadığında her biri ayrı bir sorgu açıyordu. React'in
+ * `cache`'i sonucu YALNIZCA O İSTEK boyunca saklar; istekler arasında hiçbir
+ * şey paylaşılmaz, yani bir kullanıcının oturumu bir başkasına görünemez.
  */
-export async function getCurrentSession(): Promise<SessionUserRow | null> {
+export const getCurrentSession = cache(async (): Promise<SessionUserRow | null> => {
   return readSession(await readSessionToken());
-}
+});
 
 /**
  * Oturum çerezini yazar.

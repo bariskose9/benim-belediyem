@@ -4,6 +4,59 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 5: görsel iskelet (layout, tema, marka)
+- **Marka paleti**: kurumsal lacivert (`--primary`) + turkuaz vurgu
+  (`--brand-accent`), açık ve koyu tema için ayrı ayrı. Değerler tahminle
+  seçilmedi: her metin/zemin çifti oklch → sRGB'ye çevrilip WCAG kontrast oranı
+  hesaplandı. En düşük çift **4.67:1** (gereken 4.5:1), odak halkası **4.89:1**
+  (gereken 3:1)
+- **Kendi kelime-logomuz** (`Logo` bileşeni + `icon.svg` sekme simgesi):
+  yuvarlak köşeli karo içinde sadeleştirilmiş kemerli kamu binası cephesi.
+  **Hiçbir gerçek belediyenin logosu, arması veya rengi kullanılmadı** — depo
+  herkese açık ve site canlı. İşaret SVG olduğu için rengini temadan alıyor,
+  ayrı bir ağ isteği doğurmuyor ve düzen kaymasına yol açmıyor
+- **Açık/koyu tema düğmesi**: tercih tarayıcıda saklanıyor, ilk girişte sistem
+  tercihi kullanılıyor. Sınıf sayfa **boyanmadan önce** uygulanıyor (`<head>`
+  içindeki satır içi betik), yani koyu tema kullanıcısı açılışta beyaz parlama
+  görmüyor. **Yeni bağımlılık eklenmedi** — `next-themes` yerine 3 fonksiyonluk
+  kendi çözümümüz (`src/lib/theme.ts`)
+- **Üst menü yeniden**: solda logo, ortada hizmet bağlantıları, sağda tema
+  düğmesi ve giriş/çıkış. Mobilde bağlantılar açılır menüye giriyor
+  (`aria-expanded` + `aria-controls`), **giriş/çıkış düğmesi ise menünün dışında
+  kalıyor** — en kritik eylem her ekran boyutunda tek dokunuş uzaklıkta
+- **Bağlantılar tek kopya**: masaüstü ve mobil için ayrı menü YAZILMADI. İki
+  kopya olsaydı ekran okuyucu her şeyi iki kez okur, testler de hangi
+  bağlantının kastedildiğini ayırt edemezdi
+- **Alt bilgi (yeni)**: her sayfada kalıcı feragat — "Bu site gerçek bir
+  belediyeye ait değildir." Yasal sayfalar (adım 17) henüz yok, bu yüzden
+  onlara bağlantı verilmedi: 404'e giden bir "KVKK" bağlantısı, bağlantının hiç
+  olmamasından kötüdür
+- **Ana sayfa**: tanıtım bölümü + 6 hizmet kartı. Sayfası olmayan hizmet
+  **bağlantı değil**, "Yakında" rozetiyle duruyor — hem 404 önleniyor hem de
+  Next'in bağlantı ön yüklemesi ana sayfada başarısız istek üretmiyor
+- **"İçeriğe geç" atlama bağlantısı**: klavye kullanıcısı menüyü tek tek
+  geçmeden içeriğe atlıyor (WCAG 2.1 AA "Bypass Blocks")
+- **Dokunma hedefleri 44x44px'e çıkarıldı** (menü, tema düğmesi, çıkış düğmesi)
+- 375px'te üst menü **tek satıra sığdırıldı**: tarayıcıda ölçüldüğünde satır
+  10px taşıyor ve menü düğmesi alta düşüyordu. Kelime-logo dar ekranda bir punto
+  küçültüldü, boşluk daraltıldı; dokunma hedefleri korundu
+- Sayfa çerçevesinin ölçüleri tek yerde: `page-shell` yardımcı sınıfı +
+  `--page-*` token'ları. Üst menü, içerik ve alt bilgi aynı hizada
+
+### Değiştirildi — adım 5
+- **Site açıklamasından gerçek kurum adı çıkarıldı.** Önceki metin gerçek bir
+  belediyenin adını taşıyordu; arama sonuçlarında ve bağlantı önizlemelerinde
+  görünen bu metin, sitenin o kuruma ait olduğu izlenimini doğurabilirdi
+- **`getCurrentSession()` istek başına bir kez okuyor** (React `cache`). Oturum
+  aynı sayfada birden fazla yerden okunuyordu (üst menü + sayfa + korumalı
+  sayfalarda `page-guard`) ve her biri ayrı bir sorgu açıyordu. Önbellek
+  yalnızca o istek boyunca yaşıyor; istekler arasında hiçbir şey paylaşılmıyor
+- **E2E local'de 2 işçiyle koşuyor** (önceden çekirdek sayısının yarısı). Test
+  sayısı 92'den 118'e çıkınca beş paralel işçi tek Next sunucusu üzerinde 30
+  saniyelik zaman aşımlarına yol açıyordu; testler tek tek geçiyordu, yani sorun
+  testlerde değil koşum ortamındaydı. CI zaten tek işçi kullanıyor
+- Şema **değişmedi**, migration **yok**
+
 ### Eklendi — adım 4c: Google ile giriş (OAuth)
 - **"Google ile devam et" ile giriş ve kayıt** (`/api/auth/google` →
   Google → `/api/auth/google/callback`). Düğme metni bilerek "giriş yap" değil:

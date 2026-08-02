@@ -1,8 +1,29 @@
 import Link from "next/link";
 
+import { Logo } from "@/components/brand/Logo";
+import { HeaderShell } from "@/components/layout/HeaderShell";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { buttonVariants } from "@/components/ui/button";
 import { messages } from "@/config/messages";
+import { primaryNavItems, type PrimaryNavKey } from "@/config/navigation";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
 import { getCurrentSession } from "@/features/auth/services/session-context";
+import { cn } from "@/lib/utils";
+
+/**
+ * Menü bağlantısının stili tek yerde. `min-h-11` mobilde dokunma hedefini
+ * 44px'e çıkarıyor; masaüstünde satır yüksekliği daha derli toplu olabilir.
+ */
+const navLinkClassName =
+  "flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-muted-foreground " +
+  "transition-colors hover:bg-muted hover:text-foreground md:min-h-9";
+
+/** Yapılandırmadaki anahtar → görünen Türkçe metin. */
+const navLabels: Record<PrimaryNavKey, string> = {
+  home: messages.nav.home,
+  hospital: messages.nav.hospital,
+  gym: messages.nav.gym,
+};
 
 /**
  * Üst menü — oturum durumuna göre değişir.
@@ -14,7 +35,7 @@ import { getCurrentSession } from "@/features/auth/services/session-context";
  * BEDEL: `cookies()` okunduğu için bu bileşeni içeren her sayfa dinamik hâle
  * gelir, yani statik olarak önceden üretilemez. Girişin her sayfada görünmesi
  * gereken bir uygulamada bu kaçınılmaz; ölçüm gerektiğinde
- * `12-operations-and-scaling.md` sırası izlenir.
+ * `12-operations-and-scaling.md` sırası izlenir (roadmap teknik borç #27).
  *
  * MENÜDE ÖĞE GİZLEMEK KORUMA DEĞİLDİR: personele özel bağlantılar burada
  * herkese görünür, kapı sayfanın kendisindedir (`page-guard.ts`).
@@ -23,35 +44,48 @@ export async function SiteHeader() {
   const session = await getCurrentSession();
 
   return (
-    <header className="border-b">
-      <nav
-        aria-label={messages.nav.label}
-        className="mx-auto flex w-full max-w-4xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
-      >
-        <Link href="/" className="font-semibold">
-          {messages.app.name}
+    <HeaderShell
+      brand={
+        <Link href="/" className="flex min-h-11 items-center rounded-md">
+          <Logo />
         </Link>
+      }
+      nav={
+        <>
+          {primaryNavItems.map((item) => (
+            <Link key={item.key} href={item.href} className={navLinkClassName}>
+              {navLabels[item.key]}
+            </Link>
+          ))}
 
-        <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          {/* Hesaba ait bağlantı menünün sonunda; giriş/çıkış eylemi ise
+              `actions` içinde, yani mobilde menü açılmadan da görünür. */}
           {session ? (
-            <>
-              <Link href="/hesabim" className="underline-offset-4 hover:underline">
-                {messages.nav.account}
-              </Link>
-              <LogoutButton />
-            </>
+            <Link href="/hesabim" className={navLinkClassName}>
+              {messages.nav.account}
+            </Link>
           ) : (
-            <>
-              <Link href="/kayit" className="underline-offset-4 hover:underline">
-                {messages.nav.register}
-              </Link>
-              <Link href="/giris" className="underline-offset-4 hover:underline">
-                {messages.nav.login}
-              </Link>
-            </>
+            <Link href="/kayit" className={navLinkClassName}>
+              {messages.nav.register}
+            </Link>
           )}
-        </div>
-      </nav>
-    </header>
+        </>
+      }
+      actions={
+        <>
+          <ThemeToggle />
+          {session ? (
+            <LogoutButton />
+          ) : (
+            <Link
+              href="/giris"
+              className={cn(buttonVariants({ variant: "default", size: "lg" }), "min-h-11")}
+            >
+              {messages.nav.login}
+            </Link>
+          )}
+        </>
+      }
+    />
   );
 }

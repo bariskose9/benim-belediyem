@@ -23,9 +23,32 @@ const botCheckErrors = {
 
 export const messages = {
   app: {
-    name: "benim-belediyem",
-    title: "benim-belediyem",
-    description: "İzmir Büyükşehir Belediyesi temalı örnek hizmet portalı. Tüm veriler sahtedir.",
+    name: "benim belediyem",
+    title: "benim belediyem",
+
+    /**
+     * AÇIKLAMADA GERÇEK KURUM ADI GEÇMEZ.
+     *
+     * Bu metin arama sonuçlarında ve bağlantı önizlemelerinde çıkıyor. Önceki
+     * hâli gerçek bir belediyenin adını taşıyordu; depo herkese açık ve site
+     * canlı olduğu için bu, o kurumun sitesiymiş izlenimi doğurabilirdi.
+     * Aynı gerekçeyle hiçbir kurumun logosu, arması veya rengi kullanılmıyor.
+     */
+    description:
+      "Örnek belediye hizmet portalı. Gerçek bir kuruma ait değildir; " +
+      "eğitim ve portföy amacıyla geliştirilmiştir, tüm veriler sahtedir.",
+
+    /** Kelime-logo iki parçadan oluşuyor: ince "benim" + kalın "belediyem". */
+    brand: {
+      first: "benim",
+      second: "belediyem",
+    },
+  },
+
+  /** Açık/koyu tema düğmesi — erişilebilir ad temaya göre değişir. */
+  theme: {
+    switchToDark: "Koyu temaya geç",
+    switchToLight: "Açık temaya geç",
   },
 
   envBanner: {
@@ -71,10 +94,76 @@ export const messages = {
   },
 
   home: {
-    heading: "benim-belediyem",
+    heading: "Belediye hizmetleri tek hesapta",
     intro:
-      "Bu proje yapım aşamasındadır. Şu an yalnızca teknik iskelet kuruludur; " +
-      "hizmet sayfaları sırayla eklenecektir.",
+      "Randevu, sipariş, bilet ve üyelik işlemlerinizi tek bir hesapla yönetin. " +
+      "Bu bir örnek projedir; hizmetler sırayla açılıyor.",
+
+    /**
+     * BAĞLANTI ADLARI ÜST MENÜDEKİLERDEN FARKLI ("Giriş yap" değil "Zaten
+     * hesabım var"). Sebebi yalnızca üslup değil: aynı sayfada aynı adı taşıyan
+     * iki bağlantı olsaydı hem ekran okuyucu kullanıcısı hangisinin ne olduğunu
+     * ayırt edemezdi hem de otomatik testler "hangi bağlantı?" diye takılırdı.
+     */
+    ctaRegister: "Hemen hesap oluşturun",
+    ctaLogin: "Zaten hesabım var",
+    ctaAccount: "Hesabıma git",
+
+    servicesHeading: "Hizmetler",
+    servicesIntro: "Açılan hizmetleri kullanabilir, hazırlananları buradan takip edebilirsiniz.",
+  },
+
+  /**
+   * Hizmet kartları (PRD §5). Anahtarlar `src/config/navigation.ts` içindeki
+   * `ServiceKey` ile birebir aynıdır — biri değişirse TypeScript diğerini de
+   * değiştirmeye zorlar.
+   */
+  services: {
+    market: {
+      title: "Belediye Market",
+      description: "Temel gıda ve temizlik ürünleri, paket servis teslimatıyla.",
+    },
+    restaurant: {
+      title: "Belediye Restoran",
+      description: "Günlük menü, masa rezervasyonu ve paket sipariş.",
+    },
+    events: {
+      title: "Etkinlik ve bilet",
+      description: "Konser ve gösteri programı, koltuk seçimiyle bilet alma.",
+    },
+    support: {
+      title: "Destek talebi",
+      description: "Talep ve şikâyetlerinizi iletin, durumunu takip edin.",
+    },
+    hospital: {
+      title: "Hastane randevusu",
+      description: "Personel sağlık birimi randevuları.",
+    },
+    gym: {
+      title: "Spor salonu",
+      description: "Personel spor tesisi üyeliği ve paketleri.",
+    },
+  },
+
+  /** Kart ve liste rozetleri. Bilgi yalnızca renkle değil METİNLE de verilir. */
+  badges: {
+    comingSoon: "Yakında",
+    open: "Açık",
+    staffOnly: "Personele özel",
+  },
+
+  /** Alt bilgi — her sayfada görünür. */
+  footer: {
+    /**
+     * KALICI FERAGAT. Site canlı ve depo herkese açık; ziyaretçi hangi sayfaya
+     * düşerse düşsün buranın gerçek bir kurum olmadığını görmeli
+     * (14-privacy-and-compliance.md → yanıltıcı sunum yapılmaz).
+     */
+    disclaimer:
+      "Bu site gerçek bir belediyeye ait değildir. Eğitim ve portföy amacıyla " +
+      "geliştirilmiş bir örnektir; kurum adları, kişiler, ürünler ve tüm veriler uydurmadır.",
+    sourceCode: "Kaynak kodu (GitHub)",
+    sourceCodeUrl: "https://github.com/bariskose9/benim-belediyem",
   },
 
   /**
@@ -547,8 +636,20 @@ export const messages = {
     login: "Giriş yap",
     register: "Kayıt ol",
     account: "Hesabım",
+    hospital: "Hastane",
+    gym: "Spor salonu",
     /** Ekran okuyucular için: menünün ne olduğu söylenmeli (WCAG 2.1 AA). */
     label: "Ana menü",
+
+    /** Mobilde menüyü açıp kapatan düğme; adı duruma göre değişir. */
+    openMenu: "Menüyü aç",
+    closeMenu: "Menüyü kapat",
+
+    /**
+     * Klavye kullanıcısı her sayfada menünün tamamını tek tek geçmek zorunda
+     * kalmasın diye ilk odaklanan bağlantı (WCAG 2.1 AA "Bypass Blocks").
+     */
+    skipToContent: "İçeriğe geç",
   },
 
   /**

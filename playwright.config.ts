@@ -9,7 +9,19 @@ export default defineConfig({
   // CI'da yanlışlıkla bırakılmış .only merge'i engellemesin diye kırmızı olur.
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
-  workers: isCI ? 1 : undefined,
+  /**
+   * Local'de İŞÇİ SAYISI SINIRLI (varsayılan: çekirdek sayısının yarısı).
+   *
+   * Sebep ölçüldü: adım 5'te test sayısı 92'den 118'e çıkınca beş paralel işçi,
+   * tek bir Next sunucusu + tek Postgres üzerinde 30 saniyelik test zaman
+   * aşımlarına ve "session closed" protokol hatalarına yol açtı. Aynı testler
+   * tek tek koşturulduğunda geçiyordu, yani sorun testlerde değil yüktesti —
+   * argon2 (ADR-011) bilinçli olarak CPU pahalı ve beş işçi onu aynı anda
+   * zorluyor.
+   *
+   * Testi zayıflatmak yerine koşum ortamı düzeltiliyor. CI zaten tek işçi.
+   */
+  workers: isCI ? 1 : 2,
   reporter: isCI ? [["github"], ["html", { open: "never" }]] : [["list"]],
   use: {
     baseURL,

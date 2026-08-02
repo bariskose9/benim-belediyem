@@ -9,7 +9,13 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-02 · roadmap adım 4c sonrası
+**Son güncelleme:** 2026-08-02 · roadmap adım 5 sonrası
+
+> **Adım 5'te dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis, yeni
+> ortam değişkeni yok; adım tamamen arayüz tarafında kaldı. Tek dış iş, aşağıda
+> iki kez anlatılan tanıdık tuzak: `feature/layout` dalının preview adresi
+> **Cloudflare Turnstile hostname listesine** ve **Google OAuth redirect URI
+> listesine** elle eklenmeli (teknik borç #31).
 
 ---
 
