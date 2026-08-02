@@ -12,12 +12,12 @@
 
 | Senaryo | Kimlik numarası | Doğum tarihi | Beklenen sonuç |
 |---|---|---|---|
-| 18 yaş altı | `90822561452` | 2010-05-07 | Kayıt **reddedilir** |
-| 18 yaş altı | `97030093102` | 2013-04-16 | Kayıt **reddedilir** |
-| 18 yaş altı | `92995594282` | 2011-04-18 | Kayıt **reddedilir** |
-| 18 yaş altı | `90220717772` | 2010-03-10 | Kayıt **reddedilir** |
-| 18 yaş altı | `92155305482` | 2010-08-19 | Kayıt **reddedilir** |
-| Bugün 18 oluyor | `92050662178` | 2008-08-01 | Kayıt **kabul edilir** |
+| 18 yaş altı | `90822561452` | 2010-05-08 | Kayıt **reddedilir** |
+| 18 yaş altı | `97030093102` | 2013-04-17 | Kayıt **reddedilir** |
+| 18 yaş altı | `92995594282` | 2011-04-19 | Kayıt **reddedilir** |
+| 18 yaş altı | `90220717772` | 2010-03-11 | Kayıt **reddedilir** |
+| 18 yaş altı | `92155305482` | 2010-08-20 | Kayıt **reddedilir** |
+| Bugün 18 oluyor | `92050662178` | 2008-08-02 | Kayıt **kabul edilir** |
 | KPS zaman aşımı | `91038813878` | 1954-10-25 | Sorgu **timeout** döner |
 | KPS sunucu hatası | `93397972098` | 1958-10-17 | Sorgu **error** döner |
 | KPS'te kayıt yok | `99918365820` | — | Sorgu **not_found** döner |
