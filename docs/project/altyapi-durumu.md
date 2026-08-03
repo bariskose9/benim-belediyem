@@ -9,19 +9,24 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-03 · roadmap adım 6 sonrası
+**Son güncelleme:** 2026-08-03 · roadmap adım 7 sonrası
 
-> **Adım 6'da dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis, yeni
-> ortam değişkeni, yeni bağımlılık ve yeni migration yok; randevu tabloları
-> adım 3'ten beri hazırdı. Tek dış iş, aşağıda iki kez anlatılan tanıdık tuzak:
-> `feature/hastane-randevu` dalının preview adresi **Cloudflare Turnstile
-> hostname listesine** ve **Google OAuth redirect URI listesine** elle
-> eklenmeli (teknik borç #31).
+> **Adım 7'de dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis, yeni
+> ortam değişkeni, yeni bağımlılık ve yeni migration yok; sepet, sipariş, ödeme
+> ve kayıtlı kart tabloları adım 3'ten beri hazırdı.
+>
+> **ÖDEME GERÇEK DEĞİL.** Hiçbir ödeme kuruluşuyla entegrasyon yok, hiçbir
+> yere API anahtarı girilmedi. Tahsilat `mock-payment-provider.ts` içinde
+> taklit ediliyor (sahte KPS ile aynı adaptör deseni, ADR-003). Ekranda
+> kalıcı bir uyarı var: "Gerçek kart bilgisi girmeyin."
+>
+> ⚠️ **Yeni dal açtığında** o dalın **dal adresini** iki panele ekle:
+> Cloudflare Turnstile → Hostname Management **ve** Google Cloud → Auth
+> Platform → Clients → Authorized redirect URIs (sonuna
+> `/api/auth/google/callback` ekleyerek). Teknik borç #31.
 >
 > ⚠️ **Uzak ortamlarda tohumlanmış doktor saatleri ~2026-08-15'te tükeniyor**
-> (teknik borç #38). Preview ve production 2026-08-01'de tohumlandı ve seed
-> 14 günlük takvim üretiyor. O tarihten sonra hastane ekranı çökmez, "boş saat
-> kalmamış" der; düzeltmek için seed'in yeniden koşturulması gerekir.
+> (teknik borç #38). Ekran çökmez, "boş saat kalmamış" der.
 
 ---
 

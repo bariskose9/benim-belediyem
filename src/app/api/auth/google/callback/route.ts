@@ -6,6 +6,8 @@ import {
   isGoogleLoginConfigured,
 } from "@/features/auth/services/google-oauth.service";
 import { readSessionToken, writeSessionCookie } from "@/features/auth/services/session-context";
+import { mergeGuestCartIntoUserCart } from "@/features/cart/services/cart.service";
+import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { revokeSession } from "@/features/auth/services/session.service";
 import { DEFAULT_REDIRECT_PATH } from "@/lib/redirect";
 import { readActorIp } from "@/lib/rate-limit";
@@ -63,6 +65,21 @@ export async function GET(request: Request) {
     // geçerli kalmamalı. Başka cihazlardaki oturumlara dokunulmaz.
     await revokeSession(await readSessionToken());
     await writeSessionCookie(outcome.token);
+
+    /**
+     * Ziyaretçiyken doldurulan sepet hesaba taşınır (PRD §4). Şifreyle
+     * girişte olduğu gibi burada da: kullanıcı hangi kapıdan girerse
+     * girsin sepetini kaybetmemeli. Hatası girişi düşürmez.
+     */
+    try {
+      await mergeGuestCartIntoUserCart({
+        userId: outcome.userId,
+        anonymousId: await ensureAnonymousId(),
+        now: new Date(),
+      });
+    } catch (mergeError) {
+      console.error("[CART_MERGE] ziyaretçi sepeti taşınamadı", mergeError);
+    }
 
     return redirectTo(outcome.isNewUser ? DEFAULT_REDIRECT_PATH : transaction.returnTo);
   } catch (error) {

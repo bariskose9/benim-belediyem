@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { Logo } from "@/components/brand/Logo";
 import { HeaderShell } from "@/components/layout/HeaderShell";
+import { ShoppingCartIcon } from "lucide-react";
+
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { buttonVariants } from "@/components/ui/button";
 import { messages } from "@/config/messages";
@@ -73,6 +75,24 @@ export async function SiteHeader() {
       }
       actions={
         <>
+          {/*
+            SEPET SAĞDA, MENÜNÜN İÇİNDE DEĞİL (PRD §4: "sağda sepet, dark mode
+            düğmesi, profil/giriş"). Menüye konsaydı mobilde hamburger'in
+            arkasında kalırdı; sepet, giriş düğmesi gibi her ekran boyutunda
+            tek dokunuş uzaklıkta olmalı.
+
+            SAYI GÖSTERİLMİYOR ve bu bilinçli: rozeti doğru tutmak her sayfayı
+            sepet sorgusuna bağlardı (üst menü zaten oturum okuduğu için
+            dinamik — teknik borç #27 — ama ikinci bir sorgu eklemek ölçüm
+            yapmadan optimizasyon bozmak olurdu). Sayı, sepet ekranında görünüyor.
+          */}
+          <Link
+            href="/sepet"
+            aria-label={messages.cart.navLabel}
+            className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-11")}
+          >
+            <ShoppingCartIcon aria-hidden="true" />
+          </Link>
           <ThemeToggle />
           {session ? (
             <LogoutButton />

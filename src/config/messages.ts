@@ -793,4 +793,145 @@ export const messages = {
         "Kısa sürede çok fazla randevu işlemi yaptınız. Lütfen 15 dakika sonra tekrar deneyin.",
     },
   },
+  /** Ortak sepet (PRD §4 · adım 7). */
+  cart: {
+    pageTitle: "Sepetim",
+    title: "Sepetim",
+    description:
+      "Market, restoran ve etkinlik ürünleriniz tek sepette toplanır ve tek seferde ödenir.",
+    navLabel: "Sepet",
+
+    /** Modül başlıkları — `CartItemType` enum'ıyla birebir aynı anahtarlar. */
+    sections: {
+      market: "Belediye Market",
+      restaurant: "Belediye Restoran",
+      event: "Etkinlik bileti",
+    },
+
+    empty: {
+      title: "Sepetiniz boş",
+      description: "Hizmetlerden ürün ekledikçe burada görünecek.",
+      cta: "Hizmetlere göz at",
+    },
+
+    line: {
+      quantity: "Adet",
+      increase: (name: string) => `${name} adedini artır`,
+      decrease: (name: string) => `${name} adedini azalt`,
+      remove: (name: string) => `${name} ürününü sepetten çıkar`,
+      removeAction: "Çıkar",
+      unitPrice: "Birim fiyat",
+      note: "Not",
+    },
+
+    summary: {
+      heading: "Sipariş özeti",
+      subtotal: "Ara toplam",
+      deliveryFee: "Teslimat ücreti",
+      freeDelivery: "Ücretsiz",
+      /** Eşiğe ne kadar kaldığını söylemek, kullanıcıyı boşuna tahmin ettirmez. */
+      freeDeliveryHint: (remaining: string) =>
+        `${remaining} daha ekleyin, market teslimatı ücretsiz olsun.`,
+      total: "Genel toplam",
+      checkout: "Ödemeye geç",
+      /** Ödeme adımı giriş zorunlu (PRD §4). */
+      signInToCheckout: "Ödeme için giriş yapın",
+    },
+
+    errors: {
+      itemNotFound: "Bu ürün artık satışta değil. Sepetten çıkarıp devam edebilirsiniz.",
+      outOfStock: "Bu üründen yeterli stok kalmamış.",
+      unavailable: "Bu ürün şu an satışta değil.",
+      quantityTooHigh: "Bir üründen en fazla 20 adet alabilirsiniz.",
+      cartTooLarge: "Sepette en fazla 50 farklı ürün olabilir.",
+      cartEmpty: "Sepetiniz boş. Ödeme yapabilmek için önce ürün ekleyin.",
+      tooManyAttempts: "Kısa sürede çok fazla işlem yaptınız. Lütfen biraz sonra tekrar deneyin.",
+    },
+  },
+
+  /** Sahte kart ödemesi (PRD §6.1 · §6.2 · adım 7). */
+  payment: {
+    pageTitle: "Ödeme",
+    title: "Ödeme",
+    description: "Kart bilgileriniz saklanmaz; bu bir örnek projedir ve gerçek tahsilat yapılmaz.",
+
+    /** Ekranda KALICI uyarı: kullanıcı gerçek kart girmemeli. */
+    fakeNotice:
+      "Bu bir örnek projedir. Gerçek kart bilgisi girmeyin — sahte test kartlarını kullanın.",
+
+    delivery: {
+      heading: "Teslimat",
+      addressLabel: "Teslimat adresi",
+      addressPlaceholder: "Adres seçin",
+      slotLabel: "Teslimat zaman aralığı",
+      newAddress: "Yeni adres ekle",
+      newAddressTitle: "Adres başlığı",
+      newAddressFull: "Açık adres",
+      newAddressDistrict: "İlçe",
+      saveAddress: "Adresi kaydet",
+      ticketNotice: "Etkinlik bileti için teslimat gerekmez; bilet hesabınıza tanımlanır.",
+    },
+
+    card: {
+      heading: "Kart bilgileri",
+      savedHeading: "Kayıtlı kartlarım",
+      useNew: "Yeni kart kullan",
+      number: "Kart numarası",
+      holder: "Kart üzerindeki isim",
+      expiry: "Son kullanma (AA/YYYY)",
+      /**
+       * Etiketler AÇIK yazılıyor ("Ay" değil "Son kullanma ayı").
+       * Kısa hâli hem ekran okuyucuda bağlamsız kalıyordu hem de sayfadaki
+       * başka metinlerle karışıyordu — testte fiilen çakıştı.
+       */
+      expiryMonth: "Son kullanma ayı",
+      expiryYear: "Son kullanma yılı",
+      cvv: "CVV",
+      save: "Bu kartı sonraki ödemeler için kaydet",
+      /** Kayıtlı kart etiketinde YALNIZCA son 4 hane geçer. */
+      maskedLabel: (brand: string, last4: string) => `${brand} •••• ${last4}`,
+      /** Şemadaki `CardBrand` enum'ıyla birebir aynı anahtarlar. */
+      brands: {
+        visa: "Visa",
+        mastercard: "Mastercard",
+      },
+    },
+
+    submit: "Ödemeyi tamamla",
+    submitting: "Ödeme işleniyor…",
+
+    success: {
+      title: "Ödemeniz alındı",
+      description: "Siparişleriniz oluşturuldu.",
+      receiptHeading: "Sahte fiş",
+      transactionId: "İşlem kodu",
+      orderHeading: "Oluşturulan siparişler",
+      backToHome: "Ana sayfaya dön",
+    },
+
+    errors: {
+      /**
+       * Sahte sağlayıcıdan gelen iki ret sebebi AYRI mesaj alıyor: PRD §6.2
+       * hata yollarının test edilebilmesini istiyor ve kullanıcı "kartımda
+       * para yok" ile "kart reddedildi" arasındaki farkı bilmeli.
+       */
+      declined: "Kartınız reddedildi. Farklı bir kartla tekrar deneyin.",
+      insufficientFunds: "Kartınızda yeterli bakiye yok. Farklı bir kartla tekrar deneyin.",
+
+      invalidNumber: "Kart numarası geçersiz. Lütfen kontrol edip tekrar girin.",
+      invalidExpiry: "Son kullanma tarihi geçersiz veya geçmiş.",
+      invalidCvv: "CVV kodu geçersiz.",
+      invalidHolder: "Kart üzerindeki ismi girin.",
+
+      addressRequired: "Market ve restoran siparişleri için teslimat adresi seçin.",
+      slotRequired: "Teslimat zaman aralığı seçin.",
+      savedCardNotFound: "Seçtiğiniz kayıtlı kart bulunamadı. Listeyi yenileyin.",
+      cartChanged: "Sepetiniz bu arada değişti. Tutarı kontrol edip ödemeyi tekrar başlatın.",
+      alreadyPaid: "Bu ödeme zaten alınmış. Siparişlerinizi profilinizden görebilirsiniz.",
+      tooManyAttempts:
+        "Çok fazla ödeme denemesi yapıldı. Güvenliğiniz için lütfen 15 dakika sonra tekrar deneyin.",
+      /** Sağlayıcı erişilemez: kullanıcıya "tekrar dene" denir, iç detay verilmez. */
+      providerUnavailable: "Ödeme servisine şu an ulaşılamıyor. Lütfen biraz sonra tekrar deneyin.",
+    },
+  },
 } as const;
