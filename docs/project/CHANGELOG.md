@@ -23,12 +23,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ### Düzeltildi — adım 8
 
-- **Türkçe aramada büyük harf sorunu.** Veritabanının büyük/küçük harf duyarsız
-  araması `I` harfini `i`'ye çeviriyor, oysa Türkçe'de karşılığı `ı`. Bu yüzden
-  `KAĞIT` yazan kullanıcı "Kağıt Havlu"yu, `SIVI` yazan "Sıvı El Sabunu"yu
-  **hiç bulamıyordu** (yerel veritabanında ölçüldü). Arama metni artık sorgudan
-  önce Türkçe kurallarıyla küçük harfe çevriliyor (`src/lib/search-text.ts`).
-  Koruma kaldırılıp testin kırmızıya döndüğü doğrulandı
+- **Türkçe aramada büyük harf VE aksan sorunu.** Veritabanının büyük/küçük harf
+  duyarsız araması Türkçe harfleri bilmiyordu; `I` harfini `i`'ye çeviriyor,
+  oysa karşılığı `ı`. Üstelik aksanlar da eşleşmiyordu. Ölçülen sonuç:
+  `KAĞIT` → 0, `kagit` → 0, yalnızca `kağıt` → 1 sonuç. Yani büyük harfle yazan
+  **veya Türkçe klavyesi olmayan** kullanıcı ürünü hiç bulamıyordu.
+  `unaccent` eklentisi migration ile açıldı; sorgu ve ürün adı aynı
+  sadeleştirmeden geçiyor, iki sorun tek yerde kapandı. Eklenti kaldırılıp
+  ilgili dört testin kırmızıya döndüğü doğrulandı
+- **Arama kutusundaki `%` ve `_` artık joker sayılmıyor.** `LIKE` içinde bunlar
+  joker karakter; kaçırılmasaydı tek bir `%` yazan kullanıcı **tüm kataloğu**
+  eşleştirirdi. Hata vermeyen, sessizce yanlış bir sonuçtu; testle sabitlendi
+
+### Veritabanı — adım 8
+
+- Migration `20260806200000_enable_unaccent_for_search` — `unaccent` eklentisi
+  açıldı. **Tablo, kolon veya veri değişmedi**; geri alınması `DROP EXTENSION`
+  ile tek satır. Neon'un desteklediği eklentiler arasında olduğu dokümandan
+  doğrulandı; CI'daki PostgreSQL kapsayıcısında da çalışıyor
 
 ### Güvenlik — adım 8
 

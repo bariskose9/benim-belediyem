@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { toKurus } from "@/lib/money";
-import { normalizeSearchQuery } from "@/lib/search-text";
+import { normalizeSearchQuery, toLikePattern } from "@/lib/search-text";
 
 import type { MarketCategory, MarketProduct } from "../types";
 
@@ -56,21 +56,17 @@ export async function listProducts(filters: {
   query?: string;
 }): Promise<MarketProduct[]> {
   const query = normalizeSearchQuery(filters.query);
+  const matchingIds = query ? await findIdsMatchingQuery(query) : null;
+
+  // Arama yapıldı ama hiçbir ürün eşleşmediyse veritabanına ikinci kez gitmeye
+  // gerek yok: `IN ()` boş listesi zaten hiçbir satır döndürmez.
+  if (matchingIds?.length === 0) return [];
 
   const rows = await prisma.product.findMany({
     where: {
       deletedAt: null,
       categoryId: filters.categoryId,
-      // Ad VEYA açıklama: kullanıcı "deterjan" yazdığında adında geçmeyen ama
-      // açıklamasında geçen ürünü de bulabilmeli.
-      ...(query
-        ? {
-            OR: [
-              { name: { contains: query, mode: "insensitive" as const } },
-              { description: { contains: query, mode: "insensitive" as const } },
-            ],
-          }
-        : {}),
+      ...(matchingIds ? { id: { in: matchingIds } } : {}),
     },
     select: {
       id: true,
@@ -96,6 +92,42 @@ export async function listProducts(filters: {
     categoryId: row.category.id,
     categoryName: row.category.name,
   }));
+}
+
+/**
+ * Arama metniyle eşleşen ürün kimliklerini bulur.
+ *
+ * NEDEN HAM SQL: eşleştirme `unaccent()` fonksiyonundan geçiyor ve Prisma'nın
+ * sorgu kurucusu bir SQL fonksiyonunu `where` içinde ifade edemiyor. Ham SQL
+ * YALNIZCA bu eşleştirmeyle sınırlı; ürünün kendisi yine Prisma ile,
+ * tip güvenli biçimde okunuyor. Böylece kolon adlarını elle yazma ve birleşim
+ * kurma işi kodun geneline yayılmıyor.
+ *
+ * DEĞER PARAMETRE OLARAK BAĞLANIYOR (`${pattern}`), metne yapıştırılmıyor —
+ * Prisma'nın etiketli şablonu bunu garanti ediyor, yani SQL enjeksiyonu yok
+ * (04-database.md: "parametreli sorgu zorunlu").
+ *
+ * `ESCAPE '\'`: kullanıcının yazdığı `%` ve `_` joker sayılmasın diye
+ * (`toLikePattern` onları kaçırıyor).
+ *
+ * Ad VEYA açıklama taranıyor: kullanıcı "deterjan" yazdığında adında geçmeyen
+ * ama açıklamasında geçen ürünü de bulabilmeli.
+ */
+async function findIdsMatchingQuery(query: string): Promise<string[]> {
+  const pattern = toLikePattern(query);
+
+  const rows = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id
+    FROM products
+    WHERE deleted_at IS NULL
+      AND (
+        lower(unaccent(name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+        OR lower(unaccent(description)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+      )
+    LIMIT 200
+  `;
+
+  return rows.map((row) => row.id);
 }
 
 /** Süzgeç şeridinde seçili kategorinin adını göstermek için. */

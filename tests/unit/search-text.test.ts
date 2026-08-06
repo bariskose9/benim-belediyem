@@ -3,44 +3,23 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { normalizeSearchQuery } from "@/lib/search-text";
+import { normalizeSearchQuery, toLikePattern } from "@/lib/search-text";
 
 /**
- * Arama metninin Türkçe'ye göre hazırlanması.
+ * Arama metninin sorguya hazırlanması.
  *
- * BU TEST GERÇEK BİR HATADAN DOĞDU. Yerel veritabanında denendiğinde
- * "KAĞIT" yazan kullanıcı "Kağıt Havlu"yu bulamıyordu: veritabanının
- * büyük/küçük harf dönüşümü `I` harfini `i`'ye çeviriyor, oysa Türkçe'de
- * karşılığı `ı`.
- *
- * Aşağıdaki `I → ı` beklentileri o hatanın nöbetçisi: biri kırmızıya
- * dönerse büyük harfle arama yeniden bozulmuş demektir.
+ * TÜRKÇE HARF KATLAMASI BURADA TEST EDİLMİYOR çünkü burada YAPILMIYOR:
+ * `unaccent` eklentisi hem sorguyu hem ürün adını veritabanı tarafında
+ * sadeleştiriyor. O davranışın testi gerçek PostgreSQL'e karşı
+ * `tests/db/market-catalog.test.ts` içinde — taklitle kanıtlanamaz.
  */
 describe("normalizeSearchQuery", () => {
-  it("büyük I harfini Türkçe kuralıyla ı yapar", () => {
-    // "SIVI" veritabanında "Sıvı El Sabunu" ile eşleşmeli.
-    expect(normalizeSearchQuery("SIVI")).toBe("sıvı");
-    expect(normalizeSearchQuery("KAĞIT")).toBe("kağıt");
-    expect(normalizeSearchQuery("YAĞI")).toBe("yağı");
-  });
-
-  it("büyük İ harfini i yapar", () => {
-    expect(normalizeSearchQuery("İÇECEK")).toBe("içecek");
-    expect(normalizeSearchQuery("AYÇİÇEK")).toBe("ayçiçek");
-  });
-
-  it("diğer Türkçe harfleri bozmaz", () => {
-    expect(normalizeSearchQuery("SÜT ÜRÜNLERİ")).toBe("süt ürünleri");
-    expect(normalizeSearchQuery("ÇAMAŞIR")).toBe("çamaşır");
-    expect(normalizeSearchQuery("ÖĞLE")).toBe("öğle");
-  });
-
-  it("zaten küçük harfli metni değiştirmez", () => {
-    expect(normalizeSearchQuery("kağıt havlu")).toBe("kağıt havlu");
-  });
-
   it("baştaki ve sondaki boşlukları atar", () => {
     expect(normalizeSearchQuery("  süt  ")).toBe("süt");
+  });
+
+  it("metni olduğu gibi bırakır", () => {
+    expect(normalizeSearchQuery("Kağıt Havlu")).toBe("Kağıt Havlu");
   });
 
   /**
@@ -52,5 +31,39 @@ describe("normalizeSearchQuery", () => {
     expect(normalizeSearchQuery("")).toBeUndefined();
     expect(normalizeSearchQuery("   ")).toBeUndefined();
     expect(normalizeSearchQuery(undefined)).toBeUndefined();
+  });
+});
+
+/**
+ * ═══ JOKER KAÇIŞI — SESSİZ BİR SORUNUN NÖBETÇİSİ ═══
+ *
+ * `%` ve `_` `LIKE` içinde joker karakterdir. Kaçırılmasaydı tek bir `%`
+ * yazan kullanıcı TÜM kataloğu eşleştirirdi. Hata vermez, çökmez — sadece
+ * yanlış sonuç verir; bu yüzden testle sabitleniyor.
+ */
+describe("toLikePattern", () => {
+  it("metni her iki yanından joker ile sarar", () => {
+    expect(toLikePattern("süt")).toBe("%süt%");
+  });
+
+  it("kullanıcının yazdığı yüzde işaretini etkisizleştirir", () => {
+    expect(toLikePattern("50%")).toBe("%50\\%%");
+  });
+
+  it("kullanıcının yazdığı alt çizgiyi etkisizleştirir", () => {
+    expect(toLikePattern("a_b")).toBe("%a\\_b%");
+  });
+
+  /**
+   * Ters eğik çizgi ÖNCE kaçırılmalı: sonra kaçırılsaydı kendi eklediğimiz
+   * kaçış karakterleri de ikinci kez kaçırılır ve desen bozulurdu.
+   */
+  it("ters eğik çizgiyi kendi kaçış karakterimizi bozmadan kaçırır", () => {
+    expect(toLikePattern("a\\b")).toBe("%a\\\\b%");
+    expect(toLikePattern("\\%")).toBe("%\\\\\\%%");
+  });
+
+  it("Türkçe harflere dokunmaz", () => {
+    expect(toLikePattern("Kağıt")).toBe("%Kağıt%");
   });
 });

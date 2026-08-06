@@ -69,8 +69,8 @@ Dal: `feature/restoran` (öneri)
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
 - **`src/lib/money.ts`** — para TAM SAYI KURUŞ. **Ondalık sayıyla para hesabı YAPMA**
-- **`src/lib/search-text.ts`** — `normalizeSearchQuery`. Arama kutusu yazacaksan
-  ŞART: veritabanı Türkçe `I/ı` harfini yanlış katlıyor (aşağıda tuzaklarda)
+- **`src/lib/search-text.ts`** — `normalizeSearchQuery` + `toLikePattern`. Arama
+  kutusu yazacaksan ŞART (aşağıda tuzaklarda: Türkçe harf + joker kaçışı)
 - **Sepet katmanı** (`src/features/cart/`): `addItemToCart` (not alanı dahil),
   `changeItemQuantity`, `removeItemFromCart`, `getCartSummary`. Katalog
   çözümleyici restoran kalemini zaten destekliyor (`catalog.repository.ts`)
@@ -87,10 +87,18 @@ Dal: `feature/restoran` (öneri)
 ## TUZAKLAR — daha önce vakit kaybettirenler
 
 **Türkçe metin**
-- **Veritabanının büyük/küçük harf araması TÜRKÇE BİLMİYOR.** `I` harfini `i`'ye
-  çeviriyor, oysa karşılığı `ı`. Ölçüldü: `KAĞIT` → 0 sonuç, `kağıt` → 1 sonuç.
-  Arama metnini sorgudan ÖNCE `normalizeSearchQuery` ile geçir
-- Aksan körü arama HÂLÂ YOK (borç #42): "kagit" yazan bulamıyor
+- **Veritabanının kendi büyük/küçük harf araması TÜRKÇE BİLMİYOR.** `I` harfini
+  `i`'ye çeviriyor (karşılığı `ı`) ve aksanları eşlemiyor. Ölçüldü: `KAĞIT` → 0,
+  `kagit` → 0, yalnızca `kağıt` → 1 sonuç
+- **ÇÖZÜM KURULU: `unaccent` eklentisi.** Yeni bir arama yazarken Prisma'nın
+  `contains` + `mode: "insensitive"` kombinasyonunu KULLANMA — Türkçe'de
+  yanlış sonuç verir. Bunun yerine `product.repository.ts` içindeki
+  `findIdsMatchingQuery` desenini izle: `lower(unaccent(...)) LIKE
+  lower(unaccent(${pattern})) ESCAPE '\'`
+- **`LIKE` deseni ŞART olarak `toLikePattern`'den geçer** (`src/lib/search-text.ts`):
+  kullanıcının yazdığı `%` ve `_` joker sayılırsa tek karakterle tüm katalog
+  eşleşir. Sessiz bir hata, çökme yok — bu yüzden testi var
+- Yazım hatası toleransı YOK (borç #44): "kagıt havulu" yazan bulamaz
 
 **Para**
 - **Ondalık sayıyla para hesaplama.** Her yerde tam sayı kuruş, dönüşüm yalnızca
@@ -120,6 +128,10 @@ Dal: `feature/restoran` (öneri)
   tablosunu boşalt, sonra tek sefer koş
 - **Sunucu ayaktayken `npx playwright test` `.next`'i BOZABİLİR.** Çözüm:
   sunucuyu durdur, `rm -rf .next && npm run build`, yeniden başlat
+- **Adres kontrolünde `toHaveURL` DEĞİL `waitForURL` kullan.** `toHaveURL`'ün
+  5 saniyelik varsayılan sınırı yük altında yetmiyor ve gerçek hata yokken
+  kırmızı veriyor. Adım 8'de tam olarak bu oldu: aynı test yük 3'te kırmızı,
+  yük 12'de (düzeltmeden sonra) yeşil
 - **Testler zaman aşımına düşüyorsa önce `uptime` çalıştır.** Yük 7-8'e çıktığında
   iki test "bağlam yok edildi" diye kırmızıya döndü, tek tek koşturulunca geçti
 - **E2E'nin ürettiği ziyaretçi sepetini temizle:** kimliğini uygulama üretiyor,

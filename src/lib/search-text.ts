@@ -1,34 +1,21 @@
 /**
- * Arama metninin Türkçe'ye göre hazırlanması — tek kaynak.
+ * Arama metninin sorguya hazırlanması — tek kaynak.
  *
- * NEDEN GEREKLİ (ölçülmüş bir sorun, tahmin değil): veritabanının
- * büyük/küçük harf duyarsız araması Türkçe harf kurallarını bilmiyor.
- * Yerel veritabanında denendi:
+ * TÜRKÇE HARF KATLAMASI ARTIK BURADA DEĞİL, VERİTABANINDA. `unaccent`
+ * eklentisi hem sorguyu hem ürün adını sadeleştiriyor
+ * (kağıt → kagit · sıvı → sivi · çamaşır → camasir), böylece hem büyük harf
+ * hem aksan sorunu TEK yerde kapanıyor. Aynı katlamayı burada bir kez daha
+ * yapmak, sapabilecek ikinci bir doğruluk kaynağı üretmek olurdu.
  *
- *   "SIVI"  → 0 sonuç, ama "sıvı"  → "Sıvı El Sabunu" bulunuyor
- *   "KAĞIT" → 0 sonuç, ama "kağıt" → "Kağıt Havlu"    bulunuyor
- *
- * Sebebi `I` harfi: veritabanı onu `i`'ye çeviriyor, oysa Türkçe'de karşılığı
- * `ı`. Yani BÜYÜK HARFLE yazan kullanıcı ürünü hiç bulamıyordu.
- *
- * ÇÖZÜM SORGUYU GÖNDERMEDEN ÖNCE: metni JavaScript'in Türkçe yerel kurallarıyla
- * küçük harfe çeviriyoruz (`I` → `ı`, `İ` → `i`). Veritabanına zaten küçük
- * harfli bir metin gidiyor, o da geri kalanını doğru eşliyor.
- *
- * ALTERNATİFİ NEDEN SEÇMEDİK: aynı işi veritabanı tarafında yapmak Türkçe
- * bir harmanlama (collation) veya `unaccent` eklentisi kurmak, yani yeni bir
- * migration ve her ortamda ek yapılandırma demekti. Buradaki tek satır aynı
- * sorunu ücretsiz çözüyor.
- *
- * ÇÖZMEDİĞİ ŞEY: Türkçe klavyesi olmayan kullanıcının "sivi" yazması.
- * Aksan körü arama ayrı bir iş (teknik borç) — bunun için gerçekten
- * veritabanı eklentisi gerekiyor.
+ * Bu dosyaya kalan iki iş var ve ikisi de veritabanının yapamayacağı işler:
+ * metni sınırlamak ve `LIKE` joker karakterlerini etkisizleştirmek.
  */
 
-const TURKISH_LOCALE = "tr-TR";
+/** `LIKE` desenlerinde kaçış karakteri; sorguda `ESCAPE '\'` ile eşleşir. */
+const LIKE_ESCAPE = "\\";
 
 /**
- * Kullanıcının yazdığı arama metnini veritabanına gönderilecek hâle getirir.
+ * Kullanıcının yazdığını süzgeç değerine çevirir.
  *
  * Sonuç boşsa `undefined` döner: "boş metni içerenler" diye bir süzgeç
  * kurmanın anlamı yok, süzgeç hiç uygulanmamalı.
@@ -36,7 +23,28 @@ const TURKISH_LOCALE = "tr-TR";
 export function normalizeSearchQuery(raw: string | undefined): string | undefined {
   if (raw === undefined) return undefined;
 
-  const normalized = raw.trim().toLocaleLowerCase(TURKISH_LOCALE);
+  const trimmed = raw.trim();
 
-  return normalized.length === 0 ? undefined : normalized;
+  return trimmed.length === 0 ? undefined : trimmed;
+}
+
+/**
+ * Arama metnini `LIKE` desenine çevirir.
+ *
+ * NEDEN KAÇIŞ ŞART: `%` ve `_` `LIKE` içinde joker karakterdir. Kaçırılmasaydı
+ * tek bir `%` yazan kullanıcı TÜM kataloğu eşleştirir, `_` yazan ise herhangi
+ * bir tek karakteri. Bu bir SQL enjeksiyonu değil (değer parametre olarak
+ * bağlanıyor), ama sorgunun anlamını kullanıcının değiştirebilmesi demek —
+ * ve büyüyen bir katalogda gereksiz yere her satırı taratmanın yolu.
+ *
+ * Ters eğik çizgi ÖNCE kaçırılıyor: sonra kaçırılsaydı kendi eklediğimiz
+ * kaçış karakterlerini de ikinci kez kaçırırdık.
+ */
+export function toLikePattern(query: string): string {
+  const escaped = query
+    .replaceAll(LIKE_ESCAPE, LIKE_ESCAPE + LIKE_ESCAPE)
+    .replaceAll("%", LIKE_ESCAPE + "%")
+    .replaceAll("_", LIKE_ESCAPE + "_");
+
+  return `%${escaped}%`;
 }

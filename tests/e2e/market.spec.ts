@@ -50,7 +50,7 @@ test("ana sayfadaki market kartı markete götürüyor", async ({ page }) => {
 
   await page.getByRole("link", { name: new RegExp(messages.services.market.title) }).click();
 
-  await expect(page).toHaveURL(/\/market$/);
+  await page.waitForURL(/\/market$/);
   await expect(page.getByRole("heading", { name: copy.title, level: 1 })).toBeVisible();
 });
 
@@ -64,7 +64,7 @@ test("kategori süzgeci ürünleri daraltıyor", async ({ page }) => {
   await page.goto("/market");
   await page.getByRole("link", { name: new RegExp(category.name) }).click();
 
-  await expect(page).toHaveURL(new RegExp(`kategori=${category.id}`));
+  await page.waitForURL(new RegExp(`kategori=${category.id}`));
 
   // Seçili süzgeç ekran okuyucuya da bildiriliyor.
   await expect(page.getByRole("link", { name: new RegExp(category.name) })).toHaveAttribute(
@@ -97,6 +97,25 @@ test("büyük harfle Türkçe arama sonuç veriyor", async ({ page }) => {
   await expect(page.getByRole("heading", { name: product!.name, level: 3 })).toBeVisible();
 });
 
+/**
+ * Türkçe klavyesi olmayan kullanıcı — telefonda ve yurt dışında sık.
+ * "kagit" yazan da "Kağıt Havlu"yu bulabilmeli.
+ */
+test("aksansız yazılan arama sonuç veriyor", async ({ page }) => {
+  const product = await prisma.product.findFirst({
+    where: { deletedAt: null, name: { contains: "Kağıt" } },
+    select: { name: true },
+  });
+
+  test.skip(!product, "Tohum verisinde 'Kağıt' geçen ürün yok.");
+
+  await page.goto("/market");
+  await page.getByLabel(copy.search.label).fill("kagit");
+  await page.getByRole("button", { name: copy.search.submit }).click();
+
+  await expect(page.getByRole("heading", { name: product!.name, level: 3 })).toBeVisible();
+});
+
 test("sonuçsuz arama boş durumu gösteriyor", async ({ page }) => {
   await page.goto("/market");
   await page.getByLabel(copy.search.label).fill("boylebirurunyok");
@@ -105,9 +124,16 @@ test("sonuçsuz arama boş durumu gösteriyor", async ({ page }) => {
   await expect(page.getByRole("heading", { name: copy.empty.title })).toBeVisible();
   await expect(page.getByText(copy.empty.withQuery("boylebirurunyok"))).toBeVisible();
 
-  // Boş durumdan çıkış yolu var: kullanıcı çıkmaza düşmüyor.
+  /**
+   * Boş durumdan çıkış yolu var: kullanıcı çıkmaza düşmüyor.
+   *
+   * `waitForURL` KULLANILIYOR, `toHaveURL` DEĞİL: ikincisinin 5 saniyelik
+   * varsayılan sınırı, testler paralel koşarken ve makine yüklüyken yetmiyor
+   * ve gerçek bir hata yokken kırmızı veriyor. Aynı iddia, doğru bekleme —
+   * `layout.spec.ts` içinde de aynı sebeple bu desen kullanılıyor.
+   */
   await page.getByRole("link", { name: copy.empty.reset }).click();
-  await expect(page).toHaveURL(/\/market$/);
+  await page.waitForURL(/\/market$/);
 });
 
 /** PRD §5.3: "Stok yetersizse sepete eklenemez." */
@@ -147,7 +173,7 @@ test("ziyaretçi ürünü sepete ekleyebiliyor", async ({ page }) => {
 
   await page.getByRole("link", { name: copy.toast.goToCart }).click();
 
-  await expect(page).toHaveURL(/\/sepet$/);
+  await page.waitForURL(/\/sepet$/);
   await expect(page.getByText(product.name).first()).toBeVisible();
 
   await cleanupGuestCart(page);

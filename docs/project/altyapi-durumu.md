@@ -41,6 +41,17 @@
 | **Resend** | — | 3.000 e-posta/ay | Doğrulama kodu e-postası |
 | **Google Cloud** | proje `benim-belediyem` · OAuth istemcisi `benim-belediyem-web` | ücretsiz | Google ile giriş (adım 4c) |
 
+### PostgreSQL eklentileri
+
+- **`unaccent`** — aksan körü arama için (adım 8). Migration
+  `20260806200000_enable_unaccent_for_search` içinde `CREATE EXTENSION IF NOT
+  EXISTS` ile açılıyor, yani **elle bir şey yapılmıyor**: `migrate deploy`
+  koşan her ortam kendi kendine kuruyor
+- Neon'un desteklediği eklentiler arasında olduğu resmî dokümandan doğrulandı
+  (2026-08-06). CI'daki `postgres:18.4-alpine` kapsayıcısında da çalışıyor —
+  oradaki `belediye` kullanıcısı kapsayıcının süper kullanıcısı
+- Panele girip elle eklenti kurulmuş DEĞİL; yeni bir ortam açılırsa da gerekmez
+
 ## Panelde yapılandırılanlar
 
 ### Cloudflare Turnstile

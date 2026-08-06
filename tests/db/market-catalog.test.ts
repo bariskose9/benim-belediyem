@@ -155,15 +155,19 @@ describe("listProducts — arama", () => {
   });
 
   /**
-   * ═══ ASIL KORUNAN DAVRANIŞ ═══
+   * ═══ ASIL KORUNAN DAVRANIŞ — ÜÇ YAZIM, TEK SONUÇ ═══
    *
-   * Veritabanı Türkçe harf kurallarını bilmiyor: `I` harfini `i`'ye çeviriyor,
-   * oysa Türkçe'de karşılığı `ı`. Düzeltme olmadan "KAĞIT" ve "SIVI" aramaları
-   * SIFIR sonuç döndürüyordu — yani büyük harfle yazan kullanıcı ürünü hiç
-   * bulamıyordu. `normalizeSearchQuery` metni sorgudan önce Türkçe kurallarıyla
-   * küçük harfe çeviriyor.
+   * Kullanıcı "Kağıt Havlu"yu üç farklı şekilde arayabilir ve üçü de
+   * bulmalı. Düzeltme öncesi YALNIZCA üçüncüsü çalışıyordu:
+   *
+   *   "KAĞIT" (büyük harf)        → 0 sonuç · veritabanı `I`'yi `i` sanıyordu
+   *   "kagit" (Türkçe klavyesiz)  → 0 sonuç · aksan eşleşmiyordu
+   *   "kağıt" (tam doğru yazım)   → 1 sonuç
+   *
+   * `unaccent` eklentisi hem sorguyu hem ürün adını sadeleştirdiği için
+   * üçü de aynı yere düşüyor. Bu testler o davranışın nöbetçisi.
    */
-  it("büyük harfle yazılan Türkçe aramayı da eşler", async () => {
+  it("büyük harfle yazılan Türkçe aramayı eşler", async () => {
     const paper = onlyTestProducts(await listProducts({ query: "KAĞIT" }));
     const soap = onlyTestProducts(await listProducts({ query: "SIVI" }));
 
@@ -171,12 +175,56 @@ describe("listProducts — arama", () => {
     expect(soap.map((p) => p.id)).toEqual([PRODUCT_SOAP]);
   });
 
-  it("küçük harfle yazılan aynı aramayı da eşler", async () => {
+  it("küçük harfle yazılan aramayı eşler", async () => {
     const paper = onlyTestProducts(await listProducts({ query: "kağıt" }));
     const soap = onlyTestProducts(await listProducts({ query: "sıvı" }));
 
     expect(paper.map((p) => p.id)).toEqual([PRODUCT_PAPER]);
     expect(soap.map((p) => p.id)).toEqual([PRODUCT_SOAP]);
+  });
+
+  /** Türkçe klavyesi olmayan kullanıcı — telefonda ve yurt dışında sık. */
+  it("aksansız yazılan aramayı eşler", async () => {
+    const paper = onlyTestProducts(await listProducts({ query: "kagit" }));
+    const soap = onlyTestProducts(await listProducts({ query: "sivi" }));
+    const milk = onlyTestProducts(await listProducts({ query: "sut" }));
+
+    expect(paper.map((p) => p.id)).toEqual([PRODUCT_PAPER]);
+    expect(soap.map((p) => p.id)).toEqual([PRODUCT_SOAP]);
+    expect(milk.map((p) => p.id)).toEqual([PRODUCT_MILK]);
+  });
+
+  it("aksansız VE büyük harfle yazılan aramayı eşler", async () => {
+    const paper = onlyTestProducts(await listProducts({ query: "KAGIT" }));
+
+    expect(paper.map((p) => p.id)).toEqual([PRODUCT_PAPER]);
+  });
+
+  /** Diğer Türkçe harfler de katlanmalı: ç, ş, ö, ü, ğ. */
+  it("ç ş ö ü ğ harflerini de aksansız eşler", async () => {
+    const byDescription = onlyTestProducts(await listProducts({ query: "pastorize" }));
+
+    expect(byDescription.map((p) => p.id)).toEqual([PRODUCT_MILK]);
+  });
+
+  /**
+   * ═══ JOKER KAÇIŞI ═══
+   *
+   * `%` ve `_` `LIKE` içinde joker karakter. Kaçırılmasaydı `%` yazan
+   * kullanıcı TÜM kataloğu eşleştirirdi — hata vermeyen, sessizce yanlış
+   * bir sonuç.
+   */
+  it("kullanıcının yazdığı % işaretini joker saymaz", async () => {
+    const products = onlyTestProducts(await listProducts({ query: "%" }));
+
+    expect(products).toEqual([]);
+  });
+
+  it("kullanıcının yazdığı alt çizgiyi joker saymaz", async () => {
+    // "_abun" bir joker olsaydı "Sabun" ile eşleşirdi.
+    const products = onlyTestProducts(await listProducts({ query: "_abunu" }));
+
+    expect(products).toEqual([]);
   });
 
   it("kategori ve arama birlikte uygulanır", async () => {
