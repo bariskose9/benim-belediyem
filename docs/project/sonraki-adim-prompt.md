@@ -14,9 +14,38 @@ benim-belediyem projesinde roadmap adım **9**'a geçiyoruz. Başlamadan önce
 - `docs/project/fake-data-guide.md` — menü kategorileri ve fiyat bantları
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
 
+## ⛔ ÖNCE BUNU OKU — ADIM 8 MERGE EDİLMEDİ
+
+**Adım 8'in kodu bitti ama `main`'e giremedi.** Sebebi bizde değil: 2026-08-06
+akşamı **GitHub Actions küresel kesintiye girdi** (githubstatus.com'da resmî
+olay: *"Incident with Actions"*, webhook'ların yalnızca %15'i işleniyor).
+PR **#25** açık, üç commit push edilmiş, Vercel preview yeşil — ama
+**GitHub Actions çalıştırması hiç başlamadı.**
+
+**Yeni oturumda ilk iş:**
+
+1. `curl -s https://www.githubstatus.com/api/v2/summary.json` ile Actions'ın
+   düzelip düzelmediğine bak
+2. Düzeldiyse: **iş akışı geçmişe dönük tetiklenmez.** Push kesinti sırasında
+   olduğu için webhook düşürüldü. Yeniden tetiklemek gerekiyor —
+   `gh pr close 25 && gh pr reopen 25` (veya boş commit). **Kullanıcıya sor.**
+3. CI yeşile dönünce merge et, sonra `/api/health` içindeki `commit` alanının
+   değiştiğini **mutlaka doğrula** (Neon uykudaysa deploy patlar)
+4. **Ancak ondan sonra** adım 9 için `main`'den yeni dal aç
+
+**Yerelde her kapı geçildi** (kanıt PR açıklamasında): 518 unit + 91 veritabanı
++ 147 E2E testi, lint/typecheck/format temiz, build başarılı, `npm audit` 0 açık,
+tarayıcıda elle doğrulandı. Eksik olan tek şey **CI'ın kendi yeşili**.
+
+⚠️ Preview adresi (`benim-belediyem-git-feature-market-barisss.vercel.app`)
+Turnstile ve Google OAuth panellerine **eklendi** — o iş yapıldı, tekrar isteme.
+
+---
+
 ## DURUM
 
-Roadmap adım **0 → 8 bitti**. Market ekranı çalışıyor.
+Roadmap adım **0 → 8 bitti** (kod olarak; merge için yukarıya bak).
+Market ekranı çalışıyor.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - **Kayıt, giriş, çıkış, oturum, şifre sıfırlama, Google ile giriş** çalışıyor
