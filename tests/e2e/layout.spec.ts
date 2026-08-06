@@ -155,7 +155,15 @@ test.describe("erişilebilirlik", () => {
 
 test.describe("düzen", () => {
   test("hiçbir sayfa yatay kaydırma oluşturmaz", async ({ page }) => {
-    for (const path of ["/", "/giris", "/kayit", "/sifremi-unuttum", "/hastane", "/sepet"]) {
+    for (const path of [
+      "/",
+      "/giris",
+      "/kayit",
+      "/sifremi-unuttum",
+      "/hastane",
+      "/sepet",
+      "/market",
+    ]) {
       await page.goto(path);
 
       /**
@@ -202,10 +210,18 @@ test.describe("hizmet ızgarası", () => {
   test("açılmamış hizmet tıklanabilir bağlantı değildir", async ({ page }) => {
     await page.goto("/");
 
+    /**
+     * RESTORAN ÖRNEK SEÇİLDİ ÇÜNKÜ HÂLÂ KAPALI (roadmap adım 9). Burada
+     * önce market vardı; adım 8'de açılınca bu test doğru sebepten kırmızıya
+     * döndü. Bir sonraki adımda restoran da açılınca aynısı olacak — o zaman
+     * etkinlik veya destek kartına taşınmalı, testi silmek DEĞİL.
+     */
     // 404'e giden bir kart, kartın hiç olmamasından kötüdür.
-    const marketTitle = page.getByText(messages.services.market.title, { exact: true });
-    await expect(marketTitle).toBeVisible();
-    await expect(page.getByRole("link", { name: messages.services.market.title })).toHaveCount(0);
+    const closedService = page.getByText(messages.services.restaurant.title, { exact: true });
+    await expect(closedService).toBeVisible();
+    await expect(page.getByRole("link", { name: messages.services.restaurant.title })).toHaveCount(
+      0,
+    );
 
     // Durum yalnızca renkle değil metinle de belirtilmeli.
     await expect(page.getByText(messages.badges.comingSoon).first()).toBeVisible();

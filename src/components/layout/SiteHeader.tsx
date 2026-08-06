@@ -23,6 +23,7 @@ const navLinkClassName =
 /** Yapılandırmadaki anahtar → görünen Türkçe metin. */
 const navLabels: Record<PrimaryNavKey, string> = {
   home: messages.nav.home,
+  market: messages.nav.market,
   hospital: messages.nav.hospital,
   gym: messages.nav.gym,
 };

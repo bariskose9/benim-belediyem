@@ -14,7 +14,11 @@
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_snapshot",
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_pages",
-      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_console_messages"
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_console_messages",
+      "Bash(pmset -g assertions)",
+      "Bash(ps -o pid,lstart,command -p 61070)",
+      "Bash(kill 61070)",
+      "Bash(xargs -I{} echo \"değişmemiş dosya sayısı: {}\")"
     ]
   }
 }

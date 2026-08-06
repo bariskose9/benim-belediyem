@@ -4,6 +4,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 8: Belediye Market
+
+- **Market ekranı** `/market`: 45 ürün, 6 kategori; görselli, fiyatlı, stoklu
+  kartlar. Mobilde tek, tablette iki, masaüstünde dört sütun
+- **Kategori süzgeci ve arama** — ikisi de adres çubuğunda taşınıyor
+  (`?kategori=…&arama=…`), yani geri tuşu çalışıyor ve bağlantı paylaşılabiliyor.
+  Arama formu sıradan bir `GET` formu olduğu için JavaScript kapalıyken de işliyor
+- **Sepete ekleme**: hazır sepet ucu (`POST /api/carts/current/items`) çağrılıyor;
+  yeni uç ve yeni iş kuralı yazılmadı. Ziyaretçi de ekleyebiliyor (PRD §4)
+- **Bildirim balonu** (`sonner`): ekleme onayı ve içinde "Sepete git" bağlantısı.
+  Balon `aria-live` bölgesine yazıyor, yani ekran okuyucuya da ulaşıyor
+- **Tükenmiş ürün** listede kalıyor ama "Tükendi" rozetiyle ve düğmesiz. Asıl
+  engel sunucuda: `addItemToCart` isteği zaten reddediyor (PRD §5.3)
+- **Az stok uyarısı** ("Son 5 adet") 10 adedin altında görünüyor
+- Ana sayfadaki market kartı ve üst menü artık `/market`'e bağlı; rozet
+  "Yakında"dan "Açık"a döndü
+
+### Düzeltildi — adım 8
+
+- **Türkçe aramada büyük harf sorunu.** Veritabanının büyük/küçük harf duyarsız
+  araması `I` harfini `i`'ye çeviriyor, oysa Türkçe'de karşılığı `ı`. Bu yüzden
+  `KAĞIT` yazan kullanıcı "Kağıt Havlu"yu, `SIVI` yazan "Sıvı El Sabunu"yu
+  **hiç bulamıyordu** (yerel veritabanında ölçüldü). Arama metni artık sorgudan
+  önce Türkçe kurallarıyla küçük harfe çevriliyor (`src/lib/search-text.ts`).
+  Koruma kaldırılıp testin kırmızıya döndüğü doğrulandı
+
+### Güvenlik — adım 8
+
+- `hono` **4.13.0**'a `overrides` ile yükseltildi (CORS ara katmanında ReDoS —
+  GHSA-8j4g-w8fx-2239). Paket `shadcn` CLI üzerinden geliyordu ve zaten
+  bağımlılık ağacındaydı; `npm audit` ve `npm audit --omit=dev` yeniden **0 açık**
+- `next-themes` bağımlılığı **kaldırıldı**. shadcn CLI'ı `sonner` bileşeniyle
+  birlikte getirmişti, oysa projede tema sınıf tabanlı ve `src/lib/theme.ts`
+  içinde "bu paketi bilerek eklemiyoruz" yazıyor. Balon rengi artık tasarım
+  token'larına bağlı, yani temayı CSS biliyor — ikinci bir tema kaynağı yok
+
 ### Eklendi — adım 7: ortak sepet + sahte kart ödemesi
 
 - **Ortak sepet** `/sepet`: market, restoran ve etkinlik ürünleri tek sepette,

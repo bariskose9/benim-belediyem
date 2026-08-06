@@ -636,6 +636,7 @@ export const messages = {
     login: "Giriş yap",
     register: "Kayıt ol",
     account: "Hesabım",
+    market: "Market",
     hospital: "Hastane",
     gym: "Spor salonu",
     /** Ekran okuyucular için: menünün ne olduğu söylenmeli (WCAG 2.1 AA). */
@@ -791,6 +792,64 @@ export const messages = {
       cancellationTooLate: "Randevuya 2 saatten az kaldığı için iptal edilemez.",
       tooManyAttempts:
         "Kısa sürede çok fazla randevu işlemi yaptınız. Lütfen 15 dakika sonra tekrar deneyin.",
+    },
+  },
+  /** Belediye Market (PRD §5.3 · adım 8). */
+  market: {
+    pageTitle: "Belediye Market",
+    title: "Belediye Market",
+    description:
+      "Temel gıda ve temizlik ürünlerini sepete ekleyin, paket servisle adresinize gelsin.",
+
+    search: {
+      label: "Ürün ara",
+      placeholder: "Ürün adı veya açıklaması",
+      submit: "Ara",
+      clear: "Aramayı temizle",
+    },
+
+    filters: {
+      /** Süzgeç şeridinin ekran okuyucudaki adı. */
+      label: "Kategoriler",
+      all: "Tümü",
+      /** Kategori rozetindeki ürün sayısı. */
+      productCount: (count: number) => `${count} ürün`,
+    },
+
+    /**
+     * Süzgeç sonucu boşsa gösterilen metin.
+     *
+     * Arama metni geri gösteriliyor ki kullanıcı ne aradığını görsün —
+     * "sonuç yok" tek başına yazım hatasını fark ettirmez.
+     */
+    empty: {
+      title: "Aradığınız ürün bulunamadı",
+      withQuery: (query: string) => `"${query}" için sonuç çıkmadı. Farklı bir kelime deneyin.`,
+      withoutQuery: "Bu kategoride şu an ürün yok.",
+      reset: "Tüm ürünleri göster",
+    },
+
+    product: {
+      outOfStock: "Tükendi",
+      /**
+       * Az stokta uyarısı.
+       *
+       * Eşik altında sayı gösteriliyor: "son 3 adet" bilgisi kullanıcının
+       * sepete eklerken kaç adet isteyebileceğini baştan söylüyor, deneme
+       * yanılmaya bırakmıyor.
+       */
+      lowStock: (stock: number) => `Son ${stock} adet`,
+      addToCart: "Sepete ekle",
+      adding: "Ekleniyor…",
+      /** Ekran okuyucu için: "Sepete ekle" tek başına hangi ürün belirsiz. */
+      addToCartLabel: (name: string) => `${name} ürününü sepete ekle`,
+    },
+
+    toast: {
+      added: (name: string) => `${name} sepete eklendi.`,
+      goToCart: "Sepete git",
+      /** Beklenmeyen hatada kullanıcıya gösterilen genel metin. */
+      failed: "Ürün sepete eklenemedi. Lütfen tekrar deneyin.",
     },
   },
   /** Ortak sepet (PRD §4 · adım 7). */

@@ -4,6 +4,7 @@ import { Geist } from "next/font/google";
 import { EnvBanner } from "@/components/layout/EnvBanner";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { Toaster } from "@/components/ui/sonner";
 import { isProductionEnv, publicEnv } from "@/config/env";
 import { messages } from "@/config/messages";
 import { themeInitScript } from "@/lib/theme";
@@ -74,6 +75,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <SiteFooter />
+
+        {/*
+          Bildirim balonları. Kökte duruyor ki her sayfadan çağrılabilsin ve
+          sayfa geçişinde kaybolmasın. Sonner balonu `aria-live` bölgesine
+          yazıyor, yani mesaj ekran okuyucuya da ulaşıyor — sessiz bir görsel
+          onay görme engelli kullanıcı için hiçbir şey ifade etmezdi.
+        */}
+        <Toaster />
       </body>
     </html>
   );
