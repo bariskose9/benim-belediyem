@@ -19,6 +19,13 @@ Prisma'nın kendisi · sabit metinler.
 
 ## Kurallar
 - **Her hata düzeltmesi önce hatayı yakalayan testle başlar** (kırmızı → yeşil → refactor).
+- **Bir KORUMA için yazılan test, koruma kaldırılarak KANITLANIR.** Kural, kısıt,
+  kaçış, yetki kontrolü veya yarış koruması test ettiğinde: testi yaz, yeşil
+  olduğunu gör, sonra **korumayı geçici olarak kaldır** ve testin kırmızıya
+  döndüğünü **gözünle gör**. Dönmüyorsa test korumayı değil başka bir şeyi
+  ölçüyordur ve seni yanlış yere güvendirir.
+  *Kaç testin kırmızıya döndüğüne de bak:* beklediğinden fazlası dönüyorsa
+  testler birbirine karışmıştır, azı dönüyorsa kapsam eksiktir.
 - Test adı davranışı anlatır: `randevu saati doluysa 409 döner`
 - Testler birbirinden bağımsız; sıraya bağlı test yazılmaz.
 - Her test kendi verisini kurar ve temizler. Paylaşılan global veri yok.
@@ -27,6 +34,24 @@ Prisma'nın kendisi · sabit metinler.
 - **Süreye bağlı her kural için süre dolumu testi zorunludur** (koltuk kilidi, OTP,
   oturum, hız sınırı penceresi). Doğruluk okuma anındaki zaman koşuluna bağlı
   olduğu için (ADR-007), o koşul unutulursa test yakalamalıdır.
+
+## Kararsız (flaky) test — testi gevşetme, doğru bekle
+
+Yük altında kırmızı, tek başına yeşil veren test **kodu değil kendini** bildirir.
+Böyle bir testte iddiayı zayıflatmak (beklentiyi silmek, `retry` artırmak,
+`skip` etmek) hatayı gizler.
+
+- **Bir olayı bekleyen testte, kısa varsayılan zaman aşımına dayanma.** Sayfa
+  yönlendirmesi, ağ isteği veya arka plan işi gibi süresi belirsiz olaylarda
+  "o olayı bekleyen" API kullanılır; sabit bekleme (`sleep`) hiç kullanılmaz.
+  Örnek: adres değişimini `waitForURL` ile bekle, `toHaveURL`'ün varsayılan
+  sınırına güvenme.
+- **Testler paralel koşuyorsa paylaşılan her kaynak çakışma adayıdır:** aynı
+  hesap, aynı kayıt, aynı sayaç. Her paralel çalışana **kendi verisi** verilir.
+- **Sayaç tabanlı korumalar (hız sınırı) test koşuları arasında sıfırlanır**;
+  yoksa ikinci koşu, kodda olmayan bir hata bildirir.
+- **Kırmızı gördüğünde önce makinenin yükünü kontrol et.** Yüksek yükte oluşan
+  zaman aşımını koda yıkmak saatler yakar.
 
 ## Mobil doğrulama — üç ayrı şey, karıştırılmaz
 

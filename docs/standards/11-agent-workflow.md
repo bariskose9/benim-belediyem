@@ -63,11 +63,15 @@ Nasıl doğrulanır: `WebFetch` ile resmî doküman · `npm view` ile paket kayd
 değişmiş olabilir" diye **açıkça yaz**. Sessizce tahmin etme.
 
 **Neden bu kadar sert:** doğrulama ajan için saniyeler sürer; yanlış yönlendirme
-kullanıcının onlarca dakikasını yakar ve güveni bozar. Maliyet asimetriktir.
-Bu proje bunu iki kez ödedi: Turnstile hostname tuzağı (~1 saat, teknik borç #31)
-ve Google Cloud'un "OAuth consent screen" sayfasının artık var olmaması
-(sayfa "Google Auth Platform" altında Branding / Audience / Clients / Data Access
-olarak beşe bölünmüş — eski tarif kullanıcıyı olmayan bir menüye gönderdi).
+kullanıcının onlarca dakikasını yakar ve güveni bozar. **Maliyet asimetriktir.**
+
+Tipik ödenen bedeller (gerçek örneklerden):
+- Sağlayıcı, ayarı başka bir menünün altına taşımıştır; kullanıcı **var olmayan
+  bir sayfayı** arar ve "ben mi beceremiyorum" diye düşünür
+- Panelde bir değer girilmiştir ama **kaydetme adımı** tarifte yoktur; hata
+  saatlerce **kodda** aranır
+- Bir kütüphanenin önerdiği yol değişmiştir; ezberden verilen kurulum,
+  projenin yazılı bir kararını sessizce bozan bir paket getirir
 
 ## Kapsam kontrolü
 İstenmeyen iyileştirme yapma. "Bu arada şunu da düzelttim" yasak —

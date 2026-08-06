@@ -35,6 +35,28 @@ Kullanıcı verisi tutan tablolarda `user_id` + yabancı anahtar kısıtı.
 - Silme varsayılan olarak soft delete (`deleted_at`); kalıcı silme açık talep ister.
 - Kişisel veri gerekmedikçe saklanmaz; log'a kişisel veri yazılmaz.
 
+## Metin arama
+- **Veritabanının "büyük/küçük harf duyarsız" araması kullanıcının dilini bilmez.**
+  ORM'in `insensitive` kipi ASCII kurallarına göre çalışır; Türkçe'de `I` harfini
+  `i`'ye katlar (doğrusu `ı`), Almanca `ß`, Fransızca aksanlar da eşleşmez.
+  Sonuç sessizdir: hata yok, çökme yok, sadece **kullanıcı ürünü bulamaz.**
+- **Arama davranışı tahmin edilmez, GERÇEK VERİYE KARŞI ÖLÇÜLÜR.** Bir arama
+  kutusu yazmadan önce birkaç örnek kelimeyi veritabanında dene ve sonucu gör.
+- **Sorgu ile aranan alan AYNI sadeleştirmeden geçer** (`unaccent` eklentisi,
+  dile uygun collation veya eşdeğeri). Yalnızca bir tarafı normalleştirmek
+  eşleşmeyi bozar.
+- Sadeleştirmenin yeri **veritabanıdır**, uygulama katmanı değil: iki yerde
+  yapılırsa ikinci bir doğruluk kaynağı doğar ve zamanla sapar.
+- **Kullanıcı metni bir `LIKE` desenine giriyorsa `%` ve `_` kaçırılır** ve
+  `ESCAPE` belirtilir. Bu bir enjeksiyon açığı değildir (değer parametreyle
+  bağlanır) ama sorgunun **anlamını** kullanıcıya devretmektir: tek bir `%`
+  yazan kişi tüm tabloyu eşleştirir.
+- Aksan/harf katlaması için index gerekiyorsa **önce ölç**: küçük tablolarda
+  ifade index'i, onu mümkün kılan sarmalayıcı fonksiyonlar ve bakım yükü
+  kazançtan büyüktür.
+- Yazım hatası toleransı, eş anlamlı ve alaka sıralaması **veritabanının işi
+  değildir**; gerçekten gerekiyorsa ayrı bir arama motoru ADR ile kararlaştırılır.
+
 ## Seed
 - `prisma/seed.ts` idempotent olur (tekrar çalıştırınca veri katlanmaz).
 - Tüm örnek veri **açıkça sahtedir**: isimler uydurma, kart numaraları test aralığında.
