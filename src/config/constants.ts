@@ -451,3 +451,83 @@ export const APPOINTMENT_HISTORY_LIMIT = 20;
  */
 export const APPOINTMENT_WRITE_RATE_LIMIT_MAX = 20;
 export const APPOINTMENT_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+// ===========================================================================
+// ORTAK SEPET VE ÖDEME (PRD §4 "Ortak sepet" · §6.1 · §6.2 · adım 7)
+//
+// TUTARLAR TAM SAYI KURUŞ. Uygulama içinde para hiçbir yerde ondalık sayı
+// olarak taşınmaz (`src/lib/money.ts` gerekçesi).
+// ===========================================================================
+
+/**
+ * Market teslimat ücreti ve ücretsiz teslimat eşiği
+ * (`fake-data-guide.md`: "Teslimat ücreti 59 TL; 750 TL üzeri siparişte ücretsiz").
+ *
+ * Eşik YALNIZCA MARKET TUTARINA bakar, sepetin tamamına değil (PRD §6.1).
+ * Aksi hâlde restoran siparişi ekleyerek market teslimatı bedavaya getirilirdi.
+ */
+export const MARKET_DELIVERY_FEE_KURUS = 5_900;
+export const MARKET_FREE_DELIVERY_THRESHOLD_KURUS = 75_000;
+
+/**
+ * Restoran teslimat ücreti — ŞİMDİLİK SIFIR ve bu bilinçli bir boşluk.
+ *
+ * `fake-data-guide.md` teslimat ücretini YALNIZCA market için tanımlıyor;
+ * PRD §5.4 restoran paket servisinde "adres + tahmini hazırlık süresi" diyor,
+ * ücretten hiç söz etmiyor. Bir sayı uydurmak, dokümanda olmayan bir iş
+ * kuralı icat etmek olurdu. Ücret modül başına hesaplandığı için (PRD §6.1)
+ * yapı hazır: bu sabite bir değer yazmak yeterli.
+ */
+export const RESTAURANT_DELIVERY_FEE_KURUS = 0;
+
+/** Bir sepet satırında en fazla kaç adet olabilir — dolandırıcılık ve hata kalkanı. */
+export const CART_MAX_QUANTITY_PER_ITEM = 20;
+
+/**
+ * Sepette en fazla kaç FARKLI satır olabilir.
+ *
+ * Sınır ekranı ve ödeme transaction'ını korumak için: sınırsız sepet, tek
+ * istekte binlerce satır yazan bir transaction demek.
+ */
+export const CART_MAX_LINES = 50;
+
+/** Terk edilmiş sepetin ömrü (data-model.md saklama süreleri: 30 gün). */
+export const CART_ABANDONED_AFTER_MS = 30 * 24 * 60 * 60_000;
+
+/**
+ * Sepet yazma uçlarının bütçesi.
+ *
+ * Sayaç ZİYARETÇİ kimliğine bağlı, kullanıcıya değil: sepete ekleme girişsiz
+ * de yapılabiliyor (PRD §4 "Ziyaretçi sepeti"), dolayısıyla kullanıcı bazlı
+ * bir sayaç bu ucun yarısını hiç korumazdı. Cömert: normal kullanıcı alışveriş
+ * yaparken onlarca kez adet değiştirir.
+ */
+export const CART_WRITE_RATE_LIMIT_MAX = 120;
+export const CART_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * Ödeme denemesi bütçesi — KULLANICI başına, dar tutuluyor.
+ *
+ * Sepet ucundan farklı: ödeme kart denemesi demek ve sınırsız deneme, çalınmış
+ * kart numaralarını sırayla sınamanın (card testing) en kolay yolu olurdu.
+ */
+export const PAYMENT_RATE_LIMIT_MAX = 10;
+export const PAYMENT_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * Sahte ödeme sağlayıcısının yapay gecikmesi.
+ *
+ * Gerçek bir tahsilat anlıksa da değildir; ekranın "işleniyor" durumunu
+ * gerçekten göstermesi ve çift tıklama korumasının sınanabilmesi için
+ * küçük bir gecikme veriliyor (sahte KPS ile aynı gerekçe).
+ */
+export const MOCK_PAYMENT_MIN_DELAY_MS = 300;
+export const MOCK_PAYMENT_MAX_DELAY_MS = 900;
+
+/** Kart doğrulama sınırları (PRD §6.2 adım 3). */
+export const CARD_NUMBER_MIN_DIGITS = 13;
+export const CARD_NUMBER_MAX_DIGITS = 19;
+export const CARD_CVV_MIN_DIGITS = 3;
+export const CARD_CVV_MAX_DIGITS = 4;
+export const CARD_HOLDER_MIN_LENGTH = 3;
+export const CARD_HOLDER_MAX_LENGTH = 60;

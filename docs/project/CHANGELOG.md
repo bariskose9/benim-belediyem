@@ -4,6 +4,81 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 7: ortak sepet + sahte kart ödemesi
+
+- **Ortak sepet** `/sepet`: market, restoran ve etkinlik ürünleri tek sepette,
+  modül başına ayrı bölüm ve ayrı ara toplam. Adet artırma/azaltma ve satır
+  çıkarma anında çalışıyor
+- **Ziyaretçi sepeti** (PRD §4): giriş yapmamış kullanıcı da sepete ekleyebiliyor,
+  sepet `bb_anon` çerezinde taşınıyor. **Giriş yapıldığında hesaptaki sepetle
+  birleşiyor** — aynı ürünün adetleri toplanıyor, stok ve satır sınırı aşılmıyor.
+  Hem şifreyle hem Google ile girişte çalışıyor
+- **Teslimat ücreti MODÜL BAŞINA** (PRD §6.1): market 59 TL, 750 TL üzeri
+  ücretsiz. Eşik **yalnızca market tutarına** bakıyor — restoran ürünü ekleyerek
+  market teslimatını bedavaya getirmek mümkün değil, testi de var
+- **Ödeme ekranı** `/odeme` ve **sahte fiş** `/odeme/tamamlandi`: kayıtlı karttan
+  seçme veya yeni kart girme, "kartımı kaydet", teslimat adresi ve zaman aralığı
+- **Sahte ödeme sağlayıcısı** (ADR-003'ün deseni): gerçek tahsilat yok.
+  `fake-data-guide.md`'deki test kartları sonucu belirliyor —
+  `4000…0002` reddedildi, `4000…9995` yetersiz bakiye. Hata yolları böylece
+  öngörülebilir biçimde test edilebiliyor
+- **Kart doğrulaması sunucuda**: Luhn, son kullanma (ayın SONUNA kadar geçerli),
+  CVV biçimi, kart sahibi adı. Marka numaranın ön ekinden çıkarılıyor;
+  tanınmayan numara varsayılan bir markaya DÜŞMÜYOR, reddediliyor
+
+### Kabul kriterleri (PRD §6.1) — gerçek PostgreSQL'e karşı kanıtlandı
+
+- **Karışık sepet tek ödemeyle ÜÇ SİPARİŞ üretiyor**, hepsi aynı ödemeye bağlı.
+  Bilet doğrudan `delivered` oluyor ve teslimat alanları boş kalıyor; market ile
+  restoran `received` ile başlayıp adres ve zaman aralığı taşıyor
+- **Ödeme başarısızsa HİÇBİR sipariş oluşmuyor, sepet korunuyor.** Sıralama
+  bunu sağlıyor: sağlayıcıya sipariş yazılmadan ÖNCE soruluyor
+- **Çift tahsilat veritabanı seviyesinde engelleniyor** (`unique(idempotency_key)`).
+  Eşzamanlı iki istekten yalnızca biri tahsil ediyor
+- **Stok koşullu UPDATE ile düşüyor** (`WHERE stock >= n`) — randevu modülündeki
+  desenin aynısı. Son adedi aynı anda isteyen iki kullanıcıdan yalnızca biri
+  alıyor, stok eksiye inmiyor
+
+### Güvenlik
+
+- **Tam kart numarası hiçbir yere yazılmıyor**: ne veritabanına, ne log'a, ne
+  hata mesajına, ne ekrana. Repository imzalarında kart numarası için parametre
+  YOK; sızması yanlışlıkla bile mümkün değil. Testler bunu yanıtta, şema
+  hatasında, iş kuralı hatasında ve beklenmeyen hatada ayrı ayrı doğruluyor
+- **Tutar sunucuda hesaplanıyor.** İstemcinin gönderdiği `expectedTotalKurus`
+  tahsil edilmiyor; yalnızca "kullanıcının gördüğü ekran güncel miydi" diye
+  karşılaştırılıyor, tutmuyorsa ödeme duruyor
+- **IDOR**: başkasının adresi, kayıtlı kartı, sepet satırı veya fişi
+  kullanılamıyor — sahiplik her sorgunun içinde
+- Hız sınırı: sepet yazmalarında ziyaretçi başına 120/15dk, ödemede kullanıcı
+  başına 10/15dk (kart deneme saldırısına karşı dar tutuldu)
+
+### Değiştirildi
+
+- **Para hesabı artık TAM SAYI KURUŞ** (`src/lib/money.ts`). Veritabanı
+  `Decimal(10,2)` tutuyor, ekran lira gösteriyor, ama aradaki tüm hesap tam
+  sayıyla yapılıyor — `0.1 + 0.2` hatası bir sepette kuruş kaymasına dönüşürdü.
+  Testi bu davranışı doğrudan kanıtlıyor
+- Üst menüye **sepet bağlantısı** eklendi; menünün içinde değil sağda, giriş
+  düğmesi gibi her ekran boyutunda tek dokunuş uzaklıkta (PRD §4)
+- Kart son kullanma etiketleri "Ay"/"Yıl" yerine **"Son kullanma ayı/yılı"**
+  oldu: kısa hâli hem ekran okuyucuda bağlamsız kalıyordu hem de sayfadaki
+  başka metinlerle çakışıyordu (testte fiilen çakıştı)
+- `tests/db/helpers.ts` temizliği sepet, sipariş, ödeme, adres ve katalog
+  tablolarını da kapsıyor — uygulamanın ürettiği kayıtlar `cuid()` aldığı için
+  test önekiyle bulunamıyordu
+
+### Düzeltildi
+
+- **`/sepet` sayfası, çerezi hiç olmayan ziyaretçide çöküyordu.** Sunucu
+  bileşeni ziyaretçi kimliğini üretmeye çalışıyordu; Next.js sunucu
+  bileşeninde çerez yazılmasına izin vermiyor. Artık sayfa salt okuma yapıyor
+  (`readCartOwner`), kimlik ilk yazma isteğinde uçta üretiliyor. E2E testi yakaladı
+- **Hastane E2E testinde gizli bir yarış vardı** (adım 6'dan): iki Playwright
+  projesi aynı branşın aynı ilk boş saatini kapmaya çalışıyordu. Adım 7'nin
+  eklediği yükle görünür oldu; her projeye ayrı branş verildi
+
+
 ### Eklendi — adım 6: hastane randevu modülü (personele özel)
 
 - **Randevu akışı** `/hastane`: branş → doktor → gün → saat, hepsi tek adreste

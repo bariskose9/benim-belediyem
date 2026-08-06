@@ -3,6 +3,7 @@ import { loginSchema } from "@/features/auth/schemas/login.schema";
 import { login } from "@/features/auth/services/login.service";
 import { readSessionToken, writeSessionCookie } from "@/features/auth/services/session-context";
 import { revokeSession } from "@/features/auth/services/session.service";
+import { mergeGuestCartIntoUserCart } from "@/features/cart/services/cart.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { created, fail } from "@/lib/http";
 import { readActorIp } from "@/lib/rate-limit";
@@ -38,12 +39,19 @@ export async function POST(request: Request) {
 
     // Girişten ÖNCE okunuyor: çerez birazdan yeni jetonla değiştirilecek.
     const previousToken = await readSessionToken();
+    const anonymousId = await ensureAnonymousId();
 
     const result = await login({
       payload: parsed.data,
       actorIp: readActorIp(request.headers),
-      sessionId: await ensureAnonymousId(),
+      sessionId: anonymousId,
     });
+
+    /**
+     * Ziyaretçiyken doldurulan sepet hesaba taşınır (PRD §4 · §3 "kaldığı
+     * yerden devam eder"). Aynı ürün varsa adetler toplanır, stok aşılmaz.
+     */
+    await mergeGuestCart({ userId: result.userId, anonymousId });
 
     /**
      * Aynı tarayıcının önceki oturumu kapatılır.
@@ -82,5 +90,23 @@ async function readJsonBody(request: Request): Promise<unknown> {
     return await request.json();
   } catch {
     return {};
+  }
+}
+
+/**
+ * Ziyaretçi sepetini hesaba taşır — HATASI GİRİŞİ DÜŞÜRMEZ.
+ *
+ * Neden yutuluyor ve neden bu bir istisna: giriş, sepetten bağımsız ve çok
+ * daha kritik bir işlem. Sepet birleştirme sırasında bir sorun çıkarsa
+ * kullanıcıyı kapıda bırakmak, kaybedilen birkaç sepet satırından çok daha
+ * kötü bir sonuç olurdu. Hata SESSİZCE yutulmuyor: sunucu log'una yazılıyor
+ * (adım 18'de Sentry'ye bağlanacak) ve kullanıcının sepeti ziyaretçi
+ * çerezinde duruyor olmaya devam ediyor.
+ */
+async function mergeGuestCart(input: { userId: string; anonymousId: string }): Promise<void> {
+  try {
+    await mergeGuestCartIntoUserCart({ ...input, now: new Date() });
+  } catch (error) {
+    console.error("[CART_MERGE] ziyaretçi sepeti taşınamadı", error);
   }
 }

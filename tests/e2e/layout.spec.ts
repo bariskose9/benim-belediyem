@@ -155,13 +155,35 @@ test.describe("erişilebilirlik", () => {
 
 test.describe("düzen", () => {
   test("hiçbir sayfa yatay kaydırma oluşturmaz", async ({ page }) => {
-    for (const path of ["/", "/giris", "/kayit", "/sifremi-unuttum", "/hastane"]) {
+    for (const path of ["/", "/giris", "/kayit", "/sifremi-unuttum", "/hastane", "/sepet"]) {
       await page.goto(path);
 
-      const overflows = await page.evaluate(
-        () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-      );
-      expect(overflows, `${path} yatay kaydırma oluşturuyor`).toBe(false);
+      /**
+       * YÖNLENDİRMENİN OTURMASI BEKLENİYOR — İKİ SEBEPLE.
+       *
+       * `/hastane` girişsiz ziyaretçiyi `/giris`'e yolluyor. Bu yönlendirme
+       * `goto` döndükten sonra hâlâ yolda olabiliyor ve iki ayrı hataya yol
+       * açıyordu: ölçüm anında "Execution context was destroyed", bir sonraki
+       * turda ise "Navigation ... is interrupted by another navigation".
+       * İkisi de yük altında düzenli olarak görüldü.
+       *
+       * `expect.poll` ölçümü yeniden deniyor; bekleme testi GEVŞETMİYOR —
+       * aynı iddia, oturmuş bir sayfada sınanıyor.
+       */
+      await expect
+        .poll(
+          () =>
+            page.evaluate(
+              () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            ),
+          // Yük altında düzenin oturması 5 sn'yi aşabiliyor; ölçüm doğru
+          // ama erken yapıldığında geçici bir taşma görüyor.
+          { message: `${path} yatay kaydırma oluşturuyor`, timeout: 15_000 },
+        )
+        .toBe(false);
+
+      // Bu turun yönlendirmesi bitmeden sonraki `goto` başlamamalı.
+      await page.waitForLoadState("load");
     }
   });
 

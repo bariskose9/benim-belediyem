@@ -63,8 +63,29 @@ export async function cleanupTestData(): Promise<void> {
   await prisma.membership.deleteMany({ where: { id: startsWith } });
   await prisma.membershipPlan.deleteMany({ where: { id: startsWith } });
 
-  await prisma.payment.deleteMany({ where: { id: startsWith } });
-  await prisma.savedCard.deleteMany({ where: { id: startsWith } });
+  /**
+   * Sepet, sipariş ve ödeme kayıtlarının çoğunu UYGULAMA üretiyor ve kimlikleri
+   * `cuid()` oluyor — test öneki taşımıyorlar. Bu yüzden kullanıcı ve sepet
+   * bağı üzerinden de siliniyorlar; kalırlarsa yabancı anahtar kısıtları
+   * (`Restrict`) tüm temizliği patlatır. Sıra FK zincirini takip ediyor.
+   */
+  await prisma.orderItem.deleteMany({ where: { order: { userId: startsWith } } });
+  await prisma.order.deleteMany({ where: { userId: startsWith } });
+  await prisma.cartItem.deleteMany({
+    where: { OR: [{ id: startsWith }, { cart: { userId: startsWith } }] },
+  });
+  await prisma.cart.deleteMany({
+    where: { OR: [{ id: startsWith }, { userId: startsWith }, { anonymousId: startsWith }] },
+  });
+  await prisma.payment.deleteMany({ where: { OR: [{ id: startsWith }, { userId: startsWith }] } });
+  await prisma.savedCard.deleteMany({
+    where: { OR: [{ id: startsWith }, { userId: startsWith }] },
+  });
+  await prisma.address.deleteMany({ where: { OR: [{ id: startsWith }, { userId: startsWith }] } });
+  await prisma.menuItem.deleteMany({ where: { id: startsWith } });
+  await prisma.menuCategory.deleteMany({ where: { id: startsWith } });
+  await prisma.product.deleteMany({ where: { id: startsWith } });
+  await prisma.productCategory.deleteMany({ where: { id: startsWith } });
 
   // Kayıt akışı (adım 4b-1). `otpChallenge` ve `auditLog` kullanıcıya bağlı
   // olduğu için ondan ÖNCE silinmeli.

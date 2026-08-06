@@ -47,12 +47,36 @@ const PASSWORD = "Test1234!";
  * Hesaplar `docs/project/test-hesaplari.md`'den; #1 ve #4 `login.spec.ts`'e
  * ait, o yüzden burada #2 ve #3 kullanılıyor.
  */
-const STAFF_BY_PROJECT: Record<string, { nationalId: string; email: string }> = {
-  "desktop-chrome": { nationalId: "94002759196", email: "burak.tas2@ornek.test" },
-  "mobile-375": { nationalId: "91911650170", email: "nurcan.yilmaz3@ornek.test" },
+const STAFF_BY_PROJECT: Record<
+  string,
+  { nationalId: string; email: string; specialtyIndex: number }
+> = {
+  /**
+   * `specialtyIndex` de projeye özel ve bu da doğruluk şartı.
+   *
+   * İki proje aynı branşın aynı doktorunun İLK BOŞ SAATİNİ seçerse aynı slotu
+   * kapmaya çalışırlar: biri alır, diğeri 409 alıp kırmızıya döner. Kod doğru
+   * çalıştığı hâlde test düşer. Adım 6'da bu yarış vardı ama zamanlama
+   * sayesinde görünmüyordu; adım 7'nin eklediği yükle ortaya çıktı.
+   * Ayrı branş, ayrı slot havuzu demek.
+   */
+  "desktop-chrome": {
+    nationalId: "94002759196",
+    email: "burak.tas2@ornek.test",
+    specialtyIndex: 0,
+  },
+  "mobile-375": {
+    nationalId: "91911650170",
+    email: "nurcan.yilmaz3@ornek.test",
+    specialtyIndex: 1,
+  },
 };
 
-function staffAccount(projectName: string): { nationalId: string; email: string } {
+function staffAccount(projectName: string): {
+  nationalId: string;
+  email: string;
+  specialtyIndex: number;
+} {
   const account = STAFF_BY_PROJECT[projectName];
 
   if (!account) {
@@ -165,7 +189,7 @@ test("personel randevu alır, listede görür ve iptal eder", async ({ page }, t
   ).toBeVisible();
   await page
     .getByRole("link", { name: /doktor$/ })
-    .first()
+    .nth(staffAccount(testInfo.project.name).specialtyIndex)
     .click();
 
   // 2. adım — doktor seç. Adres çubuğu seçimi taşımalı.
@@ -219,7 +243,7 @@ test("dolu saat tıklanamaz ve durumu metinle yazar", async ({ page }, testInfo)
   await page.goto("/hastane");
   await page
     .getByRole("link", { name: /doktor$/ })
-    .first()
+    .nth(staffAccount(testInfo.project.name).specialtyIndex)
     .click();
   await expect(page).toHaveURL(/brans=/, { timeout: STEP_TIMEOUT_MS });
   await page
