@@ -41,15 +41,28 @@
 | **Resend** | — | 3.000 e-posta/ay | Doğrulama kodu e-postası |
 | **Google Cloud** | proje `benim-belediyem` · OAuth istemcisi `benim-belediyem-web` | ücretsiz | Google ile giriş (adım 4c) |
 
+### PostgreSQL eklentileri
+
+- **`unaccent`** — aksan körü arama için (adım 8). Migration
+  `20260806200000_enable_unaccent_for_search` içinde `CREATE EXTENSION IF NOT
+  EXISTS` ile açılıyor, yani **elle bir şey yapılmıyor**: `migrate deploy`
+  koşan her ortam kendi kendine kuruyor
+- Neon'un desteklediği eklentiler arasında olduğu resmî dokümandan doğrulandı
+  (2026-08-06). CI'daki `postgres:18.4-alpine` kapsayıcısında da çalışıyor —
+  oradaki `belediye` kullanıcısı kapsayıcının süper kullanıcısı
+- Panele girip elle eklenti kurulmuş DEĞİL; yeni bir ortam açılırsa da gerekmez
+
 ## Panelde yapılandırılanlar
 
 ### Cloudflare Turnstile
 - Widget adı: **`benim-belediyem`**
 - Mod: **Managed** (çoğu kullanıcı bulmaca görmez, onay kutusu yeter)
 - Pre-clearance: yok
-- **3 hostname tanımlı** — production (`benim-belediyem.vercel.app`) çalıştığı
+- **4 hostname tanımlı** — production (`benim-belediyem.vercel.app`) çalıştığı
   fiilen doğrulandı; 2026-08-02'de `feature/sifre-sifirlama` dalının preview
-  adresi eklendi
+  adresi, **2026-08-06'da `feature/market` dalının preview adresi**
+  (`benim-belediyem-git-feature-market-barisss.vercel.app`) proje sahibi
+  tarafından eklendi
 - ⚠️ **Her yeni dalın preview adresi listeye ELLE eklenir.** Eksikse widget hiç
   çizilmez ve tarayıcı konsolunda `[Cloudflare Turnstile] Error: 110200`
   (*domain not authorized*) görünür — **kodda hata arama, panele bak.**
@@ -77,6 +90,8 @@
 - **Authorized redirect URIs** (Clients sayfası) — tam olarak bunlar kayıtlı:
   - `http://localhost:3000/api/auth/google/callback`
   - `https://benim-belediyem.vercel.app/api/auth/google/callback`
+  - `https://benim-belediyem-git-feature-market-barisss.vercel.app/api/auth/google/callback`
+    *(2026-08-06, adım 8 dalı — proje sahibi ekledi)*
 - ⚠️ **"Authorized JavaScript origins" BOŞ ve öyle kalmalı.** Akış tamamen
   sunucu tarafında; oraya yol içeren bir adres yazılırsa Google
   *"URIs must not contain a path"* der. İlk denemede bu hataya düşüldü

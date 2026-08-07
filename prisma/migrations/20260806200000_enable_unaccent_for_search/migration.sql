@@ -1,0 +1,18 @@
+-- Aksan körü arama için `unaccent` eklentisi.
+--
+-- NEDEN: PostgreSQL'in büyük/küçük harf duyarsız araması Türkçe harfleri
+-- bilmiyor. Yerel veritabanında ölçüldü:
+--   "KAĞIT" -> 0 sonuç · "kagit" -> 0 sonuç · "kağıt" -> "Kağıt Havlu"
+-- Yani Türkçe klavyesi olmayan veya büyük harfle yazan kullanıcı ürünü hiç
+-- bulamıyordu. `unaccent` her iki tarafı da sadeleştiriyor
+-- (kağıt -> kagit · sıvı -> sivi · çamaşır -> camasir), böylece iki sorun da
+-- tek yerde kapanıyor.
+--
+-- GERİ ALINABİLİR: eklentiyi düşürmek için `DROP EXTENSION unaccent;` yeterli;
+-- hiçbir tablo, kolon veya veri değişmiyor.
+--
+-- INDEX EKLENMEDİ ve bu bilinçli: ifade üzerinde index kurmak `unaccent`i
+-- saran IMMUTABLE bir fonksiyon gerektiriyor. Katalog 45 satır; ölçüm yapmadan
+-- altyapı eklemek erken optimizasyon olurdu (CLAUDE.md §5.10). Sorgu zaten
+-- 200 satırla sınırlı.
+CREATE EXTENSION IF NOT EXISTS unaccent;

@@ -4,6 +4,61 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 8: Belediye Market
+
+- **Market ekranı** `/market`: 45 ürün, 6 kategori; görselli, fiyatlı, stoklu
+  kartlar. Mobilde tek, tablette iki, masaüstünde dört sütun
+- **Kategori süzgeci ve arama** — ikisi de adres çubuğunda taşınıyor
+  (`?kategori=…&arama=…`), yani geri tuşu çalışıyor ve bağlantı paylaşılabiliyor.
+  Arama formu sıradan bir `GET` formu olduğu için JavaScript kapalıyken de işliyor
+- **Sepete ekleme**: hazır sepet ucu (`POST /api/carts/current/items`) çağrılıyor;
+  yeni uç ve yeni iş kuralı yazılmadı. Ziyaretçi de ekleyebiliyor (PRD §4)
+- **Bildirim balonu** (`sonner`): ekleme onayı ve içinde "Sepete git" bağlantısı.
+  Balon `aria-live` bölgesine yazıyor, yani ekran okuyucuya da ulaşıyor
+- **Tükenmiş ürün** listede kalıyor ama "Tükendi" rozetiyle ve düğmesiz. Asıl
+  engel sunucuda: `addItemToCart` isteği zaten reddediyor (PRD §5.3)
+- **Az stok uyarısı** ("Son 5 adet") 10 adedin altında görünüyor
+- Ana sayfadaki market kartı ve üst menü artık `/market`'e bağlı; rozet
+  "Yakında"dan "Açık"a döndü
+
+### Düzeltildi — adım 8
+
+- **Türkçe aramada büyük harf VE aksan sorunu.** Veritabanının büyük/küçük harf
+  duyarsız araması Türkçe harfleri bilmiyordu; `I` harfini `i`'ye çeviriyor,
+  oysa karşılığı `ı`. Üstelik aksanlar da eşleşmiyordu. Ölçülen sonuç:
+  `KAĞIT` → 0, `kagit` → 0, yalnızca `kağıt` → 1 sonuç. Yani büyük harfle yazan
+  **veya Türkçe klavyesi olmayan** kullanıcı ürünü hiç bulamıyordu.
+  `unaccent` eklentisi migration ile açıldı; sorgu ve ürün adı aynı
+  sadeleştirmeden geçiyor, iki sorun tek yerde kapandı. Eklenti kaldırılıp
+  ilgili dört testin kırmızıya döndüğü doğrulandı
+- **Arama kutusundaki `%` ve `_` artık joker sayılmıyor.** `LIKE` içinde bunlar
+  joker karakter; kaçırılmasaydı tek bir `%` yazan kullanıcı **tüm kataloğu**
+  eşleştirirdi. Hata vermeyen, sessizce yanlış bir sonuçtu; testle sabitlendi
+
+### Veritabanı — adım 8
+
+- Migration `20260806200000_enable_unaccent_for_search` — `unaccent` eklentisi
+  açıldı. **Tablo, kolon veya veri değişmedi**; geri alınması `DROP EXTENSION`
+  ile tek satır. Neon'un desteklediği eklentiler arasında olduğu dokümandan
+  doğrulandı; CI'daki PostgreSQL kapsayıcısında da çalışıyor
+
+### Güvenlik — adım 8
+
+- `js-yaml` **4.3.1**'e `overrides` ile yükseltildi (`!!omap` çözümlemesinde
+  karesel CPU tüketimi — GHSA-5p4m-2wfm-xmqj, yüksek, CVSS 7.5). Bildirim
+  2026-08-06 gecesi yayınlandı ve CI'daki denetim işini kırmızıya düşürdü;
+  paket ESLint ve `shadcn` CLI üzerinden geliyor. **Uygulama çalışma anında
+  YAML ayrıştırmıyor**, yani fiili risk düşüktü — yine de denetim kırmızı
+  bırakılmadı. 4.x hattının yaması 4.3.1'dir; 5.x'e geçmek gerekmiyor
+  (bildirimden doğrulandı)
+- `hono` **4.13.0**'a `overrides` ile yükseltildi (CORS ara katmanında ReDoS —
+  GHSA-8j4g-w8fx-2239). Paket `shadcn` CLI üzerinden geliyordu ve zaten
+  bağımlılık ağacındaydı; `npm audit` ve `npm audit --omit=dev` yeniden **0 açık**
+- `next-themes` bağımlılığı **kaldırıldı**. shadcn CLI'ı `sonner` bileşeniyle
+  birlikte getirmişti, oysa projede tema sınıf tabanlı ve `src/lib/theme.ts`
+  içinde "bu paketi bilerek eklemiyoruz" yazıyor. Balon rengi artık tasarım
+  token'larına bağlı, yani temayı CSS biliyor — ikinci bir tema kaynağı yok
+
 ### Eklendi — adım 7: ortak sepet + sahte kart ödemesi
 
 - **Ortak sepet** `/sepet`: market, restoran ve etkinlik ürünleri tek sepette,

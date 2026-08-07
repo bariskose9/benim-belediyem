@@ -67,6 +67,18 @@ Hedef: projeyi ilk kez klonlayan biri 10 dakikada çalıştırabilmeli.
 - Yeni paket eklerken lisans kontrol edilir; GPL/AGPL paketler onay ister.
 - Dependabot/Renovate ile güvenlik güncellemeleri otomatik PR olarak gelir.
 - Kritik güvenlik açığı olan paket sürümü ile deploy yapılmaz.
+- **Bir CLI veya jeneratör paket/bileşen eklediyse, bağımlılık dosyasının farkı
+  OKUNUR.** Bu araçlar kendi varsayımlarına göre ek paket kurar; kurdukları paket
+  projenin **yazılı bir kararını ihlal edebilir** ve kimse fark etmezse o karar
+  sessizce geri alınmış olur. Kurulum sonrası refleks: farkı oku, istenmeyeni
+  kaldır, kaldırdıktan sonra üretilen kodu o pakete bağlı kalmayacak şekilde
+  düzelt.
+- **Her paket ekleme/çıkarmadan sonra güvenlik denetimi (`npm audit`) koşulur.**
+  Sonuç, eklenen paketle ilgisiz olsa bile o an temiz olmalıdır: denetimi
+  kırmızı bırakıp "benim eklediğim değil" demek, bir sonraki kişiye kırmızı
+  bir kapı devretmektir.
+- Doğrudan düzeltilemeyen geçişli (transitive) bir açık, sürüm sabitleme
+  (`overrides`/`resolutions`) ile kapatılır ve **neden** kapatıldığı yazılır.
 
 ## Özellik bayrakları (feature flag)
 Yarım kalan büyük özellikler uzun ömürlü dalda bekletilmez; kapalı bayrak arkasında

@@ -1,22 +1,37 @@
-# Sonraki oturum için hazır prompt — adım 8
+# Sonraki oturum için hazır prompt — adım 9
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 8 bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 9 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **8**'e geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **9**'a geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
-- `docs/project/PRD.md` §5.3 — bu adımın iş kuralları
-- `docs/project/fake-data-guide.md` — ürün kategorileri, fiyat bantları, stok
+- `docs/project/PRD.md` §5.4 — bu adımın iş kuralları
+- `docs/project/fake-data-guide.md` — menü kategorileri ve fiyat bantları
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
+
+## NOT — adım 8 gecikmeli girdi
+
+Adım 8'in kodu 2026-08-06 akşamı bitti ama o gece **GitHub Actions küresel
+kesintiye girdi** ve CI hiç koşmadı. Kesinti 2026-08-07 00:06'da giderildi,
+kuyrukta bekleyen iş akışları kendiliğinden koştu ve PR #25 merge edildi.
+
+Buradan çıkan iki ders zaten kalıcı kurallara yazıldı — burada tekrar edilmiyor:
+denetim kapısını kırmızı bırakmama (`09-ci-cd-deploy.md`) ve dış servis
+durumunu ezberden değil kaynağından okuma (`11-agent-workflow.md`).
+
+⚠️ `feature/market` dalının preview adresi Turnstile ve Google OAuth
+panellerine **eklendi** — o iş yapıldı, kullanıcıdan tekrar isteme.
+
+---
 
 ## DURUM
 
-Roadmap adım **0 → 7 bitti**. Sepet ve ödeme altyapısı hazır.
+Roadmap adım **0 → 8 bitti ve canlıda.** Market ekranı çalışıyor.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - **Kayıt, giriş, çıkış, oturum, şifre sıfırlama, Google ile giriş** çalışıyor
@@ -25,111 +40,139 @@ Roadmap adım **0 → 7 bitti**. Sepet ve ödeme altyapısı hazır.
 - **Ortak sepet + ödeme** çalışıyor: ziyaretçi sepeti, girişte birleştirme,
   modül başına teslimat ücreti, Luhn + sahte kart sağlayıcısı, tek
   transaction'da ödeme + modül başına sipariş + stok düşümü, sahte fiş
+- **Belediye Market** çalışıyor: ürün ızgarası, kategori süzgeci, arama,
+  sepete ekleme, bildirim balonu, tükenmiş ürün işareti
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında ilk iş:** dal adresini (`benim-belediyem-git-<dal>-barisss.vercel.app`)
   **iki panele** ekle: Cloudflare Turnstile hostname listesi **ve** Google OAuth
   redirect URI listesi (sonuna `/api/auth/google/callback`). Teknik borç #31
+- ⚠️ **Tohumlanmış doktor saatleri ~2026-08-15'te tükeniyor** (borç #38). O tarihten
+  sonra hastane ekranı "boş saat kalmamış" gösterir — çökme değil, seed'i yeniden
+  koşturmak gerekiyor
 
-## YAPILACAK — roadmap adım 8
+## YAPILACAK — roadmap adım 9
 
-"Belediye Market + paket servis" → PRD §5.3
+"Belediye Restoran + adisyon" → PRD §5.4
 
-Dal: `feature/market` (öneri)
+Dal: `feature/restoran` (öneri)
 
 ### Kapsam
 
-- Ürün listesi: görselli, kategorili, fiyatlı, stoklu
-- Arama ve kategori filtresi
-- **Sepete ekleme, adet değiştirme, çıkarma** — sepet altyapısı ZATEN HAZIR,
-  yalnızca ekranı bağlanacak
-- Stok yetersizse sepete eklenemez (kural serviste hazır ve testli)
-- **Kabul kriteri:** ödeme sonrası stok düşer; stok ve sipariş tek transaction'da
-  yazılır → **bu da hazır ve testli** (`tests/db/checkout.test.ts`)
+- Menü: ana yemek, ara sıcak, yan ürün/salata, içecek, tatlı — görselli, fiyatlı
+- **Adisyon:** seçilen kalemler adisyona eklenir, **adet ve NOT** girilebilir
+  (örn. "az acılı") — market'te olmayan tek yeni kavram bu
+- Adisyon sepete aktarılır ve ödenir
+- Paket servis: teslimat adresi + tahmini hazırlık süresi
 
 ### Bu adımda özellikle dikkat
 
-- **Şema DEĞİŞMİYOR** — `Product`, `ProductCategory` adım 3'te kuruldu ve tohumlu
-  (45 ürün, 6 kategori, en az 2 tanesi stok 0)
-- **Sepet servisini YENİDEN YAZMA.** `addItemToCart` stok, adet ve satır
-  sınırlarını zaten uyguluyor; ekran yalnızca `POST /api/carts/current/items`
-  ucunu çağıracak
-- `src/config/navigation.ts` → market kartının `href`'i şu an `null`. Sayfa
-  açılınca oraya `/market` yazılacak, rozet "Yakında"dan "Açık"a kendiliğinden döner
-- Ürün görselleri kategori başına tek yer tutucu SVG (teknik borç #16)
+- **Şema DEĞİŞMİYOR** — `MenuCategory`, `MenuItem` adım 3'te kuruldu ve tohumlu
+  (31 kalem, 5 kategori, en az 2 tanesi `isAvailable = false`)
+- **Sepet satırında `note` alanı ZATEN VAR** (`cart_items.note`) ve
+  `addItemToCart` onu kabul ediyor. Yeni alan açma, yeni uç yazma
+- **Market ekranı bire bir kopyalanacak bir şablon DEĞİL.** Ortak çıkan parça
+  varsa (ürün kartı iskeleti, boş durum) paylaşıma çıkar; kopyalama DRY'ı bozar
+- `src/config/navigation.ts` → restoran kartının `href`'i şu an `null`. Sayfa
+  açılınca `/restoran` yazılacak, rozet kendiliğinden "Açık"a döner
+- **Restoran teslimat ücreti SIFIR** ve bu bilinçli (borç #39): hiçbir doküman
+  restoran için ücret tanımlamıyor. Sayı UYDURMA — gerekirse kullanıcıya sor
+- `tests/e2e/layout.spec.ts` içindeki "açılmamış hizmet tıklanabilir bağlantı
+  değildir" testi şu an **restoran** kartını örnek alıyor. Restoran açılınca o
+  test doğru sebepten kırmızıya döner: örneği **etkinlik** veya **destek**
+  kartına taşı, testi silme
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
-- **`src/lib/money.ts`** — para TAM SAYI KURUŞ. `toKurus` / `toDecimalInput` /
-  `formatTry` / `sumKurus`. **Ondalık sayıyla para hesabı YAPMA**
-- **Sepet katmanı** (`src/features/cart/`): `addItemToCart`,
-  `changeItemQuantity`, `removeItemFromCart`, `getCartSummary`,
-  `mergeGuestCartIntoUserCart`. Katalog çözümleyici üç modülü tek arayüzde
-  topluyor (`catalog.repository.ts`) — market ürünü zaten destekli
+- **`src/lib/money.ts`** — para TAM SAYI KURUŞ. **Ondalık sayıyla para hesabı YAPMA**
+- **`src/lib/search-text.ts`** — `normalizeSearchQuery` + `toLikePattern`. Arama
+  kutusu yazacaksan ŞART (aşağıda tuzaklarda: Türkçe harf + joker kaçışı)
+- **Sepet katmanı** (`src/features/cart/`): `addItemToCart` (not alanı dahil),
+  `changeItemQuantity`, `removeItemFromCart`, `getCartSummary`. Katalog
+  çözümleyici restoran kalemini zaten destekliyor (`catalog.repository.ts`)
+- **Market katmanı** (`src/features/market/`) — aynı desenin çalışan örneği:
+  repository → Zod şeması → sunucu bileşeni sayfa → tek istemci düğme
+- **Bildirim balonu**: `import { toast } from "sonner"`, kap `src/components/ui/sonner.tsx`
+  içinde ve kök düzende takılı. `next-themes` KULLANMIYOR, tema CSS'ten geliyor
 - **`readCartOwner()`** sunucu bileşenleri için, **`getCartContext()`** uçlar
   için. **Sunucu bileşeninde çerez YAZILAMAZ**, ikisini karıştırma
-- **Ödeme akışı** (`src/features/payment/`) — dokunma, çalışıyor
 - **`requireAccess()`** uçlar için, **`guardPage()`** sayfalar için
 - `messages.ts` — kullanıcıya görünen tüm Türkçe metinler burada, dağıtma
 - Tasarım token'ları (`globals.css`) · `page-shell` · `TextField` · `FormAlert`
-- `src/lib/datetime.ts` — İstanbul saatiyle tarih; teslimat aralığı bunu kullanıyor
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
 
+**Türkçe metin**
+- **Veritabanının kendi büyük/küçük harf araması TÜRKÇE BİLMİYOR.** `I` harfini
+  `i`'ye çeviriyor (karşılığı `ı`) ve aksanları eşlemiyor. Ölçüldü: `KAĞIT` → 0,
+  `kagit` → 0, yalnızca `kağıt` → 1 sonuç
+- **ÇÖZÜM KURULU: `unaccent` eklentisi.** Yeni bir arama yazarken Prisma'nın
+  `contains` + `mode: "insensitive"` kombinasyonunu KULLANMA — Türkçe'de
+  yanlış sonuç verir. Bunun yerine `product.repository.ts` içindeki
+  `findIdsMatchingQuery` desenini izle: `lower(unaccent(...)) LIKE
+  lower(unaccent(${pattern})) ESCAPE '\'`
+- **`LIKE` deseni ŞART olarak `toLikePattern`'den geçer** (`src/lib/search-text.ts`):
+  kullanıcının yazdığı `%` ve `_` joker sayılırsa tek karakterle tüm katalog
+  eşleşir. Sessiz bir hata, çökme yok — bu yüzden testi var
+- Yazım hatası toleransı YOK (borç #44): "kagıt havulu" yazan bulamaz
+
 **Para**
-- **Ondalık sayıyla para hesaplama.** `0.1 + 0.2 !== 0.3`; sepette on kalem
-  sonra kuruş kayar. Her yerde tam sayı kuruş kullan, dönüşümü yalnızca
-  sınırlarda yap
+- **Ondalık sayıyla para hesaplama.** Her yerde tam sayı kuruş, dönüşüm yalnızca
+  sınırlarda
 
 **Eşzamanlılık**
 - **"Önce oku, boşsa yaz" İKİ ADIMDIR ve yarışı çözmez.** Tek koşullu UPDATE
   kullan (`WHERE stock >= n`) ve etkilenen satır sayısına bak
-- **Yarış testini yazdıktan sonra korumayı geçici kaldırıp testin KIRMIZIYA
-  döndüğünü gör.** Adım 7'de ilk yazdığım stok testi yanlış sebepten yeşildi:
-  koşullu düşüme hiç varmadan sepet özeti kontrolüne takılıyordu
+- **Korumayı yazdıktan sonra geçici kaldırıp testin KIRMIZIYA döndüğünü GÖR.**
+  Adım 8'de bu yapıldı ve işe yaradı: tam olarak bir test kırmızıya döndü,
+  diğer 16'sı yeşil kaldı — yani test doğru şeyi ölçüyordu
 
 **Next.js**
-- **Sunucu bileşeninde `cookies().set()` İSTİSNA FIRLATIR.** `/sepet` sayfası
-  bu yüzden çerezi hiç olmayan ziyaretçide çöküyordu. Salt okuma gereken yerde
-  `readAnonymousId()` / `readCartOwner()` kullan
+- **Sunucu bileşeninde `cookies().set()` İSTİSNA FIRLATIR.** Salt okuma gereken
+  yerde `readAnonymousId()` / `readCartOwner()` kullan
+- **`next/image` `.svg` kaynağında optimizasyonu KENDİLİĞİNDEN atlıyor** (Next 16
+  resmî dokümanı). `dangerouslyAllowSVG` açmaya gerek yok
 
 **Test**
 - Sunucu tarafı test dosyalarına `/** @vitest-environment node */` docblock'u ŞART
-- **İş kuralı testlerini `tests/db/` içinde GERÇEK veritabanına karşı yaz.**
-  Koşullu UPDATE ve transaction geri alması taklitle kanıtlanamaz
-- **Vitest'te hata sınıflarını test gövdesinin İÇİNDE `await import()` etme** —
-  ayrı modül örneği geliyor, `instanceof` tutmuyor, her iş hatası 500'e düşüyor
+- **İş kuralı testlerini `tests/db/` içinde GERÇEK veritabanına karşı yaz**
+- **Vitest'te hata sınıflarını test gövdesinin İÇİNDE `await import()` etme**
 - **Her Playwright projesine (masaüstü / 375px) AYRI test hesabı VE ayrı veri
-  havuzu ver.** Projeler paralel koşup tek veritabanına yazıyor; aynı kaydı
-  hedefleyen iki proje "bazen geçen" testler üretir
-- **E2E'yi 15 dakika içinde üst üste koşturma.** Sayaçlar veritabanında;
-  tükenince testler kırmızıya döner ve hata kodda sanılır. Çözüm:
-  `rate_limit_counters` tablosunu boşalt, sonra tek sefer koş
-- **Sunucu ayaktayken `npx playwright test` `.next`'i BOZABİLİR** (kendi
-  build'ini başlatır). Belirti: JS parçaları 500 dönüyor, konsolda
-  `Refused to execute script ... MIME type ('text/plain')`, HER test kırmızı.
-  Çözüm: sunucuyu durdur, `rm -rf .next && npm run build`, yeniden başlat
-- **Testler zaman aşımına düşüyorsa önce `uptime` çalıştır.** 2026-08-03'te yük
-  188'e çıktı (arka planda Chrome sekmeleri) ve testler kırmızıya döndü; tek tek
-  koşturulduklarında hepsi geçiyordu. Yükü kontrol etmeden testi suçlama
-- **Tohum verisi iş kurallarına UYMAK ZORUNDA.** Kural değişirse `prisma/seed/`
-  içindeki karşılığı da değişmeli
+  havuzu ver.** Giriş gerektirmeyen akışta hesap hiç kullanma — market testleri
+  ziyaretçi olarak koşuyor ve bu yüzden hız sınırına hiç takılmıyor
+- **E2E'yi 15 dakika içinde üst üste koşturma.** Çözüm: `rate_limit_counters`
+  tablosunu boşalt, sonra tek sefer koş
+- **Sunucu ayaktayken `npx playwright test` `.next`'i BOZABİLİR.** Çözüm:
+  sunucuyu durdur, `rm -rf .next && npm run build`, yeniden başlat
+- **Adres kontrolünde `toHaveURL` DEĞİL `waitForURL` kullan.** `toHaveURL`'ün
+  5 saniyelik varsayılan sınırı yük altında yetmiyor ve gerçek hata yokken
+  kırmızı veriyor. Adım 8'de tam olarak bu oldu: aynı test yük 3'te kırmızı,
+  yük 12'de (düzeltmeden sonra) yeşil
+- **Testler zaman aşımına düşüyorsa önce `uptime` çalıştır.** Yük 7-8'e çıktığında
+  iki test "bağlam yok edildi" diye kırmızıya döndü, tek tek koşturulunca geçti
+- **E2E'nin ürettiği ziyaretçi sepetini temizle:** kimliğini uygulama üretiyor,
+  test öneki taşımıyor, ortak temizlik yakalamıyor (`market.spec.ts` örneği)
 
 **Arayüz**
-- **Dark mode SINIF tabanlı** (`.dark`), tercih `localStorage`'da
-- Etiketleri KISA yazma ("Ay" yerine "Son kullanma ayı"): kısa etiketler hem
-  ekran okuyucuda bağlamsız kalıyor hem de sayfadaki başka metinlerle çakışıyor
+- **Dark mode SINIF tabanlı** (`.dark`), tercih `localStorage`'da. `next-themes`
+  BİLEREK kullanılmıyor — shadcn CLI onu geri getirmeye çalışıyor, kaldır
+- **Olmayan renk token'ı uydurma.** `warning` yok; uyarı vurgusu renkle değil
+  kalınlıkla veriliyor (renk körü kullanıcı için de ayırt edilebilir)
+- Tailwind v4 kanonik biçimi `aspect-4/3`, `aspect-[4/3]` değil (linter uyarıyor)
 - Dokunma hedefleri en az 44px (`min-h-11`)
-- **Aynı bağlantıyı masaüstü ve mobil için iki kez render etme**
+
+**Bağımlılık**
+- **`shadcn add <bileşen>` İSTENMEYEN PAKET GETİREBİLİR.** `sonner` eklerken
+  `next-themes`'i de kurdu. Kurulumdan sonra `git diff package.json` OKU
+- **Yeni paket sonrası `npm audit` KOŞ.** Adım 8'de eklemeyle ilgisiz ama yeni
+  yayınlanmış bir `hono` uyarısı çıktı; `overrides` ile kapatıldı
 
 **Prisma 7**
 - `datasource` bloğunda `url` / `directUrl` **yok** (ADR-008)
 - `migrate dev` üretilen istemciyi tazelemiyor → `npx prisma generate`
-- `.map()` içinde enum alanı `string`'e genişliyor; enum taşıyan satırları tek tek yaz
 
 **Yayın**
 - **Neon uykudayken production deploy PATLIYOR** (`P1001`). Merge sonrası
-  `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**;
-  değişmediyse veritabanını uyandırıp `npx vercel redeploy <url>`
+  `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR** — canlıdaki tam akışı
   kullanıcının elle doğrulaması gerekiyor
 
@@ -141,7 +184,9 @@ Dal: `feature/market` (öneri)
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
   `--org-id org-still-water-86075112` şart
-- `psql` **kurulu değil** → uzak sorgu için `npx tsx` + Prisma betiği (proje kökünde)
+- `psql` **kurulu değil** → uzak sorgu için `npx tsx --env-file=.env` + Prisma
+  betiği (proje kökünde; scratchpad'den çalışmıyor, yol çözümlenmiyor)
+- Docker Desktop kapalı olabilir → `open -a Docker`, sonra `npm run db:up`
 - ESLint `console.log`'u ve efekt içinde `setState`'i yasaklıyor
 - `.ts`/`.tsx` yazdıktan sonra `npm run format` çalıştır, yoksa `format:check` durur
 
@@ -151,8 +196,8 @@ Dal: `feature/market` (öneri)
 `npm run test · test:db · test:e2e · lint · typecheck · format · format:check · build`
 `gh` PATH'te. `vercel` ve `neonctl` için `npx`.
 
-**E2E'yi elle koşturma sırası:** `rm -rf .next && npm run build`, sonra ortam
-değişkenleriyle `npm run start` (arka planda), sonra `npx playwright test`.
+**E2E'yi elle koşturma sırası:** `rm -rf .next && npm run build`, sonra
+`npm run start` (arka planda), sonra `npx playwright test`.
 
 ## BENİMLE İLETİŞİM
 

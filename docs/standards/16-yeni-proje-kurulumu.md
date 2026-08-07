@@ -17,7 +17,7 @@ Gerisini ajan bu listeye bakarak kurar.
 | Ne | Nereye | Nasıl |
 |---|---|---|
 | `CLAUDE.md` | repo kökü | **Olduğu gibi kopyala**, sonra yalnızca §0 "Proje Değişkenleri" bloğunu doldur |
-| `docs/standards/**` (00–16) | `docs/standards/` | **Olduğu gibi kopyala, İÇİNİ DEĞİŞTİRME.** Stack farklıysa yalnızca `00-stack.md` tablosu güncellenir |
+| `docs/standards/**` (00–17) | `docs/standards/` | **Olduğu gibi kopyala, İÇİNİ DEĞİŞTİRME.** Stack farklıysa yalnızca `00-stack.md` tablosu güncellenir |
 | `docs/standards/sablonlar/**` | `docs/project/` | Kopyala ve **içini doldur** — her şablonun başında ne yazılacağı anlatılıyor |
 | `REPO-YAPISI.md` | repo kökü | Kopyala, projeye özel klasör adlarını değiştir |
 
@@ -77,7 +77,7 @@ Genellikle "neden bu stack / neden tek repo". `ADR-000-sablon.md` biçimi kullan
 | Dosya | Değişir mi | Ne değişir |
 |---|---|---|
 | `docs/standards/00-stack.md` | **Bazen** | Yalnızca sürüm tablosu, o da fiilen kurulanla eşitlenerek |
-| `docs/standards/01–16` | **Hayır** | Mühendislik kuralları projeden bağımsızdır |
+| `docs/standards/01–17` | **Hayır** | Mühendislik kuralları projeden bağımsızdır |
 | `CLAUDE.md` | **Sadece §0** | Geri kalanı çalışma protokolü, sabit |
 | `docs/project/PRD.md` | **Tamamen** | Her projenin işi başkadır |
 | `docs/project/roadmap.md` | **Tamamen** | Adımlar işe göre |
