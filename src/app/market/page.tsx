@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 
 import { messages } from "@/config/messages";
-import { CategoryFilter } from "@/features/market/components/CategoryFilter";
+import { CatalogFilter } from "@/features/catalog/components/CatalogFilter";
+import { CatalogSearch } from "@/features/catalog/components/CatalogSearch";
+import { parseCatalogSearchParams } from "@/features/catalog/schemas/catalog-search.schema";
 import { ProductGrid } from "@/features/market/components/ProductGrid";
-import { ProductSearch } from "@/features/market/components/ProductSearch";
 import {
   findCategoryById,
   listCategories,
   listProducts,
 } from "@/features/market/repositories/product.repository";
-import { parseMarketSearchParams } from "@/features/market/schemas/market.schema";
 
 /**
  * Belediye Market (PRD §5.3).
@@ -37,7 +37,7 @@ export default async function MarketPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const filters = parseMarketSearchParams(await searchParams);
+  const filters = parseCatalogSearchParams(await searchParams);
 
   /**
    * Var olmayan bir kategori kimliği adrese elle yazılmış olabilir. O durumda
@@ -60,9 +60,16 @@ export default async function MarketPage({
       </header>
 
       <div className="flex flex-col gap-4">
-        <ProductSearch query={filters.query} selectedCategoryId={categoryId} />
-        <CategoryFilter
-          categories={categories}
+        <CatalogSearch
+          basePath="/market"
+          copy={copy.search}
+          query={filters.query}
+          selectedCategoryId={categoryId}
+        />
+        <CatalogFilter
+          basePath="/market"
+          copy={copy.filters}
+          options={categories}
           selectedCategoryId={categoryId}
           query={filters.query}
         />

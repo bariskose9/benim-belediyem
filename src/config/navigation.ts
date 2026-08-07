@@ -28,7 +28,7 @@ export interface ServiceCard {
 
 export const serviceCards: readonly ServiceCard[] = [
   { key: "market", href: "/market", staffOnly: false },
-  { key: "restaurant", href: null, staffOnly: false },
+  { key: "restaurant", href: "/restoran", staffOnly: false },
   { key: "events", href: null, staffOnly: false },
   { key: "support", href: null, staffOnly: false },
   { key: "hospital", href: "/hastane", staffOnly: true },
@@ -45,6 +45,7 @@ export const serviceCards: readonly ServiceCard[] = [
 export const primaryNavItems = [
   { key: "home", href: "/" },
   { key: "market", href: "/market" },
+  { key: "restaurant", href: "/restoran" },
   { key: "hospital", href: "/hastane" },
   { key: "gym", href: "/spor-salonu" },
 ] as const;

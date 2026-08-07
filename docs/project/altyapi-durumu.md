@@ -9,10 +9,15 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-03 · roadmap adım 7 sonrası
+**Son güncelleme:** 2026-08-07 · roadmap adım 9 sonrası
 
-> **Adım 7'de dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis, yeni
-> ortam değişkeni, yeni bağımlılık ve yeni migration yok; sepet, sipariş, ödeme
+> **Adım 9'da dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis, yeni
+> ortam değişkeni, yeni bağımlılık ve yeni migration yok; `menu_categories`,
+> `menu_items` ve `cart_items.note` adım 3'ten beri hazırdı ve tohumluydu.
+> Tek dış dünya işi her adımda olduğu gibi aynı: **yeni dalın preview adresi
+> iki panele eklenmeli** (aşağıda).
+>
+> **Adım 7'de de dış dünyada hiçbir şey değişmemişti** — sepet, sipariş, ödeme
 > ve kayıtlı kart tabloları adım 3'ten beri hazırdı.
 >
 > **ÖDEME GERÇEK DEĞİL.** Hiçbir ödeme kuruluşuyla entegrasyon yok, hiçbir
@@ -26,7 +31,8 @@
 > `/api/auth/google/callback` ekleyerek). Teknik borç #31.
 >
 > ⚠️ **Uzak ortamlarda tohumlanmış doktor saatleri ~2026-08-15'te tükeniyor**
-> (teknik borç #38). Ekran çökmez, "boş saat kalmamış" der.
+> (teknik borç #38). Ekran çökmez, "boş saat kalmamış" der. **Bu tarih yaklaştı** —
+> adım 10'da uzak ortamlarda seed'i yeniden koşturmak gerekebilir.
 
 ---
 
@@ -58,11 +64,16 @@
 - Widget adı: **`benim-belediyem`**
 - Mod: **Managed** (çoğu kullanıcı bulmaca görmez, onay kutusu yeter)
 - Pre-clearance: yok
-- **4 hostname tanımlı** — production (`benim-belediyem.vercel.app`) çalıştığı
+- **Hostname listesi** — production (`benim-belediyem.vercel.app`) çalıştığı
   fiilen doğrulandı; 2026-08-02'de `feature/sifre-sifirlama` dalının preview
-  adresi, **2026-08-06'da `feature/market` dalının preview adresi**
+  adresi, 2026-08-06'da `feature/market` dalının preview adresi
   (`benim-belediyem-git-feature-market-barisss.vercel.app`) proje sahibi
-  tarafından eklendi
+  tarafından eklendi.
+  ⚠️ **`feature/restoran` dalının adresi
+  (`benim-belediyem-git-feature-restoran-barisss.vercel.app`) HENÜZ EKLENMEDİ** —
+  adım 9 PR'ının preview'unda giriş/kayıt denenecekse eklenmeli. Restoran
+  ekranının kendisi bot korumasına dokunmuyor, yani menü ve adisyon eklemeden de
+  çalışır
 - ⚠️ **Her yeni dalın preview adresi listeye ELLE eklenir.** Eksikse widget hiç
   çizilmez ve tarayıcı konsolunda `[Cloudflare Turnstile] Error: 110200`
   (*domain not authorized*) görünür — **kodda hata arama, panele bak.**
@@ -92,6 +103,9 @@
   - `https://benim-belediyem.vercel.app/api/auth/google/callback`
   - `https://benim-belediyem-git-feature-market-barisss.vercel.app/api/auth/google/callback`
     *(2026-08-06, adım 8 dalı — proje sahibi ekledi)*
+  - ⚠️ `feature/restoran` dalınınki **henüz eklenmedi** (adım 9). Eksikse o
+    preview'da yalnızca "Google ile devam et" düğmesi `redirect_uri_mismatch`
+    verir; şifreyle giriş ve restoran ekranı etkilenmez
 - ⚠️ **"Authorized JavaScript origins" BOŞ ve öyle kalmalı.** Akış tamamen
   sunucu tarafında; oraya yol içeren bir adres yazılırsa Google
   *"URIs must not contain a path"* der. İlk denemede bu hataya düşüldü

@@ -93,8 +93,9 @@ describe("kabul kriteri: karışık sepet tek ödemeyle üç sipariş üretir", 
       now: NOW,
       payload: {
         idempotencyKey: testId("idem", "mixed"),
-        // 100 + 200 + 300 = 600, market teslimatı 59 (eşiğin altında).
-        expectedTotalKurus: 600_00 + 59_00,
+        // 100 + 200 + 300 = 600. Market teslimatı 59 (750 eşiğinin altında),
+        // restoran teslimatı 49,90 (400 eşiğinin altında), bilette ücret yok.
+        expectedTotalKurus: 600_00 + 59_00 + 49_90,
         card: card(CARD_OK),
         delivery: delivery(),
       },
@@ -122,12 +123,24 @@ describe("kabul kriteri: karışık sepet tek ödemeyle üç sipariş üretir", 
     expect(ticket?.deliveryAddressId).toBeNull();
     expect(ticket?.deliverySlot).toBeNull();
 
-    // Market ve restoran kendi akışlarının başında ve teslimat taşıyor.
+    // Market ve restoran kendi akışlarının başında ve ikisi de ADRES taşıyor.
     for (const order of orders.filter((o) => o.fulfillmentType !== "ticket")) {
       expect(order.status).toBe("received");
       expect(order.deliveryAddressId).toBe(ADDRESS);
-      expect(order.deliverySlot).not.toBeNull();
     }
+
+    /**
+     * ZAMAN ARALIĞI YALNIZCA MARKETTE (PRD §6.1). Restoran siparişi ödemeden
+     * hemen sonra hazırlanmaya başlıyor; ona bir teslimat penceresi yazmak
+     * kullanıcıya karşılığı olmayan bir söz vermek olurdu. İstemci yine de
+     * bir aralık göndermiş olsa bile (bu testte gönderiyor) kayda geçmiyor.
+     */
+    expect(
+      orders.find((o) => o.fulfillmentType === "market_delivery")?.deliverySlot,
+    ).not.toBeNull();
+    expect(
+      orders.find((o) => o.fulfillmentType === "restaurant_delivery")?.deliverySlot,
+    ).toBeNull();
   });
 
   it("ödeme kaydı TEK, tutar sunucunun hesabı", async () => {
@@ -193,7 +206,8 @@ describe("kabul kriteri: ödeme başarısızsa hiçbir sipariş oluşmaz, sepet 
           now: NOW,
           payload: {
             idempotencyKey: testId("idem", label),
-            expectedTotalKurus: 300_00 + 59_00,
+            // Market 100 + restoran 200; teslimat ücretleri 59 ve 49,90.
+            expectedTotalKurus: 300_00 + 59_00 + 49_90,
             card: card(number),
             delivery: delivery(),
           },
@@ -443,6 +457,75 @@ describe("tutar ve yetki kontrolleri", () => {
     ).rejects.toMatchObject({ code: "DELIVERY_ADDRESS_REQUIRED", status: 422 });
 
     expect(await prisma.order.count({ where: { userId: OTHER_USER } })).toBe(0);
+  });
+
+  /**
+   * ═══ PRD §6.1 — İKİ TESLİMAT AYRI ═══
+   *
+   * Market "adres + zaman aralığı", restoran "adres + tahmini hazırlık
+   * süresi" istiyor. Restoran siparişinden de aralık istemek, kullanıcıya
+   * karşılığı olmayan bir söz verdirmek olurdu.
+   *
+   * Bu iki test kontrolün SUNUCUDA olduğunu da gösteriyor: ekranın alanı
+   * gösterip göstermemesi hiç işin içine girmiyor.
+   */
+  it("restoran siparişinde zaman aralığı istenmez", async () => {
+    await fillCart(USER, ["restaurant"]);
+
+    await expect(
+      checkout({
+        userId: USER,
+        actorIp: ACTOR_IP,
+        now: NOW,
+        payload: {
+          idempotencyKey: testId("idem", "restoslot"),
+          expectedTotalKurus: 200_00 + 49_90,
+          card: card(CARD_OK),
+          // Aralık YOK, yalnızca adres var.
+          delivery: { addressId: ADDRESS },
+        },
+      }),
+    ).resolves.toMatchObject({ orderIds: [expect.any(String)] });
+  });
+
+  it("restoran siparişinde adres yine de zorunlu", async () => {
+    await fillCart(USER, ["restaurant"]);
+
+    await expect(
+      checkout({
+        userId: USER,
+        actorIp: ACTOR_IP,
+        now: NOW,
+        payload: {
+          idempotencyKey: testId("idem", "restonoaddr"),
+          expectedTotalKurus: 200_00 + 49_90,
+          card: card(CARD_OK),
+          delivery: {},
+        },
+      }),
+    ).rejects.toMatchObject({ code: "DELIVERY_ADDRESS_REQUIRED", status: 422 });
+  });
+
+  /**
+   * Market sepette olduğu anda aralık YİNE ZORUNLU: restoran için gevşetilen
+   * kural marketi de gevşetmiş olmamalı.
+   */
+  it("sepette market varken zaman aralığı zorunlu kalır", async () => {
+    await fillCart(USER, ["market", "restaurant"]);
+
+    await expect(
+      checkout({
+        userId: USER,
+        actorIp: ACTOR_IP,
+        now: NOW,
+        payload: {
+          idempotencyKey: testId("idem", "mixedslot"),
+          expectedTotalKurus: 300_00 + 59_00 + 49_90,
+          card: card(CARD_OK),
+          delivery: { addressId: ADDRESS },
+        },
+      }),
+    ).rejects.toMatchObject({ code: "DELIVERY_SLOT_REQUIRED", status: 422 });
   });
 
   it("yalnızca bilet varsa adres istenmez", async () => {

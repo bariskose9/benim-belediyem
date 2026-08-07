@@ -19,6 +19,7 @@ import {
   findOrCreateActiveCart,
   listCartItems,
   removeItem as removeItemRow,
+  setItemNote,
   setItemQuantity,
   toCartLines,
   type CartOwner,
@@ -147,6 +148,35 @@ export async function changeItemQuantity(input: ChangeQuantityInput): Promise<Ca
   }
 
   await setItemQuantity({ cartId: cart.id, itemId: input.itemId, quantity: input.quantity });
+
+  return getCartSummary(input.owner, input.now);
+}
+
+export type ChangeNoteInput = CartActor & { itemId: string; note: string | null };
+
+/**
+ * Satırın mutfak notunu değiştirir (PRD §5.4).
+ *
+ * KATALOG SORGULANMIYOR ve bu bilinçli: not fiyatı, stoğu veya satın
+ * alınabilirliği etkilemiyor. Tükenmiş bir kalemin notunu düzeltmek de
+ * serbest — engel ödemede zaten var (`assertCartIsPayable`), notu
+ * düzeltemeyen kullanıcı satırı silmek zorunda kalırdı.
+ *
+ * Not YALNIZCA restoran satırlarında anlamlı ama servis bunu KISITLAMIYOR:
+ * kısıt ekranda (yalnızca restoran bölümünde alan gösteriliyor). Sunucuda
+ * reddetseydik, ileride markete "kapıda zili çalmayın" notu eklemek şemayı
+ * değil kuralı değiştirmeyi gerektirirdi.
+ */
+export async function changeItemNote(input: ChangeNoteInput): Promise<CartSummary> {
+  await enforceWriteBudget(input);
+
+  const cart = await findActiveCart(input.owner);
+
+  if (!cart) throw new CartItemNotFoundError();
+
+  if (!(await setItemNote({ cartId: cart.id, itemId: input.itemId, note: input.note }))) {
+    throw new CartItemNotFoundError();
+  }
 
   return getCartSummary(input.owner, input.now);
 }

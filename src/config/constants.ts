@@ -470,18 +470,42 @@ export const MARKET_DELIVERY_FEE_KURUS = 5_900;
 export const MARKET_FREE_DELIVERY_THRESHOLD_KURUS = 75_000;
 
 /**
- * Restoran teslimat ücreti — ŞİMDİLİK SIFIR ve bu bilinçli bir boşluk.
+ * Restoran teslimat ücreti ve ücretsiz teslimat eşiği.
  *
- * `fake-data-guide.md` teslimat ücretini YALNIZCA market için tanımlıyor;
- * PRD §5.4 restoran paket servisinde "adres + tahmini hazırlık süresi" diyor,
- * ücretten hiç söz etmiyor. Bir sayı uydurmak, dokümanda olmayan bir iş
- * kuralı icat etmek olurdu. Ücret modül başına hesaplandığı için (PRD §6.1)
- * yapı hazır: bu sabite bir değer yazmak yeterli.
+ * DEĞERLERİ PROJE SAHİBİ BELİRLEDİ (2026-08-07, adım 9): hiçbir doküman
+ * restoran için ücret tanımlamıyordu ve bir sayı uydurmak, dokümanda olmayan
+ * bir iş kuralı icat etmek olurdu (teknik borç #39). Market ile aynı desen
+ * seçildi — sabit ücret + eşik üstü ücretsiz — ama sayılar restorana özel:
+ * bir öğün siparişi bir market alışverişinden küçük olduğu için eşik de düşük.
+ *
+ * Eşik YALNIZCA RESTORAN TUTARINA bakar (PRD §6.1), sepetin tamamına değil.
  */
-export const RESTAURANT_DELIVERY_FEE_KURUS = 0;
+export const RESTAURANT_DELIVERY_FEE_KURUS = 4_990;
+export const RESTAURANT_FREE_DELIVERY_THRESHOLD_KURUS = 40_000;
+
+/**
+ * Paket servis hazırlık süresi (PRD §5.4 "tahmini hazırlık süresi").
+ *
+ * TAHMİN, TAAHHÜT DEĞİL: mutfağın gerçek doluluğunu bilen bir sistem yok, bu
+ * yüzden sipariş kaydına YAZILMIYOR — yalnızca ekranda gösteriliyor. Kayda
+ * yazılsaydı "söz verilen saat" gibi görünür ve tutmadığında haklı bir şikâyet
+ * konusu olurdu.
+ */
+export const RESTAURANT_PREP_MINUTES_MIN = 30;
+export const RESTAURANT_PREP_MINUTES_MAX = 45;
 
 /** Bir sepet satırında en fazla kaç adet olabilir — dolandırıcılık ve hata kalkanı. */
 export const CART_MAX_QUANTITY_PER_ITEM = 20;
+
+/**
+ * Mutfak notunun en fazla kaç karakter olabileceği (PRD §5.4).
+ *
+ * "Az acılı, soğansız olsun" için fazlasıyla yeterli; sınırsız bırakılsaydı
+ * bir sepet satırı megabaytlık metin taşıyabilirdi. Sınır hem şemada hem
+ * ekranda AYNI SABİTTEN okunuyor: iki ayrı sayı olsaydı kullanıcı ekranda
+ * yazabildiği bir notu sunucuda reddedilmiş görürdü.
+ */
+export const CART_ITEM_NOTE_MAX_LENGTH = 200;
 
 /**
  * Sepette en fazla kaç FARKLI satır olabilir.

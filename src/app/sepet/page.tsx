@@ -103,7 +103,12 @@ function Section({ section }: { section: CartSection }) {
         {copy.sections[section.itemType]}
       </h2>
 
-      <CartLines lines={section.lines} />
+      {/*
+        Mutfak notu yalnızca restoran satırlarında düzenlenebiliyor (PRD §5.4):
+        market ürününe not bırakmanın karşılığı yok ve her satırda bir not
+        alanı göstermek kullanıcıya yazdığının işe yaradığını düşündürürdü.
+      */}
+      <CartLines lines={section.lines} allowNoteEditing={section.itemType === "restaurant"} />
 
       <dl className="flex flex-col gap-1 text-sm">
         <Row label={copy.summary.subtotal} value={formatTry(section.subtotalKurus)} />
@@ -123,7 +128,10 @@ function Section({ section }: { section: CartSection }) {
       {/* Eşiğe ne kadar kaldığını söylemek kullanıcıyı tahmin ettirmez. */}
       {section.freeDeliveryRemainingKurus !== null ? (
         <p className="rounded-lg bg-brand-surface px-3 py-2 text-sm text-brand-surface-foreground">
-          {copy.summary.freeDeliveryHint(formatTry(section.freeDeliveryRemainingKurus))}
+          {copy.summary.freeDeliveryHint(
+            formatTry(section.freeDeliveryRemainingKurus),
+            copy.sections[section.itemType],
+          )}
         </p>
       ) : null}
     </section>

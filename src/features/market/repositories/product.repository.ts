@@ -1,8 +1,10 @@
+import { findIdsMatchingQuery } from "@/features/catalog/repositories/catalog-search.repository";
+import type { CatalogFilterOption } from "@/features/catalog/types";
 import { prisma } from "@/lib/db";
 import { toKurus } from "@/lib/money";
-import { normalizeSearchQuery, toLikePattern } from "@/lib/search-text";
+import { normalizeSearchQuery } from "@/lib/search-text";
 
-import type { MarketCategory, MarketProduct } from "../types";
+import type { MarketProduct } from "../types";
 
 /**
  * Market kataloğunun okuma tarafı (PRD §5.3).
@@ -13,6 +15,9 @@ import type { MarketCategory, MarketProduct } from "../types";
  *
  * TUTARLAR SINIRDA KURUŞA ÇEVRİLİYOR (`toKurus`). Yukarı katmanlar `Decimal`
  * görmüyor; para her yerde tam sayı kuruş (`src/lib/money.ts`).
+ *
+ * TÜRKÇE ARAMA ORTAK KATMANDA (`features/catalog`): aynı `unaccent` deseni
+ * restoran menüsünde de kullanılıyor ve iki kopya zamanla ayrışırdı.
  */
 
 /**
@@ -21,7 +26,7 @@ import type { MarketCategory, MarketProduct } from "../types";
  * Ürünü olmayan kategori GÖSTERİLMİYOR: tıklandığında boş liste veren bir
  * süzgeç kullanıcıya "arıza var" hissi verir.
  */
-export async function listCategories(): Promise<MarketCategory[]> {
+export async function listCategories(): Promise<CatalogFilterOption[]> {
   const rows = await prisma.productCategory.findMany({
     where: { products: { some: { deletedAt: null } } },
     select: {
@@ -35,7 +40,7 @@ export async function listCategories(): Promise<MarketCategory[]> {
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
-    productCount: row._count.products,
+    itemCount: row._count.products,
   }));
 }
 
@@ -56,7 +61,7 @@ export async function listProducts(filters: {
   query?: string;
 }): Promise<MarketProduct[]> {
   const query = normalizeSearchQuery(filters.query);
-  const matchingIds = query ? await findIdsMatchingQuery(query) : null;
+  const matchingIds = query ? await findIdsMatchingQuery("products", query) : null;
 
   // Arama yapıldı ama hiçbir ürün eşleşmediyse veritabanına ikinci kez gitmeye
   // gerek yok: `IN ()` boş listesi zaten hiçbir satır döndürmez.
@@ -94,44 +99,8 @@ export async function listProducts(filters: {
   }));
 }
 
-/**
- * Arama metniyle eşleşen ürün kimliklerini bulur.
- *
- * NEDEN HAM SQL: eşleştirme `unaccent()` fonksiyonundan geçiyor ve Prisma'nın
- * sorgu kurucusu bir SQL fonksiyonunu `where` içinde ifade edemiyor. Ham SQL
- * YALNIZCA bu eşleştirmeyle sınırlı; ürünün kendisi yine Prisma ile,
- * tip güvenli biçimde okunuyor. Böylece kolon adlarını elle yazma ve birleşim
- * kurma işi kodun geneline yayılmıyor.
- *
- * DEĞER PARAMETRE OLARAK BAĞLANIYOR (`${pattern}`), metne yapıştırılmıyor —
- * Prisma'nın etiketli şablonu bunu garanti ediyor, yani SQL enjeksiyonu yok
- * (04-database.md: "parametreli sorgu zorunlu").
- *
- * `ESCAPE '\'`: kullanıcının yazdığı `%` ve `_` joker sayılmasın diye
- * (`toLikePattern` onları kaçırıyor).
- *
- * Ad VEYA açıklama taranıyor: kullanıcı "deterjan" yazdığında adında geçmeyen
- * ama açıklamasında geçen ürünü de bulabilmeli.
- */
-async function findIdsMatchingQuery(query: string): Promise<string[]> {
-  const pattern = toLikePattern(query);
-
-  const rows = await prisma.$queryRaw<{ id: string }[]>`
-    SELECT id
-    FROM products
-    WHERE deleted_at IS NULL
-      AND (
-        lower(unaccent(name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
-        OR lower(unaccent(description)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
-      )
-    LIMIT 200
-  `;
-
-  return rows.map((row) => row.id);
-}
-
 /** Süzgeç şeridinde seçili kategorinin adını göstermek için. */
-export async function findCategoryById(id: string): Promise<MarketCategory | null> {
+export async function findCategoryById(id: string): Promise<CatalogFilterOption | null> {
   const row = await prisma.productCategory.findUnique({
     where: { id },
     select: {
@@ -141,5 +110,5 @@ export async function findCategoryById(id: string): Promise<MarketCategory | nul
     },
   });
 
-  return row ? { id: row.id, name: row.name, productCount: row._count.products } : null;
+  return row ? { id: row.id, name: row.name, itemCount: row._count.products } : null;
 }

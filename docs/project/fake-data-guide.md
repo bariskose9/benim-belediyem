@@ -133,6 +133,12 @@ Teslimat ücreti 59 TL; 750 TL üzeri siparişte ücretsiz.
 
 En az 2 kalem `isAvailable = false` (tükendi durumu için).
 
+Teslimat ücreti 49,90 TL; 400 TL üzeri siparişte ücretsiz. Tahmini hazırlık
+süresi 30–45 dakika — bu bir TAHMİN, sipariş kaydına yazılmaz, yalnızca ekranda
+gösterilir. Değerleri proje sahibi belirledi (2026-08-07, adım 9): daha önce
+hiçbir doküman restoran için ücret tanımlamıyordu. Eşik market'inkinden düşük,
+çünkü bir öğün siparişi bir market alışverişinden küçüktür.
+
 **Etkinlik** (≈12 etkinlik)
 | Tür | Bilet aralığı |
 |---|---|

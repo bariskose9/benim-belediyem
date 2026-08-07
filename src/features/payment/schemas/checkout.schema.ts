@@ -7,6 +7,8 @@ import {
   CARD_HOLDER_MIN_LENGTH,
   CARD_NUMBER_MAX_DIGITS,
   CARD_NUMBER_MIN_DIGITS,
+  CART_ITEM_NOTE_MAX_LENGTH,
+  CART_MAX_QUANTITY_PER_ITEM,
 } from "@/config/constants";
 import { messages } from "@/config/messages";
 
@@ -103,14 +105,28 @@ export type CheckoutCardPayload = z.infer<typeof checkoutCardSchema>;
 export const addCartItemSchema = z.object({
   itemType: z.enum(["market", "restaurant", "event"]),
   refId: z.string().trim().min(1).max(128),
-  quantity: z.coerce.number().int().min(1).max(20),
-  note: z.string().trim().max(200).optional(),
+  quantity: z.coerce.number().int().min(1).max(CART_MAX_QUANTITY_PER_ITEM),
+  note: z.string().trim().max(CART_ITEM_NOTE_MAX_LENGTH).optional(),
 });
 
-/** Adet güncelleme ucunun şeması. `0` = satırı sil. */
-export const updateCartItemSchema = z.object({
-  quantity: z.coerce.number().int().min(0).max(20),
-});
+/**
+ * Sepet satırı güncelleme ucunun şeması.
+ *
+ * İKİ ALAN DA İSTEĞE BAĞLI ama en az biri zorunlu: ekranda adet düğmeleri ve
+ * mutfak notu AYRI işlemler (biri her tıklamada, diğeri "kaydet" ile gider).
+ * `quantity` zorunlu kalsaydı not kaydeden istek adedi de göndermek zorunda
+ * kalırdı ve aradaki bir adet değişikliğini geri alırdı.
+ *
+ * `quantity: 0` = satırı sil. `note: null` = notu temizle.
+ */
+export const updateCartItemSchema = z
+  .object({
+    quantity: z.coerce.number().int().min(0).max(CART_MAX_QUANTITY_PER_ITEM).optional(),
+    note: z.string().trim().max(CART_ITEM_NOTE_MAX_LENGTH).nullable().optional(),
+  })
+  .refine((data) => data.quantity !== undefined || data.note !== undefined, {
+    error: "Güncellenecek bir alan gönderilmedi.",
+  });
 
 /** Ödeme ekranından yeni adres eklemenin şeması. */
 export const newAddressSchema = z.object({

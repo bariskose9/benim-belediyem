@@ -637,6 +637,7 @@ export const messages = {
     register: "Kayıt ol",
     account: "Hesabım",
     market: "Market",
+    restaurant: "Restoran",
     hospital: "Hastane",
     gym: "Spor salonu",
     /** Ekran okuyucular için: menünün ne olduğu söylenmeli (WCAG 2.1 AA). */
@@ -813,7 +814,7 @@ export const messages = {
       label: "Kategoriler",
       all: "Tümü",
       /** Kategori rozetindeki ürün sayısı. */
-      productCount: (count: number) => `${count} ürün`,
+      itemCount: (count: number) => `${count} ürün`,
     },
 
     /**
@@ -852,6 +853,81 @@ export const messages = {
       failed: "Ürün sepete eklenemedi. Lütfen tekrar deneyin.",
     },
   },
+
+  /** Belediye Restoran ve adisyon (PRD §5.4 · adım 9). */
+  restaurant: {
+    pageTitle: "Belediye Restoran",
+    title: "Belediye Restoran",
+    description:
+      "Menüden seçtiklerinizi adisyonunuza ekleyin, notunuzu yazın, paket servisle adresinize gelsin.",
+
+    search: {
+      label: "Menüde ara",
+      placeholder: "Yemek adı veya içeriği",
+      submit: "Ara",
+      clear: "Aramayı temizle",
+    },
+
+    filters: {
+      label: "Menü kategorileri",
+      all: "Tümü",
+      itemCount: (count: number) => `${count} kalem`,
+    },
+
+    empty: {
+      title: "Aradığınız kalem menüde yok",
+      withQuery: (query: string) => `"${query}" için sonuç çıkmadı. Farklı bir kelime deneyin.`,
+      withoutQuery: "Bu kategoride şu an kalem yok.",
+      reset: "Tüm menüyü göster",
+    },
+
+    item: {
+      /**
+       * Markette "Tükendi" yazıyor çünkü orada stok sayısı var; burada yalnızca
+       * "var / yok" bilgisi var ve mutfak yarın yeniden yapabilir.
+       */
+      unavailable: "Bugün yok",
+      addToTab: "Adisyona ekle",
+      /** Ekran okuyucu için: "Adisyona ekle" tek başına hangi kalem belirsiz. */
+      addToTabLabel: (name: string) => `${name} kalemini adisyona ekle`,
+    },
+
+    /**
+     * Kartın içinde açılan adet + not formu — adım 9'un tek yeni kavramı.
+     *
+     * MODAL PENCERE DEĞİL, KARTIN İÇİNDE AÇILAN BİR BÖLÜM: modal, odak
+     * tuzağı ve kapatma davranışı için yeni bir bağımlılık gerektirirdi;
+     * kazancı ise yok — form üç alanlık ve sayfanın geri kalanını
+     * kilitlemesi gerekmiyor.
+     */
+    form: {
+      heading: (name: string) => `${name} — adisyona ekle`,
+      quantity: "Adet",
+      note: "Mutfak notu (isteğe bağlı)",
+      notePlaceholder: "Örn. az acılı, soğansız",
+      noteHelp: "En fazla 200 karakter. Notu daha sonra sepetten de düzenleyebilirsiniz.",
+      submit: "Adisyona ekle",
+      submitting: "Ekleniyor…",
+      cancel: "Vazgeç",
+    },
+
+    /** Sayfanın sağındaki adisyon paneli — sepetin restoran bölümünün kendisi. */
+    tab: {
+      heading: "Adisyonunuz",
+      description: "Adisyondaki kalemler sepetinizin restoran bölümünde bekliyor.",
+      empty: "Adisyonunuz henüz boş. Menüden bir kalem ekleyin.",
+      subtotal: "Ara toplam",
+      goToCart: "Sepete git",
+      /** Hazırlık süresi bir TAHMİN, sipariş kaydına yazılmıyor (PRD §5.4). */
+      prepTime: (min: number, max: number) => `Tahmini hazırlık: ${min}-${max} dakika`,
+    },
+
+    toast: {
+      added: (name: string) => `${name} adisyona eklendi.`,
+      goToCart: "Sepete git",
+      failed: "Kalem adisyona eklenemedi. Lütfen tekrar deneyin.",
+    },
+  },
   /** Ortak sepet (PRD §4 · adım 7). */
   cart: {
     pageTitle: "Sepetim",
@@ -881,6 +957,21 @@ export const messages = {
       removeAction: "Çıkar",
       unitPrice: "Birim fiyat",
       note: "Not",
+
+      /**
+       * Mutfak notunun düzenlenmesi (PRD §5.4). Yalnızca restoran satırlarında
+       * gösteriliyor: markette bir ürüne not bırakmanın karşılığı yok, alan
+       * her satırda görünseydi kullanıcı yazdığı notun bir işe yaradığını
+       * sanırdı.
+       */
+      noteAdd: "Not ekle",
+      noteChange: "Notu değiştir",
+      noteEdit: (name: string) => `${name} kaleminin notunu düzenle`,
+      notePlaceholder: "Örn. az acılı, soğansız",
+      noteSave: "Notu kaydet",
+      noteSaving: "Kaydediliyor…",
+      noteCancel: "Vazgeç",
+      noteSaved: "Not güncellendi.",
     },
 
     summary: {
@@ -888,9 +979,15 @@ export const messages = {
       subtotal: "Ara toplam",
       deliveryFee: "Teslimat ücreti",
       freeDelivery: "Ücretsiz",
-      /** Eşiğe ne kadar kaldığını söylemek, kullanıcıyı boşuna tahmin ettirmez. */
-      freeDeliveryHint: (remaining: string) =>
-        `${remaining} daha ekleyin, market teslimatı ücretsiz olsun.`,
+      /**
+       * Eşiğe ne kadar kaldığını söylemek, kullanıcıyı boşuna tahmin ettirmez.
+       *
+       * MODÜL ADI PARAMETRE: market ve restoranın ayrı eşikleri var (PRD §6.1)
+       * ve ipucu hangi bölümün altındaysa onu söylemeli. Metne "market"
+       * gömülü kalsaydı restoran bölümünde yanlış bilgi verirdi.
+       */
+      freeDeliveryHint: (remaining: string, sectionName: string) =>
+        `${remaining} daha ekleyin, ${sectionName} teslimatı ücretsiz olsun.`,
       total: "Genel toplam",
       checkout: "Ödemeye geç",
       /** Ödeme adımı giriş zorunlu (PRD §4). */
@@ -929,6 +1026,14 @@ export const messages = {
       newAddressDistrict: "İlçe",
       saveAddress: "Adresi kaydet",
       ticketNotice: "Etkinlik bileti için teslimat gerekmez; bilet hesabınıza tanımlanır.",
+      /**
+       * Restoran siparişinde ZAMAN ARALIĞI SORULMUYOR (PRD §5.4): market
+       * "yarın 10:00-12:00" gibi bir pencere seçtirirken restoran siparişi
+       * ödeme sonrası hemen hazırlanmaya başlar. Kullanıcıya sorulacak bir şey
+       * yok, söylenecek bir şey var — bu yüzden seçim değil bilgi metni.
+       */
+      prepTimeNotice: (min: number, max: number) =>
+        `Restoran siparişiniz ödemeden hemen sonra hazırlanmaya başlar. Tahmini hazırlık süresi ${min}-${max} dakikadır.`,
     },
 
     card: {

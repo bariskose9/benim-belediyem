@@ -48,7 +48,18 @@ export default async function CheckoutPage() {
     listAddresses(guard.session.userId),
   ]);
 
-  const needsDelivery = summary.sections.some((section) => section.itemType !== "event");
+  /**
+   * Teslimat alanları sepetin İÇİNDEKİLERE göre çiziliyor (PRD §6.1):
+   * market zaman aralığı ister, restoran istemez, bilet hiç teslim edilmez.
+   * Aynı kararı sunucu da bağımsız veriyor (`resolveDelivery`) — buradaki
+   * yalnızca kullanıcıya sorulmayacak bir soruyu sormamak için.
+   */
+  const hasSection = (itemType: string) =>
+    summary.sections.some((section) => section.itemType === itemType);
+
+  const needsAddress = hasSection("market") || hasSection("restaurant");
+  const needsSlot = hasSection("market");
+  const showsPrepTime = hasSection("restaurant");
 
   return (
     <main className="page-shell flex flex-col gap-8 py-8 lg:flex-row lg:items-start">
@@ -63,7 +74,7 @@ export default async function CheckoutPage() {
           Adres YÖNETİMİ profil sayfasının işi (adım 15); burada yalnızca
           eksikse yol gösteriliyor.
         */}
-        {needsDelivery && addresses.length === 0 ? (
+        {needsAddress && addresses.length === 0 ? (
           <p role="status" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm">
             {copy.errors.addressRequired}{" "}
             <Link href="/sepet" className="font-medium underline underline-offset-4">
@@ -73,7 +84,9 @@ export default async function CheckoutPage() {
         ) : (
           <CheckoutForm
             totalKurus={summary.totalKurus}
-            needsDelivery={needsDelivery}
+            needsAddress={needsAddress}
+            needsSlot={needsSlot}
+            showsPrepTime={showsPrepTime}
             savedCards={savedCards}
             addresses={addresses}
             deliverySlots={buildDeliverySlots(now)}
