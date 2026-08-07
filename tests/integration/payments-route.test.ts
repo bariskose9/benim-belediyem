@@ -134,6 +134,28 @@ describe("girdi", () => {
     expect(response.status).toBe(422);
     expect(checkout).not.toHaveBeenCalled();
   });
+
+  /**
+   * ═══ FİİLEN YAŞANMIŞ BİR YANILTMANIN NÖBETÇİSİ ═══
+   *
+   * Son kullanma alanları boş bırakıldığında ekran "Kart numarası geçersiz"
+   * diyordu ve kullanıcı numarayı kontrol etmeye yönlendiriliyordu — numara
+   * doğruyken. Hangi alanın hatalı olduğunu SÖYLEYEMİYORUZ (gövdede kart
+   * numarası var, Zod'un hata nesnesi girdinin parçalarını taşıyabiliyor),
+   * ama yanlış alanı göstermemek elimizde.
+   */
+  it("son kullanma boşken KART NUMARASINI suçlamaz", async () => {
+    const valid = validBody();
+    // Kullanıcının iki alanı boş bırakması: tarayıcıdan boş metin gelir.
+    const broken = { ...valid, card: { ...valid.card, expMonth: "", expYear: "" } };
+
+    const response = await POST(request(broken));
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.error.message).not.toBe(messages.payment.errors.invalidNumber);
+    expect(body.error.message).toBe(messages.payment.errors.invalidRequest);
+  });
 });
 
 /**

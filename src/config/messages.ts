@@ -1051,6 +1051,20 @@ export const messages = {
       expiryMonth: "Son kullanma ayı",
       expiryYear: "Son kullanma yılı",
       cvv: "CVV",
+
+      /**
+       * ÖRNEKLER ALANIN ALTINDA, İÇİNDE DEĞİL.
+       *
+       * Önce yer tutucu (`placeholder`) olarak duruyorlardı ve fiilen yanılttı:
+       * kullanıcı kutunun içindeki soluk `12` metnini yazılmış bir değer sanıp
+       * son kullanma alanlarını boş bıraktı, ödeme reddedildi. Yer tutucu bir
+       * ÖRNEK değil bir İPUÇU gibi okunuyor; kayıt formundaki "Örnek: 1990"
+       * deseni bu yüzden alanın altında duruyor (07-ui-design-system.md).
+       */
+      numberHelp: "Örnek: 4111 1111 1111 1111",
+      expiryMonthHelp: "Örnek: 12",
+      expiryYearHelp: "Örnek: 2030",
+      cvvHelp: "Kartın arkasındaki 3 haneli kod. Örnek: 123",
       save: "Bu kartı sonraki ödemeler için kaydet",
       /** Kayıtlı kart etiketinde YALNIZCA son 4 hane geçer. */
       maskedLabel: (brand: string, last4: string) => `${brand} •••• ${last4}`,
@@ -1083,6 +1097,20 @@ export const messages = {
       insufficientFunds: "Kartınızda yeterli bakiye yok. Farklı bir kartla tekrar deneyin.",
 
       invalidNumber: "Kart numarası geçersiz. Lütfen kontrol edip tekrar girin.",
+
+      /**
+       * İSTEĞİN TAMAMI şemaya uymadığında gösterilir — hangi alan olduğu
+       * SÖYLENMEZ, çünkü gövdede kart numarası var ve Zod'un hata nesnesi
+       * girdinin parçalarını taşıyabiliyor (`InvalidCheckoutRequestError`).
+       *
+       * Metin "kart numarası geçersiz" DEĞİL: eskiden öyleydi ve boş bırakılan
+       * son kullanma alanı yüzünden reddedilen kullanıcı kart numarasını
+       * kontrol etmeye yönlendiriliyordu. Yanlış yeri gösteren bir hata
+       * mesajı, genel bir mesajdan kötüdür.
+       */
+      invalidRequest:
+        "Ödeme bilgilerinde eksik veya hatalı bir alan var. Kart bilgilerinizi " +
+        "(numara, son kullanma ayı ve yılı, CVV) ve teslimat bilgilerinizi kontrol edip tekrar deneyin.",
       invalidExpiry: "Son kullanma tarihi geçersiz veya geçmiş.",
       invalidCvv: "CVV kodu geçersiz.",
       invalidHolder: "Kart üzerindeki ismi girin.",

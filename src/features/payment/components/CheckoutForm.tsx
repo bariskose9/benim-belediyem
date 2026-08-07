@@ -238,7 +238,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
               onChange={(event) => setNumber(event.target.value)}
               inputMode="numeric"
               autoComplete="cc-number"
-              placeholder="4111 1111 1111 1111"
+              help={copy.card.numberHelp}
             />
             <TextField
               label={copy.card.holder}
@@ -253,7 +253,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
                 onChange={(event) => setExpMonth(event.target.value)}
                 inputMode="numeric"
                 autoComplete="cc-exp-month"
-                placeholder="12"
+                help={copy.card.expiryMonthHelp}
               />
               <TextField
                 label={copy.card.expiryYear}
@@ -261,7 +261,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
                 onChange={(event) => setExpYear(event.target.value)}
                 inputMode="numeric"
                 autoComplete="cc-exp-year"
-                placeholder="2030"
+                help={copy.card.expiryYearHelp}
               />
             </div>
 
@@ -283,7 +283,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
           onChange={(event) => setCvv(event.target.value)}
           inputMode="numeric"
           autoComplete="cc-csc"
-          placeholder="123"
+          help={copy.card.cvvHelp}
         />
       </section>
 
