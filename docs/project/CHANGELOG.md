@@ -50,6 +50,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
   ("… Belediye Restoran teslimatı ücretsiz olsun"); metne "market" gömülü
   kalsaydı restoran bölümünde yanlış bilgi verirdi
 
+### Düzeltildi — adım 9 (ödeme ekranı, tarayıcı denemesinde bulundu)
+
+- **Ödeme hatası yanlış alanı gösteriyordu.** İstek şemadan geçemediğinde ekran
+  ne olursa olsun "Kart numarası geçersiz" diyordu; son kullanma alanlarını boş
+  bırakan kullanıcı doğru yazdığı kart numarasını kontrol etmeye yönlendirildi.
+  Hangi alanın hatalı olduğu HÂLÂ söylenmiyor (gövdede kart numarası var ve
+  Zod'un hata nesnesi girdinin parçalarını taşıyabiliyor) ama mesaj artık
+  kontrol edilecek alanları sayıyor. Nöbetçi test eklendi; düzeltme geri
+  alınınca yalnızca o test kırmızıya dönüyor
+- **Kart alanlarındaki örnekler kutunun içinden altına taşındı.** Yer tutucu
+  olarak duran soluk `12` ve `2030` metinleri yazılmış değer sanıldı ve alanlar
+  boş bırakıldı — yukarıdaki yanıltıcı hatanın asıl sebebi buydu. Kayıt
+  formundaki "Örnek: 1990" deseniyle aynı hâle getirildi
+- İkisi de adım 7'den kalma kusurlardı, bu adımda doğmadılar
+
 ### Veritabanı — adım 9
 
 - **Değişiklik yok.** `menu_categories` ve `menu_items` adım 3'ten beri hazırdı
