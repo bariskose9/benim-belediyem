@@ -27,6 +27,19 @@ Her veri gösteren bileşende dördü de tanımlıdır:
 
 ## Formlar
 - Etiket her zaman görünür (placeholder etiket yerine geçmez).
+- **Örnek değer alanın ALTINA yazılır, İÇİNE değil** — `Örnek: 2030` biçiminde
+  bir yardım metni olarak. Yer tutucu (`placeholder`) olarak yazılmaz.
+  *Gerekçe (yaşandı):* kart formunda son kullanma alanlarının içinde soluk
+  `12` ve `2030` duruyordu; kullanıcı bunları **yazılmış değer sanıp** alanları
+  boş bıraktı ve ödeme reddedildi. Yer tutucu bir örnek gibi değil, dolu bir
+  alan gibi okunuyor — özellikle koyu temada ve küçük ekranda.
+- **Yer tutucu yalnızca BİÇİM ipucu için kullanılabilir** ("gg.aa.yyyy" gibi),
+  gerçekçi görünen bir değer için asla.
+- **Hata mesajı hangi alanı işaret ettiği konusunda YANILTMAZ.** Hangi alanın
+  hatalı olduğu söylenemiyorsa (güvenlik gereği) mesaj genel kalır; başka bir
+  alanı suçlamaz. *Gerekçe (yaşandı):* ödeme isteğinde herhangi bir alan
+  şemadan geçemediğinde ekran "Kart numarası geçersiz" diyordu ve kullanıcı
+  doğru yazdığı numarayı kontrol etmeye yönlendiriliyordu.
 - Doğrulama alan bazlı ve anlaşılır Türkçe.
 - Gönder butonu işlem sırasında kilitlenir (çift gönderim engellenir).
 - Yıkıcı işlemler (silme, iptal) onay ister.
