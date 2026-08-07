@@ -68,6 +68,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
   dışarıdan gelen bir metin değil; arama deseni parametre olarak bağlanıyor
 - Yeni bağımlılık, yeni secret, yeni ortam değişkeni **yok**. `npm audit` ve
   `npm audit --omit=dev`: **0 açık**
+- `nanoid` **3.3.18**'e `overrides` ile sabitlendi (boyut sıfır verildiğinde özel
+  üreticinin sonsuz döngüye girmesi — yüksek). Bildirim dal gönderildikten sonra,
+  2026-08-08'de yayınlandı ve CI'daki denetim işini kırmızıya düşürdü. Paket bize
+  yalnızca `@tailwindcss/postcss` → `postcss` üzerinden geliyor ve **uygulama
+  çalışma anında nanoid çağırmıyor**, yani fiili risk düşüktü — denetim kapısı
+  yine de kırmızı bırakılmadı (`09-ci-cd-deploy.md`)
 
 ### Eklendi — adım 8: Belediye Market
 
