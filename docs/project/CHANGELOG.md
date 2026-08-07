@@ -44,6 +44,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ### Güvenlik — adım 8
 
+- `js-yaml` **4.3.1**'e `overrides` ile yükseltildi (`!!omap` çözümlemesinde
+  karesel CPU tüketimi — GHSA-5p4m-2wfm-xmqj, yüksek, CVSS 7.5). Bildirim
+  2026-08-06 gecesi yayınlandı ve CI'daki denetim işini kırmızıya düşürdü;
+  paket ESLint ve `shadcn` CLI üzerinden geliyor. **Uygulama çalışma anında
+  YAML ayrıştırmıyor**, yani fiili risk düşüktü — yine de denetim kırmızı
+  bırakılmadı. 4.x hattının yaması 4.3.1'dir; 5.x'e geçmek gerekmiyor
+  (bildirimden doğrulandı)
 - `hono` **4.13.0**'a `overrides` ile yükseltildi (CORS ara katmanında ReDoS —
   GHSA-8j4g-w8fx-2239). Paket `shadcn` CLI üzerinden geliyordu ve zaten
   bağımlılık ağacındaydı; `npm audit` ve `npm audit --omit=dev` yeniden **0 açık**
