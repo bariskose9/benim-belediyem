@@ -1,37 +1,23 @@
-# Sonraki oturum için hazır prompt — adım 9
+# Sonraki oturum için hazır prompt — adım 10
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 9 bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 10 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **9**'a geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **10**'a geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
-- `docs/project/PRD.md` §5.4 — bu adımın iş kuralları
-- `docs/project/fake-data-guide.md` — menü kategorileri ve fiyat bantları
+- `docs/project/PRD.md` §5.5 — bu adımın iş kuralları (sipariş durumları,
+  bildirim, **sipariş iptali** ve dört kabul kriteri)
+- `docs/project/data-model.md` — `Order`, `OrderItem`, `Notification` alanları
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
-
-## NOT — adım 8 gecikmeli girdi
-
-Adım 8'in kodu 2026-08-06 akşamı bitti ama o gece **GitHub Actions küresel
-kesintiye girdi** ve CI hiç koşmadı. Kesinti 2026-08-07 00:06'da giderildi,
-kuyrukta bekleyen iş akışları kendiliğinden koştu ve PR #25 merge edildi.
-
-Buradan çıkan iki ders zaten kalıcı kurallara yazıldı — burada tekrar edilmiyor:
-denetim kapısını kırmızı bırakmama (`09-ci-cd-deploy.md`) ve dış servis
-durumunu ezberden değil kaynağından okuma (`11-agent-workflow.md`).
-
-⚠️ `feature/market` dalının preview adresi Turnstile ve Google OAuth
-panellerine **eklendi** — o iş yapıldı, kullanıcıdan tekrar isteme.
-
----
 
 ## DURUM
 
-Roadmap adım **0 → 8 bitti ve canlıda.** Market ekranı çalışıyor.
+Roadmap adım **0 → 9 bitti ve canlıda.** Restoran ekranı çalışıyor.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - **Kayıt, giriş, çıkış, oturum, şifre sıfırlama, Google ile giriş** çalışıyor
@@ -41,130 +27,160 @@ Roadmap adım **0 → 8 bitti ve canlıda.** Market ekranı çalışıyor.
   modül başına teslimat ücreti, Luhn + sahte kart sağlayıcısı, tek
   transaction'da ödeme + modül başına sipariş + stok düşümü, sahte fiş
 - **Belediye Market** çalışıyor: ürün ızgarası, kategori süzgeci, arama,
-  sepete ekleme, bildirim balonu, tükenmiş ürün işareti
+  sepete ekleme, tükenmiş ürün işareti
+- **Belediye Restoran + adisyon** çalışıyor: menü ızgarası, süzgeç, arama,
+  adet + mutfak notuyla adisyona ekleme, notun sonradan düzenlenmesi,
+  restoran teslimat ücreti (49,90 TL / 400 TL üzeri ücretsiz) ve
+  tahmini hazırlık süresi (30-45 dk)
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında ilk iş:** dal adresini (`benim-belediyem-git-<dal>-barisss.vercel.app`)
   **iki panele** ekle: Cloudflare Turnstile hostname listesi **ve** Google OAuth
   redirect URI listesi (sonuna `/api/auth/google/callback`). Teknik borç #31
-- ⚠️ **Tohumlanmış doktor saatleri ~2026-08-15'te tükeniyor** (borç #38). O tarihten
-  sonra hastane ekranı "boş saat kalmamış" gösterir — çökme değil, seed'i yeniden
-  koşturmak gerekiyor
+- ⚠️ **Tohumlanmış doktor saatleri ~2026-08-15'te tükeniyor** (borç #38). O tarih
+  geldiyse hastane ekranı "boş saat kalmamış" gösterir — çökme değil, uzak
+  ortamlarda seed'i yeniden koşturmak gerekiyor
 
-## YAPILACAK — roadmap adım 9
+## YAPILACAK — roadmap adım 10
 
-"Belediye Restoran + adisyon" → PRD §5.4
+"Sipariş takibi + bildirim sistemi" → PRD §5.5
 
-Dal: `feature/restoran` (öneri)
+Dal: `feature/siparis-takibi` (öneri)
 
 ### Kapsam
 
-- Menü: ana yemek, ara sıcak, yan ürün/salata, içecek, tatlı — görselli, fiyatlı
-- **Adisyon:** seçilen kalemler adisyona eklenir, **adet ve NOT** girilebilir
-  (örn. "az acılı") — market'te olmayan tek yeni kavram bu
-- Adisyon sepete aktarılır ve ödenir
-- Paket servis: teslimat adresi + tahmini hazırlık süresi
+- Sipariş durumları: `Alındı → Hazırlanıyor → Yola çıktı → Teslim edildi`
+  (+ `İptal edildi`). Enum değerleri **şemada zaten var**
+- **Durum simülasyonu**: yönetici paneli yok (borç #4), durumlar zamanlayıcıyla
+  ilerliyor. ADR-007'nin "doğruluk okuma anında" deseni burada da geçerli —
+  cron'a bağımlı bir doğruluk kurma
+- **Uygulama içi bildirim**: ödeme tamamlanınca ve durum değiştikçe
+- **Sipariş iptali**: YALNIZCA `Alındı` aşamasında. Sonrası **409**. Market
+  siparişiyse **stok geri yüklenir**, sahte iade kaydı oluşur, denetim kaydına
+  yazılır — hepsi **tek transaction**. Bilet hiç iptal edilemez
+- Profilde sipariş geçmişi ve anlık durum
 
 ### Bu adımda özellikle dikkat
 
-- **Şema DEĞİŞMİYOR** — `MenuCategory`, `MenuItem` adım 3'te kuruldu ve tohumlu
-  (31 kalem, 5 kategori, en az 2 tanesi `isAvailable = false`)
-- **Sepet satırında `note` alanı ZATEN VAR** (`cart_items.note`) ve
-  `addItemToCart` onu kabul ediyor. Yeni alan açma, yeni uç yazma
-- **Market ekranı bire bir kopyalanacak bir şablon DEĞİL.** Ortak çıkan parça
-  varsa (ürün kartı iskeleti, boş durum) paylaşıma çıkar; kopyalama DRY'ı bozar
-- `src/config/navigation.ts` → restoran kartının `href`'i şu an `null`. Sayfa
-  açılınca `/restoran` yazılacak, rozet kendiliğinden "Açık"a döner
-- **Restoran teslimat ücreti SIFIR** ve bu bilinçli (borç #39): hiçbir doküman
-  restoran için ücret tanımlamıyor. Sayı UYDURMA — gerekirse kullanıcıya sor
+- **Dört kabul kriteri PRD §5.5'in sonunda yazılı** — dördü de teste dönüşmeli
+- **`Hazırlanıyor` durumundaki siparişe gelen iptal isteği 409 dönmeli**,
+  istemci düğmeyi göstermese bile. Yetki kontrolü sunucuda
+- **Başkasının siparişini iptal etme isteği 403** (IDOR)
+- Stok geri yükleme koşullu UPDATE ile yazılmalı; "önce oku, sonra yaz" iki
+  adımdır ve yarışı çözmez (adım 7 ve 8'in dersi)
+- **Şema muhtemelen DEĞİŞMİYOR**: `orders.status`, `orders.cancelled_at`,
+  `orders.cancel_reason` ve `notifications` tablosu adım 3'ten beri var.
+  Yazmadan önce `prisma/schema.prisma` içinde DOĞRULA
+- `src/config/navigation.ts` → etkinlik ve destek kartlarının `href`'i hâlâ
+  `null`; adım 10 yeni bir kart açmıyor, profil/sipariş ekranları menüye
+  nasıl bağlanacak kararı senin
 - `tests/e2e/layout.spec.ts` içindeki "açılmamış hizmet tıklanabilir bağlantı
-  değildir" testi şu an **restoran** kartını örnek alıyor. Restoran açılınca o
-  test doğru sebepten kırmızıya döner: örneği **etkinlik** veya **destek**
-  kartına taşı, testi silme
+  değildir" testi şu an **etkinlik** kartını örnek alıyor (market adım 8'de,
+  restoran adım 9'da açıldığı için iki kez taşındı). Etkinlik adım 11'de
+  açılınca örneği **destek** kartına taşı, testi silme
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
 - **`src/lib/money.ts`** — para TAM SAYI KURUŞ. **Ondalık sayıyla para hesabı YAPMA**
-- **`src/lib/search-text.ts`** — `normalizeSearchQuery` + `toLikePattern`. Arama
-  kutusu yazacaksan ŞART (aşağıda tuzaklarda: Türkçe harf + joker kaçışı)
-- **Sepet katmanı** (`src/features/cart/`): `addItemToCart` (not alanı dahil),
-  `changeItemQuantity`, `removeItemFromCart`, `getCartSummary`. Katalog
-  çözümleyici restoran kalemini zaten destekliyor (`catalog.repository.ts`)
-- **Market katmanı** (`src/features/market/`) — aynı desenin çalışan örneği:
-  repository → Zod şeması → sunucu bileşeni sayfa → tek istemci düğme
+- **`src/features/catalog/`** — ORTAK katalog katmanı: arama kutusu, kategori
+  şeridi, boş durum, adres parametresi şeması ve Türkçe `unaccent` araması.
+  Yeni bir liste ekranı yazacaksan buradan başla, market/restoran'ı kopyalama
+- **Sepet katmanı** (`src/features/cart/`): `addItemToCart` (not dahil),
+  `changeItemQuantity`, `changeItemNote`, `removeItemFromCart`, `getCartSummary`
+- **Ödeme katmanı** (`src/features/payment/`): `checkout.service.ts` siparişleri
+  modül başına ve tek transaction'da yazıyor; iptal akışı buradaki desenle
+  simetrik olmalı
+- **`CartLines`** bileşeni dar kapsayıcıda da çalışıyor (`allowNoteEditing`
+  bayrağı restoran satırlarında not düzenlemeyi açıyor)
 - **Bildirim balonu**: `import { toast } from "sonner"`, kap `src/components/ui/sonner.tsx`
   içinde ve kök düzende takılı. `next-themes` KULLANMIYOR, tema CSS'ten geliyor
 - **`readCartOwner()`** sunucu bileşenleri için, **`getCartContext()`** uçlar
   için. **Sunucu bileşeninde çerez YAZILAMAZ**, ikisini karıştırma
 - **`requireAccess()`** uçlar için, **`guardPage()`** sayfalar için
+- **`recordAuditLog()`** — kritik işlemler denetim kaydına yazılır (iptal dahil)
 - `messages.ts` — kullanıcıya görünen tüm Türkçe metinler burada, dağıtma
 - Tasarım token'ları (`globals.css`) · `page-shell` · `TextField` · `FormAlert`
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
 
+**E2E koşarken (adım 9'da 40 dakika yedi)**
+- **`npm run start` ile KENDİ sunucunu açıp sonra `npx playwright test` KOŞMA.**
+  `playwright.config.ts` sunucuyu kendi ortam değişkenleriyle başlatıyor
+  (Turnstile kapalı, sahte Google istemcisi) ve `reuseExistingServer` yüzünden
+  senin sunucunu olduğu gibi kullanıyor. Sonuç: kayıt, şifre sıfırlama ve
+  Google testlerinin tamamı **kodla ilgisiz** sebeplerle kırmızıya dönüyor.
+  **Doğrusu: portu boşalt (`lsof -ti:3000 | xargs kill -9`), sonra tek başına
+  `npx playwright test` koştur** — sunucuyu Playwright kendi kurar
+- **Sunucu ayaktayken `.next`'i silme** — statik dosyalar 500 döner ve duman
+  testi "MIME type" hatalarıyla kırmızıya döner
+- **Yük 3'ün üzerindeyken tam set koşarken 1-2 test kararsız** ("ERR_ABORTED",
+  "bağlam yok edildi"). Tek tek koşturunca geçiyorlar. Önce `uptime` bak
+- **E2E'yi 15 dakika içinde üst üste koşturma** (hız sınırı). Çözüm:
+  `rate_limit_counters` tablosunu boşalt, sonra tek sefer koş
+- **Adres kontrolünde `toHaveURL` DEĞİL `waitForURL` kullan**
+- **E2E'nin ürettiği ziyaretçi sepetini temizle** (`restaurant.spec.ts` örneği)
+
+**Playwright seçicileri**
+- **`getByRole("button", { name: "Ara" })` ÇOK EŞLEŞİR**: "Izgara", "Sigara",
+  "Karışık Izgara" gibi kalem adları erişilebilir adın içinde geçiyor.
+  `exact: true` şart
+- **`getByText(<modül adı>)` de çok eşleşir**: modül adı hem bölüm başlığında
+  hem ücretsiz teslimat ipucunda geçiyor. Başlık için `getByRole("heading")` kullan
+
 **Türkçe metin**
-- **Veritabanının kendi büyük/küçük harf araması TÜRKÇE BİLMİYOR.** `I` harfini
-  `i`'ye çeviriyor (karşılığı `ı`) ve aksanları eşlemiyor. Ölçüldü: `KAĞIT` → 0,
-  `kagit` → 0, yalnızca `kağıt` → 1 sonuç
-- **ÇÖZÜM KURULU: `unaccent` eklentisi.** Yeni bir arama yazarken Prisma'nın
-  `contains` + `mode: "insensitive"` kombinasyonunu KULLANMA — Türkçe'de
-  yanlış sonuç verir. Bunun yerine `product.repository.ts` içindeki
-  `findIdsMatchingQuery` desenini izle: `lower(unaccent(...)) LIKE
-  lower(unaccent(${pattern})) ESCAPE '\'`
-- **`LIKE` deseni ŞART olarak `toLikePattern`'den geçer** (`src/lib/search-text.ts`):
-  kullanıcının yazdığı `%` ve `_` joker sayılırsa tek karakterle tüm katalog
-  eşleşir. Sessiz bir hata, çökme yok — bu yüzden testi var
-- Yazım hatası toleransı YOK (borç #44): "kagıt havulu" yazan bulamaz
+- **Veritabanının kendi büyük/küçük harf araması TÜRKÇE BİLMİYOR.** Prisma'nın
+  `contains` + `mode: "insensitive"` kombinasyonunu KULLANMA. Bunun yerine
+  `src/features/catalog/repositories/catalog-search.repository.ts` içindeki
+  `findIdsMatchingQuery` fonksiyonunu çağır — yeni bir tablo aranacaksa oraya
+  yeni bir dal ekle (tablo adı sabit listeden seçilir, parametre DEĞİL)
+- **`LIKE` deseni ŞART olarak `toLikePattern`'den geçer** (`src/lib/search-text.ts`)
+- Yazım hatası toleransı YOK (borç #44)
 
 **Para**
 - **Ondalık sayıyla para hesaplama.** Her yerde tam sayı kuruş, dönüşüm yalnızca
   sınırlarda
+- **Teslimat ücreti modül başına bir KURAL TABLOSUNDAN okunuyor**
+  (`cart-pricing.ts` → `DELIVERY_RULES`). Yeni bir modül eklenirse tabloya satır
+  ekle, yeni bir `if` dalı yazma
 
 **Eşzamanlılık**
 - **"Önce oku, boşsa yaz" İKİ ADIMDIR ve yarışı çözmez.** Tek koşullu UPDATE
   kullan (`WHERE stock >= n`) ve etkilenen satır sayısına bak
 - **Korumayı yazdıktan sonra geçici kaldırıp testin KIRMIZIYA döndüğünü GÖR.**
-  Adım 8'de bu yapıldı ve işe yaradı: tam olarak bir test kırmızıya döndü,
-  diğer 16'sı yeşil kaldı — yani test doğru şeyi ölçüyordu
+  Adım 9'da iki koruma böyle ölçüldü (IDOR ve zaman aralığı kuralı) ve ikisinde
+  de tam olarak beklenen testler kırmızıya döndü, diğerleri yeşil kaldı
 
 **Next.js**
 - **Sunucu bileşeninde `cookies().set()` İSTİSNA FIRLATIR.** Salt okuma gereken
   yerde `readAnonymousId()` / `readCartOwner()` kullan
-- **`next/image` `.svg` kaynağında optimizasyonu KENDİLİĞİNDEN atlıyor** (Next 16
-  resmî dokümanı). `dangerouslyAllowSVG` açmaya gerek yok
+- **`next/image` `.svg` kaynağında optimizasyonu KENDİLİĞİNDEN atlıyor**
+- **Sunucuda çizilen bir panel istemci bir şey yazdıktan sonra kendiliğinden
+  tazelenmez** — `router.refresh()` çağır (adisyon paneli böyle çalışıyor)
 
 **Test**
 - Sunucu tarafı test dosyalarına `/** @vitest-environment node */` docblock'u ŞART
 - **İş kuralı testlerini `tests/db/` içinde GERÇEK veritabanına karşı yaz**
 - **Vitest'te hata sınıflarını test gövdesinin İÇİNDE `await import()` etme**
 - **Her Playwright projesine (masaüstü / 375px) AYRI test hesabı VE ayrı veri
-  havuzu ver.** Giriş gerektirmeyen akışta hesap hiç kullanma — market testleri
-  ziyaretçi olarak koşuyor ve bu yüzden hız sınırına hiç takılmıyor
-- **E2E'yi 15 dakika içinde üst üste koşturma.** Çözüm: `rate_limit_counters`
-  tablosunu boşalt, sonra tek sefer koş
-- **Sunucu ayaktayken `npx playwright test` `.next`'i BOZABİLİR.** Çözüm:
-  sunucuyu durdur, `rm -rf .next && npm run build`, yeniden başlat
-- **Adres kontrolünde `toHaveURL` DEĞİL `waitForURL` kullan.** `toHaveURL`'ün
-  5 saniyelik varsayılan sınırı yük altında yetmiyor ve gerçek hata yokken
-  kırmızı veriyor. Adım 8'de tam olarak bu oldu: aynı test yük 3'te kırmızı,
-  yük 12'de (düzeltmeden sonra) yeşil
-- **Testler zaman aşımına düşüyorsa önce `uptime` çalıştır.** Yük 7-8'e çıktığında
-  iki test "bağlam yok edildi" diye kırmızıya döndü, tek tek koşturulunca geçti
-- **E2E'nin ürettiği ziyaretçi sepetini temizle:** kimliğini uygulama üretiyor,
-  test öneki taşımıyor, ortak temizlik yakalamıyor (`market.spec.ts` örneği)
+  havuzu ver.** Giriş gerektirmeyen akışta hesap hiç kullanma
 
 **Arayüz**
 - **Dark mode SINIF tabanlı** (`.dark`), tercih `localStorage`'da. `next-themes`
   BİLEREK kullanılmıyor — shadcn CLI onu geri getirmeye çalışıyor, kaldır
+- **shadcn'de Dialog bileşeni YOK ve bilerek eklenmedi** (adım 9). Küçük bir
+  form için modal yerine kartın içinde açılan bölüm kullanıldı; modal gerçekten
+  gerekirse önce kullanıcıya sor (yeni bağımlılık)
+- **Dar kapsayıcıya konan bileşen taşabilir.** Adım 9'da sepet satırı 384px'lik
+  adisyon panelinde sayfaya yatay kaydırma ekledi. Ölçüsü:
+  `document.documentElement.scrollWidth > clientWidth`
 - **Olmayan renk token'ı uydurma.** `warning` yok; uyarı vurgusu renkle değil
-  kalınlıkla veriliyor (renk körü kullanıcı için de ayırt edilebilir)
-- Tailwind v4 kanonik biçimi `aspect-4/3`, `aspect-[4/3]` değil (linter uyarıyor)
+  kalınlıkla veriliyor
+- Tailwind v4 kanonik biçimi `aspect-4/3`, `aspect-[4/3]` değil
 - Dokunma hedefleri en az 44px (`min-h-11`)
 
 **Bağımlılık**
-- **`shadcn add <bileşen>` İSTENMEYEN PAKET GETİREBİLİR.** `sonner` eklerken
-  `next-themes`'i de kurdu. Kurulumdan sonra `git diff package.json` OKU
-- **Yeni paket sonrası `npm audit` KOŞ.** Adım 8'de eklemeyle ilgisiz ama yeni
-  yayınlanmış bir `hono` uyarısı çıktı; `overrides` ile kapatıldı
+- **`shadcn add <bileşen>` İSTENMEYEN PAKET GETİREBİLİR.** Kurulumdan sonra
+  `git diff package.json` OKU
+- **Yeni paket sonrası `npm audit` KOŞ**
 
 **Prisma 7**
 - `datasource` bloğunda `url` / `directUrl` **yok** (ADR-008)
@@ -193,11 +209,11 @@ Dal: `feature/restoran` (öneri)
 ## KOMUTLAR
 
 `npm run db:up · db:migrate · db:reset · db:studio`
-`npm run test · test:db · test:e2e · lint · typecheck · format · format:check · build`
+`npm run test · test:db · lint · typecheck · format · format:check · build`
 `gh` PATH'te. `vercel` ve `neonctl` için `npx`.
 
-**E2E'yi elle koşturma sırası:** `rm -rf .next && npm run build`, sonra
-`npm run start` (arka planda), sonra `npx playwright test`.
+**E2E'yi elle koşturma sırası:** portu boşalt (`lsof -ti:3000 | xargs kill -9`),
+sonra `npx playwright test`. Sunucuyu SEN başlatma.
 
 ## BENİMLE İLETİŞİM
 

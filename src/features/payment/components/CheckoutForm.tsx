@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { RESTAURANT_PREP_MINUTES_MAX, RESTAURANT_PREP_MINUTES_MIN } from "@/config/constants";
 import { messages } from "@/config/messages";
 import { apiRequest } from "@/features/auth/components/api-client";
 import { FormAlert } from "@/features/auth/components/FormAlert";
@@ -41,7 +42,19 @@ export type AddressOption = { id: string; title: string; district: string };
 
 export type CheckoutFormProps = {
   totalKurus: number;
-  needsDelivery: boolean;
+  /** Sepette market veya restoran var mı — adres bu durumda zorunlu. */
+  needsAddress: boolean;
+  /**
+   * Zaman aralığı sorulacak mı — YALNIZCA markette (PRD §6.1).
+   *
+   * Restoran siparişi ödemeden sonra hemen hazırlanmaya başladığı için
+   * seçilecek bir pencere yok; onun yerine tahmini hazırlık süresi
+   * gösteriliyor. Bu bir görünüm kararı, koruma değil: sunucu da sepetin
+   * içine bakıp aynı kararı bağımsız veriyor.
+   */
+  needsSlot: boolean;
+  /** Sepette restoran kalemi var mı — hazırlık süresi bilgisi bu durumda çıkar. */
+  showsPrepTime: boolean;
   savedCards: readonly SavedCardOption[];
   addresses: readonly AddressOption[];
   /** Teslimat zaman aralığı seçenekleri — sunucuda üretiliyor. */
@@ -91,7 +104,9 @@ export function CheckoutForm(props: CheckoutFormProps) {
         idempotencyKey,
         expectedTotalKurus: props.totalKurus,
         card,
-        delivery: props.needsDelivery ? { addressId, deliverySlot } : {},
+        delivery: props.needsAddress
+          ? { addressId, ...(props.needsSlot ? { deliverySlot } : {}) }
+          : {},
       },
     });
 
@@ -122,7 +137,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
 
       <FormAlert message={error} />
 
-      {props.needsDelivery ? (
+      {props.needsAddress ? (
         <section className="flex flex-col gap-4" aria-labelledby="teslimat">
           <h2 id="teslimat" className="font-heading text-lg font-semibold">
             {copy.delivery.heading}
@@ -145,21 +160,34 @@ export function CheckoutForm(props: CheckoutFormProps) {
             </select>
           </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium">{copy.delivery.slotLabel}</span>
-            <select
-              required
-              value={deliverySlot}
-              onChange={(event) => setDeliverySlot(event.target.value)}
-              className="min-h-11 rounded-lg bg-background px-3 ring-1 ring-foreground/15 focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {props.deliverySlots.map((slot) => (
-                <option key={slot} value={slot}>
-                  {slot}
-                </option>
-              ))}
-            </select>
-          </label>
+          {/* Zaman aralığı YALNIZCA markette sorulur (PRD §6.1). */}
+          {props.needsSlot ? (
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">{copy.delivery.slotLabel}</span>
+              <select
+                required
+                value={deliverySlot}
+                onChange={(event) => setDeliverySlot(event.target.value)}
+                className="min-h-11 rounded-lg bg-background px-3 ring-1 ring-foreground/15 focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {props.deliverySlots.map((slot) => (
+                  <option key={slot} value={slot}>
+                    {slot}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
+          {/* Restoranda seçim değil BİLGİ: hazırlık süresi bir tahmin. */}
+          {props.showsPrepTime ? (
+            <p role="status" className="text-sm text-muted-foreground">
+              {copy.delivery.prepTimeNotice(
+                RESTAURANT_PREP_MINUTES_MIN,
+                RESTAURANT_PREP_MINUTES_MAX,
+              )}
+            </p>
+          ) : null}
         </section>
       ) : (
         <p role="status" className="text-sm text-muted-foreground">
@@ -210,7 +238,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
               onChange={(event) => setNumber(event.target.value)}
               inputMode="numeric"
               autoComplete="cc-number"
-              placeholder="4111 1111 1111 1111"
+              help={copy.card.numberHelp}
             />
             <TextField
               label={copy.card.holder}
@@ -225,7 +253,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
                 onChange={(event) => setExpMonth(event.target.value)}
                 inputMode="numeric"
                 autoComplete="cc-exp-month"
-                placeholder="12"
+                help={copy.card.expiryMonthHelp}
               />
               <TextField
                 label={copy.card.expiryYear}
@@ -233,7 +261,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
                 onChange={(event) => setExpYear(event.target.value)}
                 inputMode="numeric"
                 autoComplete="cc-exp-year"
-                placeholder="2030"
+                help={copy.card.expiryYearHelp}
               />
             </div>
 
@@ -255,7 +283,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
           onChange={(event) => setCvv(event.target.value)}
           inputMode="numeric"
           autoComplete="cc-csc"
-          placeholder="123"
+          help={copy.card.cvvHelp}
         />
       </section>
 

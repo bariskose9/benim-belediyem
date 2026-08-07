@@ -2,6 +2,7 @@ import {
   MARKET_DELIVERY_FEE_KURUS,
   MARKET_FREE_DELIVERY_THRESHOLD_KURUS,
   RESTAURANT_DELIVERY_FEE_KURUS,
+  RESTAURANT_FREE_DELIVERY_THRESHOLD_KURUS,
 } from "@/config/constants";
 import type { CartLine, CartSection, CartSummary } from "@/features/cart/types";
 import type { CartItemType } from "@/generated/prisma/enums";
@@ -23,35 +24,55 @@ import { lineTotalKurus, sumKurus } from "@/lib/money";
 const SECTION_ORDER: readonly CartItemType[] = ["market", "restaurant", "event"];
 
 /**
+ * Modül başına teslimat kuralı. `null` = o modül hiç teslim edilmiyor.
+ *
+ * TABLO HÂLİNDE ÇÜNKÜ KURAL AYNI, SAYILAR FARKLI: market ve restoran ikisi de
+ * "sabit ücret, eşik üstü ücretsiz" mantığıyla çalışıyor. İki ayrı `if` dalı
+ * yazılsaydı üçüncü modül geldiğinde üçüncü dal yazılır ve biri eşik
+ * kontrolünü unutmuş olurdu.
+ */
+const DELIVERY_RULES: Readonly<
+  Record<CartItemType, { feeKurus: number; freeThresholdKurus: number } | null>
+> = {
+  market: {
+    feeKurus: MARKET_DELIVERY_FEE_KURUS,
+    freeThresholdKurus: MARKET_FREE_DELIVERY_THRESHOLD_KURUS,
+  },
+  restaurant: {
+    feeKurus: RESTAURANT_DELIVERY_FEE_KURUS,
+    freeThresholdKurus: RESTAURANT_FREE_DELIVERY_THRESHOLD_KURUS,
+  },
+  // Bilet teslim edilmediği için ücreti yoktur — sıfır değil, "hiç yok"tur;
+  // ekran o satırı da göstermez.
+  event: null,
+};
+
+/**
  * Bir modülün teslimat ücreti.
  *
  * EŞİK YALNIZCA O MODÜLÜN TUTARINA BAKAR (PRD §6.1). Sepetin tamamına
  * bakılsaydı, restoran siparişi ekleyerek market teslimatı bedavaya
  * getirilebilirdi.
- *
- * Bilet teslim edilmediği için ücreti yoktur — sıfır değil, "hiç yok"tur;
- * ekran o satırı da göstermez.
  */
 export function deliveryFeeKurus(itemType: CartItemType, subtotalKurus: number): number {
   if (subtotalKurus <= 0) return 0;
 
-  switch (itemType) {
-    case "market":
-      return subtotalKurus >= MARKET_FREE_DELIVERY_THRESHOLD_KURUS ? 0 : MARKET_DELIVERY_FEE_KURUS;
-    case "restaurant":
-      return RESTAURANT_DELIVERY_FEE_KURUS;
-    case "event":
-      return 0;
-  }
+  const rule = DELIVERY_RULES[itemType];
+
+  if (!rule) return 0;
+
+  return subtotalKurus >= rule.freeThresholdKurus ? 0 : rule.feeKurus;
 }
 
-/** Ücretsiz teslimata kalan tutar; eşik yoksa veya aşıldıysa `null`. */
+/** Ücretsiz teslimata kalan tutar; teslimat yoksa veya eşik aşıldıysa `null`. */
 function freeDeliveryRemainingKurus(itemType: CartItemType, subtotalKurus: number): number | null {
-  if (itemType !== "market") return null;
-  if (subtotalKurus <= 0) return null;
-  if (subtotalKurus >= MARKET_FREE_DELIVERY_THRESHOLD_KURUS) return null;
+  const rule = DELIVERY_RULES[itemType];
 
-  return MARKET_FREE_DELIVERY_THRESHOLD_KURUS - subtotalKurus;
+  if (!rule) return null;
+  if (subtotalKurus <= 0) return null;
+  if (subtotalKurus >= rule.freeThresholdKurus) return null;
+
+  return rule.freeThresholdKurus - subtotalKurus;
 }
 
 /**

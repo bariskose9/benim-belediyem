@@ -63,8 +63,20 @@ const FULFILLMENT_BY_TYPE: Readonly<Record<CartItemType, FulfillmentType>> = {
   event: "ticket",
 };
 
-/** Teslimat gerektiren modüller — bilet teslim edilmez (PRD §6.1). */
-const NEEDS_DELIVERY: readonly CartItemType[] = ["market", "restaurant"];
+/** Adres gerektiren modüller — bilet teslim edilmez (PRD §6.1). */
+const NEEDS_ADDRESS: readonly CartItemType[] = ["market", "restaurant"];
+
+/**
+ * ZAMAN ARALIĞI GEREKTİREN MODÜLLER — yalnızca market.
+ *
+ * PRD §6.1 tablosu iki teslimatı ayırıyor: market "adres + zaman aralığı",
+ * restoran "adres + tahmini hazırlık süresi". Restoran siparişi ödemeden
+ * hemen sonra hazırlanmaya başlıyor, yani seçilecek bir pencere yok —
+ * hazırlık süresi bir TAHMİN ve ekranda gösteriliyor, sipariş kaydına
+ * yazılmıyor. Restorandan da aralık istemek, kullanıcıya karşılığı olmayan
+ * bir söz verdirmek olurdu.
+ */
+const NEEDS_SLOT: readonly CartItemType[] = ["market"];
 
 export async function checkout(input: CheckoutInput): Promise<CheckoutResult> {
   await enforceBudget(input.userId, input.now);
@@ -117,20 +129,26 @@ function assertCartIsPayable(summary: CartSummary, expectedTotalKurus: number): 
  *
  * Sepette market veya restoran varsa adres ZORUNLU; adresin sahibi de bu
  * kullanıcı olmalı (IDOR). Yalnızca bilet varsa teslimat hiç istenmez.
+ *
+ * ZAMAN ARALIĞI YALNIZCA MARKET VARSA isteniyor: restoran siparişi pencere
+ * seçtirmiyor (PRD §6.1). Kontrol İSTEMCİYE GÜVENMİYOR — ekran alanı
+ * göstermese bile sunucu sepetin içine bakıp kendi kararını veriyor.
  */
 async function resolveDelivery(input: {
   userId: string;
   summary: CartSummary;
   delivery: CheckoutPayload["delivery"];
 }): Promise<string | null> {
-  const needsDelivery = input.summary.sections.some((section) =>
-    NEEDS_DELIVERY.includes(section.itemType),
+  const needsAddress = input.summary.sections.some((section) =>
+    NEEDS_ADDRESS.includes(section.itemType),
   );
 
-  if (!needsDelivery) return null;
+  if (!needsAddress) return null;
+
+  const needsSlot = input.summary.sections.some((section) => NEEDS_SLOT.includes(section.itemType));
 
   if (!input.delivery.addressId) throw new DeliveryAddressRequiredError();
-  if (!input.delivery.deliverySlot) throw new DeliverySlotRequiredError();
+  if (needsSlot && !input.delivery.deliverySlot) throw new DeliverySlotRequiredError();
 
   const address = await findOwnedAddress({
     addressId: input.delivery.addressId,
@@ -228,8 +246,10 @@ async function persistSuccessfulPayment(context: {
             subtotalKurus: section.subtotalKurus,
             deliveryFeeKurus: section.deliveryFeeKurus,
             totalKurus: section.subtotalKurus + section.deliveryFeeKurus,
-            deliveryAddressId: NEEDS_DELIVERY.includes(section.itemType) ? addressId : null,
-            deliverySlot: NEEDS_DELIVERY.includes(section.itemType)
+            deliveryAddressId: NEEDS_ADDRESS.includes(section.itemType) ? addressId : null,
+            // Restoran siparişine ARALIK YAZILMIYOR: istemci yine de bir değer
+            // göndermiş olsa da kayda geçmez (PRD §6.1).
+            deliverySlot: NEEDS_SLOT.includes(section.itemType)
               ? (input.payload.delivery.deliverySlot ?? null)
               : null,
             // Bilet teslim edilmez; durumu doğrudan `delivered` (PRD §6.1).

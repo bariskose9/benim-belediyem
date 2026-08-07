@@ -1,11 +1,11 @@
 import Link from "next/link";
 
-import { messages } from "@/config/messages";
+import { buildCatalogHref } from "@/features/catalog/schemas/catalog-search.schema";
+import type { CatalogFilterCopy, CatalogFilterOption } from "@/features/catalog/types";
 import { cn } from "@/lib/utils";
-import type { MarketCategory } from "../types";
 
 /**
- * Kategori süzgeci.
+ * Kategori süzgeci — market ve restoran ekranlarının ortak parçası.
  *
  * NEDEN BAĞLANTI, DÜĞME DEĞİL: her süzgeç kendi adresine gidiyor
  * (`/market?kategori=…`). Böylece geri tuşu çalışıyor, seçim paylaşılabiliyor
@@ -15,15 +15,16 @@ import type { MarketCategory } from "../types";
  * ARAMA METNİ KORUNUYOR: kullanıcı "deterjan" arayıp sonra kategori
  * değiştirdiğinde araması silinmemeli.
  */
-
-const copy = messages.market.filters;
-
-export function CategoryFilter({
-  categories,
+export function CatalogFilter({
+  basePath,
+  copy,
+  options,
   selectedCategoryId,
   query,
 }: {
-  categories: readonly MarketCategory[];
+  basePath: string;
+  copy: CatalogFilterCopy;
+  options: readonly CatalogFilterOption[];
   selectedCategoryId?: string;
   query?: string;
 }) {
@@ -31,19 +32,19 @@ export function CategoryFilter({
     <nav aria-label={copy.label}>
       <ul className="flex flex-wrap gap-2">
         <li>
-          <FilterLink href={buildHref(undefined, query)} isActive={!selectedCategoryId}>
+          <FilterLink href={buildCatalogHref(basePath, { query })} isActive={!selectedCategoryId}>
             {copy.all}
           </FilterLink>
         </li>
 
-        {categories.map((category) => (
-          <li key={category.id}>
+        {options.map((option) => (
+          <li key={option.id}>
             <FilterLink
-              href={buildHref(category.id, query)}
-              isActive={category.id === selectedCategoryId}
+              href={buildCatalogHref(basePath, { categoryId: option.id, query })}
+              isActive={option.id === selectedCategoryId}
             >
-              {category.name}
-              <span className="text-xs opacity-75">{copy.productCount(category.productCount)}</span>
+              {option.name}
+              <span className="text-xs opacity-75">{copy.itemCount(option.itemCount)}</span>
             </FilterLink>
           </li>
         ))}
@@ -78,16 +79,4 @@ function FilterLink({
       {children}
     </Link>
   );
-}
-
-/** Süzgeç adresini kurar; boş parametreler adrese hiç yazılmaz. */
-function buildHref(categoryId: string | undefined, query: string | undefined): string {
-  const params = new URLSearchParams();
-
-  if (categoryId) params.set("kategori", categoryId);
-  if (query) params.set("arama", query);
-
-  const search = params.toString();
-
-  return search ? `/market?${search}` : "/market";
 }

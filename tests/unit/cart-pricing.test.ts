@@ -6,6 +6,8 @@ import { describe, expect, it } from "vitest";
 import {
   MARKET_DELIVERY_FEE_KURUS,
   MARKET_FREE_DELIVERY_THRESHOLD_KURUS,
+  RESTAURANT_DELIVERY_FEE_KURUS,
+  RESTAURANT_FREE_DELIVERY_THRESHOLD_KURUS,
 } from "@/config/constants";
 import { deliveryFeeKurus, summarizeCart } from "@/features/cart/services/cart-pricing";
 import type { CartLine } from "@/features/cart/types";
@@ -48,6 +50,28 @@ describe("deliveryFeeKurus", () => {
   /** Eşik DAHİL: "750 TL üzeri ücretsiz" ifadesinin doğal okunuşu 750 dahildir. */
   it("market tam eşikte ücretsizdir", () => {
     expect(deliveryFeeKurus("market", MARKET_FREE_DELIVERY_THRESHOLD_KURUS)).toBe(0);
+  });
+
+  it("restoran eşiğin altında ücret alır", () => {
+    expect(deliveryFeeKurus("restaurant", RESTAURANT_FREE_DELIVERY_THRESHOLD_KURUS - 1)).toBe(
+      RESTAURANT_DELIVERY_FEE_KURUS,
+    );
+  });
+
+  it("restoran tam eşikte ücretsizdir", () => {
+    expect(deliveryFeeKurus("restaurant", RESTAURANT_FREE_DELIVERY_THRESHOLD_KURUS)).toBe(0);
+  });
+
+  /**
+   * İki modülün eşikleri FARKLI ve karışmamalı: restoranın eşiği marketinkinden
+   * düşük (bir öğün, bir alışverişten küçük). Tek bir eşik kullanılsaydı
+   * restoran teslimatı pratikte hiç ücretsiz olmazdı.
+   */
+  it("market ve restoran eşikleri birbirinden bağımsızdır", () => {
+    const between = RESTAURANT_FREE_DELIVERY_THRESHOLD_KURUS;
+
+    expect(deliveryFeeKurus("restaurant", between)).toBe(0);
+    expect(deliveryFeeKurus("market", between)).toBe(MARKET_DELIVERY_FEE_KURUS);
   });
 
   it("bilet teslim edilmediği için ücretsizdir", () => {

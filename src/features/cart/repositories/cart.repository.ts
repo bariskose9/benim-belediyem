@@ -209,6 +209,25 @@ export async function setItemQuantity(
   return result.count === 1;
 }
 
+/**
+ * Satırın MUTFAK NOTUNU değiştirir (PRD §5.4 "adet ve not girilebilir").
+ *
+ * Sahiplik yine `cartId` üzerinden — adet güncellemesindeki desenin aynısı.
+ * Boş not `null` olarak yazılıyor: "" ile `null` arasındaki farkı ekranda
+ * kimse göremez ama iki farklı değer iki farklı sorgu davranışı demektir.
+ */
+export async function setItemNote(
+  input: { cartId: string; itemId: string; note: string | null },
+  client: Client = prisma,
+): Promise<boolean> {
+  const result = await client.cartItem.updateMany({
+    where: { id: input.itemId, cartId: input.cartId },
+    data: { note: input.note && input.note.length > 0 ? input.note : null },
+  });
+
+  return result.count === 1;
+}
+
 export async function removeItem(
   input: { cartId: string; itemId: string },
   client: Client = prisma,

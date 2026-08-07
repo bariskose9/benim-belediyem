@@ -1,11 +1,15 @@
 import { InvalidCartRequestError, OutOfStockError } from "@/features/cart/errors";
 import { getCartContext } from "@/features/cart/services/cart-context";
-import { changeItemQuantity, removeItemFromCart } from "@/features/cart/services/cart.service";
+import {
+  changeItemNote,
+  changeItemQuantity,
+  removeItemFromCart,
+} from "@/features/cart/services/cart.service";
 import { updateCartItemSchema } from "@/features/payment/schemas/checkout.schema";
 import { fail, ok } from "@/lib/http";
 
 /**
- * PATCH /api/carts/current/items/{itemId} — adet değiştirir
+ * PATCH /api/carts/current/items/{itemId} — adedi veya mutfak notunu değiştirir
  * DELETE /api/carts/current/items/{itemId} — satırı çıkarır
  *
  * SAHİPLİK SORGUNUN İÇİNDE: satır kimliği tahmin edilse bile servis onu
@@ -27,14 +31,18 @@ export async function PATCH(request: Request, context: Context) {
     if (!parsed.success || !itemId.trim()) throw new InvalidCartRequestError();
 
     const cart = await getCartContext();
+    const actor = { owner: cart.owner, anonymousId: cart.anonymousId, now: new Date(), itemId };
 
-    const summary = await changeItemQuantity({
-      owner: cart.owner,
-      anonymousId: cart.anonymousId,
-      now: new Date(),
-      itemId,
-      quantity: parsed.data.quantity,
-    });
+    /**
+     * NOT VE ADET AYRI İŞLEMLER, ayrı isteklerle geliyor: adet düğmeleri her
+     * tıklamada, not ise "kaydet"e basıldığında. İkisini tek istekte
+     * birleştirmek, notu kaydeden kullanıcının o sırada değişen adedi geri
+     * almasına yol açardı.
+     */
+    const summary =
+      parsed.data.note !== undefined
+        ? await changeItemNote({ ...actor, note: parsed.data.note })
+        : await changeItemQuantity({ ...actor, quantity: parsed.data.quantity ?? 0 });
 
     return ok(summary, { noStore: true });
   } catch (error) {

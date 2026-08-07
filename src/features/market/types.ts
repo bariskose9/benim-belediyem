@@ -4,15 +4,10 @@
  * TUTARLAR TAM SAYI KURUŞ (`src/lib/money.ts`) — bu tiplerin hiçbirinde
  * `Decimal` yok. Dönüşüm repository sınırında yapılıyor; ekran katmanı
  * ondalık sayıyla para hesabı yapamıyor, çünkü hiç görmüyor.
+ *
+ * Kategori şekli ORTAK (`features/catalog`): süzgeç şeridi restoranla aynı.
+ * Ürünün kendisi ortak DEĞİL — markette stok sayısı var, restoranda yok.
  */
-
-/** Süzgeç şeridindeki bir kategori. */
-export type MarketCategory = {
-  id: string;
-  name: string;
-  /** Rozette gösterilen ürün sayısı — boş kategoriye tıklatmamak için. */
-  productCount: number;
-};
 
 /** Izgaradaki bir ürün kartı. */
 export type MarketProduct = {

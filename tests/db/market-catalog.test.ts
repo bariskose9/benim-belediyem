@@ -259,7 +259,7 @@ describe("listCategories", () => {
     const categories = (await listCategories()).filter((c) => c.id.startsWith("test-db-"));
     const cleaning = categories.find((c) => c.id === CATEGORY_CLEANING);
 
-    expect(cleaning?.productCount).toBe(2);
+    expect(cleaning?.itemCount).toBe(2);
   });
 
   /**
@@ -277,7 +277,7 @@ describe("listCategories", () => {
     const dairy = categories.find((c) => c.id === CATEGORY_DAIRY);
 
     // Süt kategorisinde 3 satır var ama biri yumuşak silinmiş.
-    expect(dairy?.productCount).toBe(2);
+    expect(dairy?.itemCount).toBe(2);
   });
 });
 

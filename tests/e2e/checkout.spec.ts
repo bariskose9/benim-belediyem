@@ -106,7 +106,12 @@ test("sepet dolar, tutar görünür, adet değişir", async ({ page }, testInfo)
 
   await expect(page.getByRole("heading", { name: messages.cart.title })).toBeVisible();
   await expect(page.getByText(product.name)).toBeVisible();
-  await expect(page.getByText(messages.cart.sections.market)).toBeVisible();
+  /**
+   * BÖLÜM BAŞLIĞI ROLÜYLE ARANIYOR, düz metinle değil: modül adı artık
+   * ücretsiz teslimat ipucunda da geçiyor ("… Belediye Market teslimatı
+   * ücretsiz olsun") ve düz metin araması ikisine birden takılıyordu.
+   */
+  await expect(page.getByRole("heading", { name: messages.cart.sections.market })).toBeVisible();
 
   // Teslimat ücreti satırı görünmeli (market eşiğin altında).
   await expect(page.getByText(messages.cart.summary.total)).toBeVisible();

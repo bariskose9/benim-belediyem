@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * `/market` ekranının adres çubuğu parametreleri.
+ * Katalog ekranlarının (`/market`, `/restoran`) adres çubuğu parametreleri.
  *
  * ADRES ÇUBUĞU DA BİR GİRDİ NOKTASIDIR ve doğrulanır — buradan gelen değerler
  * doğrudan veritabanı sorgusuna gidiyor (03-api-guidelines.md). Prisma
@@ -31,12 +31,12 @@ const searchQuery = z
   .max(80)
   .transform((value) => (value.length === 0 ? undefined : value));
 
-export const marketSearchParamsSchema = z.object({
+export const catalogSearchParamsSchema = z.object({
   categoryId: recordId.optional().catch(undefined),
   query: searchQuery.optional().catch(undefined),
 });
 
-export type MarketSearchParams = z.infer<typeof marketSearchParamsSchema>;
+export type CatalogSearchParams = z.infer<typeof catalogSearchParamsSchema>;
 
 /**
  * Ham `searchParams` nesnesini güvenli bir süzgece çevirir.
@@ -45,10 +45,10 @@ export type MarketSearchParams = z.infer<typeof marketSearchParamsSchema>;
  * adresi elle kurcaladığında ekranı 500'e düşürmek yerine süzgeçsiz listeye
  * dönmek doğru davranış — hastane ekranındaki desenin aynısı.
  */
-export function parseMarketSearchParams(
+export function parseCatalogSearchParams(
   raw: Record<string, string | string[] | undefined>,
-): MarketSearchParams {
-  return marketSearchParamsSchema.parse({
+): CatalogSearchParams {
+  return catalogSearchParamsSchema.parse({
     categoryId: firstValue(raw.kategori),
     query: firstValue(raw.arama),
   });
@@ -57,4 +57,25 @@ export function parseMarketSearchParams(
 /** `?kategori=a&kategori=b` gibi tekrarlı parametrede ilk değeri alır. */
 function firstValue(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
+}
+
+/**
+ * Süzgeç adresini kurar; boş parametreler adrese hiç yazılmaz.
+ *
+ * Hem kategori şeridi hem arama kutusu buradan geçiyor: iki yerde ayrı ayrı
+ * kurulsaydı biri "aramayı koru" kuralını unuttuğunda kullanıcı süzgeç
+ * değiştirince aramasını kaybederdi.
+ */
+export function buildCatalogHref(
+  basePath: string,
+  filters: { categoryId?: string; query?: string },
+): string {
+  const params = new URLSearchParams();
+
+  if (filters.categoryId) params.set("kategori", filters.categoryId);
+  if (filters.query) params.set("arama", filters.query);
+
+  const search = params.toString();
+
+  return search ? `${basePath}?${search}` : basePath;
 }

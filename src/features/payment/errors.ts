@@ -144,12 +144,17 @@ export class PaymentProviderUnavailableError extends AppError {
  * sızdırma" meselesi; burada daha ağır: gövdede KART NUMARASI var ve Zod'un
  * ürettiği hata nesnesi girdinin parçalarını taşıyabiliyor. Tek tip, içerik
  * taşımayan bir mesaj dönülüyor.
+ *
+ * MESAJ "KART NUMARASI GEÇERSİZ" DEĞİL. Eskiden öyleydi ve fiilen yanılttı:
+ * son kullanma alanlarını boş bırakan kullanıcıya kart numarasını kontrol
+ * ettirdi, oysa numara doğruydu. Hangi alanın hatalı olduğunu söyleyemiyoruz
+ * ama YANLIŞ alanı göstermemek elimizde.
  */
 export class InvalidCheckoutRequestError extends AppError {
   readonly code = "VALIDATION_ERROR";
   readonly status = 422;
 
   constructor() {
-    super(copy.invalidNumber);
+    super(copy.invalidRequest);
   }
 }

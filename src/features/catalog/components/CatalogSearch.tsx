@@ -2,12 +2,13 @@ import Link from "next/link";
 import { SearchIcon } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
-import { messages } from "@/config/messages";
 import { TextField } from "@/features/auth/components/TextField";
+import { buildCatalogHref } from "@/features/catalog/schemas/catalog-search.schema";
+import type { CatalogSearchCopy } from "@/features/catalog/types";
 import { cn } from "@/lib/utils";
 
 /**
- * Ürün arama kutusu.
+ * Katalog arama kutusu — market ve restoran ekranlarının ortak parçası.
  *
  * NEDEN SIRADAN BİR `GET` FORMU: arama sonucu bir adres (`?arama=…`), yani
  * paylaşılabilir ve geri tuşuyla gezilebilir olmalı. Form `method="get"` ile
@@ -17,19 +18,24 @@ import { cn } from "@/lib/utils";
  *
  * SEÇİLİ KATEGORİ GİZLİ ALANLA TAŞINIYOR: kullanıcı bir kategoriye süzüp
  * sonra arama yaptığında kategorisi silinmemeli.
+ *
+ * METİNLER DIŞARIDAN GELİYOR: markette "Ürün ara", restoranda "Yemek ara"
+ * yazıyor. Bileşenin içine gömülselerdi tek ekran için doğru, diğeri için
+ * yanlış olurdu.
  */
-
-const copy = messages.market.search;
-
-export function ProductSearch({
+export function CatalogSearch({
+  basePath,
+  copy,
   query,
   selectedCategoryId,
 }: {
+  basePath: string;
+  copy: CatalogSearchCopy;
   query?: string;
   selectedCategoryId?: string;
 }) {
   return (
-    <form action="/market" method="get" role="search" className="flex flex-col gap-3 sm:flex-row">
+    <form action={basePath} method="get" role="search" className="flex flex-col gap-3 sm:flex-row">
       {selectedCategoryId ? (
         <input type="hidden" name="kategori" value={selectedCategoryId} />
       ) : null}
@@ -57,7 +63,7 @@ export function ProductSearch({
 
         {query ? (
           <Link
-            href={selectedCategoryId ? `/market?kategori=${selectedCategoryId}` : "/market"}
+            href={buildCatalogHref(basePath, { categoryId: selectedCategoryId })}
             className={cn(buttonVariants({ variant: "outline" }), "min-h-11")}
           >
             {copy.clear}

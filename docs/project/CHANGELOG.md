@@ -4,6 +4,92 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 9: Belediye Restoran + adisyon
+
+- **Restoran ekranı** `/restoran`: 31 kalem, 5 kategori; görselli, fiyatlı
+  kartlar. Mobilde tek, tablette iki, masaüstünde üç sütun (kartın içinde form
+  açıldığı için dört değil)
+- **Adisyon** — adım 9'un tek yeni kavramı: kaleme basınca kartın içinde adet ve
+  **mutfak notu** ("az acılı") soran bir form açılıyor. Modal pencere değil,
+  çünkü modal yeni bir bağımlılık isterdi ve üç alanlık bir form için sayfayı
+  kilitlemenin karşılığı yok
+- **Adisyon KALICI ve sepetin restoran bölümünün kendisi.** Ayrı bir taslak liste
+  tutulmadı: sayfayı yenileyince adisyon duruyor, ziyaretçiden üyeye geçişte
+  hesaba taşınıyor (PRD §4) ve adet/satılabilirlik kuralları ekranda ikinci kez
+  yazılmıyor. "Adisyon sepete aktarılır" adımı bu yüzden bir düğme değil, zaten
+  olmuş bir durum — paneldeki bağlantı doğrudan ödemeye götürüyor
+- **Mutfak notu sonradan düzenlenebiliyor** — hem adisyon panelinde hem sepet
+  sayfasının restoran bölümünde. Yeni uç yazılmadı: mevcut
+  `PATCH /api/carts/current/items/{id}` artık `note` alanını da kabul ediyor
+- **Restoran paket servisi**: teslimat ücreti **49,90 TL**, 400 TL üzeri
+  ücretsiz; ekranda **tahmini hazırlık süresi 30-45 dakika** yazıyor. Değerleri
+  proje sahibi belirledi (teknik borç #39 ödendi)
+- **Ortak katalog katmanı** (`src/features/catalog/`): arama kutusu, kategori
+  şeridi, boş durum ve Türkçe `unaccent` araması artık market ile restoran
+  arasında PAYLAŞILIYOR. Market ekranı kopyalanmadı — kopyalansaydı iki ekranın
+  aynı mantığı zamanla ayrışırdı
+- Ana sayfadaki restoran kartı ve üst menü artık `/restoran`'a bağlı; rozet
+  "Yakında"dan "Açık"a döndü
+
+### Değişti — adım 9
+
+- **Restoran siparişinde teslimat ZAMAN ARALIĞI artık sorulmuyor** (PRD §6.1).
+  Market "adres + zaman aralığı" istiyor, restoran "adres + tahmini hazırlık
+  süresi": restoran siparişi ödemeden hemen sonra hazırlanmaya başlıyor, yani
+  seçilecek bir pencere yok. Kontrol sunucuda — ekran alanı göstermese bile
+  ödeme servisi sepetin içine bakıp kendi kararını veriyor. Sepette market
+  varsa aralık yine zorunlu
+- **Teslimat ücreti hesabı modül başına bir kural tablosundan okunuyor**
+  (`cart-pricing.ts`). Önce her modül için ayrı bir `if` dalı vardı; üçüncü
+  modül geldiğinde dallardan birinin eşik kontrolünü unutması an meselesiydi
+- **Sepet satırı dar kapsayıcıda sarıyor.** Aynı bileşen hem geniş sepet
+  sayfasında hem 384px'lik adisyon panelinde çiziliyor; sarma olmadan adet
+  düğmeleri ve tutar panelden taşıp SAYFAYA yatay kaydırma ekliyordu — tarayıcıda
+  ölçüldü ve düzeltildi
+- Ücretsiz teslimat ipucu artık hangi modülden söz ettiğini yazıyor
+  ("… Belediye Restoran teslimatı ücretsiz olsun"); metne "market" gömülü
+  kalsaydı restoran bölümünde yanlış bilgi verirdi
+
+### Düzeltildi — adım 9 (ödeme ekranı, tarayıcı denemesinde bulundu)
+
+- **Ödeme hatası yanlış alanı gösteriyordu.** İstek şemadan geçemediğinde ekran
+  ne olursa olsun "Kart numarası geçersiz" diyordu; son kullanma alanlarını boş
+  bırakan kullanıcı doğru yazdığı kart numarasını kontrol etmeye yönlendirildi.
+  Hangi alanın hatalı olduğu HÂLÂ söylenmiyor (gövdede kart numarası var ve
+  Zod'un hata nesnesi girdinin parçalarını taşıyabiliyor) ama mesaj artık
+  kontrol edilecek alanları sayıyor. Nöbetçi test eklendi; düzeltme geri
+  alınınca yalnızca o test kırmızıya dönüyor
+- **Kart alanlarındaki örnekler kutunun içinden altına taşındı.** Yer tutucu
+  olarak duran soluk `12` ve `2030` metinleri yazılmış değer sanıldı ve alanlar
+  boş bırakıldı — yukarıdaki yanıltıcı hatanın asıl sebebi buydu. Kayıt
+  formundaki "Örnek: 1990" deseniyle aynı hâle getirildi
+- İkisi de adım 7'den kalma kusurlardı, bu adımda doğmadılar
+
+### Veritabanı — adım 9
+
+- **Değişiklik yok.** `menu_categories` ve `menu_items` adım 3'ten beri hazırdı
+  ve tohumluydu; `cart_items.note` de öyle. Yeni migration, yeni tablo, yeni
+  kolon YOK
+
+### Güvenlik — adım 9
+
+- Yeni girdi noktaları Zod'dan geçiyor: `/restoran` adres parametreleri (ortak
+  `parseCatalogSearchParams`) ve `PATCH` gövdesindeki `note` (en fazla 200
+  karakter, sabit `CART_ITEM_NOTE_MAX_LENGTH`'ten okunuyor)
+- **IDOR kontrolü ölçüldü:** başkasının sepet satırının notu değiştirilemiyor.
+  Sahiplik koşulu geçici olarak kaldırıldı, tam olarak bir test kırmızıya döndü,
+  diğer sekizi yeşil kaldı — yani test doğru şeyi ölçüyor
+- Menü araması ham SQL kullanıyor ama tablo adı **sabit listeden seçilen bir dal**,
+  dışarıdan gelen bir metin değil; arama deseni parametre olarak bağlanıyor
+- Yeni bağımlılık, yeni secret, yeni ortam değişkeni **yok**. `npm audit` ve
+  `npm audit --omit=dev`: **0 açık**
+- `nanoid` **3.3.18**'e `overrides` ile sabitlendi (boyut sıfır verildiğinde özel
+  üreticinin sonsuz döngüye girmesi — yüksek). Bildirim dal gönderildikten sonra,
+  2026-08-08'de yayınlandı ve CI'daki denetim işini kırmızıya düşürdü. Paket bize
+  yalnızca `@tailwindcss/postcss` → `postcss` üzerinden geliyor ve **uygulama
+  çalışma anında nanoid çağırmıyor**, yani fiili risk düşüktü — denetim kapısı
+  yine de kırmızı bırakılmadı (`09-ci-cd-deploy.md`)
+
 ### Eklendi — adım 8: Belediye Market
 
 - **Market ekranı** `/market`: 45 ürün, 6 kategori; görselli, fiyatlı, stoklu
