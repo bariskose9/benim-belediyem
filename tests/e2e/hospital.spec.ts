@@ -204,6 +204,28 @@ test("personel randevu alır, listede görür ve iptal eder", async ({ page }, t
   await expect(page).toHaveURL(/doktor=/, { timeout: STEP_TIMEOUT_MS });
   await expect(page.getByRole("heading", { name: messages.hospital.steps.slot })).toBeVisible();
 
+  /**
+   * ⛔ BUGÜN DEĞİL, YARIN SEÇİLİYOR — VE BU ŞART.
+   *
+   * Bu test randevu alıp sonra İPTAL ediyor, ama iptal en geç randevudan
+   * 2 saat önce yapılabiliyor (PRD §5.1 · `APPOINTMENT_CANCEL_CUTOFF_MS`).
+   * Bugünün ilk boş saati seçilirse ve o saate 2 saatten az kalmışsa iptal
+   * düğmesi HİÇ ÇİZİLMİYOR; test de olmayan düğmeyi bekleyip zaman aşımına
+   * uğruyor.
+   *
+   * Bu yüzden test 2026-08-08'e kadar GÜNÜN SAATİNE GÖRE kırılıyordu: sabah
+   * koşulduğunda yeşil, öğleden sonra (son slot 16:30 → sınır 14:30)
+   * kırmızıydı. Yerelde ve CI'da aynı anda kırmızıya düşmesi de bundan.
+   *
+   * Yarının bütün saatleri sınırın dışında kaldığı için gün şeridinden bir
+   * sonraki gün seçiliyor ve test artık ne zaman koşulduğundan bağımsız.
+   */
+  await page
+    .getByRole("navigation", { name: messages.hospital.steps.slot })
+    .getByRole("link")
+    .nth(1)
+    .click();
+
   const bookable = page.getByRole("button", { name: /randevu al$/ });
   await expect(bookable.first()).toBeVisible();
   await bookable.first().click();
