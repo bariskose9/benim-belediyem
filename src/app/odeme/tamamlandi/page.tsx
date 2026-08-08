@@ -118,9 +118,23 @@ export default async function PaymentSuccessPage({
         </ul>
       </section>
 
-      <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-fit")}>
-        {copy.backToHome}
-      </Link>
+      {/*
+        SİPARİŞ TAKİBİ ÖNCE, ANA SAYFA SONRA: ödemeyi tamamlayan kullanıcının
+        bir sonraki sorusu "siparişim ne durumda" (PRD §5.5). Birincil eylem
+        dolu düğme, ikincisi çerçeveli — ikisi de aynı ağırlıkta görünseydi
+        kullanıcı hangisinin beklenen adım olduğunu okuyamazdı.
+      */}
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Link
+          href="/siparislerim"
+          className={cn(buttonVariants({ variant: "default" }), "min-h-11 w-fit")}
+        >
+          {copy.viewOrders}
+        </Link>
+        <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "min-h-11 w-fit")}>
+          {copy.backToHome}
+        </Link>
+      </div>
     </main>
   );
 }

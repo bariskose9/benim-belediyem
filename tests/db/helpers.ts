@@ -69,8 +69,16 @@ export async function cleanupTestData(): Promise<void> {
    * bağı üzerinden de siliniyorlar; kalırlarsa yabancı anahtar kısıtları
    * (`Restrict`) tüm temizliği patlatır. Sıra FK zincirini takip ediyor.
    */
+  /**
+   * İade kaydı siparişe ve ödemeye `Restrict` ile bağlı — ikisinden de ÖNCE
+   * silinmeli, yoksa iptal testi bir kez koştuktan sonra temizlik patlar.
+   */
+  await prisma.refund.deleteMany({ where: { order: { userId: startsWith } } });
   await prisma.orderItem.deleteMany({ where: { order: { userId: startsWith } } });
   await prisma.order.deleteMany({ where: { userId: startsWith } });
+
+  // Bildirimleri uygulama üretiyor (`cuid()`), bağ kullanıcı üzerinden kuruluyor.
+  await prisma.notification.deleteMany({ where: { userId: startsWith } });
   await prisma.cartItem.deleteMany({
     where: { OR: [{ id: startsWith }, { cart: { userId: startsWith } }] },
   });

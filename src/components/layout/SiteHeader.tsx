@@ -65,9 +65,27 @@ export async function SiteHeader() {
           {/* Hesaba ait bağlantı menünün sonunda; giriş/çıkış eylemi ise
               `actions` içinde, yani mobilde menü açılmadan da görünür. */}
           {session ? (
-            <Link href="/hesabim" className={navLinkClassName}>
-              {messages.nav.account}
-            </Link>
+            <>
+              {/*
+                SİPARİŞ VE BİLDİRİM BAĞLANTILARI YALNIZCA OTURUM VARKEN.
+                Girişsiz kullanıcının siparişi olamaz; onu boş bir sayfaya
+                yollamak yerine hiç göstermemek doğru. Bu bir KOLAYLIK,
+                koruma değil — kapı sayfanın kendisinde (`guardPage`).
+
+                BİLDİRİM SAYACI ROZETİ YOK ve bu sepet düğmesiyle aynı karar:
+                rozeti doğru tutmak her sayfayı ikinci bir sorguya bağlardı.
+                Sayı, bildirim ekranının kendisinde görünüyor.
+              */}
+              <Link href="/siparislerim" className={navLinkClassName}>
+                {messages.nav.orders}
+              </Link>
+              <Link href="/bildirimler" className={navLinkClassName}>
+                {messages.nav.notifications}
+              </Link>
+              <Link href="/hesabim" className={navLinkClassName}>
+                {messages.nav.account}
+              </Link>
+            </>
           ) : (
             <Link href="/kayit" className={navLinkClassName}>
               {messages.nav.register}
