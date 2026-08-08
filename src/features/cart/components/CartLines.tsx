@@ -10,6 +10,7 @@ import { messages } from "@/config/messages";
 import { apiRequest } from "@/features/auth/components/api-client";
 import { TextField } from "@/features/auth/components/TextField";
 import type { CartLine } from "@/features/cart/types";
+import { SeatHoldCountdown } from "@/features/events/components/SeatHoldCountdown";
 import { formatTry } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
@@ -139,6 +140,12 @@ export function CartLines({
                     {copy.line.note}: {line.note}
                   </span>
                 ) : null}
+                {/*
+                  Bilet satırında KALAN SÜRE geri sayıyor (PRD §5.2). Süre
+                  bitince bileşen sayfayı tazeliyor ve satırı sunucu düşürüyor.
+                */}
+                {line.holdExpiresAt ? <SeatHoldCountdown expiresAt={line.holdExpiresAt} /> : null}
+
                 {/* Satın alınamayan satır GİZLENMEZ, sebebi yazılır. */}
                 {!line.isPurchasable ? (
                   <span className="text-sm font-medium text-destructive">
@@ -148,37 +155,45 @@ export function CartLines({
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-2">
-                <div className="flex items-center gap-1 rounded-lg ring-1 ring-foreground/10">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-11"
-                    aria-label={copy.line.decrease(line.name)}
-                    disabled={busy}
-                    onClick={() => void changeQuantity(line, line.quantity - 1)}
-                  >
-                    <MinusIcon aria-hidden="true" className="size-4" />
-                  </Button>
+                {/*
+                  BİLET SATIRINDA ADET DÜĞMESİ YOK: bir satır bir KOLTUK
+                  (teknik borç #40) ve "2 adet A-3-5 koltuğu" diye bir şey yok.
+                  Düğmeyi göstermek kullanıcıya sunucunun her zaman reddedeceği
+                  bir işlem sunmak olurdu. İkinci koltuk salon planından seçilir.
+                */}
+                {line.itemType === "event" ? null : (
+                  <div className="flex items-center gap-1 rounded-lg ring-1 ring-foreground/10">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-11"
+                      aria-label={copy.line.decrease(line.name)}
+                      disabled={busy}
+                      onClick={() => void changeQuantity(line, line.quantity - 1)}
+                    >
+                      <MinusIcon aria-hidden="true" className="size-4" />
+                    </Button>
 
-                  {/* Adet ekran okuyucuya da anlamlı gelsin diye etiketli. */}
-                  <span className="min-w-8 text-center text-base font-medium tabular-nums">
-                    <span className="sr-only">{copy.line.quantity}: </span>
-                    {line.quantity}
-                  </span>
+                    {/* Adet ekran okuyucuya da anlamlı gelsin diye etiketli. */}
+                    <span className="min-w-8 text-center text-base font-medium tabular-nums">
+                      <span className="sr-only">{copy.line.quantity}: </span>
+                      {line.quantity}
+                    </span>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-11"
-                    aria-label={copy.line.increase(line.name)}
-                    disabled={busy}
-                    onClick={() => void changeQuantity(line, line.quantity + 1)}
-                  >
-                    <PlusIcon aria-hidden="true" className="size-4" />
-                  </Button>
-                </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-11"
+                      aria-label={copy.line.increase(line.name)}
+                      disabled={busy}
+                      onClick={() => void changeQuantity(line, line.quantity + 1)}
+                    >
+                      <PlusIcon aria-hidden="true" className="size-4" />
+                    </Button>
+                  </div>
+                )}
 
                 <span className="text-right text-base font-semibold tabular-nums">
                   {formatTry(line.unitPriceKurus * line.quantity)}

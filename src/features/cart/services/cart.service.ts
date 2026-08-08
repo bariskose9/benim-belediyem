@@ -27,6 +27,8 @@ import {
 import { findCatalogItem } from "@/features/cart/repositories/catalog.repository";
 import { summarizeCart } from "@/features/cart/services/cart-pricing";
 import type { CartSummary } from "@/features/cart/types";
+import { releaseSeatHold } from "@/features/events/repositories/seat-reservation.repository";
+import { dropExpiredSeatLines } from "@/features/events/services/seat-expiry.service";
 import type { CartItemType } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/db";
 import { consumeRateLimit, rateLimitKey } from "@/lib/rate-limit";
@@ -55,6 +57,17 @@ export async function getCartSummary(owner: CartOwner, now: Date): Promise<CartS
   const cart = await findActiveCart(owner);
 
   if (!cart) return summarizeCart("", []);
+
+  /**
+   * SÜRESİ DOLMUŞ KOLTUKLAR OKUMA ANINDA DÜŞÜYOR (PRD §5.2 · ADR-007).
+   *
+   * Ziyaretçi sepetinde atlanıyor çünkü orada bilet satırı olamaz: koltuk
+   * kilidi bir kullanıcı kimliği gerektiriyor (`seat_reservations.user_id`
+   * zorunlu), yani ziyaretçi hiç koltuk tutamıyor.
+   */
+  if ("userId" in owner) {
+    await dropExpiredSeatLines({ cartId: cart.id, userId: owner.userId, now });
+  }
 
   const items = await listCartItems(cart.id);
   const lines = await toCartLines(items, now);
@@ -127,18 +140,20 @@ export async function changeItemQuantity(input: ChangeQuantityInput): Promise<Ca
 
   if (!cart) throw new CartItemNotFoundError();
 
+  const items = await listCartItems(cart.id);
+  const row = items.find((item) => item.id === input.itemId);
+
+  if (!row) throw new CartItemNotFoundError();
+
   if (input.quantity <= 0) {
     if (!(await removeItemRow({ cartId: cart.id, itemId: input.itemId }))) {
       throw new CartItemNotFoundError();
     }
 
+    await releaseSeatIfTicketLine(input.owner, row);
+
     return getCartSummary(input.owner, input.now);
   }
-
-  const items = await listCartItems(cart.id);
-  const row = items.find((item) => item.id === input.itemId);
-
-  if (!row) throw new CartItemNotFoundError();
 
   const item = await findCatalogItem(row.itemType, row.refId, input.now);
 
@@ -189,11 +204,38 @@ export async function removeItemFromCart(
   const cart = await findActiveCart(input.owner);
 
   if (!cart) throw new CartItemNotFoundError();
+
+  const items = await listCartItems(cart.id);
+  const row = items.find((item) => item.id === input.itemId);
+
+  if (!row) throw new CartItemNotFoundError();
   if (!(await removeItemRow({ cartId: cart.id, itemId: input.itemId }))) {
     throw new CartItemNotFoundError();
   }
 
+  await releaseSeatIfTicketLine(input.owner, row);
+
   return getCartSummary(input.owner, input.now);
+}
+
+/**
+ * Bilet satırı sepetten çıkarıldığında KOLTUK KİLİDİ DE BIRAKILIR (PRD §5.2).
+ *
+ * Bırakılmasaydı koltuk 10 dakika daha kimseye görünmezdi: kullanıcı vazgeçmiş
+ * ama koltuk hâlâ satılamıyor olurdu. Kilidi bırakmak "satılabilir" demek
+ * değil, "beklemeyi bırak" demek.
+ *
+ * SATILMIŞ BİLET ETKİLENMEZ: `releaseSeatHold` yalnızca `status = held`
+ * satırını siliyor ve sahiplik koşulu da sorgunun içinde (IDOR).
+ */
+async function releaseSeatIfTicketLine(
+  owner: CartOwner,
+  row: { itemType: CartItemType; refId: string },
+): Promise<void> {
+  if (row.itemType !== "event") return;
+  if (!("userId" in owner)) return;
+
+  await releaseSeatHold({ reservationId: row.refId, userId: owner.userId });
 }
 
 /**

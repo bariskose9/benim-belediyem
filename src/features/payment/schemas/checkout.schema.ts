@@ -101,9 +101,20 @@ export const checkoutSchema = z.object({
 export type CheckoutPayload = z.infer<typeof checkoutSchema>;
 export type CheckoutCardPayload = z.infer<typeof checkoutCardSchema>;
 
-/** Sepete ekleme ucunun şeması. */
+/**
+ * Sepete ekleme ucunun şeması.
+ *
+ * ⛔ `event` TÜRÜ BİLEREK KABUL EDİLMİYOR (adım 11). Bilet sepete bu uçtan
+ * değil, koltuk kilidi ucundan giriyor (`/api/events/[eventId]/seat-holds`) ve
+ * `ref_id` değerini SUNUCU üretiyor.
+ *
+ * Sebep güvenlik: bilet satırı artık bir `seat_reservations` kaydını gösteriyor
+ * (teknik borç #40). İstemci o kimliği kendisi yazabilseydi başkasının kilidini
+ * kendi sepetinde görüntüleyebilir — yani hangi koltuğu tuttuğunu öğrenebilirdi
+ * (05-auth-security.md → IDOR). Kapıyı hiç açmamak, açıp korumaktan güvenli.
+ */
 export const addCartItemSchema = z.object({
-  itemType: z.enum(["market", "restaurant", "event"]),
+  itemType: z.enum(["market", "restaurant"]),
   refId: z.string().trim().min(1).max(128),
   quantity: z.coerce.number().int().min(1).max(CART_MAX_QUANTITY_PER_ITEM),
   note: z.string().trim().max(CART_ITEM_NOTE_MAX_LENGTH).optional(),

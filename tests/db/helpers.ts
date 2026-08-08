@@ -54,7 +54,25 @@ export async function cleanupTestData(): Promise<void> {
   await prisma.doctor.deleteMany({ where: { id: startsWith } });
   await prisma.specialty.deleteMany({ where: { id: startsWith } });
 
-  await prisma.seatReservation.deleteMany({ where: { id: startsWith } });
+  /**
+   * Rezervasyonlar DÖRT ÖLÇÜTLE siliniyor, yalnızca kimlik önekiyle değil —
+   * randevulardaki gerekçenin aynısı.
+   *
+   * Koltuk kilidini UYGULAMA yazıyor (`seat-hold.service.ts`) ve kimliği
+   * `cuid()` oluyor, yani test öneki taşımıyor. O satırlar kalırsa `events` ve
+   * `venue_seats` silinemez (`seat_reservations_event_id_fkey` Restrict) ve
+   * temizlik tamamen patlar — adım 11'de fiilen yaşandı.
+   */
+  await prisma.seatReservation.deleteMany({
+    where: {
+      OR: [
+        { id: startsWith },
+        { eventId: startsWith },
+        { seatId: startsWith },
+        { userId: startsWith },
+      ],
+    },
+  });
   await prisma.event.deleteMany({ where: { id: startsWith } });
   await prisma.venueSeat.deleteMany({ where: { id: startsWith } });
   await prisma.venue.deleteMany({ where: { id: startsWith } });

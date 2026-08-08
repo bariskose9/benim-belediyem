@@ -643,6 +643,7 @@ export const messages = {
     notifications: "Bildirimler",
     market: "Market",
     restaurant: "Restoran",
+    events: "Etkinlikler",
     hospital: "Hastane",
     gym: "Spor salonu",
     /** Ekran okuyucular için: menünün ne olduğu söylenmeli (WCAG 2.1 AA). */
@@ -933,6 +934,107 @@ export const messages = {
       failed: "Kalem adisyona eklenemedi. Lütfen tekrar deneyin.",
     },
   },
+  /** Etkinlik, salon planı ve koltuk kilidi (PRD §5.2 · adım 11). */
+  events: {
+    pageTitle: "Etkinlikler",
+    title: "Etkinlik ve bilet",
+    description:
+      "Konser ve gösteri programına göz atın, salon planından koltuğunuzu seçin, biletinizi alın.",
+
+    search: {
+      label: "Etkinlik ara",
+      placeholder: "Etkinlik adı veya sanatçı",
+      submit: "Ara",
+      clear: "Aramayı temizle",
+    },
+
+    filters: {
+      label: "Etkinlik türleri",
+      all: "Tümü",
+      itemCount: (count: number) => `${count} etkinlik`,
+    },
+
+    empty: {
+      title: "Aradığınız etkinlik bulunamadı",
+      withQuery: (query: string) => `"${query}" için sonuç çıkmadı. Farklı bir kelime deneyin.`,
+      withoutQuery: "Bu türde şu an planlanmış etkinlik yok.",
+      reset: "Tüm etkinlikleri göster",
+    },
+
+    /** `EventCategory` enum'unun ekrandaki karşılıkları (CLAUDE.md §0 dil kuralı). */
+    categories: {
+      concert: "Konser",
+      theatre: "Tiyatro",
+      kids: "Çocuk",
+    },
+
+    card: {
+      /** Boş koltuk sayısı — süresi dolmuş kilitler boş sayılır (ADR-007). */
+      availableSeats: (count: number) => `${count} boş koltuk`,
+      soldOut: "Tükendi",
+      priceFrom: (price: string) => `${price} / koltuk`,
+      details: "Koltuk seç",
+      detailsLabel: (name: string) => `${name} etkinliği için koltuk seç`,
+    },
+
+    detail: {
+      backToList: "Tüm etkinlikler",
+      /** Ekran okuyucu için alan adları — ikonlar tek başına bilgi taşımaz. */
+      performerHeading: "Sanatçı",
+      dateHeading: "Tarih",
+      venueHeading: "Mekân",
+      /** Sahnenin salon planındaki yeri — kullanıcı yönünü bilmeden koltuk seçemez. */
+      stage: "SAHNE",
+      seatMapHeading: "Salon planı",
+      seatMapHelp:
+        "Boş koltuklara basarak seçim yapın. Seçtiğiniz koltuk 10 dakika size ayrılır ve sepetinize eklenir.",
+      blockLabel: (block: string) => `${block} Blok`,
+      rowLabel: (row: string) => `${row}. sıra`,
+      legendAvailable: "Boş",
+      legendSelected: "Sizin seçiminiz",
+      legendTaken: "Dolu",
+      /** Ekran okuyucu bir koltuğun tam adresini tek cümlede duymalı. */
+      seatLabel: (block: string, row: string, seat: number) =>
+        `${block} Blok, ${row}. sıra, ${seat}. koltuk`,
+      seatTakenLabel: (block: string, row: string, seat: number) =>
+        `${block} Blok, ${row}. sıra, ${seat}. koltuk — dolu`,
+      selectedHeading: "Seçtiğiniz koltuklar",
+      goToCart: "Sepete git",
+      signInToSelect: "Koltuk seçmek için giriş yapın",
+      started: "Bu etkinlik başladı; koltuk seçimi kapandı.",
+      soldOut: "Bu etkinlikte boş koltuk kalmadı.",
+    },
+
+    /**
+     * Kalan süre geri sayımı.
+     *
+     * Dakika:saniye biçiminde çünkü son bir dakikada yalnızca dakika göstermek
+     * kullanıcıya "hâlâ 1 dakikam var" dedirtip koltuğu kaybettirirdi.
+     */
+    countdown: {
+      label: (remaining: string) => `Koltuk süresi: ${remaining}`,
+      expired: "Süre doldu",
+    },
+
+    toast: {
+      held: (seat: string) => `${seat} sepetinize eklendi.`,
+      released: (seat: string) => `${seat} bırakıldı.`,
+      failed: "Koltuk seçilemedi. Lütfen tekrar deneyin.",
+    },
+
+    errors: {
+      notFound: "Etkinlik bulunamadı.",
+      seatNotFound: "Koltuk bulunamadı.",
+      eventStarted: "Bu etkinlik başladı; bilet satışı kapandı.",
+      seatTaken: "Bu koltuk az önce başkası tarafından alındı. Başka bir koltuk seçin.",
+      holdNotFound: "Koltuk süreniz dolmuş olabilir. Salon planını yenileyin.",
+      tooManyHolds:
+        "Aynı anda en fazla 8 koltuk tutabilirsiniz. Ödemeyi tamamlayın ya da bir koltuğu bırakın.",
+      tooManyAttempts: "Çok fazla deneme yaptınız. Lütfen biraz bekleyip tekrar deneyin.",
+      signInRequired: "Koltuk seçmek için giriş yapmanız gerekiyor.",
+    },
+  },
+
   /** Ortak sepet (PRD §4 · adım 7). */
   cart: {
     pageTitle: "Sepetim",
@@ -1253,6 +1355,20 @@ export const messages = {
       cancelledTitle: "Siparişiniz iptal edildi",
       cancelledBody: (module: string, code: string) =>
         `${module} siparişiniz iptal edildi ve iade kaydı oluşturuldu. Sipariş kodu: ${code}`,
+    },
+
+    /**
+     * Koltuk süresi dolduğunda (PRD §5.2: "süre dolarsa koltuk sepetten
+     * otomatik düşer ve kullanıcıya bildirim gösterilir").
+     *
+     * Gövdede KOLTUĞUN TAM ADRESİ geçiyor: kullanıcı üç koltuk tuttuysa
+     * hangisini kaybettiğini bilmeli, yoksa planı baştan gözden geçirmesi
+     * gerekirdi.
+     */
+    seatHold: {
+      expiredTitle: "Koltuk süreniz doldu",
+      expiredBody: (event: string, seat: string) =>
+        `${event} etkinliğinde ${seat} için ayırdığınız süre doldu ve koltuk sepetinizden düştü. Dilerseniz yeniden seçebilirsiniz.`,
     },
 
     errors: {

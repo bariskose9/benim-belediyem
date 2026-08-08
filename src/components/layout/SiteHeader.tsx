@@ -25,6 +25,7 @@ const navLabels: Record<PrimaryNavKey, string> = {
   home: messages.nav.home,
   market: messages.nav.market,
   restaurant: messages.nav.restaurant,
+  events: messages.nav.events,
   hospital: messages.nav.hospital,
   gym: messages.nav.gym,
 };

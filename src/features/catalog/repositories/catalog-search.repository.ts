@@ -29,7 +29,7 @@ import { toLikePattern } from "@/lib/search-text";
  * (tanımlayıcılar parametre olarak bağlanamaz) ve bu bir enjeksiyon kapısı
  * açardı. Her tablo için ayrı, sabit sorgu yazmak bu kapıyı hiç açmıyor.
  */
-export type SearchableCatalog = "products" | "menu_items";
+export type SearchableCatalog = "products" | "menu_items" | "events";
 
 /** Tek bir aramanın döndürebileceği en fazla kayıt. */
 const SEARCH_RESULT_LIMIT = 200;
@@ -49,29 +49,54 @@ export async function findIdsMatchingQuery(
   query: string,
 ): Promise<string[]> {
   const pattern = toLikePattern(query);
-
-  const rows =
-    catalog === "products"
-      ? await prisma.$queryRaw<{ id: string }[]>`
-          SELECT id
-          FROM products
-          WHERE deleted_at IS NULL
-            AND (
-              lower(unaccent(name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
-              OR lower(unaccent(description)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
-            )
-          LIMIT ${SEARCH_RESULT_LIMIT}
-        `
-      : await prisma.$queryRaw<{ id: string }[]>`
-          SELECT id
-          FROM menu_items
-          WHERE deleted_at IS NULL
-            AND (
-              lower(unaccent(name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
-              OR lower(unaccent(description)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
-            )
-          LIMIT ${SEARCH_RESULT_LIMIT}
-        `;
+  const rows = await runSearch(catalog, pattern);
 
   return rows.map((row) => row.id);
+}
+
+/**
+ * Her tablo için AYRI VE SABİT bir sorgu.
+ *
+ * Ortak bir sorgu kurup tablo adını değişken yapmak mümkün değil: tanımlayıcı
+ * parametre olarak bağlanamaz, metne yapıştırılmak zorunda kalırdı. Tekrar
+ * eden üç sorgu, açılmış bir enjeksiyon kapısından iyidir.
+ *
+ * ETKİNLİKTE `description` YOK, `performer` VAR: kullanıcı "kent oyuncuları"
+ * yazdığında etkinliğin adını bilmeden topluluğa göre de bulabilmeli.
+ * Etkinlikte `deleted_at` de yok — etkinlik yumuşak silinen 8 tablodan biri
+ * değil (data-model.md).
+ */
+function runSearch(catalog: SearchableCatalog, pattern: string): Promise<{ id: string }[]> {
+  switch (catalog) {
+    case "products":
+      return prisma.$queryRaw<{ id: string }[]>`
+        SELECT id
+        FROM products
+        WHERE deleted_at IS NULL
+          AND (
+            lower(unaccent(name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+            OR lower(unaccent(description)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+          )
+        LIMIT ${SEARCH_RESULT_LIMIT}
+      `;
+    case "menu_items":
+      return prisma.$queryRaw<{ id: string }[]>`
+        SELECT id
+        FROM menu_items
+        WHERE deleted_at IS NULL
+          AND (
+            lower(unaccent(name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+            OR lower(unaccent(description)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+          )
+        LIMIT ${SEARCH_RESULT_LIMIT}
+      `;
+    case "events":
+      return prisma.$queryRaw<{ id: string }[]>`
+        SELECT id
+        FROM events
+        WHERE lower(unaccent(name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+           OR lower(unaccent(performer)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+        LIMIT ${SEARCH_RESULT_LIMIT}
+      `;
+  }
 }

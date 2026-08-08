@@ -164,6 +164,18 @@ test.describe("düzen", () => {
       "/sepet",
       "/market",
       "/restoran",
+      /**
+       * Etkinlik listesi ve SALON PLANI (adım 11).
+       *
+       * Plan uygulamanın en geniş içeriği: 8 koltukluk sıralar 375px'e
+       * sığmıyor ve kendi kapsayıcısında kayıyor. Kaydırmanın SAYFAYA taşması
+       * tam olarak bu testin yakalaması gereken hata.
+       *
+       * Detay sayfası adres olarak sabit yazılamaz (kimlik tohum verisinden
+       * geliyor); onun ölçümü `events.spec.ts` içinde, koltuk SEÇİLDİKTEN
+       * sonraki hâliyle yapılıyor — orası girişli koşuyor.
+       */
+      "/etkinlikler",
     ]) {
       await page.goto(path);
 
@@ -212,17 +224,17 @@ test.describe("hizmet ızgarası", () => {
     await page.goto("/");
 
     /**
-     * ETKİNLİK ÖRNEK SEÇİLDİ ÇÜNKÜ HÂLÂ KAPALI (roadmap adım 11).
+     * DESTEK ÖRNEK SEÇİLDİ ÇÜNKÜ HÂLÂ KAPALI (roadmap adım 13).
      *
-     * Bu örnek daha önce iki kez taşındı: market adım 8'de, restoran adım
-     * 9'da açılınca test doğru sebepten kırmızıya döndü. Kural değişmiyor —
-     * açılmamış bir hizmet kartı tıklanabilir OLMAMALI. Etkinlik de
-     * açıldığında örnek DESTEK kartına taşınır; test SİLİNMEZ.
+     * Bu örnek daha önce ÜÇ kez taşındı: market adım 8'de, restoran adım 9'da,
+     * ETKİNLİK adım 11'de açılınca test doğru sebepten kırmızıya döndü. Kural
+     * değişmiyor — açılmamış bir hizmet kartı tıklanabilir OLMAMALI. Destek de
+     * açıldığında örnek kalan tek kapalı karta taşınır; test SİLİNMEZ.
      */
     // 404'e giden bir kart, kartın hiç olmamasından kötüdür.
-    const closedService = page.getByText(messages.services.events.title, { exact: true });
+    const closedService = page.getByText(messages.services.support.title, { exact: true });
     await expect(closedService).toBeVisible();
-    await expect(page.getByRole("link", { name: messages.services.events.title })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: messages.services.support.title })).toHaveCount(0);
 
     // Durum yalnızca renkle değil metinle de belirtilmeli.
     await expect(page.getByText(messages.badges.comingSoon).first()).toBeVisible();
