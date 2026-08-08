@@ -38,6 +38,15 @@ Roadmap adım **0 → 10 bitti.** Sipariş takibi ve iptali çalışıyor.
 
 ## ADIM 10'DAN DEVREDEN — ÖNCE BUNU OKU
 
+**Canlıda ELLE DOĞRULANMAYAN tek davranış: sipariş durumunun zamanla
+ilerlemesi** (teknik borç #50). "20 dakika sonra `Hazırlanıyor`a geçer ve
+iptal düğmesi yerini açıklamaya bırakır" adımı, proje sahibi ekran başında o
+kadar bekleyemediği için canlıda görülmedi. Otomatik testlerde (sahte saat
+ileri sarılarak) dört aşamanın dördü de kanıtlı — yani kanıt eksik değil,
+sadece gözle görülmedi. **Proje bitiminde bakılacak**; daha hızlısı isteniyorsa
+restoran siparişinde eşik 10 dakika.
+
+
 **`tests/e2e/hospital.spec.ts` → "personel randevu alır, listede görür ve iptal
 eder" testi KIRMIZI ve bu adım 10 ile İLGİSİZ.** Temiz `main`'de de kırmızı
 olduğu `git stash` ile fiilen doğrulandı (2026-08-08).
