@@ -130,6 +130,7 @@ export async function toCartLines(
         imageUrl: null,
         isPurchasable: false,
         availableStock: 0,
+        holdExpiresAt: null,
       };
     }
 
@@ -142,6 +143,7 @@ export async function toCartLines(
         entry.isPurchasable &&
         (entry.availableStock === null || entry.availableStock >= item.quantity),
       availableStock: entry.availableStock,
+      holdExpiresAt: entry.holdExpiresAt ?? null,
     };
   });
 }
@@ -234,6 +236,25 @@ export async function removeItem(
 ): Promise<boolean> {
   const result = await client.cartItem.deleteMany({
     where: { id: input.itemId, cartId: input.cartId },
+  });
+
+  return result.count === 1;
+}
+
+/**
+ * Satırı SATIR KİMLİĞİYLE DEĞİL, işaret ettiği katalog kaydıyla siler.
+ *
+ * Koltuk kilidi için gerekli (adım 11): kullanıcı salon planından bir koltuğu
+ * bıraktığında elimizde rezervasyon kimliği var, sepet satırının kimliği yok.
+ * Ekran satır kimliğini bulmak için sepeti ayrıca okumak zorunda kalsaydı,
+ * araya giren bir değişiklikte yanlış satırı silebilirdi.
+ */
+export async function removeItemByRef(
+  input: { cartId: string; itemType: CartItemType; refId: string },
+  client: Client = prisma,
+): Promise<boolean> {
+  const result = await client.cartItem.deleteMany({
+    where: { cartId: input.cartId, itemType: input.itemType, refId: input.refId },
   });
 
   return result.count === 1;

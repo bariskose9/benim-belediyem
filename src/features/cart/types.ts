@@ -12,7 +12,12 @@ import type { CartItemType } from "@/generated/prisma/enums";
 export type CartLine = {
   id: string;
   itemType: CartItemType;
-  /** İşaret ettiği katalog kaydının kimliği (ürün / menü kalemi / etkinlik). */
+  /**
+   * İşaret ettiği katalog kaydının kimliği.
+   *
+   * Bilet satırında bu bir ETKİNLİK DEĞİL, `seat_reservations` kaydıdır
+   * (adım 11, teknik borç #40): bir satır = bir koltuk.
+   */
   refId: string;
   quantity: number;
   unitPriceKurus: number;
@@ -30,8 +35,16 @@ export type CartLine = {
    * sessizce kaybolan bir ürün kullanıcıya "sepetim değişti" demez.
    */
   isPurchasable: boolean;
-  /** `null` = stok takibi yok (restoran kalemi, etkinlik bileti). */
+  /** `null` = stok takibi yok (restoran kalemi). Bilet satırında her zaman 1. */
   availableStock: number | null;
+
+  /**
+   * Koltuk kilidinin bittiği an — yalnızca bilet satırlarında dolu (PRD §5.2).
+   *
+   * Ekran bunu geri sayıma çeviriyor. Süre SEPETTE UZAMAZ: burada görünen an
+   * koltuğun seçildiği anda belirlenmiştir.
+   */
+  holdExpiresAt: Date | null;
 };
 
 /** Bir modülün sepetteki bölümü (PRD §6.1: ücret modül başına hesaplanır). */

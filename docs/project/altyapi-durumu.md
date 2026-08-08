@@ -9,16 +9,17 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-07 · roadmap adım 9 sonrası
+**Son güncelleme:** 2026-08-08 · roadmap adım 11 sonrası
 
-> **Adım 9'da dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis, yeni
-> ortam değişkeni, yeni bağımlılık ve yeni migration yok; `menu_categories`,
-> `menu_items` ve `cart_items.note` adım 3'ten beri hazırdı ve tohumluydu.
+> **Adım 11'de dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis,
+> yeni ortam değişkeni, yeni bağımlılık ve **yeni migration yok**; `venues`,
+> `venue_seats`, `events` ve `seat_reservations` adım 3'ten beri hazırdı ve
+> tohumluydu (3 salon × 192 koltuk, 12 etkinlik, koltukların %20-40'ı satılmış).
 > Tek dış dünya işi her adımda olduğu gibi aynı: **yeni dalın preview adresi
 > iki panele eklenmeli** (aşağıda).
 >
-> **Adım 7'de de dış dünyada hiçbir şey değişmemişti** — sepet, sipariş, ödeme
-> ve kayıtlı kart tabloları adım 3'ten beri hazırdı.
+> **Adım 9 ve 10'da da dış dünyada hiçbir şey değişmemişti.** Adım 7'de de
+> öyle — sepet, sipariş, ödeme ve kayıtlı kart tabloları adım 3'ten beri hazırdı.
 >
 > **ÖDEME GERÇEK DEĞİL.** Hiçbir ödeme kuruluşuyla entegrasyon yok, hiçbir
 > yere API anahtarı girilmedi. Tahsilat `mock-payment-provider.ts` içinde
@@ -31,8 +32,15 @@
 > `/api/auth/google/callback` ekleyerek). Teknik borç #31.
 >
 > ⚠️ **Uzak ortamlarda tohumlanmış doktor saatleri ~2026-08-15'te tükeniyor**
-> (teknik borç #38). Ekran çökmez, "boş saat kalmamış" der. **Bu tarih yaklaştı** —
-> adım 10'da uzak ortamlarda seed'i yeniden koşturmak gerekebilir.
+> (teknik borç #38). Ekran çökmez, "boş saat kalmamış" der. **Bu tarih geldi
+> sayılır** (bugün 2026-08-08) — uzak ortamlarda seed'i yeniden koşturmak
+> gerekiyor. Adım 11'de yapılmadı: hastane modülüne dokunulmadı ve seed'i
+> yeniden koşturmak bu adımın kapsamı dışındaydı.
+>
+> ⚠️ **Etkinlikler de tohumlama gününden itibaren 60 güne yayılıyor**
+> (`EVENT_WINDOW_DAYS`). Preview ve production 2026-08-01'de tohumlandığı için
+> etkinlikler ~2026-09-30'a kadar var; sonrasında etkinlik listesi boşalır.
+> Aynı seed koşusu ikisini birden çözer.
 
 ---
 
@@ -64,22 +72,43 @@
 - Widget adı: **`benim-belediyem`**
 - Mod: **Managed** (çoğu kullanıcı bulmaca görmez, onay kutusu yeter)
 - Pre-clearance: yok
-- **Hostname listesi** — production (`benim-belediyem.vercel.app`) çalıştığı
-  fiilen doğrulandı; 2026-08-02'de `feature/sifre-sifirlama` dalının preview
-  adresi, 2026-08-06'da `feature/market` dalının preview adresi
-  (`benim-belediyem-git-feature-market-barisss.vercel.app`) proje sahibi
-  tarafından eklendi.
-  ⚠️ **`feature/restoran` dalının adresi
-  (`benim-belediyem-git-feature-restoran-barisss.vercel.app`) HENÜZ EKLENMEDİ** —
-  adım 9 PR'ının preview'unda giriş/kayıt denenecekse eklenmeli. Restoran
-  ekranının kendisi bot korumasına dokunmuyor, yani menü ve adisyon eklemeden de
-  çalışır
-  ⚠️ **`feature/siparis-takibi` dalının adresi
-  (`benim-belediyem-git-feature-siparis-takibi-barisss.vercel.app`) HENÜZ
-  EKLENMEDİ** — adım 10 PR'ının preview'unda giriş denenecekse eklenmeli.
-  Sipariş takibi bot korumasına dokunmuyor, ama ekranları görmek için **giriş
-  yapmak gerekiyor**; giriş de bot kapısından geçtiği için bu dalda adres
-  eklenmeden preview'da sipariş ekranı fiilen denenemez
+- **Hostname listesi — 2026-08-08'de panelden GÖRÜLEREK yazıldı** (7/10 dolu).
+  Önceki sürümde liste ezberden tutuluyordu ve kaymıştı: `feature/restoran`
+  "eklenmedi" yazıyordu ama ekliydi, `feature/google-ile-giris` ise hiç
+  kaydedilmemişti. **Bu tablo panelin kendisinden okundu:**
+
+  | Hostname | Durum |
+  |---|---|
+  | `benim-belediyem.vercel.app` | ✅ production — **silinmez** |
+  | `benim-belediyem-git-feature-etkinlik-bilet-barisss.vercel.app` | ✅ adım 11, güncel dal |
+  | `localhost` | ⚠️ muhtemelen gereksiz (aşağıda) |
+  | `benim-belediyem-git-feature-google-ile-giris-barisss.vercel.app` | 🗑️ adım 4c — dal merge edildi, silinebilir |
+  | `benim-belediyem-git-feature-sifre-sifirlama-barisss.vercel.app` | 🗑️ adım 4b-3 — merge edildi, silinebilir |
+  | `benim-belediyem-git-feature-market-barisss.vercel.app` | 🗑️ adım 8 — merge edildi, silinebilir |
+  | `benim-belediyem-git-feature-restoran-barisss.vercel.app` | 🗑️ adım 9 — merge edildi, silinebilir |
+
+  `feature/siparis-takibi` (adım 10) listeye **hiç eklenmedi** ve gerek de
+  kalmadı — dal merge edildi.
+
+  ⚠️ **SINIR 10 HOSTNAME.** Her adım bir satır eklediği için merge edilmiş
+  dalların satırları temizlenmezse adım 14 civarında sınıra çarpılır.
+  Temizlemenin tek bedeli: eski bir dalın preview'una geri dönülürse orada
+  bot kutusu çizilmez.
+
+  ✋ **PROJE SAHİBİNİN KARARI (2026-08-08): SINIR DOLANA KADAR TEMİZLİK YOK.**
+  Gerekçesi yerinde — silmek hiçbir şeyi çalıştırmıyor, yalnızca her adımda
+  panele girmek demek. **Ajan bunu her adımda tekrar önermeyecek.** Sınıra
+  yaklaşıldığında (9/10 görülünce) tek seferde hatırlatılacak ve merge edilmiş
+  dalların satırları toplu silinecek.
+
+  ⚠️ **`localhost` neden şüpheli:** local ortamda Cloudflare'ın **test
+  anahtarları** kullanılıyor (bkz. "Bilinçli olarak YAPILMAYANLAR"), yani
+  gerçek widget'ın hostname listesinde `localhost` gereksiz. Üstelik gerçek
+  site anahtarının alan adına kilitli olmasının anlamı, birinin kendi
+  makinesindeki bir sayfaya widget'ı gömüp geçerli jeton üretememesi —
+  `localhost` açıkken bu mümkün. **Silmeden önce `.env` içindeki
+  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` test anahtarı mı diye bakılmalı;**
+  gerçek anahtarsa satır kalmalı
 - ⚠️ **Her yeni dalın preview adresi listeye ELLE eklenir.** Eksikse widget hiç
   çizilmez ve tarayıcı konsolunda `[Cloudflare Turnstile] Error: 110200`
   (*domain not authorized*) görünür — **kodda hata arama, panele bak.**
@@ -112,8 +141,13 @@
   - ⚠️ `feature/restoran` dalınınki **henüz eklenmedi** (adım 9). Eksikse o
     preview'da yalnızca "Google ile devam et" düğmesi `redirect_uri_mismatch`
     verir; şifreyle giriş ve restoran ekranı etkilenmez
-  - ⚠️ `feature/siparis-takibi` dalınınki **henüz eklenmedi** (adım 10). Aynı
-    sınır: yalnızca Google düğmesi etkilenir, şifreyle giriş çalışır
+  - ⚠️ `feature/siparis-takibi` dalınınki **hiç eklenmedi** (adım 10) ve gerek
+    kalmadı — dal merge edildi
+  - ⚠️ `feature/etkinlik-bilet` dalınınki (adım 11) — eklenecek tam değer:
+    `https://benim-belediyem-git-feature-etkinlik-bilet-barisss.vercel.app/api/auth/google/callback`
+    **Bu adım ŞART DEĞİL:** yalnızca "Google ile devam et" düğmesini etkiler.
+    Preview'da koltuk seçimini denemek için ŞİFREYLE giriş yeterli ve o
+    Turnstile'a bağlı (Turnstile tarafı 2026-08-08'de eklendi)
 - ⚠️ **"Authorized JavaScript origins" BOŞ ve öyle kalmalı.** Akış tamamen
   sunucu tarafında; oraya yol içeren bir adres yazılırsa Google
   *"URIs must not contain a path"* der. İlk denemede bu hataya düşüldü

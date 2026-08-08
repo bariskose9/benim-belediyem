@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { addItemToCart } from "@/features/cart/services/cart.service";
+import { holdSeat } from "@/features/events/services/seat-hold.service";
 import { checkout } from "@/features/payment/services/checkout.service";
 import { rateLimitKey, resetRateLimit } from "@/lib/rate-limit";
 
@@ -33,6 +34,16 @@ const MENU_ITEM = testId("menu", "kofte");
 const VENUE = testId("venue", "salon");
 const EVENT = testId("event", "konser");
 
+/**
+ * BİLET SEPETE KOLTUKLA GİRİYOR (adım 11, teknik borç #40 ödendi).
+ *
+ * Eskiden sepet satırı doğrudan ETKİNLİĞİ gösteriyordu ve `addItemToCart`
+ * `event` türünü kabul ediyordu. Artık kabul etmiyor: bilet yalnızca koltuk
+ * kilidi servisinden geçerek sepete giriyor ve satır bir `seat_reservations`
+ * kaydını gösteriyor. Bu testler o yüzden `holdSeat` çağırıyor.
+ */
+const SEATS = Array.from({ length: 6 }, (_unused, index) => testId("seat", `a-1-${index + 1}`));
+
 /** `fake-data-guide.md`'deki test kartları. */
 const CARD_OK = "4111111111111111";
 const CARD_DECLINED = "4000000000000002";
@@ -57,10 +68,25 @@ function delivery() {
   return { addressId: ADDRESS, deliverySlot: "3 Eylül 2026 Perşembe 10:00-12:00" };
 }
 
+/** Her `event` isteği FARKLI bir koltuk alsın diye — aynı koltuk iki kez kilitlenemez. */
+let seatCursor = 0;
+
 async function fillCart(userId: string, types: readonly ("market" | "restaurant" | "event")[]) {
-  const refs = { market: PRODUCT, restaurant: MENU_ITEM, event: EVENT };
+  const refs = { market: PRODUCT, restaurant: MENU_ITEM };
 
   for (const type of types) {
+    if (type === "event") {
+      const seatId = SEATS[seatCursor];
+
+      seatCursor += 1;
+
+      if (!seatId) throw new Error("test için yeterli koltuk tanımlanmamış");
+
+      await holdSeat({ userId, eventId: EVENT, seatId, actorIp: ACTOR_IP, now: NOW });
+
+      continue;
+    }
+
     await addItemToCart({
       owner: { userId },
       anonymousId: testId("anon", userId),
@@ -73,6 +99,7 @@ async function fillCart(userId: string, types: readonly ("market" | "restaurant"
 }
 
 beforeEach(async () => {
+  seatCursor = 0;
   await cleanupTestData();
   await seedFixtures();
   await resetBudgets();
@@ -640,6 +667,16 @@ async function seedFixtures(): Promise<void> {
   await prisma.venue.create({
     data: { id: VENUE, name: testId("mekan"), address: "Test Adres", isSeedData: true },
   });
+  await prisma.venueSeat.createMany({
+    data: SEATS.map((id, index) => ({
+      id,
+      venueId: VENUE,
+      block: "A",
+      rowLabel: "1",
+      seatNumber: index + 1,
+      isSeedData: true,
+    })),
+  });
   await prisma.event.create({
     data: {
       id: EVENT,
@@ -657,6 +694,7 @@ async function seedFixtures(): Promise<void> {
 async function resetBudgets(): Promise<void> {
   await Promise.all([
     ...[USER, OTHER_USER].map((id) => resetRateLimit(rateLimitKey("payment_attempt", "user", id))),
+    ...[USER, OTHER_USER].map((id) => resetRateLimit(rateLimitKey("seat_hold", "user", id))),
     ...[USER, OTHER_USER].map((id) =>
       resetRateLimit(rateLimitKey("cart_write", "session", testId("anon", id))),
     ),

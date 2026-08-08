@@ -1,3 +1,4 @@
+import { messages } from "@/config/messages";
 import type { Prisma } from "@/generated/prisma/client";
 import type { CartItemType } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/db";
@@ -7,8 +8,8 @@ import { toKurus } from "@/lib/money";
  * Sepetin KATALOG tarafı: üç ayrı tablodaki ürünleri tek bir şekle çevirir.
  *
  * NEDEN GEREKLİ: `cart_items.ref_id` üç farklı tabloya işaret ediyor
- * (`products`, `menu_items`, `events`) ve aralarında yabancı anahtar YOK —
- * tek bir kolon üç tabloya birden bağlanamaz. Bu dosya o çok biçimliliği
+ * (`products`, `menu_items`, `seat_reservations`) ve aralarında yabancı anahtar
+ * YOK — tek bir kolon üç tabloya birden bağlanamaz. Bu dosya o çok biçimliliği
  * tek yerde çözüyor; sepet servisi "market mi restoran mı" diye dallanmıyor.
  *
  * FİYAT HER ZAMAN BURADAN OKUNUR, İSTEMCİDEN DEĞİL. Sepete eklerken de,
@@ -23,8 +24,15 @@ export type CatalogItem = {
   unitPriceKurus: number;
   /** Satın alınabilir mi (stok, satışta olma, tarihi geçmemiş olma). */
   isPurchasable: boolean;
-  /** `null` = stok takibi yok (restoran kalemi, etkinlik bileti). */
+  /** `null` = stok takibi yok (restoran kalemi). */
   availableStock: number | null;
+  /**
+   * Koltuk kilidinin bittiği an — yalnızca bilet satırlarında dolu (PRD §5.2).
+   *
+   * Ekran bunu geri sayıma çeviriyor; sepet servisi de süresi dolmuş satırı
+   * bununla tanıyıp düşürüyor.
+   */
+  holdExpiresAt?: Date | null;
 };
 
 /** Transaction içinde de çalışabilsin diye istemci dışarıdan verilebilir. */
@@ -67,7 +75,7 @@ export async function findCatalogItems(
     case "restaurant":
       return findMenuItems(refIds, client);
     case "event":
-      return findEvents(refIds, now, client);
+      return findSeatReservations(refIds, now, client);
   }
 }
 
@@ -122,23 +130,34 @@ async function findMenuItems(
 }
 
 /**
- * Etkinlik bileti.
+ * Etkinlik bileti — SATIR KOLTUĞA BAĞLI (adım 11, teknik borç #40 ödendi).
  *
- * BU FAZDA BİLET ETKİNLİĞİN KENDİSİNE BAĞLI, koltuğa değil. Koltuk seçimi ve
- * 10 dakikalık kilit adım 11'in işi (PRD §5.2); o adımda sepet satırı
- * `SeatReservation` kaydına bağlanacak. Bugün taban fiyattan bir bilet
- * satılıyor ve bu, ödeme altyapısını kurmak için yeterli.
+ * `ref_id` artık etkinliği değil `seat_reservations` kaydını gösteriyor.
+ * Etkinliğe bağlıyken sepette "Körfez Akşamı ×2" yazıyordu ve hangi koltuklar
+ * olduğu hiçbir yerde yazmıyordu; şimdi her satır tek bir koltuk.
  *
- * Başlamış etkinliğe bilet satılmaz — zaman koşulu indeksli (ADR-007).
+ * ÜÇ KOŞUL BİRDEN aranıyor (ADR-007): kayıt hâlâ KİLİT durumunda mı, süresi
+ * DOLMAMIŞ mı ve etkinlik BAŞLAMAMIŞ mı. Üçü de sağlanmıyorsa satır satın
+ * alınamaz işaretleniyor; sepet servisi süresi dolmuş olanı ayrıca düşürüyor.
+ *
+ * SATILMIŞ BİLET DE BULUNUR ama satın alınamaz: ödeme anıyla sepetin
+ * `converted` işaretlenmesi arasında okunursa satır "alındı" görünmeli,
+ * "kayboldu" değil.
  */
-async function findEvents(
+async function findSeatReservations(
   refIds: readonly string[],
   now: Date,
   client: Client,
 ): Promise<Map<string, CatalogItem>> {
-  const rows = await client.event.findMany({
+  const rows = await client.seatReservation.findMany({
     where: { id: { in: [...refIds] } },
-    select: { id: true, name: true, basePrice: true, startsAt: true },
+    select: {
+      id: true,
+      status: true,
+      holdExpiresAt: true,
+      seat: { select: { block: true, rowLabel: true, seatNumber: true } },
+      event: { select: { name: true, startsAt: true, basePrice: true } },
+    },
   });
 
   return new Map(
@@ -146,11 +165,21 @@ async function findEvents(
       row.id,
       {
         refId: row.id,
-        name: row.name,
+        name: `${row.event.name} — ${messages.events.detail.seatLabel(
+          row.seat.block,
+          row.seat.rowLabel,
+          row.seat.seatNumber,
+        )}`,
         imageUrl: null,
-        unitPriceKurus: toKurus(row.basePrice),
-        isPurchasable: row.startsAt.getTime() > now.getTime(),
-        availableStock: null,
+        unitPriceKurus: toKurus(row.event.basePrice),
+        isPurchasable:
+          row.status === "held" &&
+          row.holdExpiresAt !== null &&
+          row.holdExpiresAt.getTime() > now.getTime() &&
+          row.event.startsAt.getTime() > now.getTime(),
+        // Bir koltuk bir kişiliktir: adet hiçbir zaman 1'i geçemez.
+        availableStock: 1,
+        holdExpiresAt: row.holdExpiresAt,
       },
     ]),
   );

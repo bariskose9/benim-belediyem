@@ -37,6 +37,7 @@ function line(itemType: CartItemType, unitPriceKurus: number, quantity = 1): Car
     imageUrl: null,
     isPurchasable: true,
     availableStock: null,
+    holdExpiresAt: null,
   };
 }
 

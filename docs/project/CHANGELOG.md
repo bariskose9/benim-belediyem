@@ -4,6 +4,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 11: Etkinlik + koltuk seçimi + bilet
+
+- **Etkinlik listesi** `/etkinlikler`: 12 etkinlik, üç tür (konser, tiyatro,
+  çocuk), tarih/mekân/sanatçı/fiyat ve **boş koltuk sayısı**. Arama ve tür
+  süzgeci market ve restoranla **ORTAK katalog katmanından** geliyor; arama
+  etkinlik adı VEYA sanatçı üzerinde çalışıyor ve aksan körü
+- **Salon planı** `/etkinlikler/[id]`: blok → sıra → koltuk düzeni, sahne
+  yönü, boş/seçili/dolu göstergesi. Dolu koltuk **düğme değil** (klavyeyle
+  gezilemeyen pasif düğme yerine durumu metinle yazan bir öğe — hastane
+  ekranındaki "dolu saat" deseninin aynısı)
+- **10 dakikalık koltuk kilidi (PRD §5.2 · ADR-007)** — adımın kalbi:
+  - Koltuğa basmak kilidi koyuyor **ve aynı transaction'da sepete satır
+    yazıyor**. İkisi ayrı yazılsaydı arada bir çökme, kimsenin göremediği ama
+    koltuğu 10 dakika kapatan bir kilit bırakırdı
+  - **Süresi dolmuş kilit okuma anında yok sayılıyor**: temizlik görevi hiç
+    çalışmasa bile koltuk satılabilir görünüyor (kabul kriteri 2)
+  - Kilit **tek ifadeli koşullu yazmayla** konuyor: süresi dolmuş kaydı
+    devralan bir `UPDATE`, kayıt hiç yoksa `INSERT … ON CONFLICT DO NOTHING`.
+    İki kullanıcı aynı anda talip olursa biri **409** alıyor (kabul kriteri 1)
+  - Süre **sepette uzamıyor**, ödeme ekranına girmek de **sıfırlamıyor**
+- **Sepette geri sayım**: her biletin yanında kalan süre saniye saniye
+  işliyor. Süre dolunca satır **kendiliğinden düşüyor** ve kullanıcıya
+  `seat_hold_expired` bildirimi gidiyor — sessizce boşalan bir sepet
+  açıklanamaz olurdu
+- **Bilet satın alma**: ödeme transaction'ının içinde kilit `sold`'a çevriliyor.
+  Koltuk bu arada kaçırılmışsa hiçbir sipariş yazılmıyor ve para çekilmiyor.
+  Bilet siparişi doğrudan `Teslim edildi` doğuyor ve iptal edilemiyor (PRD §5.5)
+- **Kullanıcı başına en fazla 8 aktif kilit**: PRD bir sayı vermiyor ama kilit
+  bedava ve koltuğu 10 dakika herkesten saklıyor — sınırsız bırakmak tek
+  hesabın salonu kilitleyip satışı durdurmasına izin vermek olurdu
+
+### Değişti — adım 11
+
+- **Teknik borç #40 ÖDENDİ**: sepetteki bilet satırı artık ETKİNLİĞE değil
+  **koltuk rezervasyonuna** bağlı. Satır "Körfez Akşamı — A Blok, 1. sıra,
+  1. koltuk" diye görünüyor, adedi 1'de sabit ve adet düğmeleri hiç çizilmiyor
+- **`POST /api/carts/current/items` artık `event` türünü KABUL ETMİYOR.**
+  Bilet sepete yalnızca koltuk kilidi ucundan, sunucunun ürettiği kimlikle
+  giriyor. İstemci rezervasyon kimliği yazabilseydi başkasının kilidini kendi
+  sepetinde görüntüleyebilirdi (IDOR)
+- Ana sayfadaki etkinlik kartı ve üst menü açıldı (`navigation.ts`)
+- **Şema DEĞİŞMEDİ**: `venues`, `venue_seats`, `events`, `seat_reservations`
+  adım 3'ten beri hazırdı ve tohumluydu. Yeni migration yok
+- **Tüm koltuklar aynı fiyat** (etkinliğin taban fiyatı): veri modelinde koltuk
+  başına fiyat alanı yok, kategori/blok farklı fiyatlandırma uydurulmadı
+
 ### Eklendi — adım 10: Sipariş takibi + bildirim
 
 - **Siparişlerim ekranı** `/siparislerim`: her sipariş için dört adımlı durum

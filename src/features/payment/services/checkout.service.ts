@@ -3,6 +3,8 @@ import { CartEmptyError, ItemUnavailableError, OutOfStockError } from "@/feature
 import { markCartConverted } from "@/features/cart/repositories/cart.repository";
 import { getCartSummary } from "@/features/cart/services/cart.service";
 import type { CartSection, CartSummary } from "@/features/cart/types";
+import { SeatTakenError } from "@/features/events/errors";
+import { markSeatSold } from "@/features/events/repositories/seat-reservation.repository";
 import {
   CartChangedError,
   DeliveryAddressRequiredError,
@@ -238,6 +240,7 @@ async function persistSuccessfulPayment(context: {
 
       for (const section of summary.sections) {
         await consumeStock(section, tx);
+        await consumeSeats(section, { userId: input.userId, now: input.now }, tx);
 
         const order = await createOrderWithItems(
           {
@@ -330,6 +333,39 @@ async function persistSuccessfulPayment(context: {
     orderIds: written.orderIds,
     totalKurus: summary.totalKurus,
   };
+}
+
+/**
+ * Bilet satırlarının koltuklarını KİLİTTEN SATIŞA çevirir (PRD §5.2).
+ *
+ * ═══ ADIMIN İKİNCİ YARIŞ KORUMASI BURADA ═══
+ * `markSeatSold` koşullu bir UPDATE: doğru kayıt + doğru sahip + hâlâ kilitli +
+ * süresi dolmamış. Dördü birden tutmazsa 0 satır etkilenir ve istisna fırlar;
+ * transaction geri alınır, yani ÖDEME DE SİPARİŞ DE YAZILMAZ (PRD §6.1 "biri
+ * yazılamazsa hiçbiri yazılmaz").
+ *
+ * Kullanıcı ödeme ekranındayken süresi dolduysa koltuk satılamaz — "sepette
+ * geçen süre kilidi uzatmaz, ödeme ekranına girmek kalan süreyi yeniden
+ * başlatmaz" kuralının (PRD §5.2) son kalesi bu satır.
+ *
+ * SAHİPLİK KOŞULU IDOR KALKANI: başkasının kilidi sepete bir şekilde girse
+ * bile satılamaz.
+ */
+async function consumeSeats(
+  section: CartSection,
+  input: { userId: string; now: Date },
+  tx: Parameters<typeof markSeatSold>[1],
+): Promise<void> {
+  if (section.itemType !== "event") return;
+
+  for (const line of section.lines) {
+    const ok = await markSeatSold(
+      { reservationId: line.refId, userId: input.userId, now: input.now },
+      tx,
+    );
+
+    if (!ok) throw new SeatTakenError();
+  }
 }
 
 /** Market satırlarının stoğunu koşullu olarak düşer; yetmezse işlemi bozar. */

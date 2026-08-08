@@ -566,3 +566,39 @@ export const CARD_CVV_MIN_DIGITS = 3;
 export const CARD_CVV_MAX_DIGITS = 4;
 export const CARD_HOLDER_MIN_LENGTH = 3;
 export const CARD_HOLDER_MAX_LENGTH = 60;
+
+// ===========================================================================
+// ETKİNLİK VE KOLTUK KİLİDİ (PRD §5.2 · ADR-007 · adım 11)
+// ===========================================================================
+
+/**
+ * Koltuk kilidinin ömrü — 10 dakika.
+ *
+ * SAYIYI AJAN SEÇMEDİ: PRD §5.2 ve `05-auth-security.md` bu süreyi sabitliyor.
+ *
+ * SÜRE SEPETTE UZAMAZ ve ödeme ekranına girmek onu SIFIRLAMAZ (PRD §5.2):
+ * kilit konulduğu andan itibaren işler. Uzasaydı sepetini açık tutan tek bir
+ * kullanıcı koltuğu süresiz kilitleyebilir, koltuk da hiç satılamazdı.
+ */
+export const SEAT_HOLD_DURATION_MS = 10 * 60_000;
+
+/**
+ * Bir kullanıcının aynı anda tutabileceği en fazla kilit.
+ *
+ * PRD BİR SAYI VERMİYOR; sınır yine de gerekli çünkü kilit bedava ve 10 dakika
+ * boyunca koltuğu herkesten saklıyor — sınırsız bırakmak tek hesabın salonu
+ * kilitleyip satışı durdurmasına izin vermek olurdu. 8, bir ailenin yan yana
+ * oturması için fazlasıyla yeterli.
+ */
+export const SEAT_HOLD_MAX_PER_USER = 8;
+
+/**
+ * Koltuk kilidi uçlarının bütçesi — KULLANICI başına.
+ *
+ * Kilitleme ve bırakma AYNI sayacı paylaşıyor (randevu modülündeki desenin
+ * aynısı): ayrı bütçe verilseydi "kilitle-bırak-kilitle" döngüsüyle sınır iki
+ * katına çıkarılabilirdi. Cömert, çünkü salon planında koltuk seçmek fikir
+ * değiştire değiştire yapılan bir iş.
+ */
+export const SEAT_HOLD_RATE_LIMIT_MAX = 60;
+export const SEAT_HOLD_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
