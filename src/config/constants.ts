@@ -539,6 +539,17 @@ export const PAYMENT_RATE_LIMIT_MAX = 10;
 export const PAYMENT_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
 
 /**
+ * Sipariş iptali bütçesi — KULLANICI başına (PRD §5.5).
+ *
+ * Dar tutuluyor ama ödemeden gevşek: iptal stok geri yükleyen ve iade kaydı
+ * açan bir YAZMA işlemi, yani ucuz değil. Öte yandan meşru kullanıcı karışık
+ * bir sepetten doğan birkaç siparişi arka arkaya iptal edebilir — sınır o
+ * senaryoyu boğmayacak kadar yüksek.
+ */
+export const ORDER_CANCEL_RATE_LIMIT_MAX = 20;
+export const ORDER_CANCEL_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
  * Sahte ödeme sağlayıcısının yapay gecikmesi.
  *
  * Gerçek bir tahsilat anlıksa da değildir; ekranın "işleniyor" durumunu

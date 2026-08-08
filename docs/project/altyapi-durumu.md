@@ -74,6 +74,12 @@
   adım 9 PR'ının preview'unda giriş/kayıt denenecekse eklenmeli. Restoran
   ekranının kendisi bot korumasına dokunmuyor, yani menü ve adisyon eklemeden de
   çalışır
+  ⚠️ **`feature/siparis-takibi` dalının adresi
+  (`benim-belediyem-git-feature-siparis-takibi-barisss.vercel.app`) HENÜZ
+  EKLENMEDİ** — adım 10 PR'ının preview'unda giriş denenecekse eklenmeli.
+  Sipariş takibi bot korumasına dokunmuyor, ama ekranları görmek için **giriş
+  yapmak gerekiyor**; giriş de bot kapısından geçtiği için bu dalda adres
+  eklenmeden preview'da sipariş ekranı fiilen denenemez
 - ⚠️ **Her yeni dalın preview adresi listeye ELLE eklenir.** Eksikse widget hiç
   çizilmez ve tarayıcı konsolunda `[Cloudflare Turnstile] Error: 110200`
   (*domain not authorized*) görünür — **kodda hata arama, panele bak.**
@@ -106,6 +112,8 @@
   - ⚠️ `feature/restoran` dalınınki **henüz eklenmedi** (adım 9). Eksikse o
     preview'da yalnızca "Google ile devam et" düğmesi `redirect_uri_mismatch`
     verir; şifreyle giriş ve restoran ekranı etkilenmez
+  - ⚠️ `feature/siparis-takibi` dalınınki **henüz eklenmedi** (adım 10). Aynı
+    sınır: yalnızca Google düğmesi etkilenir, şifreyle giriş çalışır
 - ⚠️ **"Authorized JavaScript origins" BOŞ ve öyle kalmalı.** Akış tamamen
   sunucu tarafında; oraya yol içeren bir adres yazılırsa Google
   *"URIs must not contain a path"* der. İlk denemede bu hataya düşüldü

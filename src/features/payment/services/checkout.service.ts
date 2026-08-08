@@ -12,6 +12,7 @@ import {
   PaymentDeclinedError,
   PaymentRateLimitedError,
 } from "@/features/payment/errors";
+import { notifyOrderPlaced } from "@/features/notifications/services/order-notification.service";
 import { attemptPayment } from "@/features/payment/providers/mock-payment-provider";
 import {
   createOrderWithItems,
@@ -260,6 +261,22 @@ async function persistSuccessfulPayment(context: {
               quantity: line.quantity,
               unitPriceKurus: line.unitPriceKurus,
             })),
+          },
+          tx,
+        );
+
+        /**
+         * "Siparişiniz alındı" bildirimi ÖDEMENİN TRANSACTION'I İÇİNDE
+         * yazılıyor (PRD §5.5: "ödeme tamamlandığında kullanıcıya uygulama
+         * içi bildirim düşer"). Dışarıda yazılsaydı ödeme yazılıp bildirim
+         * yazılmadan çökme olabilir ve kullanıcı hiç haber almazdı.
+         */
+        await notifyOrderPlaced(
+          {
+            userId: input.userId,
+            orderId: order.id,
+            fulfillmentType: FULFILLMENT_BY_TYPE[section.itemType],
+            initialStatus: section.itemType === "event" ? "delivered" : "received",
           },
           tx,
         );

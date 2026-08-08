@@ -121,12 +121,29 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
   `restaurant_delivery` / `ticket`), `subtotalAmount`, `deliveryFee`,
   `discountAmount`, `totalAmount`, `status` (`received` / `preparing` /
   `on_the_way` / `delivered` / `cancelled`), `cancelledAt`, `cancelReason`,
-  `deliveryAddressId` (nullable), `deliverySlot` (nullable)
+  `notifiedStatus` (nullable), `deliveryAddressId` (nullable), `deliverySlot` (nullable)
 
   *(Karışık sepet tek ödemeyle **birden fazla sipariş** üretir — modül başına bir
   tane. Aynı ödemeye bağlı siparişler **aynı `paymentId`'yi paylaşır**; PRD §6.1.
   `ticket` türünde teslimat alanları boştur ve durum doğrudan `delivered` olur.
   Teslimat ücreti sipariş bazında hesaplanır, sepetin tamamına göre değil.)*
+
+  ⚠️ **`status` EKRANDA GÖRÜNEN DURUM DEĞİLDİR (ADR-013).** Kolon yalnızca
+  siparişin nasıl doğduğunu (`received`, bilet ise `delivered`) ve iptal edilip
+  edilmediğini tutar; aradaki ilerleme siparişin **yaşından okuma anında
+  hesaplanır** ve hiçbir yere yazılmaz. Durum okuyan her yol
+  `deriveOrderState`'ten geçmelidir — kolona doğrudan bakan bir sorgu akmakta
+  olan siparişi "Alındı"da görür.
+  `notifiedStatus` ise kullanıcıya **en son hangi durum için bildirim
+  gönderildiğini** tutar ve koşullu UPDATE ile ilerletilir; aynı bildirimin iki
+  kez yazılmasını bu kolon engeller.
+
+- **Refund** — `orderId` (**unique**), `paymentId`, `amount`, `fakeRefundId`
+  (unique), `reason` — append-only
+  *(sahte iade kaydı; PRD §5.5 "iptal edildiğinde sahte iade kaydı oluşur".
+  Gerçek bir sağlayıcı olmadığı için para hareketi yoktur. `orderId`'nin
+  benzersizliği bir **iş kuralıdır**: aynı siparişe ikinci iade yazılamaz ve
+  kararı uygulama değil veritabanı verir.)*
 
 - **OrderItem** — `orderId`, `itemType`, `refId`, `quantity`, `unitPrice`
   *(fiyat sipariş anında kopyalanır; ürün fiyatı sonradan değişirse geçmiş sipariş bozulmaz)*
@@ -238,6 +255,10 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
   satılabilir. Koruma, `DoctorSlot.isBooked` üzerinde koşullu güncellemedir
   (`... WHERE is_booked = false`), transaction içinde
 - Süreye bağlı her sorgu zaman koşulu içerir (ADR-007); bu koşul için indeks konur
+- Sipariş iptalinin tekilliği **iki katmanla** korunur: `orders` üzerinde koşullu
+  güncelleme (`... WHERE status = 'received' AND created_at > <pencere>`) ve
+  `Refund.orderId` üzerindeki unique index. Birincisi yarışı çözer, ikincisi
+  birincisi yanlış yazılsa bile stoğun iki kez geri yüklenmesini engeller (ADR-013)
 - İstemciden gelen `price`, `userId`, `role`, `isStaff` alanları **reddedilir**
 
 ## Saklama süreleri
@@ -257,6 +278,6 @@ Süresi dolan kayıtları temizleyen planlı görev günde bir çalışır (ADR-
 | `TicketAttachment` | 1 yıl | Dosya blob'dan silinir, kayıt anonimleşir |
 | `SupportTicket` | 3 yıl | Anonimleştirilir |
 | `Appointment`, `SeatReservation` | 3 yıl | Anonimleştirilir |
-| `Order`, `OrderItem`, `Payment`, `MembershipPayment` | 10 yıl | Mali kayıt — kişisel alanlar anonimleştirilir, tutarlar korunur |
+| `Order`, `OrderItem`, `Payment`, `Refund`, `MembershipPayment` | 10 yıl | Mali kayıt — kişisel alanlar anonimleştirilir, tutarlar korunur |
 | `AuditLog`, `ConsentRecord` | 10 yıl | Silinmez |
 | `User` (hesap silinince) | — | Kişisel alanlar anonimleştirilir, mali kayıt bağı korunur |

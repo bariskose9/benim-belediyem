@@ -663,6 +663,13 @@ model Order {
   status            OrderStatus     @default(received)
   cancelledAt       DateTime?       @map("cancelled_at")
   cancelReason      String?         @map("cancel_reason")
+  /// Kullanıcıya EN SON HANGİ DURUM İÇİN bildirim gönderildiği (ADR-013).
+  /// Durum bir zamanlayıcı değil, siparişin yaşı belirliyor; bildirim ise
+  /// kalıcı olmak zorunda. Bu kolon ikisini birleştiriyor: liste okunurken
+  /// hesaplanan durum bu değerden ileriyse aradaki bildirimler o anda
+  /// yazılıyor ve kolon KOŞULLU UPDATE ile ilerletiliyor. Koşul `WHERE`'in
+  /// içinde olduğu için iki eşzamanlı okuma aynı bildirimi iki kez yazamaz.
+  notifiedStatus    OrderStatus?    @map("notified_status")
   deliveryAddressId String?         @map("delivery_address_id")
   // Teslimat zaman aralığı serbest metindir ("2026-08-02 10:00-12:00"): sabit
   // bir sözlüğü yoktur ve bu fazda üzerinden zaman sorgusu yapılmaz.
@@ -676,6 +683,7 @@ model Order {
   payment         Payment     @relation(fields: [paymentId], references: [id], onDelete: Restrict)
   deliveryAddress Address?    @relation(fields: [deliveryAddressId], references: [id], onDelete: Restrict)
   items           OrderItem[]
+  refund          Refund?
 
   @@index([userId, createdAt])
   @@index([paymentId])
@@ -752,10 +760,40 @@ model Payment {
   user      User       @relation(fields: [userId], references: [id], onDelete: Restrict)
   savedCard SavedCard? @relation(fields: [savedCardId], references: [id], onDelete: Restrict)
   orders    Order[]
+  refunds   Refund[]
 
   @@index([userId, attemptedAt])
   @@index([status])
   @@map("payments")
+}
+
+/// SAHTE İADE KAYDI (PRD §5.5: "iptal edildiğinde sahte iade kaydı oluşur").
+///
+/// Gerçek bir ödeme sağlayıcısı olmadığı için para hareketi yoktur; kayıt
+/// "şu sipariş iptal edildi ve şu tutar iade edildi" olgusunu belgeler ve
+/// kullanıcıya ekranda gösterilir. `payments` gibi APPEND-ONLY.
+///
+/// `order_id` BENZERSİZ ve bu bir iş kuralıdır, kolaylık değil: aynı siparişe
+/// ikinci bir iade yazılamaz. Çift iptal isteğinde kararı uygulama değil
+/// VERİTABANI verir — "önce iade var mı diye bak, yoksa yaz" iki adımdır ve
+/// iki eşzamanlı istekte yetersizdir (data-model.md).
+model Refund {
+  id           String  @id @default(cuid())
+  orderId      String  @unique @map("order_id")
+  paymentId    String  @map("payment_id")
+  amount       Decimal @db.Decimal(10, 2)
+  fakeRefundId String  @unique @map("fake_refund_id")
+  reason       String?
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+
+  @@index([paymentId])
+  @@index([createdAt])
+  @@map("refunds")
 }
 
 // ===========================================================================

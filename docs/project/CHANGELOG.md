@@ -4,6 +4,41 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 10: Sipariş takibi + bildirim
+
+- **Siparişlerim ekranı** `/siparislerim`: her sipariş için dört adımlı durum
+  çizgisi (`Alındı → Hazırlanıyor → Yola çıktı → Teslim edildi`), kalemler,
+  tutarlar ve iptal düğmesi. Durum renkle değil **metinle** anlatılıyor
+- **Durum bir zamanlayıcıyla değil, siparişin YAŞINDAN hesaplanıyor**
+  (ADR-013). Bu projede sık çalışan cron yok (borç #3) ve yönetici paneli de
+  yok (borç #4); durumu bir görevin çalışmasına bağlamak, gecikmesi hâlinde
+  kullanıcıya yanlış bilgi göstermek olurdu. Eşikler modül başına tek bir
+  kural tablosunda: restoran 10/25/45 dk, market 20/90/240 dk
+- **Bildirimler ekranı** `/bildirimler`: ödeme tamamlanınca ve her durum
+  değişiminde bildirim düşüyor, okunmamışlar işaretli. "Tümünü okundu
+  işaretle" tek uçla çalışıyor
+- **Atlanan aşamalar kaybolmuyor**: kullanıcı yarım saat sonra baksa bile
+  `Hazırlanıyor` ve `Yola çıktı` bildirimlerinin ikisi birden yazılıyor. Aynı
+  bildirimin iki kez yazılmasını `orders.notified_status` üzerindeki
+  **koşullu güncelleme** engelliyor
+- **Sipariş iptali** yalnızca `Alındı` aşamasında. Sonrası 409, başkasının
+  siparişi 403, bilet hiç iptal edilemiyor. İptal tek transaction'da:
+  durum değişimi + market stoğunun geri yüklenmesi + sahte iade kaydı +
+  bildirim; denetim kaydı da yazılıyor
+- **İptal penceresi hem serviste hem `WHERE` içinde**: okuma ile yazma arasında
+  pencere kapanabilir, bu yüzden asıl kararı koşullu UPDATE veriyor. İkinci
+  emniyet kemeri `refunds.order_id` üzerindeki unique index — stok iki kez
+  geri yüklenemiyor
+- Ödeme sonrası fiş ekranına **"Siparişlerimi takip et"** bağlantısı, üst menüye
+  giriş yapmış kullanıcı için **Siparişlerim** ve **Bildirimler** eklendi
+
+### Değişti — adım 10
+
+- `prisma/schema.prisma`: yeni `refunds` tablosu ve `orders.notified_status`
+  kolonu (ikisi de geriye uyumlu ekleme; kolon silen migration yok)
+- Ödeme akışı artık her sipariş için "Siparişiniz alındı" bildirimini **ödemenin
+  transaction'ı içinde** yazıyor
+
 ### Eklendi — adım 9: Belediye Restoran + adisyon
 
 - **Restoran ekranı** `/restoran`: 31 kalem, 5 kategori; görselli, fiyatlı

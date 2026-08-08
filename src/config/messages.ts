@@ -636,6 +636,11 @@ export const messages = {
     login: "Giriş yap",
     register: "Kayıt ol",
     account: "Hesabım",
+    /** Yalnızca giriş yapmış kullanıcıya görünür — girişsiz kullanıcının
+        siparişi ve bildirimi olamaz, boş bir sayfaya bağlantı vermenin
+        anlamı yok. Gizlemek burada KOLAYLIK; kapı sayfanın kendisinde. */
+    orders: "Siparişlerim",
+    notifications: "Bildirimler",
     market: "Market",
     restaurant: "Restoran",
     hospital: "Hastane",
@@ -1084,6 +1089,8 @@ export const messages = {
       receiptHeading: "Sahte fiş",
       transactionId: "İşlem kodu",
       orderHeading: "Oluşturulan siparişler",
+      /** Ödeme sonrası doğal sonraki adım: siparişin durumunu izlemek. */
+      viewOrders: "Siparişlerimi takip et",
       backToHome: "Ana sayfaya dön",
     },
 
@@ -1124,6 +1131,132 @@ export const messages = {
         "Çok fazla ödeme denemesi yapıldı. Güvenliğiniz için lütfen 15 dakika sonra tekrar deneyin.",
       /** Sağlayıcı erişilemez: kullanıcıya "tekrar dene" denir, iç detay verilmez. */
       providerUnavailable: "Ödeme servisine şu an ulaşılamıyor. Lütfen biraz sonra tekrar deneyin.",
+    },
+  },
+
+  orders: {
+    pageTitle: "Siparişlerim",
+    title: "Siparişlerim",
+    description: "Siparişlerinizin güncel durumunu buradan takip edebilirsiniz.",
+
+    /**
+     * Şemadaki `OrderStatus` enum'ıyla BİREBİR aynı anahtarlar (PRD §5.5:
+     * "enum değerleri İngilizce, ekranda gösterilen karşılıkları src/config
+     * altında"). Anahtar eşleşmesi zorunlu — eksik bir anahtar derleme
+     * hatasına dönüşsün diye tip tarafından da bekleniyor.
+     */
+    statuses: {
+      received: "Alındı",
+      preparing: "Hazırlanıyor",
+      on_the_way: "Yola çıktı",
+      delivered: "Teslim edildi",
+      cancelled: "İptal edildi",
+    },
+
+    /** `FulfillmentType` enum'ıyla birebir aynı anahtarlar. */
+    fulfillment: {
+      market_delivery: "Belediye Market",
+      restaurant_delivery: "Belediye Restoran",
+      ticket: "Etkinlik bileti",
+    },
+
+    orderCode: (code: string) => `Sipariş kodu: ${code}`,
+    placedAt: (date: string) => `Sipariş tarihi: ${date}`,
+    deliverySlot: (slot: string) => `Teslimat aralığı: ${slot}`,
+    itemCount: (count: number) => `${count} kalem`,
+    quantity: (count: number) => `${count} adet`,
+    subtotal: "Ara toplam",
+    deliveryFee: "Teslimat ücreti",
+    total: "Toplam",
+    paidWith: (last4: string) => `Ödeme: •••• ${last4}`,
+
+    /** Bilinmeyen kalem: ürün katalogdan silinmişse satır yine de gösterilir. */
+    unknownItem: "Ürün bilgisi bulunamadı",
+
+    /** Bir sonraki aşamanın tahmini zamanı — SÖZ DEĞİL, tahmin olduğu yazıyor. */
+    nextStageAt: (time: string) => `Tahmini bir sonraki güncelleme: ${time}`,
+
+    cancel: {
+      action: "Siparişi iptal et",
+      pending: "İptal ediliyor…",
+      /** Geri alınamaz işlem: onay istenir (randevu iptaliyle aynı desen). */
+      confirmTitle: "Siparişi iptal etmek istiyor musunuz?",
+      confirmBody: "İptal geri alınamaz. Ödediğiniz tutar için iade kaydı oluşturulur.",
+      confirmAction: "Evet, iptal et",
+      confirmDismiss: "Vazgeç",
+      /** İptal düğmesinin yerini alan açıklama (PRD §5.5). */
+      closed: "Hazırlık başladı, sipariş iptal edilemez.",
+      ticketClosed: "Etkinlik bileti iptal edilemez.",
+      cancelledAt: (date: string) => `İptal edildi: ${date}`,
+      refunded: (amount: string) => `${amount} tutarında iade kaydı oluşturuldu.`,
+      success: "Siparişiniz iptal edildi.",
+    },
+
+    empty: {
+      title: "Henüz siparişiniz yok",
+      description:
+        "Belediye Market veya Belediye Restoran'dan sipariş verdiğinizde burada görünür.",
+      marketAction: "Belediye Market'e git",
+      restaurantAction: "Belediye Restoran'a git",
+    },
+
+    errors: {
+      /**
+       * KAYIT YOK: 404. Sipariş kodu adres çubuğunda geçmiyor ve kullanıcı
+       * kendi listesinden tıklıyor; bu hatayı normal akışta göremez.
+       */
+      notFound: "Sipariş bulunamadı. Listeyi yenileyip tekrar deneyin.",
+      /**
+       * BAŞKASININ SİPARİŞİ: 403 (PRD §5.5 kabul kriteri bunu açıkça istiyor).
+       *
+       * Randevu modülünde aynı durum 404 dönüyor — orada kaydın varlığını
+       * gizlemek gerekiyordu. Buradaki farkın sebebi PRD'nin kendisi; iki
+       * modülün farklı davranması bilinçli, kopyalama hatası değil.
+       */
+      forbidden: "Bu sipariş size ait değil.",
+      tooLate: "Hazırlık başladığı için bu sipariş artık iptal edilemez.",
+      notCancellable: "Bu sipariş iptal edilemez.",
+      alreadyCancelled: "Bu sipariş zaten iptal edilmiş.",
+      invalidRequest: "İstek geçersiz. Sayfayı yenileyip tekrar deneyin.",
+      tooManyAttempts:
+        "Çok fazla iptal denemesi yapıldı. Güvenliğiniz için lütfen biraz sonra tekrar deneyin.",
+    },
+  },
+
+  notifications: {
+    pageTitle: "Bildirimler",
+    title: "Bildirimler",
+    description: "Sipariş durumunuz değiştikçe buraya bildirim düşer.",
+    markAllRead: "Tümünü okundu işaretle",
+    markingAllRead: "İşaretleniyor…",
+    unreadBadge: (count: number) => `${count} okunmamış bildirim`,
+    unreadLabel: "Okunmadı",
+    empty: {
+      title: "Bildiriminiz yok",
+      description: "Sipariş verdiğinizde ve siparişinizin durumu değiştikçe burada görünür.",
+    },
+
+    /**
+     * Sipariş bildirimlerinin metinleri.
+     *
+     * Gövdede MODÜL ADI ve KISA SİPARİŞ KODU geçiyor: kullanıcının iki
+     * siparişi aynı anda ilerliyor olabilir ve "Siparişiniz yola çıktı"
+     * tek başına hangisinden bahsettiğini söylemez.
+     */
+    order: {
+      createdTitle: "Siparişiniz alındı",
+      createdBody: (module: string, code: string) =>
+        `${module} siparişiniz alındı. Sipariş kodu: ${code}`,
+      statusTitle: (status: string) => `Siparişiniz: ${status}`,
+      statusBody: (module: string, code: string, status: string) =>
+        `${module} siparişinizin durumu “${status}” olarak güncellendi. Sipariş kodu: ${code}`,
+      cancelledTitle: "Siparişiniz iptal edildi",
+      cancelledBody: (module: string, code: string) =>
+        `${module} siparişiniz iptal edildi ve iade kaydı oluşturuldu. Sipariş kodu: ${code}`,
+    },
+
+    errors: {
+      invalidRequest: "İstek geçersiz. Sayfayı yenileyip tekrar deneyin.",
     },
   },
 } as const;
