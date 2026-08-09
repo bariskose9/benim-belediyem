@@ -4,6 +4,66 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 12: Spor salonu üyeliği (personele özel)
+
+- **Spor salonu sayfası** `/spor-salonu`: tesis künyesi, salon saatleri
+  (Pazar "Kapalı" diye YAZIYOR, satır gizlenmiyor) ve haftalık grup ders
+  programı. Program ve tesis bilgisi **koddaki sabit içerik** — veri modelinde
+  karşılığı olan bir tablo yok ve değiştirecek yönetici paneli de yok
+- **Dört paket, hepsi AYLIK tahsilat** (PRD §5.6): aylık taahhütsüz · 3 · 6 ·
+  12 aylık. Peşin toplu ödeme yok. **İndirim yüzdesi veritabanında
+  tutulmuyor**, taahhütsüz paketin fiyatından hesaplanıp yalnızca ekranda
+  gösteriliyor (%10 / %15 / %25)
+- **Üyelik SEPETE GİRMİYOR** — kendi akışı var: paket seç → kart seç/gir →
+  taahhüt ve erken çıkış kuralını onayla → **ilk ay tahsil edilir**. Sepette
+  bekleyen market/restoran/bilet ürünleri bu akıştan etkilenmiyor
+- **Taahhüt ve erken çıkış kuralı satın alma ÖNCESİ ekranda**, ay başına TL
+  cinsinden. Onay kutusu işaretlenmeden düğme çalışmıyor; **sunucu da aynı
+  onayı bağımsız arıyor** (istemciye güvenilmiyor)
+- **"Aynı anda tek üyelik" kuralını veritabanı zorluyor**: `memberships`
+  tablosuna nullable + benzersiz `active_user_id` kolonu eklendi. Üyelik
+  yaşarken `user_id` ile aynı, sona erince `NULL`. Uygulamadaki kontrol
+  yalnızca kullanıcıya doğru mesajı göstermek için — kararı veritabanı veriyor
+- **Üyelik ekranı** `/spor-salonu/uyelik`: aktif paket, taahhüt bitişi,
+  sonraki tahsilat tarihi ve tutarı, otomatik yenileme, ödeme geçmişi
+  (başarısız denemeler dahil), paket değiştirme ve iptal
+- **Paket değişimi bir sonraki tahsilat tarihinde** yürürlüğe giriyor; ödenmiş
+  ay ne kısalıyor ne uzuyor (PRD kabul kriteri). Değişim yürürlüğe girene
+  kadar iptal edilebiliyor
+- **Erken çıkış farkı**: taahhüt sürerken iptal edilirse ya da daha kısa
+  taahhütlü pakete düşülürse, o güne kadar **tahsil edilmiş** aylar taahhütsüz
+  fiyattan yeniden hesaplanıyor ve fark tek seferde çekiliyor. Tutar onaydan
+  önce ekranda; kullanıcının onayladığı rakam sunucunun hesabıyla tutmuyorsa
+  işlem duruyor. Fark **bir kez** alınıyor (kayıt tablosuna sorularak)
+- **Yenileme hatırlatması** vadeden 3 gün önce, **tembel** yazılıyor
+  (ADR-013 deseni): planlı görev yokken de kullanıcı bildirimi görüyor. Aynı
+  hatırlatmanın ikinci kez yazılmasını `renewal_reminder_for_billing_at`
+  üzerindeki **koşullu güncelleme** engelliyor
+- **Üyelik durumu kolondan değil KURALDAN türetiliyor** (ADR-013): vadesi
+  geçmiş üyelik okuma anında "ödeme bekliyor", 3 gün de geçmişse "sona erdi",
+  iptal edilmiş üyelik ödenmiş dönem sonunda bitiyor
+- **Yenileme tahsilatı saf bir çekirdek fonksiyonda** (`renewMembershipPeriod`):
+  HTTP, oturum ve ekran bilmiyor. Adım 16'daki planlı görev onu olduğu gibi
+  çağıracak — kopyalanacak mantık kalmadı
+- Uçlar: `POST /api/memberships` · `PATCH` ve `DELETE
+  /api/memberships/[id]`. Üçü de `requireAccess("staff")` ile korunuyor ve
+  sahiplik sorgunun içinde (başkasının üyeliği 404 alıyor, 403 değil)
+- Tohuma **iki yeni demo personel hesabı** eklendi (#11, #12): üyelikte hesap
+  paylaşılamadığı için iki Playwright projesinin her birine ayrı personel
+  gerekiyordu. Listenin SONUNA eklendi; mevcut 10 hesabın kimliği ve
+  e-postası değişmedi
+
+### Değiştirildi
+
+- **Sahte ödeme sağlayıcısı artık kayıtlı kartta da sonucu belirleyebiliyor.**
+  Kayıtlı kartın numarası hiç saklanmadığı için sağlayıcı varsayılan
+  "başarılı" yolunu izliyordu; artık **son 4 haneye** bakıyor. Üyelik aidatı
+  her ay kayıtlı karttan çekildiği için bu olmadan "kart reddedilirse üyelik
+  ödeme bekliyora geçer" kuralı hiç tetiklenemezdi. **Sepet ödemesini de
+  etkiliyor**: kaydedilmiş "Reddedildi" kartı artık gerçekten reddediliyor
+- Ödeme ekranındaki kart alanları ortak bir bileşene taşındı (`CardPicker`) ve
+  üyelik ekranı da onu kullanıyor — erişilebilirlik kuralları tek yerde
+
 ### Eklendi — adım 11: Etkinlik + koltuk seçimi + bilet
 
 - **Etkinlik listesi** `/etkinlikler`: 12 etkinlik, üç tür (konser, tiyatro,

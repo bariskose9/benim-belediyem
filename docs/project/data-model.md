@@ -194,11 +194,32 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
   *(`discountPercent` **tutulmaz** — indirim, taahhütsüz paketin fiyatından
   hesaplanıp yalnızca ekranda gösterilir. İki alan tutmak sapma riski yaratır)*
 
-- **Membership** — `userId`, `planId`, `savedCardId`, `startsAt`,
-  `commitmentEndsAt`, `status` (`active` / `payment_pending` / `cancelled` / `expired`),
+- **Membership** — `userId`, `activeUserId` (**unique**, nullable), `planId`, `savedCardId`,
+  `startsAt`, `commitmentEndsAt`,
+  `status` (`active` / `payment_pending` / `cancelled` / `expired`),
   `autoRenewEnabled`, `nextBillingAt`, `cancelledAt`, `pendingPlanId` (nullable),
-  `pendingPlanEffectiveAt` (nullable)
+  `pendingPlanEffectiveAt` (nullable), `renewalReminderForBillingAt` (nullable)
   *(paket değişimi bir sonraki tahsilat tarihinde yürürlüğe girer — PRD §5.6)*
+
+  ⚠️ **`status` EKRANDA GÖRÜNEN DURUM DEĞİLDİR (ADR-013 deseni).** Kolon yalnızca
+  üyeliğin nasıl doğduğunu (`active`), iptal edilip edilmediğini (`cancelled`) ve
+  son tahsilatın başarısız olduğunu (`payment_pending`) tutar. Aradaki geçişler —
+  vadesi geçmiş üyeliğin "ödeme bekliyor" sayılması, ödeme süresi de dolmuş
+  üyeliğin pasifleşmesi, iptal edilmiş üyeliğin ödenmiş dönem sonunda bitmesi —
+  **okuma anında hesaplanır** (`deriveMembershipState`) ve hiçbir yere yazılmaz.
+
+  - **`activeUserId` "aynı anda tek üyelik" kuralını VERİTABANINA söyletir**
+    (PRD §5.6). Değeri tek bir kurala bağlıdır: üyelik yaşadığı sürece `userId`
+    ile aynı, sona erdiğinde `NULL`. PostgreSQL benzersiz indekste birden çok
+    `NULL` kabul ettiği için geçmiş üyelikler birikebilir, yaşayan yalnızca bir
+    tane olabilir. Uygulamadaki `if` yetmezdi: "önce aktif üyeliği var mı diye
+    bak, yoksa yaz" iki adımdır ve iki eşzamanlı istek ikisinde de "yok" görür.
+    Kolonu ömrü dolmuş üyeliklerde boşaltan tembel temizlik yazma yolundadır
+    (ADR-007 deseni)
+  - **`renewalReminderForBillingAt`**, "yenilemeden 3 gün önce hatırlatma"
+    bildiriminin ikinci kez yazılmasını engelleyen işarettir —
+    `orders.notifiedStatus` ile aynı iş: koşullu güncelleme tuttuysa bildirim
+    yazılır. Değer, hatırlatmanın ait olduğu `nextBillingAt` anıdır
 
 - **MembershipPayment** — `membershipId`, `periodStart`, `periodEnd`, `amount`,
   `kind` (`renewal` / `early_exit_fee`), `status` (`success` / `failed`),
@@ -245,7 +266,8 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
 - Enum değerleri **İngilizce**; kullanıcıya gösterilen karşılıkları `src/config/` altında
 - Eşzamanlılık kritik olan yerler benzersiz indeks + transaction ile korunur:
   `DoctorSlot` (doktor + saat) · `SeatReservation` (etkinlik + koltuk) ·
-  `MembershipPayment` (üyelik + dönem) · `Payment.idempotencyKey` ·
+  `MembershipPayment` (üyelik + dönem) · `Membership.activeUserId` (kullanıcı
+  başına tek yaşayan üyelik) · `Payment.idempotencyKey` ·
   `RateLimitCounter` (anahtar + pencere) · `CartItem` (sepet + ürün)
 
   *(Çift ödemenin engellendiği yer **ödeme** kaydıdır, sipariş değil: bir ödeme

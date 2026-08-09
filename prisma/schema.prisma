@@ -1070,8 +1070,24 @@ model MembershipPlan {
 /// Paket değişimi bir SONRAKİ tahsilat tarihinde yürürlüğe girer (PRD §5.6);
 /// bekleyen paket bu yüzden ayrı iki alanda tutulur.
 model Membership {
-  id                     String           @id @default(cuid())
-  userId                 String           @map("user_id")
+  id     String @id @default(cuid())
+  userId String @map("user_id")
+
+  /// "AYNI ANDA TEK ÜYELİK" KURALINI VERİTABANINA SÖYLETİR (PRD §5.6:
+  /// "Aktif üyelik varken ikinci üyelik alınamaz").
+  ///
+  /// Değeri tek bir kurala bağlıdır: üyelik yaşadığı sürece `user_id` ile
+  /// AYNI, sona erdiğinde `NULL`. PostgreSQL'de benzersiz indeks birden fazla
+  /// `NULL` kabul ettiği için geçmiş üyelikler birikebilir, yaşayan yalnızca
+  /// bir tane olabilir.
+  ///
+  /// NEDEN UYGULAMADA `if` YETMİYOR: "önce aktif üyeliği var mı diye bak,
+  /// yoksa yaz" iki adımdır ve iki eşzamanlı istek ikisinde de "yok" görür
+  /// (data-model.md → "kararı uygulama değil veritabanı verir"). Bedeli tek
+  /// bir türetilmiş kolon; karşılığı, kullanıcıdan iki kez aidat çekilmesinin
+  /// veritabanı seviyesinde imkânsız olması.
+  activeUserId String? @unique @map("active_user_id")
+
   planId                 String           @map("plan_id")
   savedCardId            String?          @map("saved_card_id")
   startsAt               DateTime         @map("starts_at")
@@ -1082,6 +1098,19 @@ model Membership {
   cancelledAt            DateTime?        @map("cancelled_at")
   pendingPlanId          String?          @map("pending_plan_id")
   pendingPlanEffectiveAt DateTime?        @map("pending_plan_effective_at")
+
+  /// HANGİ TAHSİLAT TARİHİ İÇİN HATIRLATMA GÖNDERİLDİ (PRD §5.6 "yenilemeden
+  /// 3 gün önce hatırlatma").
+  ///
+  /// `orders.notified_status` ile aynı işi görüyor: bildirim tembel yazılıyor
+  /// (ADR-013) ve aynı hatırlatmanın ikinci kez yazılmasını KOŞULLU BİR
+  /// GÜNCELLEME engelliyor — "önce bildirim var mı diye bak, yoksa yaz" iki
+  /// adımdır ve iki sekme aynı anda bakarsa ikisi de yazar.
+  ///
+  /// Değer, hatırlatmanın ait olduğu `next_billing_at` anıdır; dönem
+  /// ilerlediğinde eski değer otomatik olarak eşleşmez ve yeni hatırlatma
+  /// yazılabilir.
+  renewalReminderForBillingAt DateTime? @map("renewal_reminder_for_billing_at")
 
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")

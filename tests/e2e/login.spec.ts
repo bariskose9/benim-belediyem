@@ -166,12 +166,14 @@ test("personel hastane ve spor salonunu görebilir", async ({ page }) => {
   await expect(page.getByText("Kurum personeli")).toBeVisible();
 
   /**
-   * İKİ SAYFA ARTIK FARKLI ŞEYLER GÖSTERİYOR (roadmap adım 6).
+   * İKİ MODÜL DE AÇILDI (hastane adım 6, spor salonu adım 12).
    *
-   * Hastane modülü açıldı ve gerçek içerik çiziyor; spor salonu hâlâ iskelet
-   * ve dürüstçe "yakında" diyor. Bu testin asıl sorusu ikisinde de aynı ve
-   * değişmedi: PERSONEL, "yalnızca kurum personeline açıktır" duvarını
-   * GÖRMEMELİ. Modülün kendi akışı `hospital.spec.ts` içinde sınanıyor.
+   * ADIM 12'DE GÜNCELLENDİ: spor salonu artık "Bu hizmet henüz açılmadı"
+   * demiyor, gerçek içerik çiziyor. Bu testin asıl sorusu ikisinde de aynı ve
+   * DEĞİŞMEDİ: PERSONEL, "yalnızca kurum personeline açıktır" duvarını
+   * GÖRMEMELİ. Modüllerin kendi akışları `hospital.spec.ts` ve `gym.spec.ts`
+   * içinde sınanıyor; burada yalnızca erişim kapısının doğru yönde açıldığı
+   * doğrulanıyor.
    */
   await page.goto("/hastane");
   await expect(
@@ -180,7 +182,9 @@ test("personel hastane ve spor salonunu görebilir", async ({ page }) => {
   await expect(page.getByText("yalnızca kurum personeline")).toHaveCount(0);
 
   await page.goto("/spor-salonu");
-  await expect(page.getByText("Bu hizmet henüz açılmadı")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: messages.gym.plans.heading, exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("yalnızca kurum personeline")).toHaveCount(0);
 });
 

@@ -1035,6 +1035,211 @@ export const messages = {
     },
   },
 
+  /**
+   * Spor salonu üyeliği (PRD §5.6 · adım 12) — PERSONELE ÖZEL.
+   *
+   * ═══ BU MODÜLÜN METİNLERİ NEDEN BU KADAR AÇIK ═══
+   *
+   * Üyelik, kullanıcının tek tıkla girdiği ama aylarca sürecek bir taahhüt.
+   * PRD §5.6 "bu kural satın alma öncesi ekranda açıkça gösterilir" diyor ve
+   * bunu iki yerde istiyor: taahhüt süresi ve erken çıkış farkı. Metinler
+   * TUTARI ve TARİHİ birlikte veriyor — "indirimlisiniz" gibi tek yanlı bir
+   * cümle, aynı ekranın kullanıcıya söylemesi gereken bedeli gizlerdi.
+   */
+  gym: {
+    pageTitle: "Spor Salonu",
+    title: "Spor salonu üyeliği",
+    description:
+      "Belediye personel spor tesisine üye olun. Tüm paketler aylık tahsil edilir; " +
+      "peşin toplu ödeme yoktur.",
+    loading: "Spor salonu bilgileri yükleniyor",
+
+    facility: {
+      heading: "Tesis",
+      addressHeading: "Adres",
+      amenitiesHeading: "Tesiste neler var",
+      hoursHeading: "Salon saatleri",
+      closed: "Kapalı",
+      scheduleHeading: "Haftalık ders programı",
+      scheduleNote:
+        "Derslere önceden kayıt alınmaz; üyeler ders saatinde stüdyoya gelir. Program aylık güncellenir.",
+      classDuration: (minutes: number) => `${minutes} dk`,
+      noClasses: "Bu gün grup dersi yok.",
+    },
+
+    plans: {
+      heading: "Üyelik paketleri",
+      note:
+        "Uzun taahhüt aylık ücreti düşürür. Hangi paketi seçerseniz seçin tahsilat aylıktır; " +
+        "tutarın tamamı peşin alınmaz.",
+      monthlyPrice: (price: string) => `${price} / ay`,
+      noCommitment: "Taahhüt yok",
+      commitment: (months: number) => `${months} ay taahhüt`,
+      discountBadge: (percent: number) => `%${percent} indirimli`,
+      choose: "Bu paketi seç",
+      chooseLabel: (name: string) => `${name} paketini seç`,
+      current: "Mevcut paketiniz",
+      switchTo: "Bu pakete geç",
+      switchToLabel: (name: string) => `${name} paketine geç`,
+      empty: "Şu an tanımlı üyelik paketi yok.",
+    },
+
+    /** Satın alma ekranı — üyelik SEPETE GİRMEZ, kendi akışı vardır (PRD §5.6). */
+    purchase: {
+      pageTitle: "Üyelik başlat",
+      heading: "Üyeliği başlat",
+      backToPlans: "Paketlere dön",
+      summaryHeading: "Seçtiğiniz paket",
+      firstChargeHeading: "Bugün tahsil edilecek",
+      firstChargeNote: "İlk ay şimdi tahsil edilir; sonraki aylar her ayın aynı gününde çekilir.",
+      nextBillingLabel: "Sonraki tahsilat",
+      commitmentEndsLabel: "Taahhüt bitişi",
+
+      /**
+       * Onay kutusu METNİ İKİ ŞEYİ BİRDEN SÖYLÜYOR: taahhüt süresi ve
+       * erken çıkarsa ne olacağı. PRD §5.6 ikisinin de satın alma ÖNCESİ
+       * gösterilmesini istiyor; ayrı ayrı iki kutu, kullanıcının ikincisini
+       * okumadan işaretlemesinin en kısa yolu olurdu.
+       */
+      termsHeading: "Taahhüt ve erken çıkış",
+      termsNoCommitment:
+        "Bu pakette taahhüt yoktur. Üyeliğinizi istediğiniz zaman iptal edebilirsiniz; " +
+        "iptal ettiğinizde ödediğiniz ayın sonuna kadar tesisi kullanmaya devam edersiniz.",
+      termsCommitment: (months: number, monthlyGap: string) =>
+        `Bu pakette ${months} ay taahhüt vardır. Taahhüt süresi dolmadan iptal ederseniz, ` +
+        `o güne kadar ödediğiniz aylar taahhütsüz fiyattan yeniden hesaplanır ve ` +
+        `aradaki fark (ay başına ${monthlyGap}) iptal anında kartınızdan tek seferde tahsil edilir.`,
+      termsAccept: "Taahhüt ve erken çıkış kuralını okudum, kabul ediyorum.",
+
+      /**
+       * Yeni kart MUTLAKA KAYDEDİLİR ve bu bir tercih değil zorunluluk:
+       * üyelik her ay aynı karttan çekilecek. Kaydedilmezse ikinci ay
+       * tahsilat yapılamaz ve üyelik daha ilk yenilemede ödeme bekliyora
+       * düşerdi. Kullanıcıya sessizce yapılmıyor — burada yazıyor.
+       */
+      cardSaveNotice:
+        "Aylık tahsilat için kartınız hesabınıza kaydedilir. Kart numarası saklanmaz; " +
+        "yalnızca markası ve son 4 hanesi tutulur.",
+      submit: "Üyeliği başlat ve ilk ayı öde",
+      submitting: "Tahsilat yapılıyor…",
+    },
+
+    /** Üyelik ekranı (PRD §5.6 "Profilde görünür" listesinin karşılığı). */
+    membership: {
+      pageTitle: "Üyeliğim",
+      heading: "Üyeliğim",
+      backToGym: "Spor salonu sayfası",
+      viewMembership: "Üyeliğimi görüntüle",
+      planLabel: "Paket",
+      statusLabel: "Durum",
+      startedLabel: "Başlangıç",
+      commitmentEndsLabel: "Taahhüt bitişi",
+      nextBillingLabel: "Sonraki tahsilat",
+      nextAmountLabel: "Sonraki tutar",
+      autoRenewLabel: "Otomatik yenileme",
+      autoRenewOn: "Açık",
+      autoRenewOff: "Kapalı",
+      cardLabel: "Tahsilat kartı",
+      noCommitment: "Taahhüt yok",
+      endsAt: (date: string) => `Üyeliğiniz ${date} tarihinde sona erecek.`,
+      paymentDueBy: (date: string) =>
+        `Son tahsilat başarısız oldu. ${date} tarihine kadar ödeme yapılmazsa üyeliğiniz pasifleşir.`,
+
+      /** `MembershipStatus` enum'unun ekrandaki karşılıkları. */
+      statuses: {
+        active: "Aktif",
+        cancelled: "İptal edildi",
+        payment_pending: "Ödeme bekliyor",
+        expired: "Sona erdi",
+      },
+
+      pendingChange: (planName: string, date: string, price: string) =>
+        `${date} tarihinde ${planName} paketine geçeceksiniz. Yeni aylık tutar: ${price}`,
+      cancelPendingChange: "Paket değişimini iptal et",
+
+      historyHeading: "Ödeme geçmişi",
+      historyEmpty: "Henüz tahsilat kaydı yok.",
+      historyPeriod: (start: string, end: string) => `${start} – ${end}`,
+      /** `MembershipPaymentKind` ve `MembershipPaymentStatus` karşılıkları. */
+      paymentKinds: {
+        renewal: "Aylık aidat",
+        early_exit_fee: "Erken çıkış farkı",
+      },
+      paymentStatuses: {
+        success: "Başarılı",
+        failed: "Başarısız",
+      },
+
+      changeHeading: "Paket değiştir",
+      changeNote: (date: string) =>
+        `Yeni paket ${date} tarihindeki tahsilatla yürürlüğe girer. Ödediğiniz ay kısalmaz veya uzamaz.`,
+      /**
+       * Taahhütsüze (ya da daha kısa taahhüde) düşme de erken çıkış farkı
+       * doğurur (PRD §5.6). Metin farkı ONAYDAN ÖNCE ve TL cinsinden veriyor;
+       * iptaldeki metinden ayrı çünkü burada üyelik devam ediyor.
+       */
+      changeWithFee: (fee: string) =>
+        `Taahhüdünüz sürüyor. Daha kısa taahhütlü bir pakete geçerseniz erken çıkış farkı olarak ` +
+        `${fee} kartınızdan tek seferde tahsil edilir. Üyeliğiniz devam eder.`,
+
+      /**
+       * İPTAL SATIR İÇİ ONAYLA: shadcn'de Dialog bileşeni yok ve bilerek
+       * eklenmedi (07-ui-design-system.md · adım 10'daki sipariş iptaliyle
+       * aynı desen). Onay, tutarı gösteren metnin hemen altında açılıyor.
+       */
+      cancelHeading: "Üyeliği iptal et",
+      cancel: "Üyeliği iptal et",
+      cancelling: "İptal ediliyor…",
+      cancelConfirm: "Evet, iptal et",
+      cancelDismiss: "Vazgeç",
+      cancelNoFee: (date: string) =>
+        `Üyeliğiniz iptal edilecek ve ${date} tarihine kadar tesisi kullanmaya devam edeceksiniz. Ek ücret alınmaz.`,
+      cancelWithFee: (fee: string, months: number, date: string) =>
+        `Taahhüdünüz sürüyor. İptal ederseniz ödediğiniz ${months} ay taahhütsüz fiyattan ` +
+        `yeniden hesaplanacak ve ${fee} tutarındaki fark kartınızdan tek seferde tahsil edilecek. ` +
+        `Tesisi ${date} tarihine kadar kullanmaya devam edersiniz.`,
+
+      empty: {
+        title: "Aktif üyeliğiniz yok",
+        description: "Yukarıdaki paketlerden birini seçerek üyelik başlatabilirsiniz.",
+      },
+    },
+
+    toast: {
+      created: "Üyeliğiniz başladı ve ilk ay tahsil edildi.",
+      cancelled: "Üyeliğiniz iptal edildi.",
+      planChangeScheduled: "Paket değişiminiz sıraya alındı.",
+      planChangeCleared: "Paket değişimi iptal edildi.",
+      failed: "İşlem tamamlanamadı. Lütfen tekrar deneyin.",
+    },
+
+    errors: {
+      planNotFound: "Seçtiğiniz üyelik paketi bulunamadı. Sayfayı yenileyip tekrar deneyin.",
+      membershipNotFound: "Üyelik bulunamadı.",
+      /**
+       * PRD §5.6 KURALI: "Aktif üyelik varken ikinci üyelik alınamaz —
+       * 'paket değiştir' önerilir." Hata mesajı bu yüzden yalnızca reddetmiyor,
+       * kullanıcıyı doğru yere yönlendiriyor.
+       */
+      alreadyMember:
+        "Zaten aktif bir üyeliğiniz var. İkinci üyelik alınamaz; üyelik sayfanızdan paket değiştirebilirsiniz.",
+      noMembership: "Aktif bir üyeliğiniz yok.",
+      termsNotAccepted: "Devam etmek için taahhüt ve erken çıkış kuralını onaylayın.",
+      samePlan: "Zaten bu paketi kullanıyorsunuz.",
+      /** Erken çıkış farkı ekranda gösterilenden farklıysa: kullanıcı eski bir sayfaya bakıyor. */
+      feeChanged:
+        "Erken çıkış farkı bu arada değişti. Güncel tutarı görmek için sayfayı yenileyin.",
+      declined: "Kartınız reddedildi. Farklı bir kartla tekrar deneyin.",
+      insufficientFunds: "Kartınızda yeterli bakiye yok. Farklı bir kartla tekrar deneyin.",
+      invalidRequest:
+        "Üyelik bilgilerinde eksik veya hatalı bir alan var. Paket ve kart bilgilerinizi kontrol edip tekrar deneyin.",
+      alreadyProcessed: "Bu işlem zaten yapılmış. Üyelik sayfanızı yenileyin.",
+      tooManyAttempts:
+        "Çok fazla üyelik işlemi denediniz. Güvenliğiniz için lütfen 15 dakika sonra tekrar deneyin.",
+      cardRequired: "Aylık tahsilat için bir kart seçin veya yeni kart girin.",
+    },
+  },
+
   /** Ortak sepet (PRD §4 · adım 7). */
   cart: {
     pageTitle: "Sepetim",
@@ -1369,6 +1574,22 @@ export const messages = {
       expiredTitle: "Koltuk süreniz doldu",
       expiredBody: (event: string, seat: string) =>
         `${event} etkinliğinde ${seat} için ayırdığınız süre doldu ve koltuk sepetinizden düştü. Dilerseniz yeniden seçebilirsiniz.`,
+    },
+
+    /**
+     * Spor salonu üyeliği bildirimleri (PRD §5.6).
+     *
+     * İkisi de TARİH VE TUTAR taşıyor: "yenileme yaklaşıyor" tek başına
+     * kullanıcıya ne zaman ve ne kadar çekileceğini söylemez, dolayısıyla
+     * hazırlık yapma imkânı vermez — bildirimin tek amacı da bu.
+     */
+    membership: {
+      reminderTitle: "Üyelik yenilemeniz yaklaşıyor",
+      reminderBody: (date: string, amount: string) =>
+        `Spor salonu üyeliğiniz ${date} tarihinde yenilenecek ve kayıtlı kartınızdan ${amount} tahsil edilecek.`,
+      paymentFailedTitle: "Üyelik tahsilatı yapılamadı",
+      paymentFailedBody: (date: string) =>
+        `Spor salonu üyelik tahsilatınız gerçekleştirilemedi. ${date} tarihine kadar ödeme yapılmazsa üyeliğiniz pasifleşir.`,
     },
 
     errors: {

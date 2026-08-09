@@ -77,8 +77,21 @@ export async function cleanupTestData(): Promise<void> {
   await prisma.venueSeat.deleteMany({ where: { id: startsWith } });
   await prisma.venue.deleteMany({ where: { id: startsWith } });
 
-  await prisma.membershipPayment.deleteMany({ where: { id: startsWith } });
-  await prisma.membership.deleteMany({ where: { id: startsWith } });
+  /**
+   * Üyelik kayıtları İKİ ÖLÇÜTLE siliniyor — randevu ve koltuk kilidindeki
+   * gerekçenin aynısı (adım 12).
+   *
+   * Üyeliği ve tahsilatı UYGULAMA yazıyor (`membership-purchase.service.ts`)
+   * ve kimlikleri `cuid()` oluyor, yani test öneki taşımıyorlar. O satırlar
+   * kalırsa `saved_cards` ve `users` silinemez (`Restrict`) ve temizlik
+   * tamamen patlar. Bağ, kullanıcı kimliği üzerinden kuruluyor.
+   */
+  await prisma.membershipPayment.deleteMany({
+    where: { OR: [{ id: startsWith }, { membership: { userId: startsWith } }] },
+  });
+  await prisma.membership.deleteMany({
+    where: { OR: [{ id: startsWith }, { userId: startsWith }] },
+  });
   await prisma.membershipPlan.deleteMany({ where: { id: startsWith } });
 
   /**

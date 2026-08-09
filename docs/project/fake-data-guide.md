@@ -162,6 +162,17 @@ Fiyatlar `.90` / `.40` ile biter (dosyanın genel kuralı: gerçekçi kuruş).
 İndirim yüzdesi veritabanında **tutulmaz**, taahhütsüz fiyattan hesaplanıp
 yalnızca ekranda gösterilir (`data-model.md` → `MembershipPlan`).
 
+**Tesis bilgisi, salon saatleri ve ders programı VERİTABANINDA DEĞİL**,
+`src/features/gym/data/facility.ts` içinde sabit içerik olarak durur (adım 12).
+Veri modelinde karşılığı olan bir tablo yok ve onu değiştirecek bir yönetici
+paneli de yok; salt okunur, hiç yazılmayan bir içeriği tabloya taşımak bugün
+hiçbir şey kazandırmazdı. İçeriğin tamamı uydurmadır: adres gerçek bir tesise
+ait değildir, ders adları ve saatleri örnektir.
+
+**Üyelik tohumlanmaz.** Hiçbir demo hesabın açılışta üyeliği yoktur; ekranın
+"aktif üyeliğiniz yok" durumu da satın alma akışı da böylece ilk açılışta
+denenebilir.
+
 **Hastane randevu**
 Ücret yoktur. 8 branş × 3–5 doktor. Her doktor için önümüzdeki 14 güne
 20 dakikalık slotlar (09:00–12:00, 13:30–16:30). Slotların %30'u dolu seed edilir.
