@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { messages } from "../../src/config/messages";
+import { serviceCards } from "../../src/config/navigation";
 
 /**
  * Görsel iskeletin testleri (roadmap adım 5).
@@ -220,24 +221,60 @@ test.describe("düzen", () => {
 });
 
 test.describe("hizmet ızgarası", () => {
-  test("açılmamış hizmet tıklanabilir bağlantı değildir", async ({ page }) => {
+  test("her hizmet kartı DURUMUNA UYGUN çiziliyor", async ({ page }) => {
     await page.goto("/");
 
     /**
-     * DESTEK ÖRNEK SEÇİLDİ ÇÜNKÜ HÂLÂ KAPALI (roadmap adım 13).
+     * ═══ BU TEST ADIM 13'TE YENİDEN YAZILDI ═══
      *
-     * Bu örnek daha önce ÜÇ kez taşındı: market adım 8'de, restoran adım 9'da,
-     * ETKİNLİK adım 11'de açılınca test doğru sebepten kırmızıya döndü. Kural
-     * değişmiyor — açılmamış bir hizmet kartı tıklanabilir OLMAMALI. Destek de
-     * açıldığında örnek kalan tek kapalı karta taşınır; test SİLİNMEZ.
+     * Eski hâli tek bir KAPALI hizmet kartını örnek alıyordu ve örnek üç kez
+     * taşındı: market (adım 8), restoran (adım 9), etkinlik (adım 11). Adım
+     * 13'te destek de açılınca **kapalı hizmet kalmadı** — taşınacak dördüncü
+     * bir kart yok.
+     *
+     * Kural SİLİNMEDİ, iki parçaya ayrıldı:
+     *  · davranış (kapalı kart bağlantı değildir) →
+     *    `tests/unit/service-tile.test.tsx`, uydurma bir kapalı kartla
+     *  · gerçek ızgaranın kurala uyduğu → BURASI, veriye bakarak
+     *
+     * Böylece test hizmetler açıldıkça kırılmıyor ama kural da kaybolmuyor:
+     * yarın yeni bir kapalı hizmet eklenirse aşağıdaki döngü onu da kapsar.
      */
-    // 404'e giden bir kart, kartın hiç olmamasından kötüdür.
-    const closedService = page.getByText(messages.services.support.title, { exact: true });
-    await expect(closedService).toBeVisible();
-    await expect(page.getByRole("link", { name: messages.services.support.title })).toHaveCount(0);
+    /**
+     * ARAMA IZGARANIN İÇİNE SINIRLANIYOR. Hizmet adları üst menüde de geçiyor
+     * ("Spor salonu" hem kartta hem menüde) ve sayfa genelinde arama iki
+     * öğeye birden takılıyor. Bölüm, başlığıyla adlandırılmış bir `region`.
+     */
+    const grid = page.getByRole("region", { name: messages.home.servicesHeading });
 
-    // Durum yalnızca renkle değil metinle de belirtilmeli.
-    await expect(page.getByText(messages.badges.comingSoon).first()).toBeVisible();
+    for (const service of serviceCards) {
+      const title = messages.services[service.key].title;
+
+      // Kart her hâlükârda GÖRÜNÜR: hizmetin varlığı gizlenmiyor.
+      await expect(grid.getByText(title, { exact: true })).toBeVisible();
+
+      const link = grid.getByRole("link", { name: new RegExp(title) });
+
+      if (service.href === null) {
+        // 404'e giden bir kart, kartın hiç olmamasından kötüdür.
+        await expect(link).toHaveCount(0);
+      } else {
+        await expect(link).toHaveAttribute("href", service.href);
+      }
+    }
+
+    /**
+     * Durum yalnızca renkle değil METİNLE de belirtilmeli (WCAG 2.1 AA).
+     *
+     * `exact: true` ŞART: "Açık" metni tema düğmesinin ekran okuyucu
+     * etiketinde de ("Açık temaya geç") geçiyor ve gevşek arama gizli o
+     * öğeye takılıyor. Arama ayrıca ızgaranın içine sınırlı.
+     */
+    const expectedBadge = serviceCards.some((service) => service.href === null)
+      ? messages.badges.comingSoon
+      : messages.badges.open;
+
+    await expect(grid.getByText(expectedBadge, { exact: true }).first()).toBeVisible();
   });
 
   test("açık hizmet kendi sayfasına götürür", async ({ page }) => {

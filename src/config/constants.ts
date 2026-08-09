@@ -644,3 +644,52 @@ export const MEMBERSHIP_BILLING_PERIOD_MONTHS = 1;
  */
 export const MEMBERSHIP_WRITE_RATE_LIMIT_MAX = 20;
 export const MEMBERSHIP_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+// ===========================================================================
+// DESTEK TALEBİ (PRD §5.7 · adım 13)
+// ===========================================================================
+
+/**
+ * Talebin kaç DAKİKA sonra hangi aşamaya geçtiği.
+ *
+ * ⚠️ BU SAYILAR BİR VARSAYIMDIR. PRD §5.7 durumları sayıyor ama süre vermiyor;
+ * `ORDER_TIMELINE_RULES`'taki gibi tek bir yerde toplandı ve proje sahibinin
+ * onayına açık. Değiştirmek için TEK YER burasıdır.
+ *
+ * Sipariş eşiklerinden UZUN seçildi çünkü destek talebi bir kuryenin değil bir
+ * insanın işi: 20 dakikada "çözüldü" diyen bir simülasyon inandırıcı olmazdı.
+ */
+export const SUPPORT_TICKET_IN_REVIEW_AFTER_MINUTES = 30;
+export const SUPPORT_TICKET_RESOLVED_AFTER_MINUTES = 180;
+
+/** Tek talepte kaç ek olabilir — PRD §5.7 "en fazla 5 adet". */
+export const SUPPORT_ATTACHMENT_MAX_COUNT = 5;
+
+/**
+ * Dosya başına boyut sınırı.
+ *
+ * PRD §5.7 "dosya başına boyut sınırı var" diyor, sayıyı vermiyor. 2 MB seçildi:
+ * bir telefon ekran görüntüsü tipik olarak 0,2-1,5 MB arasında, yani gerçek
+ * kullanımı kesmiyor. Üst sınır aynı zamanda ADR-014'ün depolama bütçesini
+ * koruyan tek kapı — talep başına en kötü durum 5 × 2 MB.
+ */
+export const SUPPORT_ATTACHMENT_MAX_BYTES = 2 * 1024 * 1024;
+
+/** Başlık ve açıklamanın sınırları — veritabanı değil, kullanılabilirlik kararı. */
+export const SUPPORT_SUBJECT_MIN_LENGTH = 5;
+export const SUPPORT_SUBJECT_MAX_LENGTH = 120;
+export const SUPPORT_DESCRIPTION_MIN_LENGTH = 20;
+export const SUPPORT_DESCRIPTION_MAX_LENGTH = 2000;
+
+/** Liste ekranında en fazla kaç talep çizilir (sayfalama gelene kadar). */
+export const SUPPORT_TICKET_LIST_LIMIT = 50;
+
+/**
+ * Destek yazma uçlarının bütçesi — KULLANICI başına.
+ *
+ * Üyelikten dar: her talep 10 MB'a kadar dosya taşıyabiliyor, yani burada hız
+ * sınırı yalnızca spam'e değil **depolama tüketimine** de karşı duruyor
+ * (ADR-014 bedel 1).
+ */
+export const SUPPORT_WRITE_RATE_LIMIT_MAX = 10;
+export const SUPPORT_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;

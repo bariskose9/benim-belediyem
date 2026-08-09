@@ -646,6 +646,7 @@ export const messages = {
     events: "Etkinlikler",
     hospital: "Hastane",
     gym: "Spor salonu",
+    support: "Destek",
     /** Ekran okuyucular için: menünün ne olduğu söylenmeli (WCAG 2.1 AA). */
     label: "Ana menü",
 
@@ -1533,14 +1534,20 @@ export const messages = {
   notifications: {
     pageTitle: "Bildirimler",
     title: "Bildirimler",
-    description: "Sipariş durumunuz değiştikçe buraya bildirim düşer.",
+    /**
+     * ADIM 13'TE GENELLEŞTİRİLDİ: metin yalnızca siparişten bahsediyordu ama
+     * bu ekrana artık üyelik ve destek talebi bildirimleri de düşüyor. Ekranda
+     * yazan söz, ekranın gerçekte yaptığı işi anlatmalı.
+     */
+    description: "Sipariş, üyelik ve destek talebi durumlarınız değiştikçe buraya bildirim düşer.",
     markAllRead: "Tümünü okundu işaretle",
     markingAllRead: "İşaretleniyor…",
     unreadBadge: (count: number) => `${count} okunmamış bildirim`,
     unreadLabel: "Okunmadı",
     empty: {
       title: "Bildiriminiz yok",
-      description: "Sipariş verdiğinizde ve siparişinizin durumu değiştikçe burada görünür.",
+      description:
+        "Sipariş verdiğinizde, üyelik başlattığınızda veya destek talebi açtığınızda burada görünür.",
     },
 
     /**
@@ -1592,8 +1599,132 @@ export const messages = {
         `Spor salonu üyelik tahsilatınız gerçekleştirilemedi. ${date} tarihine kadar ödeme yapılmazsa üyeliğiniz pasifleşir.`,
     },
 
+    /**
+     * Destek talebi bildirimleri (PRD §5.7).
+     *
+     * Gövdede TALEP KODU ve BAŞLIK geçiyor: kullanıcının birden çok açık
+     * talebi olabilir ve "Talebiniz inceleniyor" tek başına hangisinden
+     * bahsettiğini söylemez (sipariş bildirimindeki aynı gerekçe).
+     */
+    supportTicket: {
+      createdTitle: "Destek talebiniz alındı",
+      createdBody: (code: string, subject: string) =>
+        `“${subject}” başlıklı destek talebiniz alındı. Talep kodu: ${code}`,
+      statusTitle: (status: string) => `Destek talebiniz: ${status}`,
+      statusBody: (code: string, subject: string, status: string) =>
+        `“${subject}” başlıklı ${code} numaralı destek talebinizin durumu “${status}” olarak güncellendi.`,
+      closedTitle: "Destek talebiniz kapatıldı",
+      closedBody: (code: string, subject: string) =>
+        `“${subject}” başlıklı ${code} numaralı destek talebiniz kapatıldı.`,
+    },
+
     errors: {
       invalidRequest: "İstek geçersiz. Sayfayı yenileyip tekrar deneyin.",
+    },
+  },
+
+  /** Destek talebi (PRD §5.7 · adım 13). */
+  support: {
+    pageTitle: "Destek talepleri",
+    title: "Destek talepleri",
+    description:
+      "Sorun ve önerilerinizi buradan iletin, talebinizin durumunu aynı sayfadan takip edin.",
+
+    /**
+     * Şemadaki `SupportTicketStatus` enum'ıyla BİREBİR aynı anahtarlar
+     * (siparişteki kural). Eksik bir anahtar derleme hatasına dönüşsün diye
+     * tip tarafından da bekleniyor.
+     */
+    statuses: {
+      open: "Açık",
+      in_review: "İnceleniyor",
+      resolved: "Çözüldü",
+      closed: "Kapandı",
+    },
+
+    /** Liste bölümünün başlığı — sayfa başlığından FARKLI olmak zorunda:
+        aynı metni iki başlıkta kullanmak hem ekran okuyucuyu hem testi
+        belirsiz bırakıyor. */
+    listHeading: "Talepleriniz",
+
+    ticketCode: (code: string) => `Talep kodu: ${code}`,
+    createdAt: (date: string) => `Oluşturma tarihi: ${date}`,
+    closedAt: (date: string) => `Kapatıldı: ${date}`,
+
+    /** Bir sonraki aşamanın tahmini zamanı — SÖZ DEĞİL, tahmin olduğu yazıyor. */
+    nextStageAt: (time: string) => `Tahmini bir sonraki güncelleme: ${time}`,
+
+    detailAction: "Talebi görüntüle",
+    backToList: "Destek taleplerine dön",
+    attachmentsHeading: "Ekler",
+    attachmentCount: (count: number) => `${count} ek`,
+    noAttachments: "Bu talebe ek dosya eklenmemiş.",
+    attachmentAlt: (fileName: string) => `Ek görsel: ${fileName}`,
+
+    /**
+     * SİMÜLASYON AÇIKÇA YAZILIYOR. Yönetici paneli yok (teknik borç #4) ve
+     * durum talebin yaşından türetiliyor (ADR-013); kullanıcının gerçek bir
+     * görevlinin baktığını sanması yanıltıcı olurdu.
+     */
+    simulationNotice:
+      "Bu bir gösterim projesidir: talebinize gerçek bir görevli bakmaz, durum zamanla otomatik ilerler.",
+
+    form: {
+      heading: "Yeni destek talebi",
+      subjectLabel: "Konu",
+      subjectHint: "Sorunu tek cümleyle özetleyin.",
+      descriptionLabel: "Açıklama",
+      descriptionHint: "Ne olduğunu, ne beklediğinizi ve hangi ekranda karşılaştığınızı yazın.",
+      attachmentsLabel: "Ekran görüntüsü (isteğe bağlı)",
+      attachmentsHint: (maxCount: number, maxSize: string) =>
+        `En fazla ${maxCount} görsel, dosya başına ${maxSize}. PNG, JPEG veya WebP.`,
+      selectedCount: (count: number) => `${count} dosya seçildi`,
+      removeAttachment: (fileName: string) => `${fileName} dosyasını kaldır`,
+      submit: "Talebi gönder",
+      submitting: "Gönderiliyor…",
+      success: "Destek talebiniz oluşturuldu.",
+    },
+
+    close: {
+      action: "Talebi kapat",
+      pending: "Kapatılıyor…",
+      /** Geri alınamaz işlem: onay istenir (sipariş iptaliyle aynı desen). */
+      confirmTitle: "Talebi kapatmak istiyor musunuz?",
+      confirmBody: "Kapatılan talep yeniden açılamaz; gerekirse yeni bir talep oluşturabilirsiniz.",
+      confirmAction: "Evet, kapat",
+      confirmDismiss: "Vazgeç",
+      success: "Talebiniz kapatıldı.",
+      alreadyClosedNotice: "Bu talep kapatıldı.",
+    },
+
+    empty: {
+      title: "Henüz destek talebiniz yok",
+      description: "Bir sorun yaşadığınızda yukarıdaki formu doldurarak talep oluşturabilirsiniz.",
+    },
+
+    errors: {
+      notFound: "Destek talebi bulunamadı.",
+      attachmentNotFound: "Ek dosya bulunamadı.",
+      alreadyClosed: "Bu talep zaten kapatılmış.",
+      invalidRequest: "Lütfen konu ve açıklama alanlarını kontrol edin.",
+      subjectLength: (min: number, max: number) =>
+        `Konu en az ${min}, en fazla ${max} karakter olmalı.`,
+      descriptionLength: (min: number, max: number) =>
+        `Açıklama en az ${min}, en fazla ${max} karakter olmalı.`,
+      tooManyAttachments: (max: number) => `En fazla ${max} dosya ekleyebilirsiniz.`,
+      attachmentTooLarge: (maxSize: string) => `Her dosya en fazla ${maxSize} olabilir.`,
+      attachmentEmpty: "Boş dosya yüklenemez.",
+      /**
+       * Tür reddi: kullanıcının ne yapması gerektiğini söylüyor, dosyanın
+       * adını yankılamıyor. "İçeriği doğrulanamadı" ifadesi kasıtlı — uzantı
+       * doğru olsa bile içerik farklıysa aynı mesaj çıkar.
+       */
+      attachmentType: "Yalnızca PNG, JPEG veya WebP görsel yükleyebilirsiniz.",
+      tooManyAttempts:
+        "Çok fazla talep oluşturdunuz. Güvenliğiniz için lütfen biraz sonra tekrar deneyin.",
+      botCheckFailed: "Doğrulama tamamlanamadı. Sayfayı yenileyip tekrar deneyin.",
+      botCheckUnavailable:
+        "Doğrulama servisine şu anda ulaşılamıyor. Lütfen birazdan tekrar deneyin.",
     },
   },
 } as const;

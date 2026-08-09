@@ -30,7 +30,7 @@ export const serviceCards: readonly ServiceCard[] = [
   { key: "market", href: "/market", staffOnly: false },
   { key: "restaurant", href: "/restoran", staffOnly: false },
   { key: "events", href: "/etkinlikler", staffOnly: false },
-  { key: "support", href: null, staffOnly: false },
+  { key: "support", href: "/destek", staffOnly: false },
   { key: "hospital", href: "/hastane", staffOnly: true },
   { key: "gym", href: "/spor-salonu", staffOnly: true },
 ] as const;
@@ -49,6 +49,7 @@ export const primaryNavItems = [
   { key: "events", href: "/etkinlikler" },
   { key: "hospital", href: "/hastane" },
   { key: "gym", href: "/spor-salonu" },
+  { key: "support", href: "/destek" },
 ] as const;
 
 export type PrimaryNavKey = (typeof primaryNavItems)[number]["key"];

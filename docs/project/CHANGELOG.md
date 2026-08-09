@@ -4,6 +4,46 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 13: Destek talebi + dosya yükleme
+
+- **Destek ekranı** `/destek`: üye başlık ve açıklama yazıp **en fazla 5 ekran
+  görüntüsü** yükleyerek talep açıyor; aynı sayfada kendi taleplerini listeliyor
+- **Talep detayı** `/destek/<id>`: durum çizgisi, tam açıklama, ek görselleri ve
+  kapatma düğmesi
+- **Durum okuma anında türetiliyor** (ADR-013 deseni): `Açık → İnceleniyor →
+  Çözüldü` talebin yaşından hesaplanıyor (30 dk / 180 dk) ve hiçbir yere
+  yazılmıyor. `support_tickets.status` kolonu yalnızca doğuşu ve kapanışı tutuyor
+- **`Kapandı` durumunu yalnızca talebi açan üye veriyor** (PRD §5.7). Kapatma
+  koşullu tek bir UPDATE ile yapılıyor; ikinci kapatma isteği 409 dönüyor
+- **Dosya yükleme yeni bir güvenlik yüzeyi ve buna göre kapatıldı:** tür
+  istemcinin beyanından değil **baytların imzasından** doğrulanıyor (PNG/JPEG/
+  WebP), boyut dosya başına 2 MB, adet 5, dosya adı sanitize ediliyor ve
+  **uzantıyı sunucu yazıyor**. SVG bilerek kabul edilmiyor (içine betik
+  yazılabilir)
+- **Ekler yetkili bir uçtan servis ediliyor**
+  (`/api/support-tickets/<id>/attachments/<ekId>`): her istekte oturum ve
+  sahiplik kontrolü var, `nosniff` + `no-store` başlıklarıyla dönüyor
+- **Kabul kriteri kanıtlandı — kullanıcı başkasının talebini göremiyor:**
+  sahiplik sorgunun içinde, başkasının talebi ve eki 404 dönüyor. Koruma
+  geçici olarak kaldırılıp ilgili üç testin kırmızıya döndüğü **ölçüldü**
+- **Bot doğrulaması** talep oluşturmada (Turnstile · ADR-004) ve kullanıcı
+  başına **hız sınırı** (15 dakikada 10 talep) — sınır burada spam'in yanı sıra
+  depolama tüketimini de kesiyor
+- **Bildirim ve denetim kaydı**: durum ilerledikçe tembel bildirim yazılıyor,
+  atlanan aşamalar kaybolmuyor; talep açma ve kapatma denetim kaydına düşüyor
+- **Hizmet ızgarasında destek kartı açıldı** ve üst menüye eklendi
+
+### Değişti
+
+- **`ticket_attachments` ve `support_tickets` tabloları genişledi** (geriye
+  uyumlu migration): `content_type`, `data`, `closed_at`, `notified_status`
+- **Bildirimler ekranının açıklaması genelleştirildi** — artık yalnızca
+  siparişten değil, üyelik ve destek talebinden de bahsediyor
+- **"Açılmamış hizmet tıklanabilir bağlantı değildir" testi taşındı.** Destek
+  açılınca kapalı hizmet kalmadı; kural birim testine (uydurma kapalı kart) ve
+  ızgaranın veriye bakan uçtan uca testine bölündü. `ServiceTile` bu yüzden
+  `page.tsx`'ten kendi dosyasına çıkarıldı
+
 ### Eklendi — adım 12: Spor salonu üyeliği (personele özel)
 
 - **Spor salonu sayfası** `/spor-salonu`: tesis künyesi, salon saatleri
