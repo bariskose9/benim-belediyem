@@ -4,6 +4,50 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 15: Profil sayfası (tüm kayıtların tek yerden yönetimi)
+
+- **`/hesabim` bir profil MERKEZİNE dönüştü.** Eskiden yalnızca beş satır hesap
+  bilgisi gösteriyordu; artık iki bölüm daha var: **"Kayıtlarım"** (siparişler,
+  destek talepleri, bildirimler — personelse ayrıca randevular ve spor salonu
+  üyeliği) ve **"Hesap ayarları"** (adresler, kayıtlı kartlar). PRD §4
+- **Teslimat adresi YÖNETİMİ geldi** (`/hesabim/adreslerim`): listeleme, ekleme,
+  **düzenleme** ve silme. Adım 7'den beri adres yalnızca ödeme ekranında
+  eklenebiliyordu; yanlış yazılan bir adres asla düzeltilemiyordu (PRD §5.0)
+- **Kayıtlı kart yönetimi geldi** (`/hesabim/kartlarim`): listeleme ve kaldırma.
+  **Teknik borç #41 ödendi**
+- **Kart ödemeden bağımsız olarak EKLENEMEZ ve bu ekranda yazıyor.** Kart yalnızca
+  gerçek bir ödeme sırasında, sahte sağlayıcının doğrulamasından geçtikten sonra
+  kaydediliyor (PRD §6.2); profilden eklemek doğrulanmamış bir kartı listeye
+  koymak olurdu
+- **Üyeliğe bağlı kart kaldırılırken UYARILIYOR**: aidatı bu karttan çekilen
+  kullanıcı, silme onayında "bir sonraki aylık tahsilat bu karttan yapılamaz"
+  cümlesini görüyor. Silme ENGELLENMİYOR — karar kullanıcının (PRD §5.6)
+- **İKİ SİLME DE YUMUŞAK** (`deleted_at`): geçmiş siparişler adrese, geçmiş
+  ödemeler ve üyelikler karta `onDelete: Restrict` ile bağlı. Kullanıcı için
+  kayıt listeden çıkıyor, mali kayıt ve denetim izi bozulmuyor (data-model.md)
+- **Sahiplik kontrolü sorgunun `WHERE` koşulunda**, sonradan yapılan bir `if`
+  değil: başkasının adresi/kartı 404 döner ve varlığı bile sızdırılmaz.
+  Koruma testte **kaldırılıp kırmızıya döndüğü görülerek** ölçüldü
+- **Kullanıcı başına en fazla 20 adres** ve profil yazma uçlarına **15 dakikada
+  30 istek** bütçesi (CLAUDE.md §5.5)
+- **Adres ve kart yazmaları denetim kaydına düşüyor** — dört yeni denetim işlemi
+  (`address_create/update/delete`, `saved_card_delete`) ve iki yeni varlık türü
+- **Teknik borç #35 ödendi**: `/giris`, `/kayit`, `/hesabim`, `/sifremi-unuttum`
+  ekranlarının gövde metinleri 14px'ten **16px'e** taşındı (07-ui-design-system.md)
+
+### Değişti — adım 15
+
+- **`addresses` ve `saved_cards` sorguları ödeme özelliğinden profil özelliğine
+  taşındı** (`src/features/profile/repositories/`). İkisi de KULLANICIYA ait
+  kayıtlar; ödeme onları kullanıyor ama sahibi değil. Aynı tabloya iki ayrı
+  özellikten dokunmak "tablo başına tek repository" kuralını çiğnerdi
+- **Geriye uyumlu migration** (`20260809180000_add_profile_audit_actions`):
+  yalnızca yeni enum DEĞERLERİ ekliyor; tablo, kolon ve satır değişmiyor
+- **Tohuma iki demo vatandaş hesabı eklendi** (#13 Aslı Avcı, #14 Ege Kurt).
+  Profil E2E'si kullanıcının adres ve kartlarını değiştirdiği için hesap
+  paylaşamıyor; mevcut 12 demo hesabın hepsi başka spec'lere ayrılmıştı.
+  Liste **sona** eklendi, 1-92 arası hiçbir hesap kaymadı
+
 ### Eklendi — adım 14: Bilgi widget'ları (hava, haber, piyasa)
 
 - **Anasayfaya "Bilgi panosu" bölümü eklendi**: hava durumu (İzmir — güncel

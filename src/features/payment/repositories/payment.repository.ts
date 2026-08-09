@@ -137,84 +137,17 @@ export async function decrementStock(
   return result.count === 1;
 }
 
-/** Kullanıcının kayıtlı kartları — silinenler hariç. */
-export async function listSavedCards(
-  userId: string,
-  client: Client = prisma,
-): Promise<{ id: string; brand: CardBrand; last4: string; expMonth: number; expYear: number }[]> {
-  return client.savedCard.findMany({
-    where: { userId, deletedAt: null },
-    select: { id: true, brand: true, last4: true, expMonth: true, expYear: true },
-    orderBy: { createdAt: "desc" },
-  });
-}
-
 /**
- * Kayıtlı kartı getirir — YALNIZCA sahibine.
+ * ⛔ KAYITLI KART VE ADRES SORGULARI ARTIK BURADA DEĞİL (adım 15).
  *
- * Sahiplik sorgunun içinde (`userId`), sonradan kontrol edilen bir `if`
- * değil: başkasının kartıyla ödeme yapılması IDOR açığı olurdu.
+ * `saved_cards` → `features/profile/repositories/saved-card.repository.ts`
+ * `addresses`   → `features/profile/repositories/address.repository.ts`
+ *
+ * Gerekçe: ikisi de KULLANICIYA ait kayıtlar; ödeme onları kullanır ama sahibi
+ * değildir. Profil sayfası ikinci çağıran olunca aynı tabloya iki ayrı
+ * özellikten dokunulur hâle gelmişti — tablo başına tek repository kuralı
+ * (01-architecture.md) bunu yasaklıyor.
  */
-export async function findOwnedSavedCard(
-  input: { savedCardId: string; userId: string },
-  client: Client = prisma,
-): Promise<{
-  id: string;
-  brand: CardBrand;
-  last4: string;
-  expMonth: number;
-  expYear: number;
-} | null> {
-  return client.savedCard.findFirst({
-    where: { id: input.savedCardId, userId: input.userId, deletedAt: null },
-    select: { id: true, brand: true, last4: true, expMonth: true, expYear: true },
-  });
-}
-
-/** Yeni kartı kaydeder. Numara DEĞİL, yalnızca marka + son 4 hane + son kullanma. */
-export async function saveCard(
-  input: {
-    userId: string;
-    brand: CardBrand;
-    last4: string;
-    expMonth: number;
-    expYear: number;
-    holderName: string;
-  },
-  client: Client = prisma,
-): Promise<{ id: string }> {
-  return client.savedCard.create({ data: input, select: { id: true } });
-}
-
-/** Kullanıcının teslimat adresleri. */
-export async function listAddresses(
-  userId: string,
-  client: Client = prisma,
-): Promise<{ id: string; title: string; fullAddress: string; district: string }[]> {
-  return client.address.findMany({
-    where: { userId, deletedAt: null },
-    select: { id: true, title: true, fullAddress: true, district: true },
-    orderBy: { createdAt: "asc" },
-  });
-}
-
-/** Adresin sahibi bu kullanıcı mı — IDOR kontrolü sorgunun içinde. */
-export async function findOwnedAddress(
-  input: { addressId: string; userId: string },
-  client: Client = prisma,
-): Promise<{ id: string } | null> {
-  return client.address.findFirst({
-    where: { id: input.addressId, userId: input.userId, deletedAt: null },
-    select: { id: true },
-  });
-}
-
-export async function createAddress(
-  input: { userId: string; title: string; fullAddress: string; district: string },
-  client: Client = prisma,
-): Promise<{ id: string }> {
-  return client.address.create({ data: input, select: { id: true } });
-}
 
 export type PaymentReceipt = {
   transactionId: string;

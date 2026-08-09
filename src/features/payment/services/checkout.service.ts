@@ -20,9 +20,9 @@ import {
   createOrderWithItems,
   createPayment,
   decrementStock,
-  findOwnedAddress,
-  saveCard,
 } from "@/features/payment/repositories/payment.repository";
+import { findOwnedAddress } from "@/features/profile/repositories/address.repository";
+import { saveCard } from "@/features/profile/repositories/saved-card.repository";
 import type { CheckoutPayload } from "@/features/payment/schemas/checkout.schema";
 import { resolveCard, type ResolvedCard } from "@/features/payment/services/card-resolver";
 import type { CartItemType, FulfillmentType } from "@/generated/prisma/enums";

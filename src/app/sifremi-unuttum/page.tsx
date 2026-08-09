@@ -38,7 +38,7 @@ export default async function PasswordResetPage({
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">{copy.request.title}</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-base text-muted-foreground">
           {/* Local ve preview'da e-posta GÖNDERİLMİYOR; "göndereceğiz" demek
               kullanıcıyı gelmeyecek bir postayı beklemeye iter. */}
           {isProductionEnv ? copy.request.description : copy.request.descriptionSimulated}
@@ -66,7 +66,7 @@ export default async function PasswordResetPage({
         </Alert>
       )}
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground">
         <Link href="/giris" className="font-medium underline underline-offset-4">
           {copy.request.backToLogin}
         </Link>

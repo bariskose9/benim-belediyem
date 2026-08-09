@@ -22,7 +22,7 @@ import { findMembershipPlan } from "@/features/gym/repositories/membership-plan.
 import { addCalendarMonths } from "@/features/gym/services/billing-period";
 import type { CreateMembershipPayload } from "@/features/gym/schemas/membership.schema";
 import { attemptPayment } from "@/features/payment/providers/mock-payment-provider";
-import { saveCard } from "@/features/payment/repositories/payment.repository";
+import { saveCard } from "@/features/profile/repositories/saved-card.repository";
 import { resolveCard } from "@/features/payment/services/card-resolver";
 import { recordAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/db";

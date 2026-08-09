@@ -1,19 +1,21 @@
 import { requireAccess } from "@/features/auth/services/api-guard";
-import { InvalidCheckoutRequestError } from "@/features/payment/errors";
-import { createAddress } from "@/features/payment/repositories/payment.repository";
-import { newAddressSchema } from "@/features/payment/schemas/checkout.schema";
+import { InvalidProfileRequestError } from "@/features/profile/errors";
+import { addressInputSchema } from "@/features/profile/schemas/profile.schema";
+import { createUserAddress } from "@/features/profile/services/address.service";
 import { created, fail } from "@/lib/http";
+import { readActorIp } from "@/lib/rate-limit";
 
 /**
- * POST /api/addresses — teslimat adresi ekler.
+ * `POST /api/addresses` — teslimat adresi ekler (PRD §5.0 · adım 15).
  *
- * NEDEN BU ADIMDA: market ve restoran siparişi adres olmadan tamamlanamıyor
- * (PRD §6.1) ve adresi olmayan bir kullanıcı ödeme ekranında kilitli kalırdı.
- * Adres YÖNETİMİ (listeleme, düzenleme, silme) profil sayfasının işi
- * (adım 15); burada yalnızca ekleme var.
+ * ⛔ `userId` GÖVDEDEN OKUNMAZ, oturumdan gelir. Şemada böyle bir alan yok,
+ * dolayısıyla istemci gönderse bile sonuca taşınamaz (05-auth-security.md).
  *
- * `userId` GÖVDEDEN OKUNMAZ, oturumdan gelir — istemci gönderse bile şema
- * onu sonuca taşımıyor.
+ * ⛔ `GET` UCU BİLEREK YOK. Adres listesini sayfa SUNUCUDA okuyor
+ * (`listUserAddresses`), yani listeyi HTTP üzerinden döndüren bir uca ihtiyaç
+ * yok. Açık duran her uç bakılması, test edilmesi ve korunması gereken bir
+ * yüzeydir; kimsenin çağırmadığı bir uç bedava değildir (CLAUDE.md §5.2 YAGNI).
+ * Mobil uygulama (adım 19) gerektirdiğinde kendi testiyle birlikte eklenir.
  */
 export const dynamic = "force-dynamic";
 
@@ -21,15 +23,17 @@ export async function POST(request: Request) {
   try {
     const session = await requireAccess("authenticated");
 
-    const parsed = newAddressSchema.safeParse(await readJsonBody(request));
+    const parsed = addressInputSchema.safeParse(await readJsonBody(request));
 
-    if (!parsed.success) throw new InvalidCheckoutRequestError();
+    // Zod'un alan yolu istemciye GİTMİYOR; kullanıcı tek ve anlaşılır bir
+    // Türkçe mesaj görüyor (03-api-guidelines.md).
+    if (!parsed.success) throw new InvalidProfileRequestError();
 
-    const address = await createAddress({
+    const address = await createUserAddress({
       userId: session.userId,
-      title: parsed.data.title,
-      fullAddress: parsed.data.fullAddress,
-      district: parsed.data.district,
+      payload: parsed.data,
+      actorIp: readActorIp(request.headers),
+      now: new Date(),
     });
 
     return created({ id: address.id });

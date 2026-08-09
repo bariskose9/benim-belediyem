@@ -260,6 +260,14 @@ enum AuditAction {
   data_export
   account_delete
   role_change
+  /// Profil sayfası (adım 15). Adres ve kayıtlı kart KİŞİSEL VERİDİR
+  /// (14-privacy-and-compliance.md), dolayısıyla her yazma ve her silme
+  /// denetlenebilir olmak zorunda. Okuma denetlenmiyor: liste her sayfa
+  /// açılışında okunuyor ve kaydı gürültüye boğardı.
+  address_create
+  address_update
+  address_delete
+  saved_card_delete
 }
 
 enum AuditEntityType {
@@ -273,6 +281,8 @@ enum AuditEntityType {
   membership_payment
   support_ticket
   consent_record
+  address
+  saved_card
 }
 
 enum ConsentType {

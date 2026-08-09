@@ -71,6 +71,26 @@ const BACKGROUND_CITIZEN_RANGE = { start: 17, count: 40 } as const;
  */
 const LATE_DEMO_STAFF_CITIZEN_INDEXES = [143, 144] as const;
 
+/**
+ * SONRADAN EKLENEN demo VATANDAŞ hesapları (adım 15).
+ *
+ * Yukarıdaki "sona ekle, araya ekleme" gerekçesinin aynısı geçerli; bu satırlar
+ * da listenin en sonunda duruyor ve 1-92 arası hiçbir hesabı kaydırmıyor.
+ *
+ * NEDEN GEREKİYOR: profil ekranının uçtan uca testi kullanıcının adreslerini ve
+ * kayıtlı kartlarını DEĞİŞTİRİYOR (ekliyor, düzenliyor, siliyor). Bu kayıtlar
+ * ödeme ve üyelik testlerinin de kullandığı kayıtlar; hesap paylaşılsaydı
+ * paralel koşan iki spec birbirinin verisini bozardı. Mevcut 12 demo hesabın
+ * hepsi başka spec dosyalarına ayrılmış durumda.
+ *
+ * PERSONEL DEĞİL VATANDAŞ: adres ve kart yönetimi `authenticated` kademesinde,
+ * personel yetkisi istemiyor (PRD §5.0 erişim tablosu).
+ *
+ * Kimlik havuzu: arka plan vatandaşları 17-56 aralığını kullanıyor, 57 ve 58
+ * boştaydı.
+ */
+const LATE_DEMO_CITIZEN_INDEXES = [57, 58] as const;
+
 export interface UserSeedResult {
   readonly users: readonly SeededUser[];
   readonly demoUsers: readonly SeededUser[];
@@ -94,6 +114,7 @@ export async function seedUsers(
     ...range(BACKGROUND_CITIZEN_RANGE).map((index) => ({ index, isDemoAccount: false })),
     // Sıra bozulmasın diye EN SONDA (gerekçe yukarıda).
     ...LATE_DEMO_STAFF_CITIZEN_INDEXES.map((index) => ({ index, isDemoAccount: true })),
+    ...LATE_DEMO_CITIZEN_INDEXES.map((index) => ({ index, isDemoAccount: true })),
   ];
 
   // Tek özet üretilip demo hesaplarda paylaşılıyor. Aynı şifre için ayrı ayrı

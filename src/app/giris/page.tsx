@@ -68,7 +68,7 @@ export default async function LoginPage({
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">{copy.title}</h1>
-        <p className="text-sm text-muted-foreground">{copy.description}</p>
+        <p className="text-base text-muted-foreground">{copy.description}</p>
       </header>
 
       {params.durum === "giris-gerekli" ? (
@@ -106,13 +106,13 @@ export default async function LoginPage({
       */}
       {isGoogleLoginConfigured() ? <GoogleLoginButton redirectTo={redirectTo} /> : null}
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground">
         <Link href="/sifremi-unuttum" className="font-medium underline underline-offset-4">
           {copy.forgotPasswordCta}
         </Link>
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground">
         {copy.registerPrompt}{" "}
         <Link href="/kayit" className="font-medium underline underline-offset-4">
           {copy.registerCta}

@@ -205,7 +205,7 @@ function ChannelPanel({
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">{destination}</p>
+          <p className="text-base text-muted-foreground">{destination}</p>
 
           {/* Doğrulandıktan sonra kod ekranda KALMAZ: işi bitmiş bir kodu
               göstermeye devam etmek hem kafa karıştırır hem gereksiz. */}

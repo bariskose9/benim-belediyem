@@ -12,7 +12,7 @@ import { addCalendarMonths, addDays } from "@/features/gym/services/billing-peri
 import type { MembershipRow } from "@/features/gym/types";
 import { notifyMembershipPaymentFailed } from "@/features/notifications/services/membership-notification.service";
 import { attemptPayment } from "@/features/payment/providers/mock-payment-provider";
-import { findOwnedSavedCard } from "@/features/payment/repositories/payment.repository";
+import { findOwnedSavedCard } from "@/features/profile/repositories/saved-card.repository";
 import { recordAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/db";
 

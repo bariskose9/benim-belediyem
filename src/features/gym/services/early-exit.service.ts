@@ -12,7 +12,7 @@ import { listMembershipPlans } from "@/features/gym/repositories/membership-plan
 import { calculateEarlyExitFeeKurus, findBasePlan } from "@/features/gym/services/plan-pricing";
 import type { MembershipPlanRow, MembershipRow } from "@/features/gym/types";
 import { attemptPayment } from "@/features/payment/providers/mock-payment-provider";
-import { findOwnedSavedCard } from "@/features/payment/repositories/payment.repository";
+import { findOwnedSavedCard } from "@/features/profile/repositories/saved-card.repository";
 import { recordAuditLog } from "@/lib/audit";
 
 /**

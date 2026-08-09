@@ -6,7 +6,8 @@ import { messages } from "@/config/messages";
 import { guardPage } from "@/features/auth/services/page-guard";
 import { getCartSummary } from "@/features/cart/services/cart.service";
 import { CheckoutForm } from "@/features/payment/components/CheckoutForm";
-import { listAddresses, listSavedCards } from "@/features/payment/repositories/payment.repository";
+import { listAddresses } from "@/features/profile/repositories/address.repository";
+import { listSavedCards } from "@/features/profile/repositories/saved-card.repository";
 import { buildDeliverySlots } from "@/features/payment/services/delivery-slots";
 import { formatTry } from "@/lib/money";
 

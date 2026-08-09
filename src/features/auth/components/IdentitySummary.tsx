@@ -52,11 +52,11 @@ export function IdentitySummary({ identity }: { identity: RegistrationIdentityVi
       <dl className="grid divide-y divide-border">
         {rows.map((row) => (
           <div key={row.label} className="grid gap-1 py-3 sm:grid-cols-[12rem_1fr] sm:gap-4">
-            <dt className="text-sm text-muted-foreground">
+            <dt className="text-base text-muted-foreground">
               {row.label}
               {row.notStored ? <span className="sr-only"> (kaydedilmez)</span> : null}
             </dt>
-            <dd className="text-sm font-medium break-words">{row.value}</dd>
+            <dd className="text-base font-medium wrap-break-word">{row.value}</dd>
           </div>
         ))}
       </dl>
