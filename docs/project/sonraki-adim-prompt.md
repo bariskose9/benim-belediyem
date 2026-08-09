@@ -31,7 +31,8 @@ Roadmap adım **0 → 14 bitti.** Bilgi panosu çalışıyor.
 - **Spor salonu üyeliği** çalışıyor: dört paket, aylık tahsilat, iptal
 - **Destek talebi** çalışıyor: `/destek`, `/destek/<id>` — dosya yükleme
 - **Bilgi panosu** çalışıyor (anasayfa altı): hava, haber, piyasa —
-  **projenin ilk gerçek dış API çağrıları**
+  **projenin ilk gerçek dış API çağrıları**. Canlıda gerçek veriyle doğrulandı:
+  hava 34°, USD 47,7099 ₺, BTC 3.109.296 ₺, 5 TRT Haber başlığı
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında ilk iş:** dal adresini
@@ -43,9 +44,12 @@ Roadmap adım **0 → 14 bitti.** Bilgi panosu çalışıyor.
 
 ## ⏰ OTURUM SONUNDA HATIRLAT — proje sahibinin bekleyen işleri
 
-**Adım 14'ten bekleyen telefon testi VAR:** anasayfadaki bilgi panosunun üç
-kartı (hava, haber, piyasa) telefonda denenmedi. Dar ekranda kartların taşıp
-taşmadığına ve haber başlıklarına dokunulabildiğine bakılmalı.
+**Şu an bekleyen telefon testi YOK.** Proje sahibi bilgi panosunu 2026-08-09'da
+preview'da ve telefonundan denedi — üç kart da temiz, haber bağlantıları
+açılıyor, koyu tema okunabilir. Adım 14 canlıya alındı (commit `383a1df`).
+
+**Adım 15'te yeni ekran geleceği için telefon testi yine gerekecek** — commit
+önerisini sunarken hangi ekranın deneneceğini yaz.
 
 ⚠️ **20 dakika bekleme gerektiren iki iş PROJE SONUNA bırakıldı** (borç #50 ve
 #62): sipariş durumunun ve destek talebi durumunun zamanla ilerlediği canlıda

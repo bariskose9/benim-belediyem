@@ -11,6 +11,11 @@
 
 **Son güncelleme:** 2026-08-09 · roadmap adım 14 sonrası
 
+> ✅ **Adım 14 CANLIDA** (2026-08-09, commit `383a1df`). Sağlık ucu `db: ok`,
+> anasayfada üç kart da gerçek veriyle çiziliyor. `feature/bilgi-widgetlari`
+> dalı merge edilip **silindi** — Turnstile ve Google panellerine hiç
+> eklenmemişti, çünkü bilgi panosu giriş gerektirmiyor.
+>
 > ## Adım 14 — DIŞ DÜNYADA HİÇBİR HESAP AÇILMADI ve AÇILMASI GEREKMİYOR
 >
 > Adım 14 projenin **ilk gerçek dış API çağrılarını** getirdi, ama **dört
