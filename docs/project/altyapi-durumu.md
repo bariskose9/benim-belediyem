@@ -9,8 +9,28 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-09 · roadmap adım 12 sonrası
+**Son güncelleme:** 2026-08-09 · roadmap adım 13 sonrası
 
+> **Adım 13'te dış dünyada DEĞİŞEN TEK ŞEY yeni dalın preview adresi.** Yeni
+> hesap, yeni servis, yeni ortam değişkeni ve yeni bağımlılık YOK.
+> **Yeni bir migration VAR**
+> (`20260809120000_add_support_ticket_lifecycle_and_attachments`) ama elle
+> çalıştırılacak bir şey değil: Vercel derleme komutu `prisma migrate deploy`
+> ile başlıyor. Migration geriye uyumlu — dört kolon ekliyor, hiçbir veri
+> silmiyor, eski sürüm kod bu kolonları hiç bilmeden çalışmaya devam ediyor.
+>
+> ⛔ **DOSYA DEPOLAMA İÇİN VERCEL BLOB STORE AÇILMADI — ve bu bir KARAR.**
+> `00-stack.md` Vercel Blob diyor, `integrations.md` `BLOB_READ_WRITE_TOKEN`
+> için yer tutuyor; ikisi de **bugün kullanılmıyor**. Destek talebi ekleri
+> `ticket_attachments.data` kolonunda duruyor (ADR-014). Proje sahibi
+> 2026-08-09'da "şimdilik veritabanı kalsın" dedi. Teknik borç #60.
+> **Blob store açılacaksa:** Vercel panelinde **private** erişimli bir store
+> oluşturulur ve projeye bağlanır; `BLOB_READ_WRITE_TOKEN` panel tarafından
+> kendiliğinden eklenir. Hobby planında ücretsiz — limit aşılırsa ücret
+> çıkmıyor, servis duruyor (resmî fiyat sayfasından 2026-08-09'da doğrulandı).
+> Local ve CI için `db` sürücüsü yine gerekir (canlı anahtar local'de
+> kullanılmaz — `13-environments.md`).
+>
 > **Adım 12'de dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis,
 > yeni ortam değişkeni ve yeni bağımlılık yok. **Yeni bir migration VAR**
 > (`20260808190500_membership_lifecycle_guards`) ama elle çalıştırılacak bir
@@ -105,7 +125,8 @@
   |---|---|
   | `benim-belediyem.vercel.app` | ✅ production — **silinmez** |
   | `benim-belediyem-git-feature-etkinlik-bilet-barisss.vercel.app` | ✅ adım 11 — dal merge edildi |
-  | `benim-belediyem-git-feature-spor-salonu-uyeligi-barisss.vercel.app` | ⛔ **adım 12 — HENÜZ EKLENMEDİ, ZORUNLU** |
+  | `benim-belediyem-git-feature-spor-salonu-uyeligi-barisss.vercel.app` | ❓ adım 12'de "eklenecek" diye yazılmıştı; **eklenip eklenmediği panelden görülmedi**. Dal merge edildi, artık gerekmiyor |
+  | `benim-belediyem-git-feature-destek-talebi-barisss.vercel.app` | ⛔ **adım 13 — HENÜZ EKLENMEDİ, ZORUNLU** |
   | `localhost` | ⚠️ muhtemelen gereksiz (aşağıda) |
   | `benim-belediyem-git-feature-google-ile-giris-barisss.vercel.app` | 🗑️ adım 4c — dal merge edildi, silinebilir |
   | `benim-belediyem-git-feature-sifre-sifirlama-barisss.vercel.app` | 🗑️ adım 4b-3 — merge edildi, silinebilir |
@@ -119,6 +140,12 @@
   dalların satırları temizlenmezse adım 14 civarında sınıra çarpılır.
   Temizlemenin tek bedeli: eski bir dalın preview'una geri dönülürse orada
   bot kutusu çizilmez.
+
+  ⚠️ **SINIRA GELİNDİ SAYILIR (2026-08-09):** destek dalı eklenince liste 8
+  veya 9 satıra çıkıyor — spor salonu satırının eklenip eklenmediği panelden
+  görülmediği için kesin sayı bilinmiyor. Proje sahibinin koyduğu tetik
+  (9/10 görülünce tek seferde temizlik) **bu adımda hatırlatılıyor**: panele
+  girildiğinde 🗑️ işaretli satırlar (merge edilmiş dallar) toplu silinebilir.
 
   ✋ **PROJE SAHİBİNİN KARARI (2026-08-08): SINIR DOLANA KADAR TEMİZLİK YOK.**
   Gerekçesi yerinde — silmek hiçbir şeyi çalıştırmıyor, yalnızca her adımda

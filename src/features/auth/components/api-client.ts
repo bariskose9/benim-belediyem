@@ -17,11 +17,23 @@ export async function apiRequest<T>(
   path: string,
   init: { method: string; body?: unknown } = { method: "GET" },
 ): Promise<ApiResult<T>> {
+  /**
+   * `FormData` gövdesi OLDUĞU GİBİ gönderilir ve `content-type` ELLE
+   * YAZILMAZ: sınır dizesini (boundary) tarayıcı üretiyor, başlığı elle
+   * yazmak onu düşürür ve sunucu gövdeyi ayrıştıramaz. Dosya taşıyan tek
+   * uç destek talebi oluşturma (ADR-014).
+   */
+  const isMultipart = init.body instanceof FormData;
+
   try {
     const response = await fetch(path, {
       method: init.method,
-      headers: init.body ? { "content-type": "application/json" } : undefined,
-      body: init.body ? JSON.stringify(init.body) : undefined,
+      headers: init.body && !isMultipart ? { "content-type": "application/json" } : undefined,
+      body: isMultipart
+        ? (init.body as FormData)
+        : init.body
+          ? JSON.stringify(init.body)
+          : undefined,
       // Kayıt yanıtları kişisel veri taşıyor; tarayıcı önbelleğine girmemeli.
       cache: "no-store",
     });

@@ -1213,11 +1213,25 @@ model StaffMember {
 // ===========================================================================
 
 model SupportTicket {
-  id          String              @id @default(cuid())
-  userId      String              @map("user_id")
+  id     String @id @default(cuid())
+  userId String @map("user_id")
+  /// Kullanıcının yazdığı başlık ve açıklama — ekranda düz METİN olarak çizilir.
   subject     String
   description String
-  status      SupportTicketStatus @default(open)
+
+  /// ⛔ GÖSTERİLECEK DURUM BU KOLON DEĞİLDİR (ADR-013 · ADR-014).
+  ///
+  /// Burada yalnızca talebin DOĞDUĞU (`open`) ve üyenin KAPATTIĞI (`closed`)
+  /// gerçekleri durur. Aradaki `in_review` ve `resolved` aşamaları talebin
+  /// yaşından türetilir (`support-ticket-timeline.ts`) ve hiçbir yere yazılmaz.
+  status SupportTicketStatus @default(open)
+
+  /// Üyenin talebi kapattığı an; kapatılmamışsa `null`.
+  closedAt DateTime? @map("closed_at")
+
+  /// Kullanıcıya EN SON hangi durumun bildirildiği. `null` = hiç bildirilmedi.
+  /// Tembel bildirim senkronizasyonunun ilerlettiği işaret (siparişteki desen).
+  notifiedStatus SupportTicketStatus? @map("notified_status")
 
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
@@ -1233,11 +1247,28 @@ model SupportTicket {
 }
 
 model TicketAttachment {
-  id        String @id @default(cuid())
-  ticketId  String @map("ticket_id")
-  fileUrl   String @map("file_url")
-  fileName  String @map("file_name")
-  sizeBytes Int    @map("size_bytes")
+  id       String @id @default(cuid())
+  ticketId String @map("ticket_id")
+
+  /// DEPOLAMA REFERANSI — hangi sürücünün nerede tuttuğunu söyleyen URI (ADR-014).
+  ///  · `db:inline` → içerik aşağıdaki `data` kolonunda
+  ///  · `https://…` → içerik dış nesne deposunda (Vercel Blob)
+  /// Kolonun kendisi ekrana ASLA verilmez; ek her zaman kendi yetkili ucumuzdan
+  /// servis edilir, böylece sürücü değişince ekran kodu değişmez.
+  fileUrl String @map("file_url")
+
+  /// Sanitize edilmiş dosya adı — kullanıcının gönderdiği ham ad DEĞİL.
+  fileName String @map("file_name")
+
+  /// Sunucuda BAYT DİZİSİNDEN doğrulanmış tür; istemcinin beyanı değil.
+  contentType String @map("content_type")
+
+  sizeBytes Int @map("size_bytes")
+
+  /// Dosya içeriği — yalnızca `db` sürücüsünde dolu (ADR-014).
+  /// Nesne deposuna geçildiğinde yeni satırlarda `null` kalır ve eski satırlar
+  /// okunmaya devam eder; bu yüzden nullable.
+  data Bytes?
 
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")

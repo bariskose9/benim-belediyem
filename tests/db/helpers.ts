@@ -144,6 +144,22 @@ export async function cleanupTestData(): Promise<void> {
 
   await prisma.registrationDraft.deleteMany({ where: { id: startsWith } });
 
+  /**
+   * Destek talepleri İKİ ÖLÇÜTLE siliniyor — randevu, koltuk ve üyelikteki
+   * gerekçenin aynısı (adım 13).
+   *
+   * Talebi UYGULAMA yazıyor (`support-ticket.service.ts`) ve kimliği `cuid()`
+   * oluyor, yani test öneki taşımıyor. `support_tickets.user_id` üzerindeki
+   * yabancı anahtar `Restrict` olduğu için bu satırlar kalırsa test kullanıcısı
+   * silinemez ve bir sonraki koşu "kullanıcı zaten var" ile patlar.
+   *
+   * EKLERİ AYRICA SİLMEYE GEREK YOK: `ticket_attachments` talebe `Cascade` ile
+   * bağlı, talep silinince ekleri de gider.
+   */
+  await prisma.supportTicket.deleteMany({
+    where: { OR: [{ id: startsWith }, { userId: startsWith }] },
+  });
+
   await prisma.user.deleteMany({ where: { id: startsWith } });
 
   await prisma.kpsQueryLog.deleteMany({ where: { id: startsWith } });
