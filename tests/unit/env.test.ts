@@ -107,7 +107,9 @@ describe("sunucu ortam değişkenleri", () => {
     const parsed = parseEnv(serverEnvSchema, validServerEnv, "test");
 
     expect(parsed.OTP_EMAIL_CHANNEL).toBe("mock");
-    expect(parsed.NEWS_API_PROVIDER).toBe("gnews");
+    // Bilgi widget'ları anahtar İSTEMİYOR (ADR-016); yalnızca koordinatın
+    // varsayılanı var ve o da verilmezse İzmir'e düşüyor.
+    expect(parsed.WEATHER_DEFAULT_LAT).toBe(38.4237);
   });
 
   it("sahte KPS anahtarı ZORUNLUDUR — eksikse uygulama açılmaz", () => {

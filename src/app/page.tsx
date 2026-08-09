@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { messages } from "@/config/messages";
 import { serviceCards } from "@/config/navigation";
 import { getCurrentSession } from "@/features/auth/services/session-context";
+import { InfoBoard } from "@/features/info-widgets/components/InfoBoard";
 import { cn } from "@/lib/utils";
 
 /**
@@ -73,6 +74,13 @@ export default async function HomePage() {
           ))}
         </ul>
       </section>
+
+      {/*
+        Bilgi panosu hizmet ızgarasının ALTINDA: sayfanın işi hizmete
+        yönlendirmek, hava durumu göstermek değil. Widget'lar `Suspense` ile
+        ayrı ayrı aktığı için buradaki sıra ilk çizimi geciktirmiyor.
+      */}
+      <InfoBoard />
     </main>
   );
 }

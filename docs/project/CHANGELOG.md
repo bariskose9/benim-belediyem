@@ -4,6 +4,48 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 14: Bilgi widget'ları (hava, haber, piyasa)
+
+- **Anasayfaya "Bilgi panosu" bölümü eklendi**: hava durumu (İzmir — güncel
+  durum + 3 günlük tahmin), güncel haber başlıkları ve piyasa (döviz kuru +
+  kripto). PRD §5.8
+- **PROJENİN İLK GERÇEK DIŞ API ÇAĞRILARI.** Bugüne kadar tüm dış servisler
+  taklit ediliyordu (sahte KPS, sahte ödeme). Sağlayıcılar canlı uçlarından
+  doğrulandı, ezberden yazılmadı
+- **Dört sağlayıcının DÖRDÜ DE ANAHTARSIZ** — proje sahibine yeni hesap
+  açtırılmadı: Open-Meteo (hava), Frankfurter/ECB (döviz), CoinGecko (kripto),
+  TRT Haber RSS (haber). `NEWS_API_KEY` ve `NEWS_API_PROVIDER` kaldırıldı
+- **Çağrılar yalnızca sunucuda** ve ortak bir dayanıklılık katmanından geçiyor
+  (`src/lib/external-fetch.ts`): **5 sn zaman aşımı**, en fazla **2 yeniden
+  deneme** (üstel geri çekilmeli) ve **sağlayıcı başına ayrı devre kesici**
+  (mevcut ADR-010 altyapısı yeniden kullanıldı, yeniden yazılmadı)
+- **`429` bilerek YENİDEN DENENMİYOR**: hız sınırına takılmışken tekrar sormak
+  sınırı derinleştirir. O tur kaybediliyor ve bayat veri gösteriliyor
+- **Yanıtlar Postgres'te önbellekleniyor** (yeni `external_data_cache` tablosu ·
+  **ADR-015**): hava 30 dk, döviz 60 dk, kripto 5 dk, haber 15 dk. Taze kayıt
+  varken dış çağrı **hiç yapılmıyor**
+- **Sağlayıcı çökerse widget boş kalmıyor**: 24 saate kadar eski kayıt
+  *"Şu an güncellenemiyor — … itibarıyla son veri"* notuyla gösteriliyor.
+  Daha eskisi gösterilmiyor; kart dürüstçe hata durumuna geçiyor ve
+  **sayfanın kalanı çalışmaya devam ediyor**
+- **Haber XML'i yeni bir paket eklenmeden okunuyor** (`src/lib/rss.ts` ·
+  **ADR-016**): CDATA ve HTML varlıkları çözülüyor, etiketler varlık
+  çözümünden ÖNCE siliniyor, bağlantılar **alan adı beyaz listesinden** ve
+  `https` şartından geçiyor, bağlantılar `rel="noopener noreferrer"` ile
+  yeni sekmede açılıyor
+- **Her widget kendi `Suspense` sınırında**: üç kart üç farklı sağlayıcıya
+  gidiyor ve en yavaş olan diğerlerini bekletmiyor. Yükleniyor / bayat / hata
+  durumlarının üçü de METİNLE yazılı
+- **Piyasa kartında iki sağlayıcı ayrı ayrı bozulabiliyor**: döviz düşerse
+  kripto ekranda kalıyor, tersi de geçerli
+
+### Değişti
+
+- **Yeni tablo: `external_data_cache`** (geriye uyumlu migration — yalnızca
+  ekliyor, hiçbir veriyi değiştirmiyor)
+- **`.env.example` sadeleşti**: bilgi widget'ları için anahtar satırı kalmadı,
+  yalnızca hava durumu koordinatı duruyor
+
 ### Eklendi — adım 13: Destek talebi + dosya yükleme
 
 - **Destek ekranı** `/destek`: üye başlık ve açıklama yazıp **en fazla 5 ekran

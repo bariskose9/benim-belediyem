@@ -9,7 +9,7 @@ sayfayı çökertmez.
 | Hava durumu | **Open-Meteo** (`api.open-meteo.com`) | Gerekmiyor | Ticari olmayan kullanım serbest | 30 dk |
 | Döviz kuru | **Frankfurter** (`api.frankfurter.dev`) | Gerekmiyor | Sınırsız (günlük ECB verisi) | 60 dk |
 | Kripto | **CoinGecko** public API | Gerekmiyor (demo) | Dakikada sınırlı | 5 dk |
-| Haber | **GNews.io** veya **NewsData.io** | Gerekiyor | Günde ~100 istek | 15 dk |
+| Haber | **TRT Haber RSS** (`www.trthaber.com/sondakika.rss`) | Gerekmiyor | Belirtilmiş bir sınır yok | 15 dk |
 | Bot koruması | **Cloudflare Turnstile** (`challenges.cloudflare.com`) | Gerekiyor (site + gizli anahtar) | Ayda 1M çözüme kadar ücretsiz | Önbelleklenmez — jeton tek kullanımlık |
 | Doğrulama kodu e-postası | **Resend** (`api.resend.com`) | Gerekiyor (API anahtarı + doğrulanmış gönderen) | Ayda 3.000 e-posta | Önbelleklenmez |
 
@@ -21,6 +21,26 @@ sayfayı çökertmez.
 - Cevap şeması Zod ile doğrulanır — dış servis bozuk veri gönderirse uygulama patlamaz.
 - Yerel geliştirmede ağ yoksa sahte veriye düşülür (fallback), boş ekran gösterilmez.
 - Testlerde gerçek istek atılmaz, yanıtlar mock'lanır.
+
+## Bilgi widget'ları — nasıl çalışıyor (adım 14)
+
+**Dört sağlayıcının DÖRDÜ DE anahtarsız.** Haber için `integrations.md`'nin önceki
+sürümü GNews/NewsData (anahtarlı) diyordu; proje sahibine yeni hesap açtırmamak
+için anahtarsız bir RSS akışına geçildi — gerekçe **ADR-016**.
+
+- Çağrılar `src/lib/external-fetch.ts` üzerinden yapılır: **zaman aşımı 5 sn**,
+  en fazla **2 yeniden deneme** (üstel geri çekilmeli), sağlayıcı başına
+  **ayrı devre kesici** (ADR-010).
+- **`429` YENİDEN DENENMEZ.** Sınıra takılmışken tekrar sormak sınırı
+  derinleştirir; o tur kaybedilir ve bayat veri gösterilir.
+- Yanıtlar `external_data_cache` tablosunda önbelleklenir (**ADR-015**).
+  Sağlayıcıya ulaşılamazsa **24 saate kadar eski kayıt** "şu an güncellenemiyor"
+  notuyla gösterilir; daha eskisi gösterilmez, kart hata durumuna geçer.
+- Önbelleğe **ham gövde değil sadeleştirilmiş şekil** yazılır; şekil hem
+  yazarken hem okurken Zod'dan geçer.
+- **Haber bağlantıları alan adı beyaz listesinden geçer** (`NEWS_ALLOWED_HOSTS`).
+  Akış ele geçirilse bile kullanıcı rastgele bir adrese götürülemez.
+- E2E testleri önbellek tablosunu doldurarak koşar; **ağa hiç çıkmaz.**
 
 ## Bot koruması (Cloudflare Turnstile)
 
@@ -75,9 +95,8 @@ GOOGLE_CLIENT_SECRET=
 NATIONAL_ID_ENCRYPTION_KEY=        # 32 bayt, ortamlar arası paylaşılmaz
 NATIONAL_ID_HASH_SALT=             # arama için tuzlanmış özet
 
-# Dış bilgi servisleri
-NEWS_API_KEY=
-NEWS_API_PROVIDER=gnews
+# Dış bilgi servisleri — ANAHTAR GEREKMİYOR (ADR-016)
+# Yalnızca hangi şehrin hava durumu gösterilecek; verilmezse İzmir.
 WEATHER_DEFAULT_LAT=38.4237
 WEATHER_DEFAULT_LON=27.1428
 

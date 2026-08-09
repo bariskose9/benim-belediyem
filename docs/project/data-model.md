@@ -96,6 +96,12 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
   `count` · unique: `key + windowStartedAt` (ADR-006)
   *(anahtar kişisel veri içermez; IP ve kimlik numarası hash'lenir)*
 
+- **ExternalDataCache** — `key` (unique), `payload` (JSON), `fetchedAt`, `expiresAt` (ADR-015)
+  *(dış bilgi servislerinin — hava, döviz, kripto, haber — sadeleştirilmiş yanıtı;
+  herkese açık ve kişiselleştirilmemiş veri, KİŞİSEL VERİ İÇERMEZ. Süresi geçen
+  satır silinmez, üzerine yazılır: sağlayıcıya ulaşılamadığında bayat kayıt
+  "eski veri" işaretiyle gösterilebilsin diye)*
+
 - **KpsQueryLog** — `actorIpHash`, `sessionId`, `result` (`success` / `mismatch` /
   `not_found` / `rate_limited` / `timeout`), `durationMs` — append-only
   *(kimlik numarası YAZILMAZ)*
@@ -293,6 +299,7 @@ Süresi dolan kayıtları temizleyen planlı görev günde bir çalışır (ADR-
 | `RegistrationDraft` | 15 dakika | Silinir — okuma anında da, hesap açılınca da (ADR-012) |
 | `OtpChallenge` | 24 saat | Silinir |
 | `RateLimitCounter` | 24 saat | Silinir |
+| `ExternalDataCache` | 7 gün (son okumadan) | Silinir — kişisel veri değil, yalnızca çöp birikmesin diye |
 | `Session` | Süre + 7 gün | Silinir |
 | `Cart` (`abandoned`) | 30 gün | Silinir |
 | `KpsQueryLog` | 90 gün | Silinir |

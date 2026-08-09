@@ -164,6 +164,14 @@ export async function cleanupTestData(): Promise<void> {
 
   await prisma.kpsQueryLog.deleteMany({ where: { id: startsWith } });
   await prisma.rateLimitCounter.deleteMany({ where: { id: startsWith } });
+
+  /**
+   * Dış veri önbelleği ANAHTAR üzerinden siliniyor, kimlik üzerinden değil:
+   * satırın kimliğini uygulama `cuid()` ile üretiyor, test önekini taşıyan
+   * alan `key` (adım 14 · ADR-015). Bu, üyelik ve destek tablolarında
+   * öğrenilen tuzağın aynısı.
+   */
+  await prisma.externalDataCache.deleteMany({ where: { key: startsWith } });
 }
 
 /**
