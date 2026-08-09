@@ -3,6 +3,7 @@ import {
   listNotificationsForUser,
   type NotificationRow,
 } from "@/features/notifications/repositories/notification.repository";
+import { syncMembershipNotifications } from "@/features/notifications/services/membership-notification.service";
 import { syncOrderNotifications } from "@/features/notifications/services/order-notification.service";
 import { listOrdersForUser } from "@/features/orders/repositories/order.repository";
 
@@ -25,6 +26,13 @@ export async function listNotifications(input: {
   const orders = await listOrdersForUser(input.userId);
 
   await syncOrderNotifications({ userId: input.userId, orders, now: input.now });
+
+  /**
+   * Üyelik hatırlatması da aynı gerekçeyle burada (adım 12): kullanıcı spor
+   * salonu sayfasına hiç uğramadan doğrudan bildirimlere gelirse, yaklaşan
+   * yenilemeyi hiç görmezdi.
+   */
+  await syncMembershipNotifications({ userId: input.userId, now: input.now });
 
   return listNotificationsForUser(input.userId);
 }

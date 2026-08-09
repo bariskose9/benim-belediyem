@@ -8,8 +8,13 @@ import { RESTAURANT_PREP_MINUTES_MAX, RESTAURANT_PREP_MINUTES_MIN } from "@/conf
 import { messages } from "@/config/messages";
 import { apiRequest } from "@/features/auth/components/api-client";
 import { FormAlert } from "@/features/auth/components/FormAlert";
-import { TextField } from "@/features/auth/components/TextField";
-import type { CardBrand } from "@/generated/prisma/enums";
+import {
+  CardPicker,
+  emptyCardForm,
+  toCardPayload,
+  type CardFormState,
+  type SavedCardOption,
+} from "@/features/payment/components/CardPicker";
 import { formatTry } from "@/lib/money";
 
 /**
@@ -29,14 +34,6 @@ import { formatTry } from "@/lib/money";
  */
 
 const copy = messages.payment;
-
-export type SavedCardOption = {
-  id: string;
-  brand: CardBrand;
-  last4: string;
-  expMonth: number;
-  expYear: number;
-};
 
 export type AddressOption = { id: string; title: string; district: string };
 
@@ -68,42 +65,21 @@ export function CheckoutForm(props: CheckoutFormProps) {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [useSavedCardId, setUseSavedCardId] = useState<string | null>(
-    props.savedCards[0]?.id ?? null,
-  );
   const [addressId, setAddressId] = useState(props.addresses[0]?.id ?? "");
   const [deliverySlot, setDeliverySlot] = useState(props.deliverySlots[0] ?? "");
-
-  const [number, setNumber] = useState("");
-  const [holderName, setHolderName] = useState("");
-  const [expMonth, setExpMonth] = useState("");
-  const [expYear, setExpYear] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [saveCard, setSaveCard] = useState(false);
+  const [card, setCard] = useState<CardFormState>(() => emptyCardForm(props.savedCards));
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setIsPending(true);
 
-    const card = useSavedCardId
-      ? { kind: "saved" as const, savedCardId: useSavedCardId, cvv }
-      : {
-          kind: "new" as const,
-          number,
-          holderName,
-          expMonth: Number(expMonth),
-          expYear: Number(expYear),
-          cvv,
-          save: saveCard,
-        };
-
     const result = await apiRequest<{ transactionId: string }>("/api/payments", {
       method: "POST",
       body: {
         idempotencyKey,
         expectedTotalKurus: props.totalKurus,
-        card,
+        card: toCardPayload(card),
         delivery: props.needsAddress
           ? { addressId, ...(props.needsSlot ? { deliverySlot } : {}) }
           : {},
@@ -200,91 +176,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
           {copy.card.heading}
         </h2>
 
-        {props.savedCards.length > 0 ? (
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-2 text-sm font-medium">{copy.card.savedHeading}</legend>
-            {props.savedCards.map((card) => (
-              <label key={card.id} className="flex min-h-11 items-center gap-3">
-                <input
-                  type="radio"
-                  name="kart"
-                  checked={useSavedCardId === card.id}
-                  onChange={() => setUseSavedCardId(card.id)}
-                  className="size-4"
-                />
-                <span className="text-base">
-                  {copy.card.maskedLabel(copy.card.brands[card.brand], card.last4)}
-                </span>
-              </label>
-            ))}
-            <label className="flex min-h-11 items-center gap-3">
-              <input
-                type="radio"
-                name="kart"
-                checked={useSavedCardId === null}
-                onChange={() => setUseSavedCardId(null)}
-                className="size-4"
-              />
-              <span className="text-base">{copy.card.useNew}</span>
-            </label>
-          </fieldset>
-        ) : null}
-
-        {useSavedCardId === null ? (
-          <div className="flex flex-col gap-4">
-            <TextField
-              label={copy.card.number}
-              value={number}
-              onChange={(event) => setNumber(event.target.value)}
-              inputMode="numeric"
-              autoComplete="cc-number"
-              help={copy.card.numberHelp}
-            />
-            <TextField
-              label={copy.card.holder}
-              value={holderName}
-              onChange={(event) => setHolderName(event.target.value)}
-              autoComplete="cc-name"
-            />
-            <div className="flex gap-3">
-              <TextField
-                label={copy.card.expiryMonth}
-                value={expMonth}
-                onChange={(event) => setExpMonth(event.target.value)}
-                inputMode="numeric"
-                autoComplete="cc-exp-month"
-                help={copy.card.expiryMonthHelp}
-              />
-              <TextField
-                label={copy.card.expiryYear}
-                value={expYear}
-                onChange={(event) => setExpYear(event.target.value)}
-                inputMode="numeric"
-                autoComplete="cc-exp-year"
-                help={copy.card.expiryYearHelp}
-              />
-            </div>
-
-            <label className="flex min-h-11 items-center gap-3">
-              <input
-                type="checkbox"
-                checked={saveCard}
-                onChange={(event) => setSaveCard(event.target.checked)}
-                className="size-4"
-              />
-              <span className="text-sm">{copy.card.save}</span>
-            </label>
-          </div>
-        ) : null}
-
-        <TextField
-          label={copy.card.cvv}
-          value={cvv}
-          onChange={(event) => setCvv(event.target.value)}
-          inputMode="numeric"
-          autoComplete="cc-csc"
-          help={copy.card.cvvHelp}
-        />
+        <CardPicker savedCards={props.savedCards} value={card} onChange={setCard} showSaveOption />
       </section>
 
       <Button type="submit" size="lg" className="min-h-11" disabled={isPending}>

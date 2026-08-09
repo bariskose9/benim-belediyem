@@ -602,3 +602,45 @@ export const SEAT_HOLD_MAX_PER_USER = 8;
  */
 export const SEAT_HOLD_RATE_LIMIT_MAX = 60;
 export const SEAT_HOLD_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+// ===========================================================================
+// SPOR SALONU ÜYELİĞİ (PRD §5.6 · adım 12)
+// ===========================================================================
+
+/**
+ * Yenileme hatırlatmasının kaç gün önce düşeceği.
+ *
+ * SAYIYI AJAN SEÇMEDİ: PRD §5.6 "yenilemeden 3 gün önce hatırlatma bildirimi
+ * düşer" diyor.
+ */
+export const MEMBERSHIP_RENEWAL_REMINDER_DAYS = 3;
+
+/**
+ * Tahsilat başarısız olduktan sonra üyeliğin pasifleşmesine kalan süre.
+ *
+ * Yine PRD §5.6: "3 gün içinde ödenmezse üyelik pasifleşir". Pasifleşme bir
+ * kolona YAZILMIYOR, okuma anında hesaplanıyor (ADR-007 · ADR-013): durumu
+ * ilerletecek bir zamanlayıcı yok ve olsa bile hiç çalışmadığında kullanıcı
+ * yanlış durum görmemeli.
+ */
+export const MEMBERSHIP_PAYMENT_GRACE_DAYS = 3;
+
+/**
+ * Bir ayın uzunluğu — bir sonraki tahsilat tarihi bununla bulunur.
+ *
+ * TAKVİM AYI KULLANILIYOR, 30 GÜN DEĞİL: 31 Ocak'ta başlayan üyelik 28
+ * Şubat'ta yenilenir, 2 Mart'ta değil. Sabit gün sayısı kullanmak tahsilat
+ * gününü her ay biraz kaydırır ve bir yıl sonra kullanıcının beklediği tarih
+ * tutmaz. Ayın karşılığı olmayan günlerde (29-31) ay sonuna çekilir.
+ */
+export const MEMBERSHIP_BILLING_PERIOD_MONTHS = 1;
+
+/**
+ * Üyelik yazma uçlarının bütçesi — KULLANICI başına.
+ *
+ * Ödeme bütçesinden ayrı ve daha dar: üyelik işlemleri (satın alma, paket
+ * değişimi, iptal) günde birkaç kez yapılan işler değil. Her denemenin
+ * arkasında sahte de olsa bir tahsilat çağrısı var.
+ */
+export const MEMBERSHIP_WRITE_RATE_LIMIT_MAX = 20;
+export const MEMBERSHIP_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;

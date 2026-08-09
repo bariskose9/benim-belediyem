@@ -9,8 +9,23 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-08 · roadmap adım 11 sonrası
+**Son güncelleme:** 2026-08-09 · roadmap adım 12 sonrası
 
+> **Adım 12'de dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis,
+> yeni ortam değişkeni ve yeni bağımlılık yok. **Yeni bir migration VAR**
+> (`20260808190500_membership_lifecycle_guards`) ama elle çalıştırılacak bir
+> şey değil: Vercel derleme komutu `prisma migrate deploy` ile başlıyor, yani
+> her deploy migration'ları kendisi uyguluyor. Migration geriye uyumlu —
+> `memberships` tablosuna iki NULL kabul eden kolon ekliyor, hiçbir veri
+> silmiyor ve eski sürüm kod bu kolonları hiç bilmeden çalışmaya devam ediyor.
+>
+> ⚠️ **UZAK ORTAMLARDA TOHUMLAMA GÜNCEL DEĞİL.** Adım 12'de tohuma iki yeni
+> demo personel hesabı eklendi (#11 Zehra Kılıç, #12 Esra Arslan). Preview ve
+> production 2026-08-01'de tohumlandığı için **o iki hesap orada YOK**.
+> Uygulama bundan etkilenmiyor (mevcut personel hesapları üye olabiliyor);
+> yalnızca E2E testleri local'de koşuyor ve orada seed güncel. Uzak ortamlarda
+> seed yeniden koşturulursa iki hesap da gelir.
+>
 > **Adım 11'de dış dünyada HİÇBİR ŞEY değişmedi.** Yeni hesap, yeni servis,
 > yeni ortam değişkeni, yeni bağımlılık ve **yeni migration yok**; `venues`,
 > `venue_seats`, `events` ve `seat_reservations` adım 3'ten beri hazırdı ve
@@ -40,7 +55,16 @@
 > ⚠️ **Etkinlikler de tohumlama gününden itibaren 60 güne yayılıyor**
 > (`EVENT_WINDOW_DAYS`). Preview ve production 2026-08-01'de tohumlandığı için
 > etkinlikler ~2026-09-30'a kadar var; sonrasında etkinlik listesi boşalır.
-> Aynı seed koşusu ikisini birden çözer.
+>
+> ⛔ **DÜZELTME (2026-08-09):** önceki sürüm "aynı seed koşusu ikisini birden
+> çözer" diyordu; **bu YANLIŞ.** Seed kodu okunarak doğrulandı:
+> - **Doktor saatleri düzelir** — slot kimliği tarihten üretiliyor
+>   (`seedId("slot", doktor, <saat>)`), yani yeni koşu bugünden itibaren 14
+>   günlük YENİ satırlar yazar
+> - **Etkinlikler DÜZELMEZ** — etkinlik kimliği sabit (`seed-event-0001…12`)
+>   ve `createMany({ skipDuplicates: true })` mevcut satırları atlar; tarihleri
+>   2026-08-01'e göre kalmaya devam eder. Tazelemek için ya etkinlikler
+>   silinip yeniden üretilmeli ya da seed'e tarih güncelleyen bir kol eklenmeli
 
 ---
 
@@ -80,7 +104,8 @@
   | Hostname | Durum |
   |---|---|
   | `benim-belediyem.vercel.app` | ✅ production — **silinmez** |
-  | `benim-belediyem-git-feature-etkinlik-bilet-barisss.vercel.app` | ✅ adım 11, güncel dal |
+  | `benim-belediyem-git-feature-etkinlik-bilet-barisss.vercel.app` | ✅ adım 11 — dal merge edildi |
+  | `benim-belediyem-git-feature-spor-salonu-uyeligi-barisss.vercel.app` | ⛔ **adım 12 — HENÜZ EKLENMEDİ, ZORUNLU** |
   | `localhost` | ⚠️ muhtemelen gereksiz (aşağıda) |
   | `benim-belediyem-git-feature-google-ile-giris-barisss.vercel.app` | 🗑️ adım 4c — dal merge edildi, silinebilir |
   | `benim-belediyem-git-feature-sifre-sifirlama-barisss.vercel.app` | 🗑️ adım 4b-3 — merge edildi, silinebilir |

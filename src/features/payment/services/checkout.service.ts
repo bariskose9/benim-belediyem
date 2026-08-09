@@ -106,6 +106,8 @@ export async function checkout(input: CheckoutInput): Promise<CheckoutResult> {
    */
   const result = await attemptPayment({
     cardNumber: card.cardNumber ?? "",
+    // Kayıtlı kartta numara yok; sahte sağlayıcı sonucu son 4 haneden okur.
+    cardLast4: card.last4,
     amountKurus: summary.totalKurus,
   });
 

@@ -24,6 +24,21 @@ import { sleep } from "@/lib/utils";
 export type PaymentAttempt = {
   /** Yalnızca sonucu belirlemek için okunur; hiçbir yere yazılmaz. */
   cardNumber: string;
+  /**
+   * Kayıtlı kartla ödemede sonucu belirleyen alan.
+   *
+   * ═══ NEDEN GEREKLİ (adım 12) ═══
+   * Kayıtlı kartın numarası HİÇ SAKLANMIYOR, dolayısıyla `cardNumber` boş
+   * geliyor ve sağlayıcı varsayılan "başarılı" yolunu izliyordu. Tek seferlik
+   * ödemede bunun bedeli küçüktü; üyelikte büyük: aidat her ay KAYITLI
+   * KARTTAN çekiliyor, yani "kart reddedilirse üyelik ödeme bekliyora geçer"
+   * kuralının (PRD §5.6) hiçbir zaman tetiklenmemesi demekti.
+   *
+   * Son 4 hane test kartlarını ayırt etmeye yetiyor (`fake-data-guide.md`);
+   * gerçek bir entegrasyonda bunun karşılığı sağlayıcıdaki kart jetonudur.
+   * Son 4 hane zaten veritabanında duruyor — yeni bir sır saklanmıyor.
+   */
+  cardLast4?: string;
   amountKurus: number;
 };
 
@@ -45,6 +60,12 @@ const RESULT_BY_CARD: Readonly<Record<string, PaymentStatus>> = {
   "4000000000009995": "insufficient_funds",
 };
 
+/** Aynı kartların son 4 hanesi — kayıtlı kartta numara olmadığı için tek ipucu bu. */
+const RESULT_BY_LAST4: Readonly<Record<string, PaymentStatus>> = {
+  "0002": "declined",
+  "9995": "insufficient_funds",
+};
+
 /**
  * Ödemeyi dener.
  *
@@ -59,10 +80,13 @@ export async function attemptPayment(attempt: PaymentAttempt): Promise<PaymentRe
 
   const digits = normalizeCardNumber(attempt.cardNumber);
 
-  return {
-    status: RESULT_BY_CARD[digits] ?? "success",
-    transactionId: buildTransactionId(),
-  };
+  // Numara varsa o karar verir; yoksa (kayıtlı kart) son 4 haneye bakılır.
+  const status =
+    RESULT_BY_CARD[digits] ??
+    (digits === "" && attempt.cardLast4 ? RESULT_BY_LAST4[attempt.cardLast4] : undefined) ??
+    "success";
+
+  return { status, transactionId: buildTransactionId() };
 }
 
 /**

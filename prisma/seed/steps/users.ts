@@ -44,6 +44,33 @@ const DEMO_CITIZEN_INDEXES = [10, 11, 12, 13, 14, 15, 16] as const;
 const BACKGROUND_STAFF_RANGE = { start: 103, count: 40 } as const;
 const BACKGROUND_CITIZEN_RANGE = { start: 17, count: 40 } as const;
 
+/**
+ * SONRADAN EKLENEN demo personel hesapları (adım 12).
+ *
+ * ═══ NEDEN LİSTENİN SONUNA EKLENİYOR, ARAYA DEĞİL ═══
+ *
+ * Hesapların satır kimliği ve e-posta adresi `plan` dizisindeki SIRADAN
+ * türetiliyor (`seedId("user", order + 1)`, `fakeEmail(..., order + 1)`).
+ * Yeni girdiyi `DEMO_STAFF_CITIZEN_INDEXES` içine koymak kendisinden sonraki
+ * her hesabın sırasını bir kaydırırdı: `emre.arslan1` başka birine geçer,
+ * E2E testlerindeki ve `test-hesaplari.md`'deki numaralar tutmaz, üstelik
+ * mevcut bir veritabanında tohumlama aynı kişileri YENİ kimliklerle bir kez
+ * daha yazardı (`skipDuplicates` yalnızca aynı kimliği atlar).
+ *
+ * Sona eklemek bu risklerin hiçbirini taşımıyor: 1-90 arası her satır
+ * olduğu yerde kalıyor, yeni hesaplar 91 ve 92 numarayı alıyor.
+ *
+ * NEDEN GEREKİYOR: spor salonu üyeliğinde "bir kullanıcıya tek aktif üyelik"
+ * kuralı var (PRD §5.6), yani üyelik testi hesap PAYLAŞAMAZ. İki Playwright
+ * projesi (masaüstü + 375px) aynı anda koştuğu için her birine ayrı personel
+ * hesabı gerekiyor; mevcut üç demo personelin ikisi hastane testine ait.
+ *
+ * Kimlik havuzu: 143 ve 144 numaralı sahte vatandaşlar teşkilat şemasında
+ * personel olarak zaten var ama hiçbir hesaba bağlı değildi (arka plan
+ * personeli 103-142 aralığını kullanıyor).
+ */
+const LATE_DEMO_STAFF_CITIZEN_INDEXES = [143, 144] as const;
+
 export interface UserSeedResult {
   readonly users: readonly SeededUser[];
   readonly demoUsers: readonly SeededUser[];
@@ -65,6 +92,8 @@ export async function seedUsers(
     ...DEMO_CITIZEN_INDEXES.map((index) => ({ index, isDemoAccount: true })),
     ...range(BACKGROUND_STAFF_RANGE).map((index) => ({ index, isDemoAccount: false })),
     ...range(BACKGROUND_CITIZEN_RANGE).map((index) => ({ index, isDemoAccount: false })),
+    // Sıra bozulmasın diye EN SONDA (gerekçe yukarıda).
+    ...LATE_DEMO_STAFF_CITIZEN_INDEXES.map((index) => ({ index, isDemoAccount: true })),
   ];
 
   // Tek özet üretilip demo hesaplarda paylaşılıyor. Aynı şifre için ayrı ayrı
