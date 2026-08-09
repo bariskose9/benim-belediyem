@@ -43,6 +43,17 @@ Roadmap adım **0 → 15 bitti.** Profil sayfası çalışıyor.
 
 ## ⏰ OTURUM SONUNDA HATIRLAT — proje sahibinin bekleyen işleri
 
+🔴 **BEKLEYEN TELEFON TESTİ VAR — adım 15 (profil sayfası).** Proje sahibi
+2026-08-09'da "şimdilik merge et, telefon testini sonraya saklayalım" dedi.
+Adım 15 canlıya alındı ama **ekranlar telefondan denenmedi.** Bir sonraki
+oturumun BAŞINDA hatırlat; canlıda denenecek beş adım:
+
+1. Giriş yap → **Hesabım** → "Kayıtlarım" ve "Hesap ayarları" bölümleri görünüyor mu
+2. **Teslimat adreslerim** → adres ekle, sonra **Düzenle** ile başlığını değiştir
+3. Aynı adreste **Sil** → onay kutusu çıkıyor mu → Evet, sil
+4. **Kayıtlı kartlarım** → tam kart numarası hiçbir yerde görünmüyor mu (yalnızca son 4 hane)
+5. Tema düğmesiyle açık/koyu geçiş → iki temada da metinler okunuyor mu
+
 ⚠️ **20 dakika bekleme gerektiren iki iş PROJE SONUNA bırakıldı** (borç #50 ve
 #62): sipariş durumunun ve destek talebi durumunun zamanla ilerlediği canlıda
 elle görülmedi. **Adım 18'de tek oturumda birlikte bakılacak.** Bunları her
