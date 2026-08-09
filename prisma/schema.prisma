@@ -539,6 +539,28 @@ model RateLimitCounter {
   @@map("rate_limit_counters")
 }
 
+/// Dış bilgi servislerinin (hava, döviz, kripto, haber) önbelleklenmiş yanıtı — ADR-015.
+/// `payload` HAM gövde DEĞİL, Zod'dan geçmiş sadeleştirilmiş şekildir: sağlayıcı
+/// şeması değişirse hata ayrıştırma anında görülür, ekran çizilirken değil.
+/// KİŞİSEL VERİ İÇERMEZ: herkese açık, kişiselleştirilmemiş veri.
+/// `key` benzersiz — süresi geçen kayıt SİLİNMEZ, üzerine yazılır; sağlayıcıya
+/// ulaşılamadığında bayat kayıt "eski veri" işaretiyle ekrana çıkabilsin diye.
+model ExternalDataCache {
+  id      String @id @default(cuid())
+  key     String @unique
+  payload Json
+
+  fetchedAt DateTime @map("fetched_at")
+  expiresAt DateTime @map("expires_at")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  isSeedData Boolean  @default(false) @map("is_seed_data")
+
+  @@index([expiresAt])
+  @@map("external_data_cache")
+}
+
 /// KPS sorgu denetim kaydı — append-only, updatedAt yok.
 /// SORGULANAN KİMLİK NUMARASI İÇİN KOLON YOKTUR: olmayan kolona yanlışlıkla
 /// yazılamaz (05-auth-security.md "Her sorgu denetim kaydına yazılır —

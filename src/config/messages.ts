@@ -114,6 +114,69 @@ export const messages = {
   },
 
   /**
+   * Anasayfadaki bilgi widget'ları (PRD §5.8 · adım 14).
+   *
+   * ÜÇ DURUM DA METİNLE YAZILI (07-ui-design-system.md → yükleniyor / boş /
+   * hata): veri gelirken "yükleniyor", sağlayıcıya ulaşılamayıp elde eski kayıt
+   * varken "güncellenemiyor", hiç veri yokken "erişilemiyor".
+   */
+  infoWidgets: {
+    heading: "Bilgi panosu",
+    intro: "Hava durumu, güncel haberler ve piyasa değerleri tek ekranda.",
+
+    /** Yükleniyor durumunun ekran okuyucuya duyurulan karşılığı. */
+    loading: "Yükleniyor…",
+
+    updatedAt: (time: string) => `${time} itibarıyla`,
+
+    /**
+     * BAYAT VERİ SESSİZ GÖSTERİLMEZ (ADR-015 bedel 2).
+     *
+     * Kur ve kripto hızlı değişiyor; "güncel" başlığı altında saatler önceki
+     * bir sayıyı işaretsiz göstermek kullanıcıyı yanıltırdı.
+     */
+    staleNotice: (time: string) => `Şu an güncellenemiyor — ${time} itibarıyla son veri`,
+
+    /** Dış servis çökse bile SAYFA AYAKTA: yalnızca bu kart hata gösterir. */
+    unavailable: "Bu bilgiye şu anda ulaşılamıyor. Sayfanın kalanı çalışmaya devam ediyor.",
+
+    weather: {
+      title: "Hava durumu",
+      city: "İzmir",
+      humidity: (percent: number) => `Nem %${percent}`,
+      wind: (kmh: string) => `Rüzgâr ${kmh} km/s`,
+      forecastHeading: "Sonraki 3 gün",
+      /** Ekran okuyucu için: "24 derece / 15 derece" yerine anlamlı cümle. */
+      dayRange: (max: string, min: string) => `En yüksek ${max}, en düşük ${min}`,
+      empty: "Tahmin bilgisi bulunamadı.",
+    },
+
+    markets: {
+      title: "Piyasa",
+      ratesHeading: "Döviz kuru",
+      cryptoHeading: "Kripto",
+      /** Kur ANLIK DEĞİL: ECB günlük referans kuru — tarihi yazmak şart. */
+      rateDate: (date: string) => `Merkez bankası kuru · ${date}`,
+      unit: (code: string) => `1 ${code}`,
+      changeUp: (percent: string) => `%${percent} arttı`,
+      changeDown: (percent: string) => `%${percent} azaldı`,
+      coins: {
+        bitcoin: "Bitcoin",
+        ethereum: "Ethereum",
+      },
+    },
+
+    news: {
+      title: "Güncel haberler",
+      /** Haber bize ait DEĞİL: kaynak açıkça yazılıyor (ADR-016). */
+      source: (name: string) => `Kaynak: ${name}`,
+      /** Bağlantı yeni sekmede açılıyor; ekran okuyucu bunu bilmeli. */
+      opensInNewTab: "yeni sekmede açılır",
+      empty: "Şu anda gösterilecek haber yok.",
+    },
+  },
+
+  /**
    * Hizmet kartları (PRD §5). Anahtarlar `src/config/navigation.ts` içindeki
    * `ServiceKey` ile birebir aynıdır — biri değişirse TypeScript diğerini de
    * değiştirmeye zorlar.

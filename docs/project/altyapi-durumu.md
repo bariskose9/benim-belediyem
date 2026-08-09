@@ -9,8 +9,39 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-09 · roadmap adım 13 sonrası
+**Son güncelleme:** 2026-08-09 · roadmap adım 14 sonrası
 
+> ## Adım 14 — DIŞ DÜNYADA HİÇBİR HESAP AÇILMADI ve AÇILMASI GEREKMİYOR
+>
+> Adım 14 projenin **ilk gerçek dış API çağrılarını** getirdi, ama **dört
+> sağlayıcının dördü de anahtarsız**. Yeni hesap, yeni anahtar, yeni panel işi
+> ve yeni ortam değişkeni **YOK**:
+>
+> | Ne için | Sağlayıcı | Anahtar | Kimin panelinde bir işi var |
+> |---|---|---|---|
+> | Hava durumu | Open-Meteo | **gerekmiyor** | hiç kimsenin |
+> | Döviz kuru | Frankfurter (ECB) | **gerekmiyor** | hiç kimsenin |
+> | Kripto | CoinGecko public | **gerekmiyor** | hiç kimsenin |
+> | Haber | TRT Haber RSS | **gerekmiyor** | hiç kimsenin |
+>
+> Dördü de 2026-08-09'da canlı uçlarından **fiilen çağrılarak** doğrulandı.
+> Gerekçe ADR-016: proje sahibine yeni hesap açtırmamak, açtırmaktan iyidir.
+>
+> ⛔ **`NEWS_API_KEY` ve `NEWS_API_PROVIDER` KALDIRILDI.** Bu değişkenler
+> hiçbir ortamda tanımlı değildi ve artık şemada da yoklar. Bir sonraki oturum
+> "haber için anahtar girilmesi gerekiyor" sanmasın.
+>
+> **Yeni bir migration VAR** (`20260809150000_add_external_data_cache`) ama
+> elle çalıştırılacak bir şey değil: Vercel derleme komutu `prisma migrate
+> deploy` ile başlıyor. Migration geriye uyumlu — tek bir yeni tablo ekliyor,
+> hiçbir veriyi değiştirmiyor, eski sürüm kod bu tabloyu hiç bilmeden
+> çalışmaya devam ediyor.
+>
+> ⚠️ **CoinGecko'nun anahtarsız ucu Vercel'de `429` verebilir** (çıkış IP'leri
+> paylaşımlı). Bu bir arıza değil beklenen bir durum: 5 dakikalık önbellek
+> istek sayısını saatte ~12'ye indiriyor ve takılırsa kullanıcı boş kart değil
+> bayat fiyat görüyor. Teknik borç #65 — canlıda trafik oluşunca ölçülecek.
+>
 > **Adım 13'te dış dünyada DEĞİŞEN TEK ŞEY yeni dalın preview adresi.** Yeni
 > hesap, yeni servis, yeni ortam değişkeni ve yeni bağımlılık YOK.
 > **Yeni bir migration VAR**

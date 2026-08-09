@@ -693,3 +693,95 @@ export const SUPPORT_TICKET_LIST_LIMIT = 50;
  */
 export const SUPPORT_WRITE_RATE_LIMIT_MAX = 10;
 export const SUPPORT_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+// ===========================================================================
+// BİLGİ WIDGET'LARI (PRD §5.8 · adım 14)
+//
+// Projenin İLK GERÇEK dış API çağrıları. Dördü de anahtar gerektirmiyor
+// (ADR-016) ve yanıtları Postgres'te önbellekleniyor (ADR-015).
+// ===========================================================================
+
+/**
+ * Dış servis zaman aşımı — sahte KPS'inkinden (3 sn) UZUN.
+ *
+ * Gerekçe: sahte KPS kendi sunucumuzda, aynı bölgede çalışıyor; buradakiler
+ * başka kıtadaki üçüncü parti sunucular. 3 saniye onlar için haksız bir sınır
+ * olurdu ve widget'lar durup dururken hataya düşerdi. Yine de üst sınır şart
+ * (CLAUDE.md §5.9): cevap vermeyen bir servis isteği sonsuza kadar açık tutar.
+ */
+export const INFO_WIDGET_TIMEOUT_MS = 5_000;
+
+/** En fazla 2 yeniden deneme (CLAUDE.md §5.9); taban 300 ms, üstel geri çekilme. */
+export const INFO_WIDGET_MAX_RETRIES = 2;
+export const INFO_WIDGET_RETRY_BACKOFF_MS = 300;
+
+/**
+ * Devre kesici (ADR-010) — sağlayıcı BAŞINA ayrı devre.
+ *
+ * Eşik sahte KPS'inkinden (5) düşük: orada her hata bir kullanıcının kayıt
+ * denemesiydi, burada hatalar arka planda birikiyor ve kullanıcı zaten bayat
+ * veri görüyor. Çöken bir servise ısrar etmenin karşılığı yok.
+ */
+export const INFO_WIDGET_BREAKER_FAILURE_THRESHOLD = 3;
+export const INFO_WIDGET_BREAKER_WINDOW_MS = 5 * 60_000;
+export const INFO_WIDGET_BREAKER_COOLDOWN_MS = 5 * 60_000;
+
+/**
+ * Önbellek süreleri (`integrations.md` tablosuyla birebir aynı).
+ * Verinin gerçekte ne sıklıkta değiştiğine göre seçildi:
+ * döviz kuru günde bir kez (ECB), kripto sürekli, hava yarım saatte bir.
+ */
+export const WEATHER_CACHE_TTL_MS = 30 * 60_000;
+export const EXCHANGE_RATE_CACHE_TTL_MS = 60 * 60_000;
+export const CRYPTO_CACHE_TTL_MS = 5 * 60_000;
+export const NEWS_CACHE_TTL_MS = 15 * 60_000;
+
+/** Önbellek anahtarları — TEK yerde, çünkü tablodaki satırı bunlar adresliyor. */
+export const WEATHER_CACHE_KEY = "info:weather:izmir";
+export const EXCHANGE_RATE_CACHE_KEY = "info:rates:try";
+export const CRYPTO_CACHE_KEY = "info:crypto:try";
+export const NEWS_CACHE_KEY = "info:news:tr";
+
+/**
+ * Bayat kayıt bu yaştan sonra ARTIK GÖSTERİLMEZ.
+ *
+ * Bayat veri sunmanın amacı geçici bir kesintiyi kullanıcıya yansıtmamak; bir
+ * haftalık döviz kurunu "güncel" bölümünde göstermek ise yanıltıcı olurdu.
+ * Bu sınırdan sonra widget dürüstçe hata durumuna geçer.
+ */
+export const INFO_WIDGET_MAX_STALE_MS = 24 * 60 * 60_000;
+
+/** Önbellek satırı son okumadan bu kadar sonra çöp sayılır (data-model.md). */
+export const EXTERNAL_CACHE_RETENTION_MS = 7 * 24 * 60 * 60_000;
+
+/** Hava durumu: İzmir + 3 günlük tahmin (PRD §5.8). Bugün dâhil 4 gün istenir. */
+export const WEATHER_FORECAST_DAYS = 4;
+export const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
+
+/**
+ * Döviz: Frankfurter, ECB günlük kurlarını yayınlıyor ve anahtar istemiyor.
+ * `base=TRY` sorulup ters çevriliyor — tek çağrıyla üç kur geliyor.
+ */
+export const EXCHANGE_RATE_API_URL = "https://api.frankfurter.dev/v1/latest";
+export const EXCHANGE_RATE_SYMBOLS = ["USD", "EUR", "GBP"] as const;
+
+/** Kripto: CoinGecko'nun anahtarsız ucu. Dakikada sınırlı → 5 dk önbellek şart. */
+export const CRYPTO_API_URL = "https://api.coingecko.com/api/v3/simple/price";
+export const CRYPTO_COIN_IDS = ["bitcoin", "ethereum"] as const;
+
+/**
+ * Haber: anahtarsız RSS akışı (ADR-016). Sağlayıcı değişimi TEK satır.
+ * Kaynak adı ekranda yazıyor — haber bize aitmiş gibi sunulmuyor.
+ */
+export const NEWS_FEED_URL = "https://www.trthaber.com/sondakika.rss";
+export const NEWS_SOURCE_NAME = "TRT Haber";
+export const NEWS_ITEM_LIMIT = 5;
+
+/**
+ * Haber bağlantılarının izinli alan adları.
+ *
+ * NEDEN VAR: akış üçüncü bir kurumun sunucusunda. Bir gün ele geçirilse veya
+ * yönlendirilse, kullanıcıyı rastgele bir adrese götüren bir bağlantı
+ * çizmemeliyiz. Bu liste dışındaki her kalem sessizce atılır.
+ */
+export const NEWS_ALLOWED_HOSTS = ["www.trthaber.com", "trthaber.com"] as const;

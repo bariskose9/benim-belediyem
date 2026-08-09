@@ -110,9 +110,17 @@ const serverEnvBaseSchema = z.object({
     error: "En az 32 karakter olmalı. Üretmek için: openssl rand -base64 32",
   }),
 
-  // adım 14'te zorunlu olur (bilgi widget'ları)
-  NEWS_API_KEY: optionalSecret,
-  NEWS_API_PROVIDER: z.enum(["gnews", "newsdata"]).default("gnews"),
+  /**
+   * Bilgi widget'ları (adım 14) — koordinat DIŞINDA hiçbir değişkene ihtiyaç yok.
+   *
+   * `NEWS_API_KEY` ve `NEWS_API_PROVIDER` KALDIRILDI: haber kaynağı anahtar
+   * gerektirmeyen bir RSS akışı (ADR-016), hava/döviz/kripto sağlayıcıları da
+   * anahtarsız. Kullanılmayan değişkeni şemada tutmak, sonraki oturuma
+   * "bir yere anahtar girilmesi gerekiyor" diye yanlış bir iz bırakırdı.
+   *
+   * Koordinat yapılandırmada kalıyor: şehir değişirse kod değil ortam değişir.
+   * Varsayılan İzmir — üç ortamda da tanımlanmasına gerek yok.
+   */
   WEATHER_DEFAULT_LAT: z.coerce.number().min(-90).max(90).default(38.4237),
   WEATHER_DEFAULT_LON: z.coerce.number().min(-180).max(180).default(27.1428),
 
