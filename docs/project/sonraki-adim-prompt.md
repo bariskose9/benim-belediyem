@@ -49,9 +49,16 @@ Adım 15 canlıya alındı ama **ekranlar telefondan denenmedi.** Canlıda denen
 4. **Kayıtlı kartlarım** → tam kart numarası hiçbir yerde görünmüyor mu (son 4 hane)
 5. Tema düğmesiyle açık/koyu geçiş → iki temada da metinler okunuyor mu
 
-🟠 **ADIM 15b DE TELEFONDAN DENENMEDİ** (canlıya alındıysa): `/hakkimizda`
-sayfasında şema açılıp kapanıyor mu, bir birime dokununca liste geliyor mu,
-arama kutusu çalışıyor mu, 375px'te satırlar taşıyor mu.
+🔴 **BEKLEYEN TELEFON TESTİ VAR — adım 15b (Hakkımızda).** Proje sahibi
+2026-08-10'da "bunun da testi sonraya kalsın, not al, merge et" dedi. Adım 15b
+canlıya alındı ama **ekranlar telefondan denenmedi.** Canlıda denenecek:
+
+1. `/hakkimizda` → şemadaki oklara dokun, birimler açılıp kapanıyor mu
+2. **"Bilgi İşlem Dairesi Başkanlığı personelini listele"** → 100 kişi geliyor mu
+3. **"İtfaiye Dairesi Başkanlığı"** → "henüz yayınlanmadı" mesajı çıkıyor mu
+4. Arama kutusuna bir personel adını **BÜYÜK HARFLE** yaz → yine buluyor mu
+5. Şema satırları dar ekranda taşıyor mu (yatay kaydırma çubuğu çıkıyor mu)
+6. Tema düğmesiyle açık/koyu geçiş → iki temada da metinler okunuyor mu
 
 ⚠️ **20 dakika bekleme gerektiren iki iş PROJE SONUNA bırakıldı** (borç #50 ve
 #62): sipariş durumunun ve destek talebi durumunun zamanla ilerlediği canlıda
