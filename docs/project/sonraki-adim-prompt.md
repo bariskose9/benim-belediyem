@@ -24,8 +24,9 @@ Roadmap adım **0 → 15 ve 15b bitti.** Hakkımızda sayfası çalışıyor.
 - **Hastane randevusu** · **Ortak sepet + ödeme** · **Market** · **Restoran**
   · **Sipariş takibi + bildirim** · **Etkinlik + koltuk** · **Spor salonu**
   · **Destek talebi** · **Bilgi panosu** · **Profil merkezi** çalışıyor
-- **Hakkımızda** çalışıyor: `/hakkimizda` — kurum bilgileri, teşkilat şeması
-  (açılır kapanır ağaç), 100 kişilik personel rehberi. **Giriş gerektirmiyor**
+- **Hakkımızda** çalışıyor ve **CANLIDA** (2026-08-10, commit `9d64199`):
+  `/hakkimizda` — kurum bilgileri, teşkilat şeması (açılır kapanır ağaç),
+  100 kişilik personel rehberi. **Giriş gerektirmiyor**
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında ilk iş:** dal adresini
@@ -249,8 +250,14 @@ Dal: `feature/google-baglantisi` (öneri)
   `docker compose down -v` + `npm run db:up`
 
 **Yayın**
-- **Neon uykudayken production deploy PATLIYOR** (`P1001`). Merge sonrası
-  `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**
+- **Neon uykudayken deploy PATLIYOR** (`P1001`) — **production'da da PREVIEW'da
+  da**. Adım 15b'de preview ilk denemede patladı; çözüm `npx vercel redeploy
+  <dagitim-url> --scope barisss` (ilk bağlantı denemesi zaten veritabanını
+  uyandırıyor, ikinci deneme geçiyor). **`vercel redeploy`'a panel adresini
+  (`vercel.com/...`) DEĞİL dağıtım adresini (`*.vercel.app`) ver** — panel
+  adresiyle "Can't find the deployment" diyor.
+  Merge sonrası `/api/health` içindeki `commit` alanının değiştiğini
+  **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR**
 
 **Git**

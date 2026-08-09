@@ -28,9 +28,24 @@
 > ⚠️ Bir sonraki adım (15c, Google bağlantısı) **giriş gerektiriyor** —
 > orada iki panel satırı da ZORUNLU olacak.
 >
+> ✅ **Adım 15b CANLIDA** (2026-08-10, commit `9d64199`, PR #37). Sağlık ucu
+> `db: ok`, `/hakkimizda` 200 dönüyor ve canlıda 100 kişi listeleniyor.
+> `feature/hakkimizda` dalı merge edilip **silindi** — Turnstile ve Google
+> panellerine hiç eklenmemişti (sayfa giriş gerektirmiyor).
+>
+> ⚠️ **PREVIEW DAĞITIMI İLK DENEMEDE PATLADI** (`P1001`): Neon'un **preview**
+> dalı uykudaydı, `prisma migrate deploy` ~5 saniyede vazgeçti. `npx vercel
+> redeploy <dagitim-url>` ile ikinci deneme geçti. Bu tuzağın production'da
+> yaşandığı biliniyordu; **preview'da da aynen geçerli** olduğu 2026-08-10'da
+> görüldü. Uyandırmanın en ucuz yolu: dağıtımı yeniden tetiklemek (ilk
+> bağlantı denemesi zaten uyandırma sinyali gönderiyor).
+>
+> ⚠️ Proje sahibinin **iki telefon testi bekliyor** — adım 15 (profil) ve
+> adım 15b (Hakkımızda). İkisi de canlıda, ikisi de gerçek cihazda
+> denenmedi (roadmap teknik borç #73).
+>
 > ✅ **Adım 15 CANLIDA** (2026-08-09, commit `35af65d`). Devir belgesi PR #36
-> ile merge edildi (`d94437f`). ⚠️ Proje sahibinin **telefon testi hâlâ
-> bekliyor** — profil ekranları canlıda telefondan denenmedi.
+> ile merge edildi (`d94437f`).
 >
 > ## Adım 15 — DIŞ DÜNYADA HİÇBİR HESAP AÇILMADI ve AÇILMASI GEREKMİYOR
 >
