@@ -43,17 +43,18 @@ Roadmap adım **0 → 13 bitti.** Destek talebi çalışıyor.
 
 ## ⏰ OTURUM SONUNDA HATIRLAT — proje sahibinin bekleyen işleri
 
-Adım 14 bitip commit önerisini sunarken **şunları hatırlat:**
+**Şu an bekleyen telefon testi YOK.** Adım 13'te ikisi de kapatıldı: proje
+sahibi destek talebini (dosya seçme + ek görselin çizilmesi) ve spor salonunu
+(paket kartları + ders programı) 2026-08-09'da telefonundan denedi, ikisi de
+temiz. Borç #59 ödendi.
 
-> 1. **Spor salonu üyeliğini TELEFONDAN dene** — canlıda
->    `benim-belediyem.vercel.app/spor-salonu`. Paket kartları ve haftalık ders
->    programı dar ekranda taşıyor mu? (Borç #59 · 2026-08-09'da ertelendi)
-> 2. **Destek talebini TELEFONDAN dene** — `benim-belediyem.vercel.app/destek`.
->    Özellikle **dosya seçme** ve **ek görselin çizilmesi** gerçek cihazda hiç
->    denenmedi; masaüstü tarayıcıda ve Playwright `mobile-375` projesinde
->    doğrulandı (2026-08-09)
+**Adım 14'te yeni bir ekran geldiği için telefon testi yine gerekecek** —
+commit önerisini sunarken hangi ekranın deneneceğini yaz.
 
-Bakıldıktan sonra ilgili maddeyi sil.
+⚠️ **20 dakika bekleme gerektiren iki iş PROJE SONUNA bırakıldı** (borç #50 ve
+#62): sipariş durumunun ve destek talebi durumunun zamanla ilerlediği canlıda
+elle görülmedi. **Adım 18'de tek oturumda birlikte bakılacak.** Bunları her
+adımda tekrar hatırlatma — proje sahibi bilinçli olarak erteledi.
 
 ## ADIM 13'TEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
 
