@@ -38,33 +38,74 @@ Roadmap adım **0 → 15 ve 15b bitti.** Hakkımızda sayfası çalışıyor.
   **⚠️ Turnstile listesi 10 sınırına dayandı** — panele girildiğinde merge
   edilmiş dalların satırları toplu silinmeli (`altyapi-durumu.md`)
 
-## ⏰ OTURUM SONUNDA HATIRLAT — proje sahibinin bekleyen işleri
+## 📱 TOPLU ELLE TEST — OTURUMUN BAŞINDA GÜNDEME GETİR
 
-🔴 **BEKLEYEN TELEFON TESTİ VAR — adım 15 (profil sayfası).** Proje sahibi
-2026-08-09'da "şimdilik merge et, telefon testini sonraya saklayalım" dedi.
-Adım 15 canlıya alındı ama **ekranlar telefondan denenmedi.** Canlıda denenecek:
+> Proje sahibi 2026-08-10'da **"hepsini sonraki oturumda topluca test edeyim"**
+> dedi. Bekleyen dört elle doğrulamanın **tamamı** aşağıda, tek seferde
+> koşulacak biçimde sıralı. Kod yazmadan önce bunu ona hatırlat ve
+> **"şimdi mi yapalım, sonra mı?"** diye sor — cevabı "sonra" ise bu bölümü
+> olduğu gibi bırak, adım işine geç.
+>
+> Kapsanan teknik borçlar: **#50 · #62 · #73**.
+> Tamamlananları bu listeden ve roadmap'ten SİL, yarım kalanı bırak.
 
-1. Giriş yap → **Hesabım** → "Kayıtlarım" ve "Hesap ayarları" görünüyor mu
-2. **Teslimat adreslerim** → adres ekle, sonra **Düzenle** ile başlığını değiştir
-3. Aynı adreste **Sil** → onay kutusu çıkıyor mu → Evet, sil
-4. **Kayıtlı kartlarım** → tam kart numarası hiçbir yerde görünmüyor mu (son 4 hane)
-5. Tema düğmesiyle açık/koyu geçiş → iki temada da metinler okunuyor mu
+**Nerede:** https://benim-belediyem.vercel.app (production) · **telefondan**
+**Hesap:** `docs/project/test-hesaplari.md` → "Örnek üye hesapları", şifre
+`Test1234!`. **Personel olan bir hesap seç** (tabloda "✔ evet") — hastane ve
+spor salonu ekranları yalnızca personele açık.
+⛔ **#13 Aslı Avcı ve #14 Ege Kurt production'da YOK** (tohum 2026-08-01), onları seçme.
 
-🔴 **BEKLEYEN TELEFON TESTİ VAR — adım 15b (Hakkımızda).** Proje sahibi
-2026-08-10'da "bunun da testi sonraya kalsın, not al, merge et" dedi. Adım 15b
-canlıya alındı ama **ekranlar telefondan denenmedi.** Canlıda denenecek:
+### ⏱️ ADIM 0 — ÖNCE SAYAÇLARI BAŞLAT (sonra beklemeyesin)
+
+İki doğrulama gerçek zamanda bekleme istiyor. Onları **en başta** tetikle,
+bekleme süresini diğer testlerle doldur:
+
+1. **Sipariş oluştur** (borç #50): **RESTORAN'dan** sipariş ver — restoran
+   eşiği **10 dakika**, markette **20 dakika** (`order-timeline.ts`, koddan
+   doğrulandı). Adisyona bir yemek ekle → Sepet → Öde → adres seç/ekle →
+   sahte kart **`4111 1111 1111 1111`** (projenin başarılı test kartı; `…0002`
+   ve `…9995` bilerek BAŞARISIZ döner), son kullanma ileri bir tarih, CVV üç hane
+   → ödemeyi tamamla. **Saati not et.** Sipariş `Alındı` olmalı ve
+   **iptal düğmesi görünmeli**
+2. **Destek talebi oluştur** (borç #62): Destek → yeni talep → konu + açıklama
+   → gönder. **Saati not et.** Talep `Açık` durumunda olmalı
+
+### A) ADIM 15 — PROFİL EKRANLARI (borç #73)
+
+1. **Hesabım** → "Kayıtlarım" ve "Hesap ayarları" bölümleri görünüyor mu
+2. **Teslimat adreslerim** → yeni adres ekle → sonra **Düzenle** ile başlığını değiştir
+3. Aynı adreste **Sil** → onay kutusu çıkıyor mu → "Evet, sil" → liste güncelleniyor mu
+4. **Kayıtlı kartlarım** → adım 0'da kullandığın kart burada mı ve
+   **tam numara hiçbir yerde görünmüyor mu** (yalnızca son 4 hane)
+5. Kartı kaldırmayı dene → onay metni çıkıyor mu (spor salonu üyeliğin varsa
+   ek uyarı da görünmeli)
+
+### B) ADIM 15b — HAKKIMIZDA (borç #73)
 
 1. `/hakkimizda` → şemadaki oklara dokun, birimler açılıp kapanıyor mu
 2. **"Bilgi İşlem Dairesi Başkanlığı personelini listele"** → 100 kişi geliyor mu
 3. **"İtfaiye Dairesi Başkanlığı"** → "henüz yayınlanmadı" mesajı çıkıyor mu
 4. Arama kutusuna bir personel adını **BÜYÜK HARFLE** yaz → yine buluyor mu
-5. Şema satırları dar ekranda taşıyor mu (yatay kaydırma çubuğu çıkıyor mu)
-6. Tema düğmesiyle açık/koyu geçiş → iki temada da metinler okunuyor mu
+5. Şema satırları taşıyor mu — sayfa **yana kayıyor mu** (kaymamalı)
 
-⚠️ **20 dakika bekleme gerektiren iki iş PROJE SONUNA bırakıldı** (borç #50 ve
-#62): sipariş durumunun ve destek talebi durumunun zamanla ilerlediği canlıda
-elle görülmedi. **Adım 18'de tek oturumda birlikte bakılacak.** Bunları her
-adımda tekrar hatırlatma — proje sahibi bilinçli olarak erteledi.
+### C) HER İKİ EKRAN İÇİN ORTAK
+
+1. Tema düğmesiyle **açık/koyu** geçiş → iki temada da metinler okunuyor mu
+2. Düğmelere parmakla rahat basılıyor mu (hedefler 44px olmalı)
+
+### D) ⏱️ SAYAÇLARA GERİ DÖN
+
+1. **Restoran siparişinden 10 dakika sonra** (borç #50): `/siparislerim` →
+   sipariş **`Hazırlanıyor`** durumuna geçmiş olmalı ve **iptal düğmesi
+   kaybolmalı**. (Market siparişi verdiysen süre **20 dakika**.)
+   İstersen 25. dakikada tekrar bak: **`Yolda`** olmalı
+2. **Talepten 30 dakika sonra** (borç #62): `/destek` → talep
+   **`İnceleniyor`** durumuna geçmiş olmalı.
+   (`Çözüldü` eşiği 180 dakika — o kadar beklemeye gerek yok)
+
+> **Neden bekleme gerekiyor:** durumlar veritabanında bir kolonda tutulmuyor,
+> **okuma anında zamandan türetiliyor** (ADR-013). Yani "ilerleme" ancak gerçek
+> saat ilerleyince görülebiliyor; otomatik testlerde saat taklit ediliyor.
 
 ## ADIM 15b'DEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
 
