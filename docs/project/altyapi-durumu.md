@@ -9,8 +9,29 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-09 · roadmap adım 15 sonrası
+**Son güncelleme:** 2026-08-09 · roadmap adım 15b sonrası
 
+> ## Adım 15b — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ ve PANEL İŞİ DE YOK
+>
+> Hakkımızda sayfası tamamen kendi verimizle çalışıyor: yeni servis, yeni
+> anahtar, yeni ortam değişkeni, yeni bağımlılık ve **yeni migration YOK**.
+> `org_units` (35 birim) ve `staff_members` (100 personel) adım 3'ten beri
+> tohumluydu; şema hiç değişmedi. `npm audit`: 0 açık.
+>
+> ⛔ **YENİ DALIN PREVIEW ADRESİ PANELLERE EKLENMEDİ — ve GEREKMİYOR.**
+> Diğer adımlardan farklı olarak `feature/hakkimizda` dalı için Cloudflare
+> Turnstile ve Google OAuth listelerine satır eklenmedi: sayfa **giriş
+> gerektirmiyor**, yani preview'da denemek için ne bot kutusuna ne de Google
+> girişine ihtiyaç var. Turnstile listesi 10 sınırına dayandığı için gereksiz
+> satır eklemek doğrudan zarar. Sonraki oturum "eksik kalmış" sanmasın —
+> bu bir KARAR (adım 14'te bilgi panosu için de aynısı yapılmıştı).
+> ⚠️ Bir sonraki adım (15c, Google bağlantısı) **giriş gerektiriyor** —
+> orada iki panel satırı da ZORUNLU olacak.
+>
+> ✅ **Adım 15 CANLIDA** (2026-08-09, commit `35af65d`). Devir belgesi PR #36
+> ile merge edildi (`d94437f`). ⚠️ Proje sahibinin **telefon testi hâlâ
+> bekliyor** — profil ekranları canlıda telefondan denenmedi.
+>
 > ## Adım 15 — DIŞ DÜNYADA HİÇBİR HESAP AÇILMADI ve AÇILMASI GEREKMİYOR
 >
 > Profil sayfası tamamen kendi verimizle çalışıyor: yeni servis, yeni anahtar,

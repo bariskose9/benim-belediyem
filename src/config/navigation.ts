@@ -50,6 +50,12 @@ export const primaryNavItems = [
   { key: "hospital", href: "/hastane" },
   { key: "gym", href: "/spor-salonu" },
   { key: "support", href: "/destek" },
+  /**
+   * Hakkımızda menünün SONUNDA: bir hizmet değil, kurumsal bilgi. Ana sayfadaki
+   * hizmet ızgarasına da bu yüzden konulmadı — orası "ne yapabilirim" sorusunun
+   * cevabı, burası "bu kurum kim" sorusunun.
+   */
+  { key: "about", href: "/hakkimizda" },
 ] as const;
 
 export type PrimaryNavKey = (typeof primaryNavItems)[number]["key"];

@@ -227,6 +227,8 @@ export const messages = {
       "geliştirilmiş bir örnektir; kurum adları, kişiler, ürünler ve tüm veriler uydurmadır.",
     sourceCode: "Kaynak kodu (GitHub)",
     sourceCodeUrl: "https://github.com/bariskose9/benim-belediyem",
+    /** Kurumsal bilgi sayfası (adım 15b). Yasal sayfalar adım 17'de eklenecek. */
+    about: "Hakkımızda",
   },
 
   /**
@@ -710,6 +712,7 @@ export const messages = {
     hospital: "Hastane",
     gym: "Spor salonu",
     support: "Destek",
+    about: "Hakkımızda",
     /** Ekran okuyucular için: menünün ne olduğu söylenmeli (WCAG 2.1 AA). */
     label: "Ana menü",
 
@@ -1962,6 +1965,119 @@ export const messages = {
       invalidDistrict: "İlçe adı 2-60 karakter olmalı.",
       tooManyAttempts:
         "Çok fazla değişiklik yaptınız. Güvenliğiniz için lütfen biraz sonra tekrar deneyin.",
+    },
+  },
+
+  /** Hakkımızda: kurum bilgileri, teşkilat şeması ve personel rehberi (PRD §5.9 · adım 15b). */
+  about: {
+    pageTitle: "Hakkımızda",
+    title: "Hakkımızda",
+    description:
+      "Kurum bilgilerimiz, teşkilat şemamız ve personel rehberi. Bu sayfa herkese açıktır; " +
+      "görüntülemek için giriş yapmanız gerekmez.",
+
+    contact: {
+      heading: "Kurum bilgileri",
+      addressLabel: "Adres",
+      addressValue: "Örnek Mahallesi, Belediye Caddesi No: 1, Konak / İzmir",
+      phoneLabel: "Çağrı merkezi",
+      phoneValue: "0232 000 00 00",
+      emailLabel: "E-posta",
+      emailValue: "bilgi@ornek.test",
+      hoursLabel: "Çalışma saatleri",
+      hoursValue: "Hafta içi 08.30 – 17.30 · Hafta sonu kapalı",
+      /**
+       * Feragat burada da tekrarlanıyor: alt bilgideki genel uyarıyı okumadan
+       * bu kutuya bakan biri adresi ve telefonu gerçek sanabilir.
+       */
+      note: "Adres, telefon ve e-posta bilgileri örnektir; gerçek bir kuruma ait değildir.",
+    },
+
+    chart: {
+      heading: "Teşkilat şeması",
+      intro:
+        "Birimlerin üzerine dokunarak şemayı açıp kapatabilir, bir birimi seçerek o birimin " +
+        "personelini listeleyebilirsiniz.",
+      /**
+       * Listenin erişilebilir ADI sayfa başlığından FARKLI seçildi: aynı metin
+       * iki yerde kullanılırsa hem ekran okuyucu hem test hangisini kastettiğini
+       * ayırt edemiyor (adım 15'te ölçülmüş bir tuzak).
+       */
+      listLabel: "Teşkilat birimleri",
+      staffCount: (count: number) => `${count} personel`,
+      showStaff: (name: string) => `${name} personelini listele`,
+      /** Alt birimi olmayan birimde açılır ok yerine düz bağlantı çiziliyor. */
+      selected: "Seçili birim",
+    },
+
+    directory: {
+      heading: "Personel rehberi",
+      intro:
+        "Bilgi İşlem Dairesi Başkanlığı personeli birim ve unvana göre süzülebilir, ada göre aranabilir.",
+      listLabel: "Personel kayıtları",
+      resultCount: (count: number) => `${count} kişi listeleniyor`,
+      selectedUnit: (name: string) => `Birim: ${name}`,
+      clearUnit: "Birim süzgecini kaldır",
+
+      search: {
+        label: "Personel ara",
+        placeholder: "Ad veya soyad",
+        submit: "Personeli ara",
+        clear: "Aramayı temizle",
+      },
+
+      titles: {
+        label: "Unvanlar",
+        all: "Tüm unvanlar",
+      },
+
+      /**
+       * Unvan enum'ının Türkçe karşılıkları.
+       *
+       * Veritabanındaki değerler İngilizce (`department_head`, …); kullanıcıya
+       * gösterilen karşılıkları burada (data-model.md → "Enum değerleri
+       * İngilizce; kullanıcıya gösterilen karşılıkları src/config/ altında").
+       */
+      titleLabels: {
+        department_head: "Daire Başkanı",
+        branch_manager: "Şube Müdürü",
+        chief: "Şef",
+        engineer: "Mühendis",
+        specialist: "Uzman",
+        technician: "Tekniker",
+        officer: "Memur",
+        contracted: "Sözleşmeli Personel",
+      },
+
+      entry: {
+        unitLabel: "Birim",
+        emailLabel: "Kurumsal e-posta",
+        extensionLabel: "Dahili",
+      },
+
+      /**
+       * PRD §5.9: kişisel iletişim bilgisi gösterilmez. Bunu ekranda da
+       * söylüyoruz — eksik sanılmasın, karar olduğu görülsün.
+       */
+      privacyNote:
+        "Rehberde yalnızca kurumsal iletişim bilgisi yer alır. Cep telefonu, özel e-posta ve " +
+        "adres gibi kişisel bilgiler ne saklanır ne de gösterilir.",
+
+      empty: {
+        /** PRD §5.9: dolu olmayan dairelerde boş ekran bırakılmaz. */
+        unpublished: {
+          title: "Bu birimin personel rehberi henüz yayınlanmadı",
+          body: (name: string) =>
+            `${name} için rehber bilgisi girilmedi. Şu an yalnızca Bilgi İşlem Dairesi ` +
+            `Başkanlığı personeli yayında.`,
+        },
+        noResults: {
+          title: "Aradığınız personel bulunamadı",
+          withQuery: (query: string) => `"${query}" için sonuç çıkmadı. Farklı bir ad deneyin.`,
+          withoutQuery: "Bu süzgeçle eşleşen personel yok.",
+          reset: "Tüm personeli göster",
+        },
+      },
     },
   },
 } as const;

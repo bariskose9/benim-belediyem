@@ -162,6 +162,20 @@ export async function cleanupTestData(): Promise<void> {
 
   await prisma.user.deleteMany({ where: { id: startsWith } });
 
+  /**
+   * Teşkilat kayıtları KULLANICIDAN SONRA siliniyor (adım 15b): `users
+   * .staff_member_id` personel kaydına `Restrict` ile bağlı, yani personel
+   * önce silinseydi bir kullanıcıya bağlıysa temizlik patlardı.
+   *
+   * Birimler tek `deleteMany` ile gidebiliyor: PostgreSQL yabancı anahtar
+   * denetimini ifade SONUNDA yapıyor, yani üst ve alt birim aynı ifadede
+   * silindiğinde `org_units_parent_id_fkey` (Restrict) tetiklenmiyor.
+   */
+  await prisma.staffMember.deleteMany({
+    where: { OR: [{ id: startsWith }, { orgUnitId: startsWith }] },
+  });
+  await prisma.orgUnit.deleteMany({ where: { id: startsWith } });
+
   await prisma.kpsQueryLog.deleteMany({ where: { id: startsWith } });
   await prisma.rateLimitCounter.deleteMany({ where: { id: startsWith } });
 
