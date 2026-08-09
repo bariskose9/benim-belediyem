@@ -26,7 +26,7 @@ export function StepHeader({
           .replace("{total}", String(TOTAL_STEPS))}
       </p>
       <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-      {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+      {description ? <p className="text-base text-muted-foreground">{description}</p> : null}
     </header>
   );
 }

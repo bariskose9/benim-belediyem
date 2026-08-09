@@ -3,7 +3,7 @@ import {
   InvalidCardNumberError,
   SavedCardNotFoundError,
 } from "@/features/payment/errors";
-import { findOwnedSavedCard } from "@/features/payment/repositories/payment.repository";
+import { findOwnedSavedCard } from "@/features/profile/repositories/saved-card.repository";
 import type { CheckoutCardPayload } from "@/features/payment/schemas/checkout.schema";
 import {
   detectCardBrand,

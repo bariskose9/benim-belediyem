@@ -785,3 +785,44 @@ export const NEWS_ITEM_LIMIT = 5;
  * çizmemeliyiz. Bu liste dışındaki her kalem sessizce atılır.
  */
 export const NEWS_ALLOWED_HOSTS = ["www.trthaber.com", "trthaber.com"] as const;
+
+// ===========================================================================
+// PROFİL (PRD §4 · §5.0 "Adres ve kimlik güncelleme" · adım 15)
+//
+// Adres ve kayıtlı kart KİŞİSEL VERİDİR (14-privacy-and-compliance.md).
+// Sınırlar burada, şemada değil: aynı değer hem Zod'da hem ekrandaki
+// `maxLength` sayacında kullanılıyor ve iki yerde ayrı yazılırsa kayarlar.
+// ===========================================================================
+
+/**
+ * Adres alan sınırları — ödeme ekranındaki şemayla AYNI değerler.
+ *
+ * Adım 7'de `newAddressSchema` içine gömülü sayılardı; profil ekranı aynı
+ * kuralı ikinci kez uygulamak zorunda olduğu için buraya çıkarıldılar (DRY).
+ */
+export const ADDRESS_TITLE_MIN_LENGTH = 2;
+export const ADDRESS_TITLE_MAX_LENGTH = 60;
+export const ADDRESS_FULL_MIN_LENGTH = 10;
+export const ADDRESS_FULL_MAX_LENGTH = 300;
+export const ADDRESS_DISTRICT_MIN_LENGTH = 2;
+export const ADDRESS_DISTRICT_MAX_LENGTH = 60;
+
+/**
+ * Kullanıcı başına en fazla kaç adres.
+ *
+ * NEDEN SINIR VAR: adres ucu giriş yapmış her kullanıcıya açık bir YAZMA ucu.
+ * Hız sınırı ani seli durdurur ama günlere yayılan birikimi durdurmaz; üst
+ * sınır olmadan tek hesap tabloyu şişirebilir. 20 gerçek kullanım için fazlasıyla
+ * yeterli (ev, iş, anne, yazlık...).
+ */
+export const ADDRESS_MAX_PER_USER = 20;
+
+/**
+ * Profil yazma uçlarının bütçesi — KULLANICI başına.
+ *
+ * Destekten geniş (10 → 30): adres formu dosya taşımıyor ve kullanıcı ekleme,
+ * düzeltme, silmeyi arka arkaya yapabilir. Amaç kötüye kullanımı durdurmak,
+ * normal düzenleme akışını cezalandırmak değil.
+ */
+export const PROFILE_WRITE_RATE_LIMIT_MAX = 30;
+export const PROFILE_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;

@@ -1,38 +1,37 @@
-# Sonraki oturum için hazır prompt — adım 15
+# Sonraki oturum için hazır prompt — adım 15b
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 15 bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 15b bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **15**'e geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **15b**'ye geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
-- `docs/project/PRD.md` §5.11 ve §5.0 — profil sayfasının iş kuralları
-- `docs/project/data-model.md` — `User`, `Address`, `SavedCard` alanları
+- `docs/project/PRD.md` — "Hakkımızda" ve teşkilat şemasının iş kuralları
+- `docs/project/data-model.md` — `OrgUnit`, `StaffMember` alanları
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
 
 ## DURUM
 
-Roadmap adım **0 → 14 bitti.** Bilgi panosu çalışıyor.
+Roadmap adım **0 → 15 bitti.** Profil sayfası çalışıyor.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - **Kayıt, giriş, çıkış, oturum, şifre sıfırlama, Google ile giriş** çalışıyor
 - **Görsel iskelet** çalışıyor (marka paleti, tema düğmesi, mobil menü)
 - **Hastane randevusu** çalışıyor: branş → doktor → gün → saat, alma ve iptal
 - **Ortak sepet + ödeme** çalışıyor: ziyaretçi sepeti, girişte birleştirme,
-  modül başına teslimat ücreti, Luhn + sahte kart sağlayıcısı, tek
-  transaction'da ödeme + modül başına sipariş + stok düşümü, sahte fiş
+  modül başına teslimat ücreti, Luhn + sahte kart sağlayıcısı
 - **Belediye Market** ve **Belediye Restoran + adisyon** çalışıyor
 - **Sipariş takibi + bildirim** çalışıyor: `/siparislerim`, `/bildirimler`
 - **Etkinlik + koltuk seçimi + bilet** çalışıyor: 10 dakikalık kilit
 - **Spor salonu üyeliği** çalışıyor: dört paket, aylık tahsilat, iptal
 - **Destek talebi** çalışıyor: `/destek`, `/destek/<id>` — dosya yükleme
-- **Bilgi panosu** çalışıyor (anasayfa altı): hava, haber, piyasa —
-  **projenin ilk gerçek dış API çağrıları**. Canlıda gerçek veriyle doğrulandı:
-  hava 34°, USD 47,7099 ₺, BTC 3.109.296 ₺, 5 TRT Haber başlığı
+- **Bilgi panosu** çalışıyor (anasayfa altı): hava, haber, piyasa — gerçek dış API
+- **Profil merkezi** çalışıyor: `/hesabim` + `/hesabim/adreslerim` +
+  `/hesabim/kartlarim`. Adres CRUD, kart kaldırma, iki silme de YUMUŞAK
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında ilk iş:** dal adresini
@@ -44,79 +43,78 @@ Roadmap adım **0 → 14 bitti.** Bilgi panosu çalışıyor.
 
 ## ⏰ OTURUM SONUNDA HATIRLAT — proje sahibinin bekleyen işleri
 
-**Şu an bekleyen telefon testi YOK.** Proje sahibi bilgi panosunu 2026-08-09'da
-preview'da ve telefonundan denedi — üç kart da temiz, haber bağlantıları
-açılıyor, koyu tema okunabilir. Adım 14 canlıya alındı (commit `383a1df`).
-
-**Adım 15'te yeni ekran geleceği için telefon testi yine gerekecek** — commit
-önerisini sunarken hangi ekranın deneneceğini yaz.
-
 ⚠️ **20 dakika bekleme gerektiren iki iş PROJE SONUNA bırakıldı** (borç #50 ve
 #62): sipariş durumunun ve destek talebi durumunun zamanla ilerlediği canlıda
 elle görülmedi. **Adım 18'de tek oturumda birlikte bakılacak.** Bunları her
 adımda tekrar hatırlatma — proje sahibi bilinçli olarak erteledi.
 
-## ADIM 14'TEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
+## ADIM 15'TEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
 
-- **DIŞ SERVİS ÇAĞRISI İÇİN HAZIR KATMAN VAR: `src/lib/external-fetch.ts`.**
-  Zaman aşımı + 2 yeniden deneme + sağlayıcı başına devre kesici + Zod
-  doğrulaması. **Yeni bir dış servis eklenirse buradan geç, `fetch`'i elle
-  çağırma.** `429` bilerek yeniden DENENMİYOR
-- **ÖNBELLEK POSTGRES'TE, Next.js `revalidate` DEĞİL** (ADR-015). Sebep:
-  `revalidate` sahte saatle test edilemiyor ve **sağlayıcı çökünce eski veriyi
-  sunamıyor**. `loadCachedExternalData()` üç durumu birden yönetiyor
-- **Bilgi widget'ları HİÇBİR ANAHTAR İSTEMİYOR** (ADR-016). `NEWS_API_KEY` ve
-  `NEWS_API_PROVIDER` şemadan **kaldırıldı** — "anahtar girilmesi gerekiyor"
-  sanma
-- **Adım 14'te ŞEMA DEĞİŞTİ** — yeni `external_data_cache` tablosu. Migration
-  geriye uyumlu, veri silmiyor, Vercel deploy'da kendiliğinden uygulanıyor
-- **`src/lib/rss.ts` GENEL BİR XML AYRIŞTIRICI DEĞİL.** Yalnızca RSS 2.0'ın
-  `<item>` listesini ve üç alanı tanır; başka biçim verilirse boş liste döner
-- **Uzak ortamlarda tohumlama GÜNCEL DEĞİL.** Adım 12'de tohuma iki demo
-  personel hesabı eklendi (#11 Zehra Kılıç, #12 Esra Arslan) ve preview /
-  production'da bu hesaplar YOK
+- **ADRES VE KART SORGULARI ARTIK ÖDEMEDE DEĞİL.**
+  `src/features/profile/repositories/address.repository.ts` ve
+  `saved-card.repository.ts`. İkisi de kullanıcıya ait kayıt; ödeme onları
+  KULLANIYOR ama sahibi değil. `payment.repository.ts` artık yalnızca
+  `payments`, `orders`, `order_items` ve stok
+- **SAHİPLİK SORGUNUN `WHERE` KOŞULUNDA, sonradan `if` DEĞİL.** Koşullu
+  `updateMany` + etkilenen satır sayısı deseni. Yeni bir kullanıcı kaydı
+  eklenecekse bu deseni kopyala
+- **İKİ SİLME DE YUMUŞAK** (`deleted_at`): sert silme MÜMKÜN DEĞİL, geçmiş
+  sipariş adrese / geçmiş ödeme ve üyelik karta `Restrict` ile bağlı
+- **PROFİLDEN KART EKLENEMEZ ve bu bir KARAR.** Kart yalnızca gerçek ödeme
+  sırasında sahte sağlayıcıdan geçtikten sonra kaydediliyor (PRD §6.2).
+  Ekranda nedeni yazıyor — "eksik" sanıp eklemeye kalkma
+- **PROFİLDE KAYIT SAYACI YOK ve bu da bir KARAR** (borç #70): sipariş, destek
+  ve üyelik durumları okuma anında türetiliyor (ADR-013), ham sayı yanıltıcı
+  olurdu. Adres ve kart sayaçları VAR — onların durumu türetilmiyor
+- **TOHUMA İKİ DEMO HESAP EKLENDİ** (#13 Aslı Avcı `97425842292`, #14 Ege Kurt
+  `98987802090`). Listenin **SONUNA** eklendi, 1-92 arası hiçbir hesap kaymadı.
+  ⛔ **İkisi de profil E2E'sine ayrılmış — başka spec'te KULLANMA**
+- ⛔ **Uzak ortamlarda tohumlama GÜNCEL DEĞİL.** Adım 12'de #11/#12, adım 15'te
+  #13/#14 eklendi; preview ve production'da bu **dört hesap YOK**
 - ⛔ **Doktor saatleri (borç #38) uzak ortamlarda tükendi sayılır** —
   tohumlama 2026-08-01, pencere 14 gün. Yeni bir seed koşusu DÜZELTİR.
   **Etkinlikler DÜZELMEZ** — kimlik sabit (`seed-event-0001…12`),
   `skipDuplicates` mevcut satırları atlıyor ve liste ~2026-09-30'da boşalıyor
 
-## YAPILACAK — roadmap adım 15
+## YAPILACAK — roadmap adım 15b
 
-"Profil sayfası: tüm kayıtların tek yerden yönetimi"
+"Hakkımızda: teşkilat şeması + 100 kişilik personel rehberi"
 
-Dal: `feature/profil-sayfasi` (öneri)
+Dal: `feature/hakkimizda` (öneri)
 
 ### Bu adımda özellikle dikkat
 
-- **`/hesabim` ZATEN VAR** ve adım 4b-2'den beri çalışıyor. Bu adım onu
-  sıfırdan yazmak değil, **genişletmek** — önce mevcut sayfayı oku
-- **Teknik borç #35 burada ödenebilir:** kimlik doğrulama ekranlarının
-  tipografisi (`/giris`, `/kayit`, `/hesabim`, `/sifremi-unuttum`) hâlâ
-  `text-sm` kullanıyor; standart en az 16px istiyor
-- Adres ve kayıtlı kart yönetimi **kişisel veri** demek: her sorguda sahiplik,
-  her yazmada denetim kaydı (`recordAuditLog`)
-- **Kart numarası hiçbir yerde açık tutulmuyor** — mevcut `SavedCard` desenine
-  bak, yeni bir saklama biçimi icat etme
+- `org_units` (35 satır) ve `staff_members` (100 satır) **adım 3'ten beri
+  tohumlu** — yeni migration muhtemelen GEREKMİYOR, önce şemayı oku
+- Teşkilat şeması **ağaç** yapısı: kendine referans veren `parentId`. Derin
+  özyineleme yerine tek sorgu + bellekte ağaç kurmak daha ucuz
+- **`staff_members` KİŞİSEL VERİ TAŞIMIYOR** (data-model.md: cep telefonu,
+  adres, doğum tarihi TUTULMAZ) — rehbere yeni alan eklemeden önce
+  "neden, ne kadar süre, kim erişir" sorusunu cevapla
+- Sayfa **giriş gerektirmiyor** olmalı (ziyaretçiye açık) — erişim kademesini
+  PRD §5.0 tablosundan doğrula
+- **100 kişilik liste** performans sorusu doğurur: arama/sayfalama gerekiyor mu?
+  Ortak katalog arama katmanı (`src/features/catalog/`) hazır
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
+- **`src/features/profile/`** — kullanıcıya ait kayıt yönetiminin DESENİ:
+  koşullu yazma + sahiplik `WHERE`'de + yumuşak silme + denetim kaydı
+- **`src/features/catalog/`** — ORTAK katalog katmanı, Türkçe `unaccent` araması
 - **`src/lib/external-fetch.ts`** — dış servis çağrısı (zaman aşımı + deneme +
   devre kesici + Zod). **Yeni dış servis buradan geçer**
 - **`src/features/info-widgets/services/cached-external-data.ts`** — dış veri
   önbelleği; taze / bayat / hata üç durumu tek yerde (ADR-015)
-- **`src/lib/rss.ts`** — minimal RSS 2.0 okuyucu (ADR-016)
-- **`src/lib/circuit-breaker.ts`** — dış servis çökünce açılan devre (ADR-010)
-- **`src/lib/file-storage.ts`** — dosya depolama adaptörü (ADR-014)
+- **`src/lib/rss.ts`** · **`src/lib/circuit-breaker.ts`** · **`src/lib/file-storage.ts`**
 - **`src/lib/file-upload.ts`** — dosya türü BAYT İMZASINDAN doğrulama
 - **`src/lib/money.ts`** — para TAM SAYI KURUŞ. **Ondalık sayıyla para hesabı YAPMA**
 - **`src/features/support/`** — saf durum türetme + sahiplik sorgunun içinde
 - **`src/features/gym/`** — abonelik ve dönem aritmetiği deseni
 - **`src/features/events/`** — 10 dakikalık kilit ve **YARIŞ KORUMASI DESENİ**
-- **`src/features/catalog/`** — ORTAK katalog katmanı, Türkçe `unaccent` araması
 - **`src/features/notifications/`** — bildirim yazma ve **tembel senkronizasyon**
 - **`src/components/layout/ServiceTile.tsx`** — ana sayfa hizmet kartı
-- **`src/features/info-widgets/components/WidgetCard.tsx`** — yükleniyor /
-  bayat / hata üç durumunu taşıyan ortak kart kabuğu
+- **`src/features/profile/components/RecordLinkCard.tsx`** — tıklanabilir kapı kartı
+- **`src/features/info-widgets/components/WidgetCard.tsx`** — üç durumlu kart kabuğu
 - **Bildirim balonu**: `import { toast } from "sonner"`
 - **`requireAccess()`** uçlar için, **`guardPage()`** sayfalar için
 - **`recordAuditLog()`** — kritik işlemler denetim kaydına yazılır
@@ -131,58 +129,57 @@ Dal: `feature/profil-sayfasi` (öneri)
   `npx playwright test`** — sunucuyu Playwright kendi kurar
 - **Sunucu ayaktayken `.next`'i silme**
 - **YÜK 3'ÜN ÜZERİNDEYKEN TAM SET KOŞMA.** `uptime` bak, 2.5'in altına inmesini
-  bekle, sonra koş. **Kırmızı görünce ÖNCE YÜKE BAK.** Adım 14'te `google-login`
-  spec'i tam sette 4 test düşürdü, tek başına koşturulunca 18/18 yeşil geldi —
-  o spec Google'ın `.well-known` belgesini ağdan okuyor ve yük altında
-  kararsızlaşıyor
+  bekle, sonra koş. **Kırmızı görünce ÖNCE YÜKE BAK.**
 - **E2E'yi 15 dakika içinde üst üste koşturma** (hız sınırı). Çözüm:
   `rate_limit_counters` tablosunu boşalt, sonra tek sefer koş
 - **Adres kontrolünde `toHaveURL` DEĞİL `waitForURL` kullan**
 - **`npm run test:db` `docs/project/test-hesaplari.md` dosyasını YENİDEN
   ÜRETİYOR** (doğum tarihleri bugüne göre kayıyor). **Commit etmeden önce
-  `git status`'a bak** — gerçek değişiklik yoksa `git checkout` ile geri al.
-  Adım 14'te yine oldu
-- **HER PLAYWRIGHT PROJESİNE AYRI PAYLAŞILAN KAYNAK VER** — ama bilgi
-  panosunda bu MÜMKÜN DEĞİL: önbellek anahtarları `constants.ts` içinde sabit.
-  Çözüm: iki proje de AYNI değerleri yazıyor (yarış zararsız) ve satırlar
-  testten sonra **silinmiyor** (silen taraf, okuyan tarafı kırardı)
-- **E2E'nin ürettiği veriyi temizle.** Sipariş temizliğinde SIRA:
-  `refund → orderItem → order → notification → payment → cartItem → cart`.
-  **Üyelikte SIRA: `membershipPayment → membership → notification → savedCard`**
+  `git status`'a bak** — gerçek değişiklik yoksa `git checkout` ile geri al
+- **HER PLAYWRIGHT PROJESİNE AYRI PAYLAŞILAN KAYNAK VER.** Adım 15'te bu iki
+  yeni tohum hesabı gerektirdi (`asli.avci93`, `ege.kurt94`)
+- **E2E'nin ürettiği veriyi temizle — ama TOHUM VERİSİNİ ONAR, SİLME.** Profil
+  spec'i testin eklediği adresi siliyor (`isSeedData: false`) ve testin
+  sildiği tohum kartının `deletedAt`'ini `null`'a çeviriyor. Yumuşak silme
+  onarımı mümkün kılıyor; sert silseydi tohumu yeniden koşturmak gerekirdi
+  (`createMany({skipDuplicates})` mevcut satırı atlar, geri getirmez)
+- **Sipariş temizliğinde SIRA:** `refund → orderItem → order → notification →
+  payment → cartItem → cart`. **Üyelikte:** `membershipPayment → membership →
+  notification → savedCard`
 - **Kullanılmış test hesapları:** `nurcan.yilmaz3`, `burak.tas2` · `mehmet.duman7`,
   `arda.aydin9` · `ipek.kurt4`, `ferhat.tunc5` · `gamze.toprak8`, `baris.ates10` ·
-  `zehra.kilic91`, `esra.arslan92` · `emre.arslan1`, `nazli.mentes6`.
-  **BOŞTA HESAP KALMADI** — yeni modül ayrı hesap isterse tohuma eklemek gerek
+  `zehra.kilic91`, `esra.arslan92` · `emre.arslan1`, `nazli.mentes6` ·
+  `asli.avci93`, `ege.kurt94`. **BOŞTA HESAP KALMADI**
 
 **Playwright seçicileri**
 - **`getByRole("button", { name: "Ara" })` ÇOK EŞLEŞİR** → `exact: true` şart
-- **`getByRole("heading", { name: "Tesis" })` de ÇOK EŞLEŞİR**
 - ⚠️ **`exact: true` BİLE YETMEYEBİLİR — GÖRÜNMEZ ÖĞELER DE EŞLEŞİYOR.**
-  **Çözüm: aramayı BÖLGEYE sınırla** (`page.getByRole("region", { name: ... })`).
-  Adım 14'te üç widget da adlandırılmış `<section>` olduğu için bu kolaydı
+  **Çözüm: aramayı BÖLGEYE sınırla** (`page.getByRole("region", { name: ... })`)
+- ⚠️ **ÇIPLAK `getByRole("listitem")` SAYFA İSKELETİNİ DE SAYAR** (menü, alt
+  bilgi). Adım 15'te çözüm: `<ul>`'a `aria-label` verildi ve arama
+  `getByRole("list", { name: ... })` ile daraltıldı — hem test hem ekran
+  okuyucu için doğrusu bu
 - ⚠️ **ÇIPLAK METİN DÜĞÜMÜ `getByText(..., { exact: true })` İLE BULUNAMAZ.**
-  Adım 14'te sıcaklık `<p>37°<span>İzmir</span></p>` biçimindeydi; en dar
-  kapsayıcının metni "37°İzmir" olduğu için test bulamadı. **Ayrı bilgiyi ayrı
-  elemana koy** — hem ekran okuyucu hem test için doğrusu bu
-- ⚠️ **AYNI METNİ İKİ BAŞLIKTA KULLANMA**
+  **Ayrı bilgiyi ayrı elemana koy**
+- ⚠️ **AYNI METNİ İKİ BAŞLIKTA KULLANMA.** Aynısı erişilebilir AD için de
+  geçerli: adım 15'te kart listesinin adı sayfa başlığından farklı seçildi
 
 **Test veritabanı temizliği**
 - **`tests/db/helpers.ts` temizliği KİMLİK ÖNEKİNE GÜVENEMEZ.** Kaydı UYGULAMA
-  üretiyorsa kimliği `cuid()` olur. Üyelik, destek talebi ve **dış veri
-  önbelleği** (adım 14 — `key` üzerinden) bu yüzden başka alandan siliniyor
+  üretiyorsa kimliği `cuid()` olur
+
+**Sınır ve bütçe testleri**
+- ⚠️ **İKİ SINIR BİRBİRİNİ MASKELEYEBİLİR** (adım 15): adres üst sınırı 20,
+  yazma bütçesi 30. Bütçeyi yalnızca EKLEYEREK ölçmek imkânsız — 20'de adres
+  sınırı önce dolar ve test yanlış hatayı yakalar. Çözüm: bütçeyi
+  GÜNCELLEMEYLE tüket, kayıt sayısı sabit kalsın
 
 **Dış servis çağrısı (adım 14)**
-- **`429` YENİDEN DENENMEZ** — sınıra takılmışken tekrar sormak sınırı
-  derinleştirir. Kaybedilen tur bayat veriyle kapatılır
-- **Sağlayıcının paralel dizileri farklı uzunlukta gelebilir** (Open-Meteo).
-  En kısasına göre kes, yoksa ekrana `NaN` çıkar
-- **Önbelleğe HAM GÖVDE yazma**, sadeleştirilmiş şekil yaz — sağlayıcı şeması
-  değişirse hata ayrıştırmada görünsün, ekran çizilirken değil
-- **Önbellekten OKURKEN de Zod çalıştır**: satır önceki sürümün şeklinde olabilir
+- **`429` YENİDEN DENENMEZ** · **Önbelleğe HAM GÖVDE yazma** ·
+  **Önbellekten OKURKEN de Zod çalıştır** · sağlayıcı dizileri farklı uzunlukta gelebilir
 
 **Dosya yükleme (adım 13)**
 - **İSTEMCİNİN SÖYLEDİĞİ TÜRE GÜVENME** — tür baytların imzasından doğrulanır
-- **TEST İÇİN GEÇERLİ BİR GÖRSEL ÜRET** (`sips -g pixelWidth <dosya>`)
 - **`next/image` YETKİLİ bir uçtan görsel çekerken `unoptimized` ŞART**
 
 **Türkçe metin**
@@ -192,14 +189,11 @@ Dal: `feature/profil-sayfasi` (öneri)
 
 **Para**
 - **Ondalık sayıyla para hesaplama.** Her yerde tam sayı kuruş
-- **Tutar İSTEMCİDEN ALINMAZ**
-- ⚠️ **DÖVİZ KURU PARA DEĞİLDİR** (adım 14): iki para birimi arasındaki oran
-  kuruşa yuvarlanmaz. `money.ts` yalnızca TUTARLAR için
+- **Tutar İSTEMCİDEN ALINMAZ** · **DÖVİZ KURU PARA DEĞİLDİR**
 
 **Zaman ve durum**
 - **Sipariş, üyelik ve destek talebi durumları KOLONDA DEĞİL** (ADR-013)
 - **Takvim ayı ekle, 30 gün EKLEME** (`addCalendarMonths`)
-- **`tests/db/` içinde sahte saat kullanırken kayıt tarihlerini de sabitle**
 - **Süreye bağlı her sorgu ZAMAN KOŞULU içermek zorunda** (ADR-007)
 
 **Eşzamanlılık**
@@ -207,24 +201,29 @@ Dal: `feature/profil-sayfasi` (öneri)
   kullan ve **etkilenen satır sayısına bak**
 - ⚠️ **TRANSACTION İÇİNDE `create` KULLANMA, `createMany({skipDuplicates})` KULLAN**
 - **Korumayı yazdıktan sonra geçici kaldırıp testin KIRMIZIYA döndüğünü GÖR.**
-  Adım 14'te iki koruma böyle ölçüldü (taze önbellek ve bayat yaş sınırı)
+  Adım 15'te iki sahiplik koruması böyle ölçüldü (adres ve kart)
 
 **Next.js**
 - **Sunucu bileşeninde `cookies().set()` İSTİSNA FIRLATIR**
 - **Sunucuda çizilen sayfa istemci bir şey yazdıktan sonra tazelenmez** —
   `router.refresh()` çağır
+- **Formu sıfırlamak için alanları tek tek temizleme**, bileşene `key` ver —
+  React bileşeni sıfırdan kurar ve unutulacak alan kalmaz (adım 15)
 - **Zamana bağlı metin hidrasyon uyuşmazlığı üretir** → `suppressHydrationWarning`
 - **`FormData` gövdesinde `content-type` başlığını ELLE YAZMA**
-- **`FormData.get` alan yoksa `null` döner**, `undefined` değil
+- **Kendi kimlik üretme, `useId()` kullan** — sunucu ve istemci aynı değeri üretir
 
 **Arayüz**
 - **Dark mode SINIF tabanlı** (`.dark`), `next-themes` BİLEREK kullanılmıyor
-- **shadcn'de Dialog bileşeni YOK ve bilerek eklenmedi**
-- **Olmayan renk token'ı uydurma.** `warning` YOK, **`success` de YOK** (adım
-  14'te `text-success` yazıldı ve geri alındı — artış `text-brand-accent`,
-  azalış `text-destructive`)
-- Tailwind v4 kanonik biçimi `aspect-4/3`, `aspect-[4/3]` değil
+- **shadcn'de Dialog bileşeni YOK ve bilerek eklenmedi** — yıkıcı işlem onayı
+  SATIR İÇİ yapılıyor (odak tuzağı/kaçış tuşu yükümlülüğü doğmuyor)
+- **Olmayan renk token'ı uydurma.** `warning` YOK, **`success` de YOK** —
+  vurgulu bilgi için `text-brand-accent`, hata için `text-destructive`
+- Tailwind v4 kanonik biçimi `aspect-4/3` ve `wrap-break-word`
+  (`break-words` DEĞİL) — ESLint eklentisi uyarıyor
 - Dokunma hedefleri en az 44px (`min-h-11`)
+- **Gövde metni en az 16px** (`text-base`); etiket, sayaç ve yardım metni gibi
+  İKİNCİL metinler 14px kalabilir (adım 15'te borç #35 böyle ödendi)
 - ⚠️ **macOS'ta tarayıcı penceresi 375px'e İNMİYOR** (alt sınır ~485px).
   Mobil ölçümü **Playwright `mobile-375` projesiyle** yap
 
@@ -239,6 +238,9 @@ Dal: `feature/profil-sayfasi` (öneri)
   prisma/schema.prisma --script` ile SQL üret → migration klasörünü elle
   oluştur → `npx prisma migrate deploy` → `npx prisma generate`.
   ⚠️ **`--to-schema-datamodel` bayrağı KALDIRILMIŞ**, `--to-schema` kullan
+- **ENUM DEĞERİ EKLEMEK GERİYE UYUMLU ama TEK YÖNLÜDÜR** (adım 15): PostgreSQL'de
+  `DROP VALUE` yok. PG 12+ transaction içinde `ADD VALUE`'ya izin verir; şart,
+  değerin AYNI transaction'da kullanılmaması
 - **`prisma migrate reset --force` bayrağı yutuluyor.** Local'i sıfırlamak için
   `docker compose down -v` + `npm run db:up`
 
@@ -256,7 +258,8 @@ Dal: `feature/profil-sayfasi` (öneri)
   `--org-id org-still-water-86075112` şart
 - `psql` **kurulu değil** → uzak sorgu için `npx tsx --env-file=.env` + Prisma
   betiği. ⚠️ **Betik PROJE KÖKÜNDE ve `.mts` uzantılı olmalı** — `tsx -e` ile
-  satır içi kod "top-level await CJS'te desteklenmiyor" hatası veriyor
+  satır içi kod "top-level await CJS'te desteklenmiyor" hatası veriyor;
+  ⚠️ **boş `-e ""` çağrısı ASILI KALIYOR**, hiç kullanma
 - **Chrome DevTools MCP yalnızca ÇALIŞMA ALANI İÇİNDEKİ dosyayı yükleyebiliyor**
 - Docker Desktop kapalı olabilir → `open -a Docker`, sonra `npm run db:up`
 - ESLint `console.log`'u ve efekt içinde `setState`'i yasaklıyor

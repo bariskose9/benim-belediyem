@@ -38,7 +38,7 @@ export default async function PasswordResetVerifyPage() {
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">{copy.title}</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-base text-muted-foreground">
           {isProductionEnv ? copy.description : copy.descriptionSimulated}
         </p>
       </header>

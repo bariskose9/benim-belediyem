@@ -19,7 +19,7 @@ import type {
   MembershipRow,
 } from "@/features/gym/types";
 import { syncMembershipNotifications } from "@/features/notifications/services/membership-notification.service";
-import { listSavedCards } from "@/features/payment/repositories/payment.repository";
+import { listSavedCards } from "@/features/profile/repositories/saved-card.repository";
 
 /**
  * Ekranların OKUMA yolu — sayfalar repository'ye doğrudan inmiyor.

@@ -9,8 +9,32 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-09 · roadmap adım 14 sonrası
+**Son güncelleme:** 2026-08-09 · roadmap adım 15 sonrası
 
+> ## Adım 15 — DIŞ DÜNYADA HİÇBİR HESAP AÇILMADI ve AÇILMASI GEREKMİYOR
+>
+> Profil sayfası tamamen kendi verimizle çalışıyor: yeni servis, yeni anahtar,
+> yeni ortam değişkeni ve yeni bağımlılık **YOK** (`npm audit`: 0 açık).
+>
+> **Yeni bir migration VAR** (`20260809180000_add_profile_audit_actions`) ama
+> elle çalıştırılacak bir şey değil: Vercel derleme komutu `prisma migrate
+> deploy` ile başlıyor. Migration **yalnızca enum DEĞERİ ekliyor** — tablo,
+> kolon ve satır değişmiyor, eski sürüm kod bu değerleri hiç bilmeden
+> çalışmaya devam ediyor.
+> ⚠️ **Tek yönlüdür:** PostgreSQL'de enum değeri kaldırmanın doğrudan yolu yok
+> (`DROP VALUE` yok). Riski yok — kullanılmayan bir enum değeri hiçbir
+> davranışı değiştirmez.
+>
+> ⚠️ **TOHUM DEĞİŞTİ — uzak ortamlarda iki demo hesap EKSİK.** Adım 15'te
+> tohuma iki demo vatandaş eklendi (#13 Aslı Avcı, #14 Ege Kurt). Preview ve
+> production 2026-08-01'de tohumlandığı için **o iki hesap orada YOK**.
+> Uygulama bundan etkilenmiyor; yalnızca profil E2E'si local'de koşuyor ve
+> orada tohum güncel. Adım 12'deki #11/#12 durumunun aynısı.
+>
+> ⚠️ **Yeni dalın preview adresi iki panele eklenmeli** (aşağıda). Profil
+> sayfası **giriş gerektiriyor**, yani Turnstile satırı bu kez GEREKLİ —
+> şifreyle giriş bot kutusuna bağlı. Google satırı isteğe bağlı.
+>
 > ✅ **Adım 14 CANLIDA** (2026-08-09, commit `383a1df`). Sağlık ucu `db: ok`,
 > anasayfada üç kart da gerçek veriyle çiziliyor. `feature/bilgi-widgetlari`
 > dalı merge edilip **silindi** — Turnstile ve Google panellerine hiç

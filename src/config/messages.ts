@@ -1790,4 +1790,178 @@ export const messages = {
         "Doğrulama servisine şu anda ulaşılamıyor. Lütfen birazdan tekrar deneyin.",
     },
   },
+
+  /**
+   * Profil — hesabın ve kullanıcıya ait kayıtların tek kapısı
+   * (PRD §4 · adım 15).
+   */
+  profile: {
+    /**
+     * "Kayıtlarım" bölümü: her modülün kendi listesine giden kapı.
+     *
+     * SAYAÇ BİLEREK YOK. Sipariş, destek talebi ve üyelik durumları OKUMA
+     * ANINDA türetiliyor (ADR-013); "3 sipariş" yazmak aktifle teslim edilmişi
+     * aynı torbaya koymak, doğru sayıyı üretmek ise profil sayfasının beş ayrı
+     * modülün türetme mantığını çalıştırması demek olurdu.
+     */
+    records: {
+      heading: "Kayıtlarım",
+      description: "Randevularınız, siparişleriniz ve taleplerinizin tamamı burada.",
+      appointments: {
+        title: "Randevularım",
+        description: "Hastane randevularınızı görün ve iptal edin.",
+      },
+      orders: {
+        title: "Siparişlerim",
+        description: "Market, restoran ve bilet siparişlerinizin durumu.",
+      },
+      membership: {
+        title: "Spor salonu üyeliğim",
+        description: "Paketiniz, taahhüdünüz ve sonraki tahsilat tarihiniz.",
+      },
+      support: {
+        title: "Destek taleplerim",
+        description: "Açtığınız talepler ve görevlinin yanıtları.",
+      },
+      notifications: {
+        title: "Bildirimlerim",
+        description: "Siparişleriniz ve talepleriniz hakkındaki bildirimler.",
+      },
+    },
+
+    /** "Hesap ayarları" bölümü: profilin KENDİ yönettiği kayıtlar. */
+    settings: {
+      heading: "Hesap ayarları",
+      addresses: {
+        title: "Teslimat adreslerim",
+        description: "Sipariş verirken kullanacağınız adresleri yönetin.",
+        /** Sayacı burada göstermek güvenli: adres durumu türetilmiyor. */
+        count: (total: number) => (total === 1 ? "1 adres kayıtlı" : `${total} adres kayıtlı`),
+        none: "Henüz adres eklemediniz",
+      },
+      cards: {
+        title: "Kayıtlı kartlarım",
+        description: "Ödemede kullandığınız kartları görün ve kaldırın.",
+        count: (total: number) => (total === 1 ? "1 kart kayıtlı" : `${total} kart kayıtlı`),
+        none: "Henüz kayıtlı kartınız yok",
+      },
+    },
+
+    addresses: {
+      pageTitle: "Teslimat adreslerim",
+      title: "Teslimat adreslerim",
+      description:
+        "Bu adresler yalnızca teslimat içindir; nüfus kayıtlarınızdaki adres ayrıdır ve buradan değiştirilemez.",
+      backToAccount: "Hesabıma dön",
+
+      listHeading: "Kayıtlı adresleriniz",
+
+      empty: {
+        title: "Henüz adres eklemediniz",
+        description:
+          "Market ve restoran siparişleriniz için en az bir teslimat adresi gerekiyor. Aşağıdaki formdan ekleyebilirsiniz.",
+      },
+
+      form: {
+        addHeading: "Yeni adres ekle",
+        editHeading: "Adresi düzenle",
+        titleLabel: "Adres başlığı",
+        titleHint: "Örnek: Ev, İş, Annem",
+        fullAddressLabel: "Açık adres",
+        fullAddressHint: "Mahalle, sokak, bina ve daire numarasını yazın.",
+        districtLabel: "İlçe",
+        districtHint: "Örnek: Karşıyaka",
+        submitAdd: "Adresi kaydet",
+        submitEdit: "Değişikliği kaydet",
+        submitting: "Kaydediliyor…",
+        cancel: "Vazgeç",
+      },
+
+      item: {
+        edit: "Düzenle",
+        /** Ekran okuyucu için: listede on tane "Sil" düğmesi ayırt edilemez. */
+        editLabel: (title: string) => `${title} adresini düzenle`,
+        remove: "Sil",
+        removeLabel: (title: string) => `${title} adresini sil`,
+      },
+
+      remove: {
+        confirmTitle: "Bu adres silinsin mi?",
+        confirmBody:
+          "Adres listenizden kaldırılır. Bu adrese teslim edilmiş geçmiş siparişleriniz etkilenmez.",
+        confirmAction: "Evet, sil",
+        confirmDismiss: "Vazgeç",
+        pending: "Siliniyor…",
+      },
+    },
+
+    cards: {
+      pageTitle: "Kayıtlı kartlarım",
+      title: "Kayıtlı kartlarım",
+      description:
+        "Kart numaranız hiçbir zaman saklanmaz; yalnızca markası, son dört hanesi ve son kullanma tarihi tutulur.",
+      backToAccount: "Hesabıma dön",
+
+      /**
+       * Yeni kart nereden eklenir sorusunun cevabı EKRANDA yazıyor: kullanıcı
+       * burada "kart ekle" düğmesi arayıp bulamamamalı (PRD §6.2).
+       */
+      addNotice:
+        "Yeni kart yalnızca ödeme sırasında, “Bu kartı sonraki ödemeler için kaydet” seçeneğiyle eklenir.",
+
+      /**
+       * Listenin erişilebilir adı.
+       *
+       * Sayfa başlığıyla AYNI metin OLMAMALI: ekran okuyucu iki farklı öğeyi
+       * aynı adla okursa kullanıcı hangisinde olduğunu ayırt edemez (ve aynı
+       * sebeple test de ayırt edemez).
+       */
+      listLabel: "Kayıtlı kartlarınız",
+
+      empty: {
+        title: "Kayıtlı kartınız yok",
+        description:
+          "Bir ödeme yaparken kartınızı kaydetmeyi seçerseniz sonraki ödemelerde burada görünür.",
+      },
+
+      item: {
+        expiry: (month: number, year: number) =>
+          `Son kullanma ${String(month).padStart(2, "0")}/${year}`,
+        remove: "Kartı kaldır",
+        removeLabel: (last4: string) => `Son dört hanesi ${last4} olan kartı kaldır`,
+        /** Üyelik uyarısı: karar kullanıcının, ama sonucu bilerek versin (PRD §5.6). */
+        membershipWarning: "Spor salonu üyeliğinizin aylık tahsilatı bu karttan yapılıyor.",
+      },
+
+      remove: {
+        confirmTitle: "Bu kart kaldırılsın mı?",
+        confirmBody:
+          "Kart ödeme ekranında artık görünmez. Geçmiş ödemeleriniz ve fişleriniz etkilenmez.",
+        confirmMembershipBody:
+          "Kart ödeme ekranında artık görünmez ve spor salonu üyeliğinizin bir sonraki aylık tahsilatı bu karttan yapılamaz.",
+        confirmAction: "Evet, kaldır",
+        confirmDismiss: "Vazgeç",
+        pending: "Kaldırılıyor…",
+      },
+    },
+
+    /**
+     * Hata metinleri.
+     *
+     * "Bulunamadı" mesajı BİLEREK belirsiz: var olmayan kayıt ile başkasının
+     * kaydı aynı cevabı almalı (`features/profile/errors.ts`).
+     */
+    errors: {
+      addressNotFound: "Bu adres bulunamadı.",
+      cardNotFound: "Bu kart bulunamadı.",
+      addressLimitReached: (limit: number) =>
+        `En fazla ${limit} adres kaydedebilirsiniz. Yeni bir adres eklemek için önce birini silin.`,
+      invalidRequest: "Gönderdiğiniz bilgiler geçerli değil. Lütfen alanları kontrol edin.",
+      invalidTitle: "Adres başlığı 2-60 karakter olmalı.",
+      invalidFullAddress: "Açık adres 10-300 karakter olmalı.",
+      invalidDistrict: "İlçe adı 2-60 karakter olmalı.",
+      tooManyAttempts:
+        "Çok fazla değişiklik yaptınız. Güvenliğiniz için lütfen biraz sonra tekrar deneyin.",
+    },
+  },
 } as const;
