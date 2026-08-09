@@ -4,6 +4,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 15b: Hakkımızda (teşkilat şeması + 100 kişilik personel rehberi)
+
+- **`/hakkimizda` sayfası geldi ve GİRİŞ GEREKTİRMİYOR** (PRD §3 · §5.9): kurum
+  bilgileri, teşkilat şeması ve personel rehberi. Ziyaretçi tüm sayfayı
+  görebiliyor; sayfa hiçbir kayıt oluşturmadığı için kapı da yok
+- **Teşkilat şeması ağaç olarak çiziliyor**: 35 birim TEK sorguda okunup bellekte
+  hiyerarşiye dönüştürülüyor (`org-tree.ts`). Özyinelemeli SQL de seviye başına
+  ayrı sorgu da yok; şema derinleşse bile sorgu sayısı değişmiyor
+- **Açılıp kapanma tarayıcının kendi `<details>` öğesiyle**: klavyeyle çalışıyor,
+  ekran okuyucu durumu okuyor, JavaScript kapalıyken bile açılıyor. `role="tree"`
+  BİLEREK kullanılmadı — ok tuşlarıyla gezinme yükümlülüğünü üstlenmeden o rolü
+  yazmak ekran okuyucuya yanlış bilgi vermek olurdu
+- **Birimdeki personel sayısı alt birimleri de kapsıyor**: daireye tıklayan
+  kullanıcı 1 değil 100 kişi görüyor. Alt birim kimlikleri bellekteki ağaçtan
+  geliyor, veritabanına ek maliyeti yok
+- **Personeli olmayan 8 daire şemada ismen duruyor** ve tıklandığında "Bu birimin
+  personel rehberi henüz yayınlanmadı" bilgi mesajı çıkıyor — boş ekran
+  bırakılmıyor (PRD §5.9)
+- **Rehberde ada göre arama + birim ve unvana göre süzme.** Arama ORTAK katalog
+  katmanından geçiyor (`unaccent`), yani "ŞAHİN", "sahin" ve "Şahin" aynı kişiyi
+  buluyor. Süzgeçler adres çubuğunda taşınıyor: geri tuşu çalışıyor, bağlantı
+  paylaşılabiliyor, JavaScript kapalıyken de işliyor
+- **KURUMSAL E-POSTA ARANMIYOR ve bu bir karar**: adres listede görünüyor ama
+  aranabilir olsaydı arama kutusu bir e-posta doğrulayıcısına dönerdi
+- **Personelin kimlik özeti (`national_id_hash`) rehber sorgusunda HİÇ
+  OKUNMUYOR.** Üç katman birden koruyor: sorgunun alan listesi (birim testi),
+  dönen kayıt (veritabanı testi) ve tarayıcıya inen HTML (E2E). Alan listesi
+  testi, korumayı bilerek bozup **kırmızıya döndüğü görülerek** ölçüldü
+- Üst menüye ve alt bilgiye **"Hakkımızda"** bağlantısı eklendi. Ana sayfadaki
+  hizmet ızgarasına konulmadı: orası "ne yapabilirim", burası "bu kurum kim"
+
 ### Eklendi — adım 15: Profil sayfası (tüm kayıtların tek yerden yönetimi)
 
 - **`/hesabim` bir profil MERKEZİNE dönüştü.** Eskiden yalnızca beş satır hesap

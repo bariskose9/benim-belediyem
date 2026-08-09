@@ -28,8 +28,13 @@ import { toLikePattern } from "@/lib/search-text";
  * dışarıdan gelen bir metin olsaydı sorguya yapıştırılmak zorunda kalırdı
  * (tanımlayıcılar parametre olarak bağlanamaz) ve bu bir enjeksiyon kapısı
  * açardı. Her tablo için ayrı, sabit sorgu yazmak bu kapıyı hiç açmıyor.
+ *
+ * `staff_members` KATALOG DEĞİL ama aynı arama sorununu yaşıyor (adım 15b):
+ * personel rehberinde "ŞAHİN", "sahin" ve "Şahin" aynı kişiyi bulmalı. Aksan
+ * körü aramayı ikinci kez yazmak yerine bu katman paylaşılıyor — tipin adı
+ * bu yüzden `SearchableCatalog` değil `SearchableTable`.
  */
-export type SearchableCatalog = "products" | "menu_items" | "events";
+export type SearchableTable = "products" | "menu_items" | "events" | "staff_members";
 
 /** Tek bir aramanın döndürebileceği en fazla kayıt. */
 const SEARCH_RESULT_LIMIT = 200;
@@ -45,7 +50,7 @@ const SEARCH_RESULT_LIMIT = 200;
  * katalogla eşleşirdi; çökme olmayan, sessiz bir hata.
  */
 export async function findIdsMatchingQuery(
-  catalog: SearchableCatalog,
+  catalog: SearchableTable,
   query: string,
 ): Promise<string[]> {
   const pattern = toLikePattern(query);
@@ -66,7 +71,7 @@ export async function findIdsMatchingQuery(
  * Etkinlikte `deleted_at` de yok — etkinlik yumuşak silinen 8 tablodan biri
  * değil (data-model.md).
  */
-function runSearch(catalog: SearchableCatalog, pattern: string): Promise<{ id: string }[]> {
+function runSearch(catalog: SearchableTable, pattern: string): Promise<{ id: string }[]> {
   switch (catalog) {
     case "products":
       return prisma.$queryRaw<{ id: string }[]>`
@@ -96,6 +101,21 @@ function runSearch(catalog: SearchableCatalog, pattern: string): Promise<{ id: s
         FROM events
         WHERE lower(unaccent(name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
            OR lower(unaccent(performer)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
+        LIMIT ${SEARCH_RESULT_LIMIT}
+      `;
+    /**
+     * PERSONELDE YALNIZCA AD SORGULANIYOR (PRD §5.9: "ada göre arama").
+     * Kurumsal e-posta da taransaydı arama kutusu bir e-posta doğrulayıcıya
+     * dönerdi: "ali@ornek.test" yazan biri kimin hangi adresi kullandığını
+     * tek tek deneyebilirdi. Adres listede zaten görünüyor, ama aranabilir
+     * olmasına gerek yok.
+     */
+    case "staff_members":
+      return prisma.$queryRaw<{ id: string }[]>`
+        SELECT id
+        FROM staff_members
+        WHERE deleted_at IS NULL
+          AND lower(unaccent(full_name)) LIKE lower(unaccent(${pattern})) ESCAPE '\'
         LIMIT ${SEARCH_RESULT_LIMIT}
       `;
   }

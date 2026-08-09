@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Logo } from "@/components/brand/Logo";
 import { messages } from "@/config/messages";
 
@@ -19,6 +21,15 @@ export function SiteFooter() {
         <Logo />
 
         <p className="max-w-prose">{messages.footer.disclaimer}</p>
+
+        {/* Kurumsal bilgi sayfası (adım 15b). Yasal sayfalar adım 17'de
+            geldiğinde bu satırın yanına eklenecek. */}
+        <Link
+          href="/hakkimizda"
+          className="flex min-h-11 items-center font-medium text-primary underline underline-offset-4"
+        >
+          {messages.footer.about}
+        </Link>
 
         <a
           href={messages.footer.sourceCodeUrl}
