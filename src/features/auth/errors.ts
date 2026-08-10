@@ -305,3 +305,94 @@ export class PasswordResetClosedError extends AppError {
     super(messages.auth.passwordReset.errors.closed);
   }
 }
+
+/**
+ * ═══ GİRİŞ YÖNTEMİ HATALARI (adım 15c · teknik borç #33) ═══
+ *
+ * Hepsi 409 (çakışma) ya da 422 (doğrulanamayan girdi): istek biçimsel olarak
+ * geçerli, kabul edilmemesinin sebebi hesabın MEVCUT DURUMU. Kullanıcı formu
+ * düzelterek değil, durumu değiştirerek (şifre belirleyerek, başka hesaptan
+ * bağlantıyı kaldırarak) çözer.
+ */
+
+/** Google bağlantısı zaten kurulu — ikinci kez bağlanacak bir şey yok. */
+export class GoogleAlreadyLinkedError extends AppError {
+  readonly code = "GOOGLE_ALREADY_LINKED";
+  readonly status = 409;
+
+  constructor() {
+    super(messages.profile.loginMethods.errors.alreadyLinked);
+  }
+}
+
+/**
+ * Şifre doğrulaması tutmadı.
+ *
+ * ⛔ MESAJ "ŞİFRE YANLIŞ" DEMİYOR, "doğrulanamadı" diyor: aynı cümle, şifresi
+ * hiç olmayan hesapta da dönüyor. İkisini ayırmak, bir hesabın şifresi olup
+ * olmadığını dışarıdan ölçülebilir kılardı.
+ */
+export class LinkPasswordCheckFailedError extends AppError {
+  readonly code = "LINK_PASSWORD_CHECK_FAILED";
+  readonly status = 422;
+
+  constructor() {
+    super(messages.profile.loginMethods.errors.passwordCheckFailed);
+  }
+}
+
+/**
+ * Bu Google hesabı BAŞKA bir kullanıcıya bağlı.
+ *
+ * Hangi hesaba bağlı olduğu SÖYLENMEZ: bir saldırgan kendi Google hesabıyla
+ * deneyerek başkalarının hesap bilgilerini eşleştiremesin.
+ */
+export class GoogleLinkedToOtherAccountError extends AppError {
+  readonly code = "GOOGLE_LINKED_TO_OTHER_ACCOUNT";
+  readonly status = 409;
+
+  constructor() {
+    super(messages.profile.loginMethods.errors.linkedToOtherAccount);
+  }
+}
+
+/** Kaldırılacak bağlantı yok. */
+export class GoogleNotLinkedError extends AppError {
+  readonly code = "GOOGLE_NOT_LINKED";
+  readonly status = 409;
+
+  constructor() {
+    super(messages.profile.loginMethods.errors.notLinked);
+  }
+}
+
+/**
+ * Son giriş yöntemi kaldırılamaz (PRD §5.0).
+ *
+ * KİLİTLENME KORUMASI: şifresi olmayan kullanıcı Google'ı kaldırırsa hesabına
+ * bir daha giremez ve bunu kendi kendine geri alamaz.
+ */
+export class LastLoginMethodError extends AppError {
+  readonly code = "LAST_LOGIN_METHOD";
+  readonly status = 409;
+
+  constructor() {
+    super(messages.profile.loginMethods.errors.lastLoginMethod);
+  }
+}
+
+/**
+ * Google girişi bu ortamda yapılandırılmamış (`GOOGLE_CLIENT_ID` yok).
+ *
+ * 503 çünkü sorun istekte değil sunucu yapılandırmasında; kullanıcı aynı isteği
+ * yarın tekrar gönderdiğinde çalışabilir. Ekrandaki düğme zaten yapılandırma
+ * varken çiziliyor — buraya yalnızca elle istek atan biri düşer.
+ */
+export class GoogleLinkUnavailableError extends AppError {
+  readonly code = "GOOGLE_LINK_UNAVAILABLE";
+  readonly status = 503;
+
+  constructor() {
+    super(messages.profile.loginMethods.errors.unavailable);
+  }
+}

@@ -1,11 +1,11 @@
-# Sonraki oturum için hazır prompt — adım 15c
+# Sonraki oturum için hazır prompt — adım 15c-2
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 15c bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 15c-2 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **15c**'ye geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **15c-2**'ye geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
@@ -27,14 +27,19 @@ Roadmap adım **0 → 15 ve 15b bitti.** Hakkımızda sayfası çalışıyor.
 - **Hakkımızda** çalışıyor ve **CANLIDA** (2026-08-10, commit `9d64199`):
   `/hakkimizda` — kurum bilgileri, teşkilat şeması (açılır kapanır ağaç),
   100 kişilik personel rehberi. **Giriş gerektirmiyor**
+- **Profilden Google bağlantısı** çalışıyor (adım 15c-1, teknik borç #33 ÖDENDİ):
+  `/hesabim` → "Giriş yöntemleri" kartı. Bağlama şifre istiyor, son giriş
+  yöntemi kaldırılamıyor
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında ilk iş:** dal adresini
   (`benim-belediyem-git-<dal>-barisss.vercel.app`) **iki panele** ekle:
   Cloudflare Turnstile hostname listesi **ve** Google OAuth redirect URI
   listesi (sonuna `/api/auth/google/callback`). Teknik borç #31.
-  **⚠️ ADIM 15c'DE İKİSİ DE ZORUNLU** — bu adım hem girişe hem Google'a
-  dokunuyor. (Adım 15b'de bilerek eklenmedi: o sayfa giriş gerektirmiyordu.)
+  **⚠️ ADIM 15c-2'DE TURNSTILE ZORUNLU** (KPS doğrulaması giriş gerektiriyor);
+  Google satırı bu adımda ŞART DEĞİL — OAuth akışına dokunulmuyor.
+  ⚠️ **Adım 15c-1'in dal adresleri iki panele de EKLENDİ** (proje sahibi
+  2026-08-10'da yaptı); o dal merge edilince satırları silinebilir.
   **⚠️ Turnstile listesi 10 sınırına dayandı** — panele girildiğinde merge
   edilmiş dalların satırları toplu silinmeli (`altyapi-durumu.md`)
 
@@ -46,7 +51,8 @@ Roadmap adım **0 → 15 ve 15b bitti.** Hakkımızda sayfası çalışıyor.
 > **"şimdi mi yapalım, sonra mı?"** diye sor — cevabı "sonra" ise bu bölümü
 > olduğu gibi bırak, adım işine geç.
 >
-> Kapsanan teknik borçlar: **#50 · #62 · #73**.
+> Kapsanan teknik borçlar: **#50 · #62 · #73** + adım 15c-1 giriş yöntemleri
+> ekranı ve Turnstile panel temizliği.
 > Tamamlananları bu listeden ve roadmap'ten SİL, yarım kalanı bırak.
 
 **Nerede:** https://benim-belediyem.vercel.app (production) · **telefondan**
@@ -88,6 +94,18 @@ bekleme süresini diğer testlerle doldur:
 4. Arama kutusuna bir personel adını **BÜYÜK HARFLE** yaz → yine buluyor mu
 5. Şema satırları taşıyor mu — sayfa **yana kayıyor mu** (kaymamalı)
 
+### B2) ADIM 15c-1 — GİRİŞ YÖNTEMLERİ (yeni)
+
+1. **Hesabım** → "Giriş yöntemleri" kartı görünüyor mu (Şifre: Tanımlı,
+   Google: Bağlı değil)
+2. "Google'a git" düğmesine **şifreni girmeden** bas → şifre alanı zorunlu mu
+3. **Yanlış şifreyle** dene → "Şifreniz doğrulanamadı" diyor mu
+4. Doğru şifreyle dene → Google'a gidiyor mu (bağlamayı tamamlaman ŞART DEĞİL;
+   ⚠️ Google "Testing" modunda, yalnızca test kullanıcısı listesindeki
+   e-postayla girilebilir)
+5. Bağladıysan: kartta "Bağlı" + tarih görünüyor mu → **Bağlantıyı kaldır** →
+   onay kutusu çıkıyor mu → kaldırınca "Bağlı değil"e dönüyor mu
+
 ### C) HER İKİ EKRAN İÇİN ORTAK
 
 1. Tema düğmesiyle **açık/koyu** geçiş → iki temada da metinler okunuyor mu
@@ -103,58 +121,92 @@ bekleme süresini diğer testlerle doldur:
    **`İnceleniyor`** durumuna geçmiş olmalı.
    (`Çözüldü` eşiği 180 dakika — o kadar beklemeye gerek yok)
 
+### E) 🔧 PANELDE YAPILACAK TEK İŞ (tarayıcı, telefon değil)
+
+**Cloudflare Turnstile → Hostname Management** listesini aç ve **merge edilmiş
+dalların satırlarını sil.** Sınır 10 hostname ve liste sınıra dayandı; her yeni
+adım bir satır ekliyor.
+
+- **KALACAK:** `benim-belediyem.vercel.app` (production)
+- **SİLİNECEK:** adı `benim-belediyem-git-feature-...` ile başlayan ve dalı
+  merge edilmiş olan HER satır (google-ile-giris · sifre-sifirlama · market ·
+  restoran · etkinlik-bilet · spor-salonu-uyeligi · destek-talebi ·
+  bilgi-widgetlari · hakkimizda · google-baglantisi)
+- Silmenin tek bedeli: o eski dalın preview adresine geri dönülürse orada bot
+  kutusu çizilmez. Merge edilmiş dallarda böyle bir ihtiyaç yok.
+
+⚠️ Ajan bu listeyi panelden GÖREMİYOR. Temizledikten sonra söyle ki
+`altyapi-durumu.md` gerçeğe göre güncellensin.
+
 > **Neden bekleme gerekiyor:** durumlar veritabanında bir kolonda tutulmuyor,
 > **okuma anında zamandan türetiliyor** (ADR-013). Yani "ilerleme" ancak gerçek
 > saat ilerleyince görülebiliyor; otomatik testlerde saat taklit ediliyor.
 
-## ADIM 15b'DEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
+## ADIM 15c-1'DEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
 
-- **`src/features/organization/` YENİ BİR ÖZELLİK KLASÖRÜ.** İçinde:
-  `services/org-tree.ts` (SAF ağaç kurma), iki repository, bir şema, üç bileşen
-- **AĞAÇ TEK SORGUYLA KURULUYOR, ÖZYİNELEMELİ SQL YOK.** 35 birim tek
-  `findMany` ile okunuyor, hiyerarşi bellekte kuruluyor. Yeni bir ağaç
-  gerekirse bu deseni kopyala; `WITH RECURSIVE` yazma
-- **PERSONEL SAYISI ALT BİRİMLERİ DE KAPSIYOR** (`totalStaffCount`). Daireye
-  tıklayan kullanıcı 1 değil 100 kişi görüyor; alt birim kimlikleri
-  `collectUnitIds()` ile bellekteki ağaçtan geliyor
-- **`DIRECTORY_SELECT` DIŞARI AÇIK ve bu bir KARAR** (`staff.repository.ts`):
-  sorgunun okuduğu alan listesi test edilebilir olmalı. Sorguya gömülü bir
-  `select` nesnesine `nationalIdHash: true` eklense hiçbir test kırmızıya
-  dönmezdi — ölçüldü. Kullanıcıya ait yeni bir liste sorgusu yazarken bu deseni
-  düşün
-- **ARAMA KATMANI ARTIK KATALOGA ÖZEL DEĞİL**: `SearchableCatalog` tipi
-  `SearchableTable` oldu ve `staff_members` dalı eklendi. Aksan körü arama
-  gereken her tablo buradan geçer
-- **`<details>` AĞACI İSTEMCİ BİLEŞENİ DEĞİL** — açma/kapama tarayıcının işi.
-  `role="tree"` BİLEREK kullanılmadı (ok tuşu yükümlülüğü doğurur)
-- **ŞEMADA VARSAYILAN 4 KADEME AÇIK GELİYOR** ve bu tarayıcıda ölçülerek
-  seçildi: 3 kademede dolu dairenin "personelini listele" bağlantısı kapalı
-  kutuda kalıyordu
-- **ÜST BİRİMİN BAĞLANTISI EYLEM OLARAK YAZILIYOR** ("… personelini listele"),
-  birim adı olarak değil: adı ikinci kez yazmak satırı kopyalanmış gösteriyordu
-- **KURUMSAL E-POSTA ARANMIYOR ve bu bir KARAR** — arama kutusu bir e-posta
-  doğrulayıcısına dönmesin diye yalnızca ad taranıyor
-- **`docs/project/test-hesaplari.md` bu adımda ÜRETİLMEDİ** — Hakkımızda hiç
-  hesap kullanmıyor. Yeni test hesabı da AÇILMADI
+- **`src/features/auth/services/login-methods.ts` SAF KURAL DOSYASI**: "son
+  giriş yöntemi kaldırılamaz" ve "bağlama şifre ister" kararları burada.
+  Yeni bir giriş yöntemi (ör. telefon) eklenirse kural BU dosyada büyür
+- **BAĞLAMA ŞİFRE İSTİYOR ve bu bir GÜVENLİK kararı**: çalınmış bir oturumla
+  saldırgan kendi Google hesabını bağlarsa, kurban şifresini değiştirip tüm
+  oturumları düşürse bile içeride kalırdı. Yeni bir "kalıcı erişim ekleyen"
+  ekran yazılırsa aynı soruyu sor
+- **KALDIRMADA ŞİFRE SORULMUYOR** ve bu da bir karar (borç #74): kaldırma yetki
+  ARTIRIMI değil azaltımı
+- **OAUTH ÇEREZİNE `mode` EKLENDİ** (`login` / `link`). ⛔ Mod İSTEMCİDEN
+  GELMİYOR; çereze yazan yer ucun kendisi. Tanınmayan değer `login` sayılıyor
+  (daha DAR yetkili akış)
+- **CALLBACK BAĞLAMA AKIŞINDA İKİ ŞEY DOĞRULUYOR**: kullanıcı hâlâ girişli mi
+  VE akışı başlatan kullanıcı mı. İkincisi olmasaydı araya giren bir hesap
+  değişikliğinde bağlantı yanlış hesaba kurulurdu
+- **DENETİM KAYDINA GOOGLE KİMLİĞİ YAZILMIYOR** (`entityId` null) — olayın
+  kendisi yeterli, kişisel veri log'a girmez
+- **TOHUMA İKİ DEMO HESAP DAHA EKLENDİ** (#15 Kemal Güler `93587078210`,
+  #16 Sinan Turan `91269889192`). Listenin **SONUNA** eklendi, 1-94 arası
+  hiçbir hesap kaymadı. ⛔ **İkisi de Google bağlantısı E2E'sine ayrılmış —
+  başka spec'te KULLANMA**
+- ⛔ **Uzak ortamlarda tohumlama GÜNCEL DEĞİL — artık ALTI hesap eksik**
+  (#11-#16). Preview ve production 2026-08-01'de tohumlandı
+- ⛔ **Doktor saatleri (borç #38) uzak ortamlarda tükendi sayılır.**
+  **Etkinlikler yeni seed koşusuyla DÜZELMEZ** — kimlik sabit
 
-## YAPILACAK — roadmap adım 15c
+### Adım 15b'den devreden (hâlâ geçerli)
 
-"Profilden Google bağlantısı ekleme/kaldırma + Google ile girenin KPS doğrulaması"
-(teknik borç **#32** ve **#33**)
+- **`src/features/organization/`** — 35 birim TEK sorguda okunup ağaç bellekte
+  kuruluyor; `WITH RECURSIVE` yazma
+- **`DIRECTORY_SELECT` DIŞARI AÇIK ve bu bir KARAR**: sorgunun okuduğu alan
+  listesi test edilebilir olmalı — gömülü bir `select`'e kişisel veri alanı
+  eklense hiçbir test kırmızıya dönmezdi (ölçüldü)
+- **Arama katmanı katalog dışına açıldı**: `SearchableTable` (`staff_members`
+  dahil). Aksan körü arama gereken her tablo buradan geçer
 
-Dal: `feature/google-baglantisi` (öneri)
+## YAPILACAK — roadmap adım 15c-2
+
+"Google ile girenin KPS doğrulaması" (teknik borç **#32**)
+
+Dal: `feature/kimlik-dogrulama` (öneri)
+
+Bugün Google ile açılan hesap `dogrulanmamis` kalıyor: hastane ve spor salonuna
+giremiyor, doğru mesajı görüyor ama **gidecek bir sayfası yok**. Bu adım mevcut
+hesaba kimlik bağlıyor.
 
 ### Bu adımda özellikle dikkat
 
+- **Akış KAYIT AKIŞINDA ZATEN VAR ama mevcut hesap için yazılmamış**:
+  `registration.service.ts` içindeki KPS adımını oku — sıra şu: `lookupIdentity`
+  (hız sınırı + devre kesici + denetim kaydı) → 18 yaş → "bu numara başka
+  hesapta mı" → personel eşleştirme (`matchStaffMember`)
+- ⛔ **BİR KİMLİK NUMARASI YALNIZCA BİR HESABA BAĞLANABİLİR** (PRD §5.0).
+  `users.national_id_hash` benzersiz; çakışmada kullanıcıya anlaşılır bir cümle
+  gösterilmeli, ham kısıt hatası değil
+- ⛔ **`isStaff` İSTEMCİDEN GELMEZ**, yalnızca `matchStaffMember` hesaplar
+- **Doğrulama sonrası ad soyad KPS'ten gelmeli**: Google ile açılan hesapta
+  `fullName` geçici (e-postanın `@` öncesi) — `google-account.repository.ts`
+  bunu açıkça yazıyor
 - **Bu adım GİRİŞ ve KİMLİK akışına dokunuyor** — CLAUDE.md §3 kapı 3
   (`security-and-hardening` + `security-auditor`) burada gerçekten kritik
-- Roadmap teknik borç **#32 ve #33**'ü oku; ADR-005 ve adım 4c'nin OAuth
-  notları `altyapi-durumu.md` içinde
-- **Hesap birleştirme kuralı zaten var** (adım 4c) — yeniden tasarlama, oku
-- Google **"Testing" modunda**: yalnızca *Audience → Test users* listesindeki
-  e-postalar giriş yapabiliyor
-- **İstemci parolası yenilenmedi** (kurulumda ekran görüntüsüyle sohbete girdi).
-  Canlıya açılmadan önce *Clients → Add secret* ile yenilenmesi temiz olur
+- Kimlik doğrulama ekranı `authenticated` kademesinde olmalı, `kps_verified`
+  değil (doğrulanmamış kullanıcı zaten oraya gidecek)
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
@@ -198,10 +250,17 @@ Dal: `feature/google-baglantisi` (öneri)
   payment → cartItem → cart`. **Üyelikte:** `membershipPayment → membership →
   notification → savedCard`. **Teşkilatta:** önce `user`, sonra `staffMember`,
   sonra `orgUnit` (`users.staff_member_id` Restrict)
+- ⚠️ **HIZ SINIRI TUZAĞI ADIM 15c-1'DE YİNE YAŞANDI**: tam set ikinci kez
+  koşulunca `google-login` ve `register` spec'leri kırmızıya döndü. Sebep kod
+  değil, `google_oauth_start` bütçesinin (IP başına 15 dakikada 10) dolmasıydı.
+  **Kırmızı görünce önce YÜKE, sonra HIZ SINIRINA bak**
+- ⚠️ **YÜK 3'ÜN ÜZERİNDEYKEN TEK BİR SPEC BİLE KAYABİLİR**: adım 15c-1'de
+  `hospital` spec'i yük 3.58'de kırmızı döndü, tek başına koşunca geçti
 - **Kullanılmış test hesapları:** `nurcan.yilmaz3`, `burak.tas2` · `mehmet.duman7`,
   `arda.aydin9` · `ipek.kurt4`, `ferhat.tunc5` · `gamze.toprak8`, `baris.ates10` ·
   `zehra.kilic91`, `esra.arslan92` · `emre.arslan1`, `nazli.mentes6` ·
-  `asli.avci93`, `ege.kurt94`. **BOŞTA HESAP KALMADI** — yeni hesap gerekirse
+  `asli.avci93`, `ege.kurt94` · `kemal.guler95`, `sinan.turan96`.
+  **BOŞTA HESAP KALMADI** — yeni hesap gerekirse
   tohuma eklenmeli (adım 15'te #13/#14 böyle eklendi, listenin SONUNA)
 
 **Playwright seçicileri**

@@ -87,6 +87,64 @@ export async function linkGoogleAccount(userId: string, subject: string): Promis
 }
 
 /**
+ * Hesabın bugünkü giriş yolları — profil ekranı ve kaldırma kuralı için.
+ *
+ * `passwordHash` DEĞERİ OKUNMUYOR, yalnızca varlığı: özet de gizli bir veridir
+ * ve bu sorgunun cevaplaması gereken soru "şifresi var mı", "şifresi ne" değil.
+ * Prisma `select` ile alan alan okuduğu için özet hiç belleğe gelmiyor.
+ */
+export async function findLoginMethods(userId: string): Promise<GoogleConnectionView | null> {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: {
+      passwordHash: true,
+      accounts: {
+        where: { provider: GOOGLE_PROVIDER },
+        select: { createdAt: true },
+        take: 1,
+      },
+    },
+  });
+
+  if (!user) return null;
+
+  const googleAccount = user.accounts[0];
+
+  return {
+    hasPassword: user.passwordHash !== null,
+    hasGoogle: googleAccount !== undefined,
+    googleLinkedAt: googleAccount?.createdAt ?? null,
+  };
+}
+
+export type GoogleConnectionView = {
+  hasPassword: boolean;
+  hasGoogle: boolean;
+  /** Bağlantının kurulduğu an — ekranda "şu tarihte bağlandı" demek için. */
+  googleLinkedAt: Date | null;
+};
+
+/**
+ * Google bağlantısını kaldırır ve ETKİLENEN SATIR SAYISINI döner.
+ *
+ * ═══ SAHİPLİK SORGUNUN `WHERE` KOŞULUNDA ═══
+ * Silme `userId` ile sınırlı; "önce oku, sahibi mi diye bak, sonra sil" deseni
+ * KULLANILMIYOR. İki adımlı desende araya giren bir istek ya da unutulan bir
+ * `if` başkasının bağlantısını sildirebilirdi (adım 15'te adres ve kartta da
+ * aynı karar verildi).
+ *
+ * Sayı 0 dönerse kaldıracak bir şey yoktu: çağıran bunu "zaten kaldırılmış"
+ * olarak yorumlar, hata olarak değil.
+ */
+export async function unlinkGoogleAccount(userId: string): Promise<number> {
+  const result = await prisma.account.deleteMany({
+    where: { userId, provider: GOOGLE_PROVIDER },
+  });
+
+  return result.count;
+}
+
+/**
  * Google ile açılan YENİ hesap.
  *
  * `identityStatus` bilerek `unverified`: Google KİMLİK DOĞRULAMAZ, yalnızca

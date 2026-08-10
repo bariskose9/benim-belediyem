@@ -9,7 +9,38 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-09 · roadmap adım 15b sonrası
+**Son güncelleme:** 2026-08-10 · roadmap adım 15c-1 sonrası
+
+> ## Adım 15c-1 — PANEL İŞİ YAPILDI, YENİ HESAP AÇILMADI
+>
+> Profilden Google bağlantısı hem girişe hem Google akışına dokunduğu için bu
+> adımda **panel işi ZORUNLUYDU** ve proje sahibi 2026-08-10'da **iki adresi de
+> ekledi**:
+>
+> | Panel | Eklenen |
+> |---|---|
+> | Cloudflare Turnstile → Hostname Management | `benim-belediyem-git-feature-google-baglantisi-barisss.vercel.app` |
+> | Google Cloud → Clients → Authorized redirect URIs | aynı adres + `/api/auth/google/callback` |
+>
+> ⚠️ **Turnstile listesindeki merge edilmiş dal satırlarının temizlenip
+> temizlenmediği panelden GÖRÜLMEDİ** — proje sahibine temizlik önerildi ama
+> sonucu doğrulanmadı. Sonraki oturum listeyi panelden okuyup bu dosyayı
+> güncellesin; sınır 10 hostname.
+>
+> Yeni hesap, yeni servis, yeni ortam değişkeni ve yeni bağımlılık **YOK**
+> (`npm audit`: 0 açık). **Yeni bir migration VAR**
+> (`20260810090000_add_google_link_audit_actions`) ama elle çalıştırılacak bir
+> şey değil: Vercel derleme komutu `prisma migrate deploy` ile başlıyor.
+> Migration **yalnızca enum DEĞERİ ekliyor** — tablo, kolon ve satır
+> değişmiyor. ⚠️ Tek yönlü (PostgreSQL'de `DROP VALUE` yok).
+>
+> ⚠️ **TOHUM YİNE DEĞİŞTİ — uzak ortamlarda ARTIK ALTI demo hesap eksik.**
+> Adım 12'de #11/#12, adım 15'te #13/#14, adım 15c-1'de #15 (Kemal Güler) ve
+> #16 (Sinan Turan) eklendi. Preview ve production 2026-08-01'de tohumlandığı
+> için **bu altı hesap orada YOK**. Uygulama etkilenmiyor; yalnızca E2E
+> local'de koşuyor ve orada tohum güncel.
+>
+> **Son güncelleme (önceki):** 2026-08-09 · roadmap adım 15b sonrası
 
 > ## Adım 15b — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ ve PANEL İŞİ DE YOK
 >

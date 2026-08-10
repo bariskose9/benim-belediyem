@@ -15,12 +15,35 @@ import { DEFAULT_REDIRECT_PATH, sanitizeRedirectPath } from "@/lib/redirect";
  * bir yetkilendirme kodu, çerez ömrü boyunca (10 dk) tekrar denenebilirdi.
  */
 
+/**
+ * Akışın NE İÇİN başlatıldığı.
+ *
+ * ⛔ MOD İSTEMCİDEN GELMEZ. Değeri, akışı başlatan uç yazar: `/api/auth/google`
+ * her zaman `login`, `POST /api/auth/google/connections` her zaman `link`.
+ * Adres çubuğundan okunan bir "mod" parametresi olsaydı, giriş ekranından
+ * gelen biri kendini bağlama akışına sokabilirdi.
+ */
+export type GoogleOauthMode = "login" | "link";
+
 export type GoogleOauthTransaction = {
   state: string;
   codeVerifier: string;
   nonce: string;
   /** Giriş bitince dönülecek yol — HER ZAMAN beyaz listeden geçirilir. */
   returnTo: string;
+  /** Eksikse `login` sayılır — eski çerezler bozulmasın diye (adım 15c). */
+  mode?: GoogleOauthMode;
+  /**
+   * Bağlama akışında, akışı BAŞLATAN kullanıcının kimliği.
+   *
+   * NEDEN ÇEREZE YAZILIYOR: callback'te "o an girişli olan kullanıcı" ile
+   * karşılaştırılıyor. Araya giren bir oturum değişikliğinde (kullanıcı başka
+   * sekmede çıkış yapıp başka hesapla girdiyse) bağlantı YANLIŞ hesaba
+   * kurulurdu. Çerez `httpOnly`, yani sayfadaki JavaScript bu değeri
+   * değiştiremez; değiştirse bile kazandığı tek şey akışı bozmak olur —
+   * eşleşmeyen kimlik akışı öldürüyor.
+   */
+  userId?: string;
 };
 
 /**
@@ -82,7 +105,7 @@ function parseTransaction(raw: string): GoogleOauthTransaction | null {
 
     if (typeof value !== "object" || value === null) return null;
 
-    const { state, codeVerifier, nonce, returnTo } = value as Record<string, unknown>;
+    const { state, codeVerifier, nonce, returnTo, mode, userId } = value as Record<string, unknown>;
 
     // Üç alandan biri bile eksikse akış doğrulanamaz; eksik doğrulama yerine
     // akışı bitirmek doğru davranış.
@@ -94,6 +117,14 @@ function parseTransaction(raw: string): GoogleOauthTransaction | null {
       codeVerifier,
       nonce,
       returnTo: typeof returnTo === "string" ? returnTo : DEFAULT_REDIRECT_PATH,
+      /**
+       * TANINMAYAN MOD `login` SAYILIR, hata değil: `login` daha DAR yetkili
+       * akıştır (bağlantı kurmaz, yalnızca birleştirme kuralını uygular).
+       * Bilinmeyen bir değeri geniş yetkili akışa çevirmek, çerezi kurcalayan
+       * birine bağlama akışını açmak olurdu.
+       */
+      mode: mode === "link" ? "link" : "login",
+      userId: typeof userId === "string" ? userId : undefined,
     };
   } catch {
     return null;

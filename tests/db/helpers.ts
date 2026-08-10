@@ -160,6 +160,20 @@ export async function cleanupTestData(): Promise<void> {
     where: { OR: [{ id: startsWith }, { userId: startsWith }] },
   });
 
+  /**
+   * Giriş yöntemi bağlantıları (adım 15c). Satırı UYGULAMA yazıyor
+   * (`linkGoogleAccount`) ve kimliği `cuid()` oluyor — test öneki taşımıyor.
+   * Bağ kullanıcı üzerinden kuruluyor.
+   *
+   * `accounts` kullanıcıya `Cascade` ile bağlı, yani kullanıcı silinince
+   * satır da gider; yine de AÇIKÇA siliniyor: temizliğin hangi tabloya
+   * dokunduğu okunabilir olsun ve `Cascade` bir gün `Restrict`'e dönerse
+   * temizlik sessizce patlamasın.
+   */
+  await prisma.account.deleteMany({
+    where: { OR: [{ id: startsWith }, { userId: startsWith }] },
+  });
+
   await prisma.user.deleteMany({ where: { id: startsWith } });
 
   /**

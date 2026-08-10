@@ -64,6 +64,22 @@ export async function findAuthUserByNationalIdHash(
   });
 }
 
+/**
+ * Girişli kullanıcının şifre özeti — yalnızca "şifreni doğrula" adımı için.
+ *
+ * Kimlik OTURUMDAN geliyor, istemciden değil; bu yüzden IDOR yüzeyi yok.
+ * Ayrı bir fonksiyon çünkü giriş akışı kullanıcıyı kimlik numarasının
+ * özetinden buluyor, bu akış ise kullanıcı kimliğinden.
+ */
+export async function findPasswordHashByUserId(userId: string): Promise<string | null> {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: { passwordHash: true },
+  });
+
+  return user?.passwordHash ?? null;
+}
+
 /** Hesabım ekranının gösterdiği alanlar — kimlik numarası YALNIZCA maskeli. */
 export type AccountProfileRow = {
   fullName: string;

@@ -12,12 +12,12 @@
 
 | Senaryo | Kimlik numarası | Doğum tarihi | Beklenen sonuç |
 |---|---|---|---|
-| 18 yaş altı | `90822561452` | 2010-05-15 | Kayıt **reddedilir** |
-| 18 yaş altı | `97030093102` | 2013-04-24 | Kayıt **reddedilir** |
-| 18 yaş altı | `92995594282` | 2011-04-26 | Kayıt **reddedilir** |
-| 18 yaş altı | `90220717772` | 2010-03-18 | Kayıt **reddedilir** |
-| 18 yaş altı | `92155305482` | 2010-08-27 | Kayıt **reddedilir** |
-| Bugün 18 oluyor | `92050662178` | 2008-08-09 | Kayıt **kabul edilir** |
+| 18 yaş altı | `90822561452` | 2010-05-16 | Kayıt **reddedilir** |
+| 18 yaş altı | `97030093102` | 2013-04-25 | Kayıt **reddedilir** |
+| 18 yaş altı | `92995594282` | 2011-04-27 | Kayıt **reddedilir** |
+| 18 yaş altı | `90220717772` | 2010-03-19 | Kayıt **reddedilir** |
+| 18 yaş altı | `92155305482` | 2010-08-28 | Kayıt **reddedilir** |
+| Bugün 18 oluyor | `92050662178` | 2008-08-10 | Kayıt **kabul edilir** |
 | KPS zaman aşımı | `91038813878` | 1954-10-25 | Sorgu **timeout** döner |
 | KPS sunucu hatası | `93397972098` | 1958-10-17 | Sorgu **error** döner |
 | KPS'te kayıt yok | `99918365820` | — | Sorgu **not_found** döner |
@@ -49,6 +49,8 @@
 | 12 | Esra Arslan | `96118559318` | esra.arslan92@ornek.test | ✔ evet |
 | 13 | Aslı Avcı | `97425842292` | asli.avci93@ornek.test | ✘ hayır |
 | 14 | Ege Kurt | `98987802090` | ege.kurt94@ornek.test | ✘ hayır |
+| 15 | Kemal Güler | `93587078210` | kemal.guler95@ornek.test | ✘ hayır |
+| 16 | Sinan Turan | `91269889192` | sinan.turan96@ornek.test | ✘ hayır |
 
 Personel olan hesaplar hastane randevusu ve spor salonu üyeliğine erişebilir;
 diğerleri erişemez (PRD §5.0 erişim kademeleri).
