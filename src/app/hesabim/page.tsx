@@ -2,11 +2,16 @@ import type { Metadata } from "next";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { messages } from "@/config/messages";
+import { FormAlert } from "@/features/auth/components/FormAlert";
+import { findLoginMethods } from "@/features/auth/repositories/google-account.repository";
 import { findAccountProfile } from "@/features/auth/repositories/user.repository";
+import { isGoogleLoginConfigured } from "@/features/auth/services/google-oauth.service";
 import { guardPage } from "@/features/auth/services/page-guard";
+import { LoginMethodsCard } from "@/features/profile/components/LoginMethodsCard";
 import { RecordLinkCard } from "@/features/profile/components/RecordLinkCard";
 import { countAddresses } from "@/features/profile/repositories/address.repository";
 import { listSavedCards } from "@/features/profile/repositories/saved-card.repository";
+import { formatIstanbulDate } from "@/lib/datetime";
 
 /**
  * Hesabım — kullanıcının YALNIZCA kendi kaydı ve kayıtlarına açılan kapı
@@ -34,19 +39,34 @@ export const metadata: Metadata = {
   title: copy.pageTitle,
 };
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const guard = await guardPage("authenticated", "/hesabim");
 
   // `authenticated` kademesinde tek ret sebebi girişsizlik ve o zaten
   // yönlendirmeyle bitiyor; buraya gelen istek her zaman izinlidir.
   if (!guard.allowed) return null;
 
-  // Üçü birbirinden bağımsız: sırayla beklemek sayfayı boşuna yavaşlatırdı.
-  const [profile, addressCount, cards] = await Promise.all([
+  // Dördü birbirinden bağımsız: sırayla beklemek sayfayı boşuna yavaşlatırdı.
+  const [profile, addressCount, cards, methods] = await Promise.all([
     findAccountProfile(guard.session.userId),
     countAddresses(guard.session.userId),
     listSavedCards(guard.session.userId),
+    findLoginMethods(guard.session.userId),
   ]);
+
+  /**
+   * Google akışının sonucu adres çubuğunda taşınıyor (`?google=…`).
+   *
+   * NEDEN ÇEREZ VEYA OTURUM DEĞİL: sonuç tek seferlik bir bilgi ve kullanıcı
+   * Google'dan tam sayfa yönlendirmeyle dönüyor, yani istemci tarafında
+   * tutulacak bir durum yok. Tanınmayan bir değer sessizce yok sayılıyor —
+   * adresi kurcalayan biri ekrana kendi metnini yazdıramaz.
+   */
+  const googleResult = readGoogleResult(await searchParams);
 
   return (
     <main className="page-shell flex flex-col gap-8 py-8">
@@ -131,6 +151,23 @@ export default async function AccountPage() {
           {profileCopy.settings.heading}
         </h2>
 
+        {/* Google'dan dönüş sonucu — başarı da hata da aynı yerde görünür. */}
+        {googleResult ? (
+          <FormAlert message={googleResult.message} variant={googleResult.variant} />
+        ) : null}
+
+        <LoginMethodsCard
+          methods={{
+            hasPassword: methods?.hasPassword ?? false,
+            hasGoogle: methods?.hasGoogle ?? false,
+            googleLinkedAtLabel: methods?.googleLinkedAt
+              ? formatIstanbulDate(methods.googleLinkedAt)
+              : null,
+            googleAvailable: isGoogleLoginConfigured(),
+            accountLabel: profile?.email ?? guard.session.fullName,
+          }}
+        />
+
         <div className="grid gap-3 sm:grid-cols-2">
           <RecordLinkCard
             href="/hesabim/adreslerim"
@@ -156,6 +193,34 @@ export default async function AccountPage() {
       </section>
     </main>
   );
+}
+
+/**
+ * `?google=…` değerini ekrandaki cümleye çevirir.
+ *
+ * SABİT LİSTE: metin adres çubuğundan GELMİYOR, yalnızca hangi metnin
+ * gösterileceği seçiliyor. Tanınmayan değer `null` döner ve hiçbir şey
+ * çizilmez — kurcalayan biri ekrana kendi cümlesini yazdıramaz.
+ */
+function readGoogleResult(
+  params: Record<string, string | string[] | undefined>,
+): { message: string; variant: "error" | "info" } | null {
+  const raw = params.google;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  const copy = profileCopy.loginMethods.result;
+
+  switch (value) {
+    case "baglandi":
+      return { message: copy.linked, variant: "info" };
+    case "baska_hesaba_bagli":
+      return { message: copy.linkedToOtherAccount, variant: "error" };
+    case "oturum_degisti":
+      return { message: copy.sessionChanged, variant: "error" };
+    case "basarisiz":
+      return { message: copy.failed, variant: "error" };
+    default:
+      return null;
+  }
 }
 
 /** Boş alan "—" ile gösterilir; boş satır kullanıcıya "yükleniyor" hissi verir. */

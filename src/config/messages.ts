@@ -1949,6 +1949,79 @@ export const messages = {
     },
 
     /**
+     * Giriş yöntemleri kartı (adım 15c · teknik borç #33).
+     *
+     * PRD §5.0: "Profilden Google bağlantısı eklenip kaldırılabilir; son giriş
+     * yöntemi kaldırılamaz."
+     */
+    loginMethods: {
+      heading: "Giriş yöntemleri",
+      description:
+        "Hesabınıza hangi yollarla girebileceğinizi buradan yönetirsiniz. En az bir yöntem her zaman açık kalır.",
+
+      password: {
+        label: "Şifre",
+        active: "Tanımlı",
+        missing: "Tanımlı değil",
+      },
+
+      google: {
+        label: "Google",
+        linked: "Bağlı",
+        notLinked: "Bağlı değil",
+        linkedAt: (date: string) => `${date} tarihinde bağlandı`,
+      },
+
+      link: {
+        action: "Google hesabımı bağla",
+        /** Şifre neden isteniyor — kullanıcı boşuna tedirgin olmasın. */
+        passwordNotice:
+          "Güvenliğiniz için şifrenizi tekrar isteyeceğiz: hesabınıza kalıcı bir giriş yolu ekliyorsunuz.",
+        passwordLabel: "Şifreniz",
+        submit: "Google'a git",
+        pending: "Yönlendiriliyor…",
+      },
+
+      unlink: {
+        action: "Bağlantıyı kaldır",
+        confirmTitle: "Google bağlantısı kaldırılsın mı?",
+        confirmBody:
+          "Bundan sonra hesabınıza yalnızca şifrenizle girebilirsiniz. Bağlantıyı istediğiniz zaman yeniden kurabilirsiniz.",
+        confirmAction: "Evet, kaldır",
+        confirmDismiss: "Vazgeç",
+        pending: "Kaldırılıyor…",
+        /** Kaldırma düğmesi hiç çizilmiyorsa sebebi yazılı olmalı. */
+        blocked: "Şifreniz tanımlı olmadığı için bu bağlantı kaldırılamaz — tek giriş yolunuz bu.",
+      },
+
+      toast: {
+        linked: "Google hesabınız bağlandı.",
+        unlinked: "Google bağlantısı kaldırıldı.",
+      },
+
+      /** Google'dan dönüşte adres çubuğunda taşınan sonuç kodlarının karşılıkları. */
+      result: {
+        linked: "Google hesabınız bağlandı. Artık şifrenizle veya Google ile girebilirsiniz.",
+        failed: "Google bağlantısı kurulamadı. Lütfen tekrar deneyin.",
+        linkedToOtherAccount:
+          "Bu Google hesabı başka bir kullanıcıya bağlı. Önce oradan kaldırmanız gerekir.",
+        sessionChanged: "İşlem sırasında oturumunuz değişti. Lütfen baştan deneyin.",
+      },
+
+      errors: {
+        alreadyLinked: "Hesabınızda zaten bağlı bir Google hesabı var.",
+        passwordCheckFailed: "Şifreniz doğrulanamadı. Lütfen tekrar deneyin.",
+        linkedToOtherAccount: "Bu Google hesabı başka bir kullanıcıya bağlı.",
+        notLinked: "Hesabınızda bağlı bir Google hesabı yok.",
+        lastLoginMethod:
+          "Bu tek giriş yönteminiz. Kaldırmadan önce bir şifre belirlemeniz gerekir.",
+        unavailable: "Google ile bağlama şu anda kullanılamıyor. Lütfen daha sonra deneyin.",
+        tooManyAttempts:
+          "Çok fazla deneme yaptınız. Güvenliğiniz için lütfen biraz sonra tekrar deneyin.",
+      },
+    },
+
+    /**
      * Hata metinleri.
      *
      * "Bulunamadı" mesajı BİLEREK belirsiz: var olmayan kayıt ile başkasının

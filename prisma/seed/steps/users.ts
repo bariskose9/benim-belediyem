@@ -91,6 +91,22 @@ const LATE_DEMO_STAFF_CITIZEN_INDEXES = [143, 144] as const;
  */
 const LATE_DEMO_CITIZEN_INDEXES = [57, 58] as const;
 
+/**
+ * SONRADAN EKLENEN demo VATANDAŞ hesapları (adım 15c).
+ *
+ * Aynı "sona ekle, araya ekleme" gerekçesi; 1-94 arası hiçbir hesap kaymıyor.
+ *
+ * NEDEN GEREKİYOR: Google bağlantısının uçtan uca testi hesabın GİRİŞ
+ * YÖNTEMLERİNİ değiştiriyor (bağlantı ekliyor ve kaldırıyor). Bu, hesabın
+ * giriş yapabilirliğini doğrudan etkileyen bir yazma; paylaşılan bir hesapta
+ * paralel koşan başka bir spec'in girişini bozabilirdi. İki Playwright projesi
+ * (masaüstü + 375px) aynı anda koştuğu için iki ayrı hesap gerekiyor.
+ *
+ * Kimlik havuzu: arka plan vatandaşları 17-56 aralığını kullanıyor; 57-58
+ * adım 15'e gitti, 59 ve 60 boştaydı.
+ */
+const GOOGLE_LINK_DEMO_CITIZEN_INDEXES = [59, 60] as const;
+
 export interface UserSeedResult {
   readonly users: readonly SeededUser[];
   readonly demoUsers: readonly SeededUser[];
@@ -115,6 +131,7 @@ export async function seedUsers(
     // Sıra bozulmasın diye EN SONDA (gerekçe yukarıda).
     ...LATE_DEMO_STAFF_CITIZEN_INDEXES.map((index) => ({ index, isDemoAccount: true })),
     ...LATE_DEMO_CITIZEN_INDEXES.map((index) => ({ index, isDemoAccount: true })),
+    ...GOOGLE_LINK_DEMO_CITIZEN_INDEXES.map((index) => ({ index, isDemoAccount: true })),
   ];
 
   // Tek özet üretilip demo hesaplarda paylaşılıyor. Aynı şifre için ayrı ayrı

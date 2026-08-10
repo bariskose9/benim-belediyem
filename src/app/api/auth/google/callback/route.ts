@@ -1,11 +1,17 @@
 import { publicEnv } from "@/config/env";
+import { completeGoogleLink } from "@/features/auth/services/google-link.service";
 import { completeGoogleLogin } from "@/features/auth/services/google-login.service";
 import { consumeGoogleOauthCookie } from "@/features/auth/services/google-oauth-context";
 import {
   exchangeGoogleCallback,
   isGoogleLoginConfigured,
+  type GoogleIdentity,
 } from "@/features/auth/services/google-oauth.service";
-import { readSessionToken, writeSessionCookie } from "@/features/auth/services/session-context";
+import {
+  getCurrentSession,
+  readSessionToken,
+  writeSessionCookie,
+} from "@/features/auth/services/session-context";
 import { mergeGuestCartIntoUserCart } from "@/features/cart/services/cart.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { revokeSession } from "@/features/auth/services/session.service";
@@ -51,6 +57,18 @@ export async function GET(request: Request) {
       nonce: transaction.nonce,
     });
 
+    /**
+     * BAĞLAMA AKIŞI GİRİŞTEN AYRILIYOR (adım 15c).
+     *
+     * Ayrım burada yapılıyor çünkü iki akışın SONUCU farklı: giriş oturum
+     * açar, bağlama açmaz — kullanıcı zaten girişli. İkisi tek yolda
+     * birleştirilseydi, bağlama sırasında yanlışlıkla yeni bir hesap açmak
+     * ya da başka bir hesaba oturum vermek mümkün olurdu.
+     */
+    if (transaction.mode === "link") {
+      return await finishLinkFlow(transaction, identity, request);
+    }
+
     const outcome = await completeGoogleLogin({
       identity,
       actorIp: readActorIp(request.headers),
@@ -94,8 +112,53 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * Bağlama akışının son adımı (teknik borç #33).
+ *
+ * ═══ OTURUM İKİ KEZ KONTROL EDİLİYOR ve ikisi de gerekli ═══
+ *   1. HÂLÂ GİRİŞLİ Mİ: akış başladıktan sonra kullanıcı çıkış yapmış olabilir.
+ *      Girişsiz birine bağlantı kurmak, bağlantıyı sahipsiz bırakmak olurdu
+ *   2. AYNI KULLANICI MI: başka sekmede başka hesaba geçilmiş olabilir.
+ *      Çerezdeki kimlik o anki oturumla tutmuyorsa akış ölür — aksi hâlde
+ *      Google hesabı YANLIŞ kullanıcıya bağlanırdı
+ *
+ * Bu akış OTURUM AÇMAZ ve açmamalı: kullanıcı zaten girişli. Buradan oturum
+ * vermek, bağlama adımını bir giriş yoluna çevirirdi.
+ */
+async function finishLinkFlow(
+  transaction: { userId?: string; returnTo: string },
+  identity: GoogleIdentity,
+  request: Request,
+): Promise<Response> {
+  const session = await getCurrentSession();
+
+  if (!session) return redirectToLogin("baglanti_suresi_doldu");
+  if (!transaction.userId || session.userId !== transaction.userId) {
+    return redirectToAccount("oturum_degisti");
+  }
+
+  const outcome = await completeGoogleLink({
+    userId: session.userId,
+    identity,
+    actorIp: readActorIp(request.headers),
+  });
+
+  if (outcome.kind === "rejected") return redirectToAccount("baska_hesaba_bagli");
+
+  return redirectToAccount("baglandi");
+}
+
 function redirectTo(path: string): Response {
   return Response.redirect(new URL(path, publicEnv.NEXT_PUBLIC_APP_URL).toString(), 302);
+}
+
+/** Bağlama akışı her zaman profil sayfasına döner; sonuç adres çubuğunda taşınır. */
+function redirectToAccount(result: string): Response {
+  const target = new URL("/hesabim", publicEnv.NEXT_PUBLIC_APP_URL);
+
+  target.searchParams.set("google", result);
+
+  return Response.redirect(target.toString(), 302);
 }
 
 function redirectToLogin(reason: string): Response {

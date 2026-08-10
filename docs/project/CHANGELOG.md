@@ -4,6 +4,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 15c (1/2): Profilden Google bağlantısı (teknik borç #33)
+
+- **`/hesabim`'a "Giriş yöntemleri" kartı geldi**: şifre tanımlı mı, Google bağlı
+  mı, ne zaman bağlandı. PRD §5.0 bunu istiyordu; birleştirme engellendiğinde
+  kullanıcıya "şifrenle gir, sonra profilden bağla" deniyordu ama o ekran yoktu
+- **Bağlama ŞİFRE İSTİYOR ve bu bir güvenlik kararı**: bağlama hesaba KALICI bir
+  giriş yolu ekliyor. Yalnızca oturuma dayansaydı, çalınmış bir oturumla saldırgan
+  kendi Google hesabını bağlar; kurban şifresini değiştirip tüm oturumları
+  düşürse bile saldırgan girmeye devam ederdi
+- **SON GİRİŞ YÖNTEMİ KALDIRILAMAZ** (PRD §5.0): şifresi olmayan kullanıcı
+  Google'ı kaldırırsa hesabına bir daha giremezdi. Kural saf bir fonksiyonda
+  (`login-methods.ts`), ekranda düğme hiç çizilmiyor ve sunucu da reddediyor.
+  Koruma **kaldırılıp testin kırmızıya döndüğü görülerek** ölçüldü
+- **Aynı Google hesabı iki kullanıcıya bağlanamaz**: `sub` başka bir hesaba
+  bağlıysa akış reddediliyor ve hangi hesap olduğu SÖYLENMİYOR
+- **OAuth akışına "bağlama" modu eklendi.** Mod istemciden gelmiyor: işlem
+  çerezine yazan yer ucun kendisi. Callback iki şeyi birden doğruluyor —
+  kullanıcı hâlâ girişli mi ve akışı BAŞLATAN kullanıcı mı; aksi hâlde araya
+  giren bir hesap değişikliğinde bağlantı yanlış hesaba kurulurdu
+- **Bağlama ve kaldırma denetim kaydına düşüyor** (`google_link` /
+  `google_unlink`). ⛔ Google kimliği (`sub`) kayda YAZILMIYOR — olayın kendisi
+  yeterli, kişisel veri log'a girmez (CLAUDE.md §5.11)
+- Tohuma **iki demo hesap eklendi** (#15 Kemal Güler, #16 Sinan Turan): bu spec
+  hesabın giriş yöntemlerini değiştiriyor, yani hesap PAYLAŞAMAZ. Listenin
+  **sonuna** eklendi, 1-94 arası hiçbir hesap kaymadı
+
+### Değişti — adım 15c (1/2)
+
+- `accounts` tablosunun okuma tarafı büyüdü: `findLoginMethods` (şifre var mı +
+  Google bağlı mı) ve `unlinkGoogleAccount` (sahiplik `WHERE` koşulunda,
+  etkilenen satır sayısı dönüyor)
+- **Migration `20260810090000_add_google_link_audit_actions`**: denetim
+  sözlüğüne iki işlem ve bir varlık türü eklendi. Geriye uyumlu, yalnızca enum
+  DEĞERİ ekliyor; tablo, kolon ve satır değişmiyor. ⚠️ Tek yönlü
+  (PostgreSQL'de `DROP VALUE` yok)
+
 ### Eklendi — adım 15b: Hakkımızda (teşkilat şeması + 100 kişilik personel rehberi)
 
 - **`/hakkimizda` sayfası geldi ve GİRİŞ GEREKTİRMİYOR** (PRD §3 · §5.9): kurum
