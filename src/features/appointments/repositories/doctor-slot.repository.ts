@@ -46,6 +46,51 @@ export async function listSlotsForDoctor(input: {
 }
 
 /**
+ * Takvimi ileri kaydıran planlı görevin okuduğu doktor listesi (adım 16).
+ *
+ * Yalnızca kimlik dönüyor: görevin adla, unvanla veya branşla işi yok, her
+ * doktora aynı takvim açılıyor.
+ */
+export async function listAllDoctorIds(): Promise<string[]> {
+  const rows = await prisma.doctor.findMany({ select: { id: true }, orderBy: { id: "asc" } });
+
+  return rows.map((row) => row.id);
+}
+
+/**
+ * Eksik muayene saatlerini yazar; ZATEN VAR OLANLARI SESSİZCE ATLAR.
+ *
+ * ═══ İDEMPOTENTLİK VERİTABANINDAN GELİYOR ═══
+ * `@@unique([doctorId, startsAt])` + `skipDuplicates: true`. Görev iki kez
+ * çalışsa da ikinci koşu sıfır satır yazar; "önce var mı diye bak, yoksa yaz"
+ * iki adım olurdu ve iki eşzamanlı koşu ikisinde de "yok" görürdü.
+ *
+ * ⛔ `isBooked` HİÇ VERİLMİYOR → varsayılan `false`. Görev yalnızca BOŞ saat
+ * açar; tohumlamanın "%30'u dolu görünsün" süslemesi buraya taşınmadı, çünkü
+ * bu gerçek bir takvim uzatması, sahne dekoru değil.
+ *
+ * Parça parça yazılıyor: PostgreSQL tek sorguda 65535 parametre kabul ediyor
+ * ve uzun bir aradan sonra çalışan ilk koşu binlerce satır üretebilir.
+ */
+export async function insertMissingSlots(
+  rows: readonly { doctorId: string; startsAt: Date }[],
+): Promise<number> {
+  const CHUNK_SIZE = 1_000;
+  let inserted = 0;
+
+  for (let start = 0; start < rows.length; start += CHUNK_SIZE) {
+    const result = await prisma.doctorSlot.createMany({
+      data: rows.slice(start, start + CHUNK_SIZE),
+      skipDuplicates: true,
+    });
+
+    inserted += result.count;
+  }
+
+  return inserted;
+}
+
+/**
  * Randevu alınacak saati, doktoru ve branşıyla birlikte transaction içinde okur.
  *
  * Branş kimliği burada okunuyor çünkü "aynı branşta aynı gün ikinci randevu"

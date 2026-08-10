@@ -441,6 +441,28 @@
 - Ortam değişkeni değişikliği **kendiliğinden yayına girmez**; yeni bir dağıtım
   gerekir (`npx vercel redeploy <url>`)
 
+### Vercel — planlı görev (cron, adım 16)
+
+Yapılandırma **panelde değil `vercel.json` içinde**; deploy ile yürürlüğe giriyor.
+Panelde yalnızca **görüntüleniyor**: Settings → Cron Jobs (log için "View Logs").
+
+| Ne | Değer | Not |
+|---|---|---|
+| Yol | `GET /api/cron/daily` | Vercel yapılandırılan yola **GET** atıyor, metot seçilemiyor |
+| Zamanlama | `0 0 * * *` (**UTC**) | TR saatiyle 03:00 (PRD §5.6). Cron saat dilimi her zaman UTC |
+| Koruma | `Authorization: Bearer $CRON_SECRET` | Değişken tanımlıysa başlığı Vercel **kendisi** ekliyor |
+| Hangi ortam | **yalnızca production** | Cron production dağıtım adresini çağırıyor; preview'da çalışmıyor |
+
+⚠️ **Ücretsiz (Hobby) planın iki sınırı — 2026-08-10'da dokümandan doğrulandı:**
+- **Günde en fazla bir koşu.** Daha sık bir ifade (`0 * * * *` gibi) **deploy'u
+  başarısız kılıyor**, sessizce göz ardı edilmiyor (teknik borç #3)
+- **Saat garanti değil:** `0 0 * * *` ifadesi 00:00–00:59 UTC arasında herhangi
+  bir dakikada tetiklenebiliyor. Proje bu yüzden doğruluğu cron'a bağlamıyor
+  (ADR-007)
+- Vercel başarısız koşuyu **yeniden denemiyor**; kaçırılan koşu log bile
+  üretmiyor. "Bu iş bugün çalıştı mı" sorusunun tek güvenilir cevabı
+  `audit_logs` tablosundaki `scheduled_task_run` kayıtları
+
 ## Ortam değişkeni matrisi
 
 Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
@@ -460,6 +482,7 @@ Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
 | `EMAIL_API_KEY` · `EMAIL_FROM` | ✘ | ✘ | ✔ | Production'da kayıt **ve şifre sıfırlama** ekranları "geçici olarak kapalı" der. Uygulama **açılır** |
 | `GOOGLE_CLIENT_ID` · `GOOGLE_CLIENT_SECRET` | ✔ | ✔ | ✔ | Giriş ekranındaki **"Google ile devam et" düğmesi hiç çizilmez**. Kayıt ve şifreyle giriş etkilenmez — uygulama açılır (adım 4c, 2026-08-02) |
 | `AUTH_SECRET` · `AUTH_URL` | ✘ | ✘ | ✘ | **Hiç kullanılmıyor ve gerekmiyor.** Auth.js kurulmadı (ADR-005 güncelleme notu); OAuth işlem çerezi `httpOnly` olduğu için imzalanmıyor. `.env.example`'da duruyor ama boş kalabilir |
+| `CRON_SECRET` | ✔ | ✘ | ✔ | **Planlı görevler HİÇ çalışmaz** — `/api/cron/daily` her isteğe 401 döner (fail-closed, adım 16). Uygulama açılır, ekranlar etkilenmez; yalnızca temizlik, aidat tahsilatı ve doktor takvimi durur. Preview'da bilerek yok: cron yalnızca **production dağıtımında** çalışıyor (Vercel) |
 | `OWNER_*` | ✘ | ✘ | ✘ | Tohumlama proje sahibi hesabını **atlar** (kasıtlı: gerçek kişisel veri uzak ortama gitmiyor) |
 
 **Anahtarlar ortama özeldir** (`13-environments.md`): `NATIONAL_ID_*` değerleri

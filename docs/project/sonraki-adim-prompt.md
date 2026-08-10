@@ -1,23 +1,23 @@
-# Sonraki oturum için hazır prompt — adım 16
+# Sonraki oturum için hazır prompt — adım 17
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 16 bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 17 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **16**'ya geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **17**'ye geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
-- `docs/project/roadmap.md` — adım 16 satırı ve teknik borç listesi
-- `docs/project/decisions/ADR-007.md` ve `ADR-013.md` — süresi dolan kayıtlar
-  ve okuma anında türetilen durumlar (adım 16'nın tam konusu)
+- `docs/project/roadmap.md` — adım 17 satırı ve teknik borç listesi
+- `docs/project/PRD.md` §5.11 ve `docs/standards/14-privacy-and-compliance.md`
+  — yasal sayfaların ve rıza kaydının tam konusu
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
 
 ## DURUM
 
-Roadmap adım **0 → 15, 15b, 15c-1 ve 15c-2 bitti.**
+Roadmap adım **0 → 16 bitti** (15, 15b, 15c-1, 15c-2 dahil).
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - **Kayıt, giriş, çıkış, oturum, şifre sıfırlama, Google ile giriş** çalışıyor
@@ -25,33 +25,30 @@ Roadmap adım **0 → 15, 15b, 15c-1 ve 15c-2 bitti.**
 - **Hastane randevusu** · **Ortak sepet + ödeme** · **Market** · **Restoran**
   · **Sipariş takibi + bildirim** · **Etkinlik + koltuk** · **Spor salonu**
   · **Destek talebi** · **Bilgi panosu** · **Profil merkezi** · **Hakkımızda**
-  · **Profilden Google bağlantısı** çalışıyor ve canlıda
-- **Kimlik doğrulama** çalışıyor ve **CANLIDA** (2026-08-10, commit `65fc6e1`,
-  PR #42) — `/kimlik-dogrulama`, teknik borç #32 ÖDENDİ. Duman testi geçti:
-  girişsiz sayfa 307, girişsiz uç 401
+  · **Profilden Google bağlantısı** · **Kimlik doğrulama** çalışıyor ve canlıda
+- **Planlı görevler** (adım 16) canlıda: `GET /api/cron/daily`, her gece
+  TR 03:00 civarı, dokuz görev. Teknik borç **#18 · #38 · #53 · #55 · #63
+  ÖDENDİ**
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında:** dal adresini
   (`benim-belediyem-git-<dal>-barisss.vercel.app`) Cloudflare Turnstile
   hostname listesine ekle (giriş gerektiren ekran varsa **ZORUNLU**) ve
-  Google OAuth akışına dokunuyorsan Google redirect URI listesine de
-  (`/api/auth/google/callback` ekleyerek). Teknik borç #31.
-  **Adım 16'da Turnstile satırı MUHTEMELEN GEREKMİYOR** — planlı görevler
-  ekran değil, ama ekranda bir şey değişecekse yeniden değerlendir.
-  ⛔ **ADIM 15c-2'DE PANELE HİÇ GİRİLMEDİ ve bu bir KARAR:** proje sahibi
-  preview'ı atlayıp doğrudan production'a çıktı, production hostname'i zaten
-  kayıtlıydı. Liste bu adımda BÜYÜMEDİ — ama hâlâ 10 sınırında
+  Google OAuth akışına dokunuyorsan Google redirect URI listesine de.
+  Teknik borç #31. **Liste hâlâ 10 sınırında.**
+  ⛔ **ADIM 15c-2 VE 16'DA PANELE HİÇ GİRİLMEDİ** — proje sahibi preview'ı
+  atlayıp doğrudan production'a çıkıyor. Adım 17 **yasal sayfalar**, yani
+  ziyaretçiye açık ekranlar: giriş gerekmiyorsa Turnstile satırı da gerekmiyor
 
 ## 📱 TOPLU ELLE TEST — OTURUMUN BAŞINDA GÜNDEME GETİR
 
-> Proje sahibi 2026-08-10'da **"hepsini sonraki oturumda topluca test edeyim"**
-> dedi ve 15c-2 oturumunda da yapmadı. Bekleyen doğrulamaların **tamamı**
-> aşağıda, tek seferde koşulacak biçimde sıralı. Kod yazmadan önce bunu ona
-> hatırlat ve **"şimdi mi yapalım, sonra mı?"** diye sor — cevabı "sonra" ise
-> bu bölümü olduğu gibi bırak, adım işine geç.
+> Proje sahibi bunu **2026-08-10'da ÜÇÜNCÜ kez erteledi** ("benlik olan her
+> şeyi sonraki adıma aktar"). Liste eksilmedi, adım 16'nın maddesi eklendi.
+> Kod yazmadan önce hatırlat ve **"şimdi mi yapalım, sonra mı?"** diye sor —
+> cevabı "sonra" ise bu bölümü olduğu gibi bırak, adım işine geç.
 >
-> Kapsanan teknik borçlar: **#50 · #62 · #73** + adım 15c-1 giriş yöntemleri
-> ekranı + adım 15c-2 kimlik doğrulama + Turnstile panel temizliği.
+> Kapsanan teknik borçlar: **#50 · #62 · #73 · #83** + adım 15c-1 giriş
+> yöntemleri + adım 15c-2 kimlik doğrulama + adım 16 cron.
 > Tamamlananları bu listeden ve roadmap'ten SİL, yarım kalanı bırak.
 
 **Nerede:** https://benim-belediyem.vercel.app (production) · **telefondan**
@@ -99,15 +96,12 @@ spor salonu ekranları yalnızca personele açık.
 5. Bağladıysan: kartta "Bağlı" + tarih → **Bağlantıyı kaldır** → onay kutusu
    → kaldırınca "Bağlı değil"e dönüyor mu
 
-### B3) ADIM 15c-2 — KİMLİK DOĞRULAMA (yeni)
+### B3) ADIM 15c-2 — KİMLİK DOĞRULAMA
 
-> ✅ **PRODUCTION'DA ÇALIŞIYOR, panel işi GEREKMİYOR** — production'ın Turnstile
-> hostname'i zaten kayıtlı.
+> ✅ **PRODUCTION'DA ÇALIŞIYOR, panel işi GEREKMİYOR.**
 > ⚠️ Bu test **Google ile açılmış, kimliği doğrulanmamış** bir hesap istiyor.
 > Şifreyle giriş yapılan tohum hesaplarının kimliği ZATEN doğrulanmış — onlarda
 > ekran "kimliğiniz doğrulanmış" der ve form hiç çıkmaz (bu da geçerli bir test).
-> Gerçek akışı denemek için: Google ile giriş yap (Google Console'daki test
-> kullanıcısı e-postanla), sonra aşağıyı uygula.
 
 1. **Google ile giriş yap** → `/hesabim` → "Kimliğiniz henüz doğrulanmadı"
    kartı görünüyor mu, "Kimlik durumu: Doğrulanmamış" yazıyor mu
@@ -128,6 +122,23 @@ spor salonu ekranları yalnızca personele açık.
 8. `/kimlik-dogrulama` adresini tekrar aç → form YOK, "Kimliğiniz doğrulanmış"
    yazıyor mu
 
+### B4) ADIM 16 — PLANLI GÖREV (borç #83) — **DEPLOY'DAN SONRAKİ GÜN**
+
+> ⚠️ **BU MADDE TELEFONDAN DEĞİL, BİLGİSAYARDAN.** Ekranı yok; kanıt
+> Vercel panelinde ve veritabanında.
+> ⏳ **Deploy gecesinden ÖNCE bakmanın anlamı yok** — cron günde bir kez,
+> TR saatiyle 03:00–04:00 arasında çalışıyor.
+
+1. Vercel → proje → **Settings → Cron Jobs** → `/api/cron/daily` satırı
+   görünüyor mu, zamanlaması `0 0 * * *` mi
+2. Aynı satırda **View Logs** → gece bir çağrı düşmüş mü, yanıt **200** mü
+   (401 görürsen `CRON_SECRET` production'da yok demektir — ama girildi,
+   `altyapi-durumu.md` ortam değişkeni matrisine bak)
+3. Yanıt gövdesinde `"failedCount": 0` ve **dokuz görev** var mı
+4. **Hastane**'ye gir → gün şeridinde **14 gün** görünüyor mu. ⛔ Adım 16'dan
+   önce production'da saatler 2026-08-15'te bitiyordu (borç #38); cron ilk kez
+   çalıştıktan sonra takvim her gün 14 güne tamamlanıyor olmalı
+
 ### C) HER İKİ EKRAN İÇİN ORTAK
 
 1. Tema düğmesiyle **açık/koyu** geçiş → iki temada da metinler okunuyor mu
@@ -143,8 +154,8 @@ spor salonu ekranları yalnızca personele açık.
 
 ### E) 🔧 PANEL İŞİ — ŞU AN ZORUNLU DEĞİL
 
-**Bu turda panele girmen gerekmiyor.** Adım 15c-2 production'a doğrudan çıktı,
-production'ın Turnstile hostname'i zaten kayıtlı ve liste büyümedi.
+**Bu turda panele girmen gerekmiyor** (B4'teki "bak" maddesi hariç — o okuma,
+yapılandırma değil).
 
 ⏳ **TETİK — ne zaman gerekecek:** giriş gerektiren bir ekranı **preview'da**
 denemek istediğin ilk seferde. Liste 10 sınırında olduğu için o gün boş satır
@@ -162,78 +173,93 @@ bulunmayacak. O zaman **Cloudflare Turnstile → Hostname Management**'ta:
 > **Neden bekleme gerekiyor (D bölümü):** durumlar veritabanında bir kolonda
 > tutulmuyor, **okuma anında zamandan türetiliyor** (ADR-013).
 
-## ADIM 15c-2'DEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
+## ADIM 16'DAN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
 
-- **`src/features/auth/services/identity-verification.service.ts` SIRAYI
-  ANLATIYOR**: bot kapısı → "zaten doğrulanmış mı" → `lookupIdentity` → 18 yaş
-  → "numara başka hesapta mı" → `matchStaffMember` → tek koşullu yazma →
-  denetim kaydı. Sıranın her adımının gerekçesi dosyanın başında yazılı
-- **YAZMA TEK KOŞULLU** (`attachVerifiedIdentity`): koşul `WHERE`'de, karar
-  etkilenen satır sayısından. Koruma kaldırılıp test KIRMIZIYA döndürülerek
-  ölçüldü. Testin servisi DEĞİL repository'yi çağırması bilinçli — servisteki
-  ön kontrol araya girseydi asıl koruma hiç ölçülmezdi
-- ⛔ **`isStaff` İSTEMCİDEN GELMEZ**: `AttachVerifiedIdentityInput` tipinde
-  alanı yok, değer yalnızca `staffMemberId !== null`'dan türüyor
-- **P2002 AYIRT EDİLİYOR**: yalnızca `national_id_hash` çakışması "bu numara
-  başkasına ait" sayılıyor. ⚠️ **Prisma 7 + `pg` adaptöründe çakışan kolonlar
-  `meta.target` altında DEĞİL**, `meta.driverAdapterError.cause.constraint
-  .fields` altında — ölçülerek bulundu, ezberlenmedi
-- **BOT KAPISI ve KİMLİK ŞEMASI ORTAKLAŞTI** (`bot-check.ts`,
-  `identity-challenge.schema.ts`). Kayıt akışı da bunları kullanıyor; birinde
-  yapılan sıkılaştırma ikisini birden etkiler
-- **`sanitizeRedirectPath` KONTROL KARAKTERİ REDDEDİYOR** (güvenlik düzeltmesi):
-  TAB/LF/CR taşıyan bir dönüş adresi tarayıcıda başka siteye gidiyordu.
-  Yeni bir yerde dönüş adresi kullanılacaksa MUTLAKA bu fonksiyondan geçir
-- **AD SOYAD KPS'TEN GELİYOR**: doğrulamadan sonra Google'ın verdiği geçici ad
-  (e-postanın `@` öncesi) gerçek adla değişiyor
-- ⚠️ **TELEFON BOŞ KALIYOR** (borç #80): kimlik doğrulaması telefon istemiyor
+- **`src/features/scheduled-tasks/` YENİ BİR KATMAN**: `task-registry.ts`
+  görev listesi (TEK kaynak), `task-runner.ts` koşturucu, `services/*-tasks.ts`
+  görevlerin kendisi. Yeni bir günlük iş = yeni bir `ScheduledTask` + kataloğa
+  bir satır. Başka hiçbir yere dokunulmuyor
+- ⛔ **GÖREVLER MANTIĞI KOPYALAMIYOR, ÇAĞIRIYOR**: aidat tahsilatı adım 12'nin
+  `renewMembershipPeriod()`'unu, hatırlatma ekranın kullandığı
+  `syncMembershipNotifications()`'ı çağırıyor. Kural iki yerde yaşamıyor
+- **TEMİZLİK "PAYLI" (24 saat, `CLEANUP_GRACE_MS`)**: süresi dolan satır anında
+  silinmiyor. Sebep: tüketilmiş bir OTP satırı, kayıt taslağı yaşadığı sürece
+  (15 dk) hâlâ okunuyor. Pay kaldırılıp test kırmızıya döndürülerek ölçüldü
+- ⚠️ **DIŞ VERİ ÖNBELLEĞİNİN ÖLÇÜTÜ FARKLI**: `expiresAt` değil `fetchedAt`,
+  pay da `INFO_WIDGET_MAX_STALE_MS`. Süresi dolmuş kayıt orada ÖLÜ DEĞİL —
+  sağlayıcı çökünce 24 saate kadar bayat gösteriliyor (ADR-015)
+- ⛔ **KOLTUK TEMİZLİĞİ `status = 'held'` İSTİYOR** — koşul kaldırılınca test
+  kırmızıya dönüyor, çünkü kaybolacak şey satılmış bir bilet olurdu
+- **`CRON_SECRET` YOKSA UÇ HERKESE KAPALI** (fail-closed) ve karşılaştırma
+  **sabit süreli** (`timingSafeEqual`). `===` zamanlama saldırısına açıktı
+- **EŞZAMANLI KOŞU İÇİN KİLİT YOK, BİLİNÇLİ**: Vercel iki çözüm öneriyor
+  (kilit veya idempotentlik); ikincisi seçildi çünkü takılı kalan bir kilit
+  görevi günlerce durdurabilir. İdempotentlik ÖLÇÜLÜYOR
+- **DOKTOR SAATLERİ ARTIK TEK YERDE**: `slot-calendar.ts`. **Tohumlama da
+  oradan okuyor** — iki yerde yazılsalardı 15. günün saatleri farklı olurdu
+- **YENİLEME ANAHTARI DÖNEMDEN TÜRÜYOR** (`renewal:<üyelik>:<dönem>`), rastgele
+  DEĞİL: gönderecek istemci yok, anahtar tekrarlanabilir olmak zorunda
+- ⚠️ **`payment_pending` ÜYELİKLER YENİDEN DENENMİYOR** (borç #82)
+- ⚠️ **TEMİZLİK SAYFALAMA YAPMIYOR** (borç #81) — ölçüm yapılmadan eklenmedi
+- ⚠️ **DB TESTİ TAKVİM GÖREVİNİN YAN ETKİSİNİ GERİ ALIYOR**: görev TÜM
+  doktorlara yazıyor, yani tohumlanmış doktorların takvimi de büyüyor.
+  `undoCalendarSideEffects()` bunu `isSeedData: false` ölçütüyle temizliyor.
+  Yeni bir "tüm tabloya yazan" görev eklenirse aynı tuzağa dikkat
 
-### Adım 15c-1'den devreden (hâlâ geçerli)
+### ADR-017'den devreden — KİMLİK KANITI KARARI
 
-- **`login-methods.ts` SAF KURAL DOSYASI**: "son giriş yöntemi kaldırılamaz" ve
-  "bağlama şifre ister" kararları burada
-- **BAĞLAMA ŞİFRE İSTİYOR ve bu bir GÜVENLİK kararı**; **kaldırmada şifre
-  sorulmuyor** ve bu da bir karar (borç #74)
-- **OAUTH ÇEREZİNE `mode` EKLENDİ** (`login` / `link`). ⛔ Mod İSTEMCİDEN
-  GELMİYOR
-- ⛔ **Uzak ortamlarda tohumlama GÜNCEL DEĞİL — ALTI hesap eksik** (#11-#16).
-  Preview ve production 2026-08-01'de tohumlandı
-- ⛔ **Doktor saatleri (borç #38) uzak ortamlarda tükendi sayılır.**
-  **Etkinlikler yeni seed koşusuyla DÜZELMEZ** — kimlik sabit
+- **Bugün kod değişmedi, SINIR çizildi.** T.C. numarası + doğum yılı bilgi
+  temelli bir kanıt ve **geçici** işaretlendi
+- ⛔ **GERÇEK KİŞİSEL VERİYLE ÇALIŞTIRMA KAPISI KAPALI**: adım 17b (kimlik
+  bağlantısını çözme), adım 17c (personel yetkisini kimlikten ayırma) ve
+  gerçek sağlayıcı (e-Devlet) bitmeden production'a gerçek vatandaş verisi
+  girmez. Cümle `roadmap.md`'de de yazılı
+- **Adım 17c YENİ BİR ADIM** ve roadmap'e eklendi — atlanmasın
 
-## YAPILACAK — roadmap adım 16
+### Adım 15c-2'den devreden (hâlâ geçerli)
 
-"Planlı görevler (temizlik, aidat tahsilatı, durum simülasyonu) + denetim kaydı"
+- **`identity-verification.service.ts` SIRAYI ANLATIYOR**: bot kapısı →
+  "zaten doğrulanmış mı" → `lookupIdentity` → 18 yaş → "numara başka hesapta mı"
+  → `matchStaffMember` → tek koşullu yazma → denetim kaydı
+- ⛔ **`isStaff` İSTEMCİDEN GELMEZ** · **P2002'nin ayrıntısı `meta.target`'ta
+  DEĞİL**, `meta.driverAdapterError.cause.constraint.fields` içinde
+- **`sanitizeRedirectPath` KONTROL KARAKTERİ REDDEDİYOR** — yeni bir yerde
+  dönüş adresi kullanılacaksa MUTLAKA bu fonksiyondan geçir
+- ⚠️ **TELEFON BOŞ KALIYOR** (borç #80)
+- ⛔ **Uzak ortamlarda tohumlama GÜNCEL DEĞİL — ALTI hesap eksik** (#11-#16)
 
-Dal: `feature/planli-gorevler` (öneri)
+## YAPILACAK — roadmap adım 17
+
+"Yasal sayfalar (KVKK, çerez, kullanım şartları) + çerez rızası (ziyaretçi dahil)"
+
+Dal: `feature/yasal-sayfalar` (öneri)
 
 ### Bu adımda özellikle dikkat
 
-- **Ücretsiz Vercel planında cron GÜNDE 1 kez** (teknik borç #3). Doğruluk
-  okuma anında sağlanıyor (ADR-007, ADR-013); planlı görev yalnızca TEMİZLİK
-  ve TAHSİLAT yapar, doğruluğun kaynağı olmaz
-- **`rate_limit_counters` HİÇ TEMİZLENMİYOR** (teknik borç #18) — bu adımın
-  en somut işi. Hem hız sınırı hem devre kesici satırlarını kapsamalı
-- **Süresi dolan kayıtlar**: oturumlar, kayıt taslakları, OTP kayıtları,
-  koltuk kilitleri — hepsinin okuma anında zaten yok sayıldığını doğrula,
-  planlı görev yalnızca satırları siler
-- **Aidat tahsilatı** (`membership` yenileme) para işidir: `money.ts`,
-  TAM SAYI KURUŞ, tekrarlanabilirlik (aynı ay iki kez tahsilat YAPILMAMALI —
-  koşullu yazma + etkilenen satır sayısı)
-- **Her planlı görev denetim kaydına yazmalı** (CLAUDE.md §5.11) ve
-  **tekrar çalıştırılabilir (idempotent)** olmalı
+- **`consent_records` TABLOSU VE `ConsentType` ENUM'U ZATEN VAR** (adım 3'te
+  kuruldu, `consent_change` denetim işlemi de var). Şema muhtemelen
+  DEĞİŞMEYECEK — önce bak, sonra karar ver
+- **Rıza ZİYARETÇİYİ de kapsıyor**: giriş yapmamış kullanıcının rızası
+  `anonymous_id`'ye bağlanmalı (`src/lib/anonymous-id.ts` hazır)
+- **`docs/project/integrations.md` DIŞ İŞLEYİCİLERİN LİSTESİ** — KVKK aydınlatma
+  metni bu listeden yazılır, ezberden değil. Cloudflare, Resend, Google, Neon,
+  Vercel + dört bilgi sağlayıcısı
+- **Çerez bandı ölçülebilir bir performans yüküdür** ve her sayfada çiziliyor;
+  adım 18'in performans bütçesini şimdiden zorlamasın
+- **Zorunlu olmayan çerez YOKSA bant "kabul et/reddet" değil bilgilendirme
+  olur** — bugün analitik veya pazarlama çerezi var mı, ÖNCE bunu doğrula
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
-- **`src/features/auth/services/identity-verification.service.ts`** — mevcut
-  kayda YETKİ EKLEYEN akışın deseni (sıra + koşullu yazma + denetim kaydı)
+- **`src/features/scheduled-tasks/`** — günlük iş eklemenin deseni
+- **`src/lib/anonymous-id.ts`** — ziyaretçi kimliği (çerez rızası buna bağlanır)
 - **`src/features/profile/`** — kullanıcıya ait kayıt yönetiminin DESENİ
 - **`src/features/auth/`** — oturum, Google OAuth (PKCE + `state` + `nonce`)
 - **`src/features/identity/`** — KPS sorgusu, personel eşleştirmesi, ortak şema
 - **`src/features/catalog/`** — ORTAK arama katmanı, Türkçe `unaccent` araması
 - **`src/lib/external-fetch.ts`** — dış servis çağrısı (zaman aşımı + deneme +
   devre kesici + Zod). **Yeni dış servis buradan geçer**
-- **`src/lib/money.ts`** — para TAM SAYI KURUŞ. **Ondalık sayıyla para hesabı YAPMA**
+- **`src/lib/money.ts`** — para TAM SAYI KURUŞ
 - **`src/features/events/`** — **YARIŞ KORUMASI DESENİ**
 - **`src/features/notifications/`** — bildirim yazma ve **tembel senkronizasyon**
 - **`recordAuditLog()`** — kritik işlemler denetim kaydına yazılır
@@ -247,40 +273,45 @@ Dal: `feature/planli-gorevler` (öneri)
 - **`npm run start` ile KENDİ sunucunu açıp sonra `npx playwright test` KOŞMA.**
   **Doğrusu: portu boşalt (`lsof -ti:3000 | xargs kill -9`), sonra tek başına
   `npx playwright test`** — sunucuyu Playwright kendi kurar
-- ⚠️ **PLAYWRIGHT KOŞTUKTAN SONRA `npm run start` YANLIŞ YAPIYI SERVİS EDİYOR**
-  (adım 15c-2'de yaşandı): Playwright derlemeyi `NEXT_PUBLIC_TURNSTILE_SITE_KEY=""`
-  ile yapıyor ve `NEXT_PUBLIC_*` değerleri DERLEME ANINDA gömülüyor. Elle
-  tarayıcı testinden önce **`npm run build`'i yeniden koş**, yoksa bot kutusu
-  hiç çizilmez ve "kod bozuk" sanırsın
+- ⚠️ **PLAYWRIGHT KOŞTUKTAN SONRA `npm run start` YANLIŞ YAPIYI SERVİS EDİYOR**:
+  Playwright derlemeyi `NEXT_PUBLIC_TURNSTILE_SITE_KEY=""` ile yapıyor ve
+  `NEXT_PUBLIC_*` değerleri DERLEME ANINDA gömülüyor. Elle tarayıcı testinden
+  önce **`npm run build`'i yeniden koş**
 - **Sunucu ayaktayken `.next`'i silme**
-- **YÜK 3'ÜN ÜZERİNDEYKEN TAM SET KOŞMA.** `uptime` bak, 2.5'in altına inmesini
-  bekle. **Kırmızı görünce ÖNCE YÜKE BAK**
+- **YÜK 3'ÜN ÜZERİNDEYKEN TAM SET KOŞMA.** `uptime` bak. **Kırmızı görünce ÖNCE
+  YÜKE BAK**
 - **E2E'yi 15 dakika içinde üst üste koşturma** (hız sınırı). Çözüm:
   `rate_limit_counters` tablosunu boşalt, sonra tek sefer koş
 - **Adres kontrolünde `toHaveURL` DEĞİL `waitForURL` kullan**
 - **`npm run test:db` `docs/project/test-hesaplari.md` dosyasını YENİDEN
   ÜRETEBİLİYOR.** Commit etmeden önce `git status`'a bak
 - **HER PLAYWRIGHT PROJESİNE AYRI PAYLAŞILAN KAYNAK VER**
-- ⚠️ **E2E KENDİ KULLANICISINI KURABİLİR** (adım 15c-2'de böyle yapıldı):
-  oturum satırını doğrudan yazıp çereze ham jetonu koymak yeterli
-  (`sessionToken` = jetonun SHA-256 özeti, çerez adı `bb_session`). Tohuma
-  yeni demo hesap eklemek uzak ortamlarla farkı büyütüyor — **önce bu yolu düşün**
+- ⚠️ **E2E KENDİ KULLANICISINI KURABİLİR**: oturum satırını doğrudan yazıp
+  çereze ham jetonu koymak yeterli (`sessionToken` = jetonun SHA-256 özeti,
+  çerez adı `bb_session`)
 - **E2E'nin ürettiği veriyi temizle — ama TOHUM VERİSİNİ ONAR, SİLME**
 - **Sipariş temizliğinde SIRA:** `refund → orderItem → order → notification →
   payment → cartItem → cart`. **Üyelikte:** `membershipPayment → membership →
   notification → savedCard`. **Teşkilatta:** önce `user`, sonra `staffMember`,
   sonra `orgUnit` (`users.staff_member_id` Restrict)
+- ⚠️ **TÜM TABLOYA YAZAN BİR GÖREVİ TEST EDERKEN YAN ETKİYİ GERİ AL** (adım
+  16'da yaşandı): takvim görevi tohumlanmış doktorlara da yazdı ve yerel
+  veritabanında takvim 14 gün yerine 36 güne çıktı
 - **Kullanılmış test hesapları:** `nurcan.yilmaz3`, `burak.tas2` · `mehmet.duman7`,
   `arda.aydin9` · `ipek.kurt4`, `ferhat.tunc5` · `gamze.toprak8`, `baris.ates10` ·
   `zehra.kilic91`, `esra.arslan92` · `emre.arslan1`, `nazli.mentes6` ·
   `asli.avci93`, `ege.kurt94` · `kemal.guler95`, `sinan.turan96`.
   **BOŞTA HESAP KALMADI**
 
+**Vitest**
+- ⚠️ **`vi.resetModules()` + dinamik `import` KULLANIRKEN `instanceof` ÇALIŞMAZ**
+  (adım 16'da yaşandı): hata sınıfı her yüklemede yeniden oluşuyor, testin
+  üstte içe aktardığı sınıfla aynı nesne olmuyor. **Çözüm: hata KODUNA bak**
+  (`error.code === "UNAUTHORIZED"`) — zaten istemcinin gördüğü sözleşme o
+
 **Playwright seçicileri**
 - **`getByRole("button", { name: "Ara" })` ÇOK EŞLEŞİR** → `exact: true` şart
-- ⚠️ **`getByText(BAŞLIK)` AÇIKLAMA METNİYLE DE EŞLEŞİYOR** (adım 15c-2'de
-  yaşandı): başlık metni açıklamanın içinde geçiyorsa strict mode patlıyor.
-  **Çözüm: `{ exact: true }`**
+- ⚠️ **`getByText(BAŞLIK)` AÇIKLAMA METNİYLE DE EŞLEŞİYOR** → `{ exact: true }`
 - ⚠️ **`exact: true` BİLE YETMEYEBİLİR — GÖRÜNMEZ ÖĞELER DE EŞLEŞİYOR.**
   **Çözüm: aramayı BÖLGEYE sınırla** (`page.getByRole("region", { name: ... })`)
 - ⚠️ **ÇIPLAK `getByRole("listitem")` SAYFA İSKELETİNİ DE SAYAR**
@@ -289,10 +320,8 @@ Dal: `feature/planli-gorevler` (öneri)
 - **Kapalı `<details>` içindeki öğe GÖRÜNMEZ sayılır**
 
 **Next.js**
-- ⚠️ **`router.refresh()`'i BAŞARI PANELİNİ ÇİZDİĞİN ANDA ÇAĞIRMA** (adım
-  15c-2'de yaşandı): sunucu tarafı kullanıcıyı artık "doğrulanmış" görüp
-  sayfanın DİĞER dalını çiziyor ve az önce gösterdiğin sonuç paneli kayboluyor.
-  Tazelemeyi kullanıcı "devam et" dediğinde yap
+- ⚠️ **`router.refresh()`'i BAŞARI PANELİNİ ÇİZDİĞİN ANDA ÇAĞIRMA**: sunucu
+  sayfanın DİĞER dalını çiziyor ve gösterdiğin sonuç paneli kayboluyor
 - **Sunucu bileşeninde `cookies().set()` İSTİSNA FIRLATIR**
 - **Sunucuda çizilen sayfa istemci bir şey yazdıktan sonra tazelenmez** —
   `router.refresh()` çağır
@@ -326,15 +355,15 @@ Dal: `feature/planli-gorevler` (öneri)
 - **Sipariş, üyelik ve destek talebi durumları KOLONDA DEĞİL** (ADR-013)
 - **Takvim ayı ekle, 30 gün EKLEME** (`addCalendarMonths`)
 - **Süreye bağlı her sorgu ZAMAN KOŞULU içermek zorunda** (ADR-007)
+- ⚠️ **Türkiye'nin UTC farkı `slot-calendar.ts` içinde SABİT +3** — varsayım
+  test ediliyor (`formatIstanbulTime` ile geri okunuyor), ezberlenmiyor
 
 **Eşzamanlılık**
 - **"Önce oku, boşsa yaz" İKİ ADIMDIR ve yarışı çözmez.** Tek koşullu yazma
   kullan ve **etkilenen satır sayısına bak**
 - ⚠️ **TRANSACTION İÇİNDE `create` KULLANMA, `createMany({skipDuplicates})` KULLAN**
 - **Korumayı yazdıktan sonra geçici kaldırıp testin KIRMIZIYA döndüğünü GÖR.**
-  ⚠️ Testin korumayı GERÇEKTEN ölçtüğünden emin ol: adım 15c-2'de ilk yazılan
-  eşzamanlılık testi koruma kaldırılınca da YEŞİL kaldı, çünkü servisteki ön
-  kontrol araya giriyordu. Ölçüm için repository'yi doğrudan çağırmak gerekti
+  ⚠️ Testin korumayı GERÇEKTEN ölçtüğünden emin ol
 
 **Arayüz**
 - **Dark mode SINIF tabanlı** (`.dark`), `next-themes` BİLEREK kullanılmıyor
@@ -358,8 +387,6 @@ Dal: `feature/planli-gorevler` (öneri)
   oluştur → `npx prisma migrate deploy` → `npx prisma generate`
 - **ENUM DEĞERİ EKLEMEK GERİYE UYUMLU ama TEK YÖNLÜDÜR**
 - **PostgreSQL enum'ları TANIMLANMA SIRASINA göre sıralar**
-- ⚠️ **P2002'nin ayrıntısı `meta.target`'ta DEĞİL**,
-  `meta.driverAdapterError.cause.constraint.fields` içinde
 - **`prisma migrate reset --force` bayrağı yutuluyor.** Local'i sıfırlamak için
   `docker compose down -v` + `npm run db:up`
 
@@ -370,6 +397,8 @@ Dal: `feature/planli-gorevler` (öneri)
   ver.** Merge sonrası `/api/health` içindeki `commit` alanının değiştiğini
   **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR**
+- ⚠️ **Ücretsiz planda cron GÜNDE 1 ve saati garanti DEĞİL** (belirtilen saatin
+  içinde herhangi bir dakika). Daha sık bir ifade **deploy'u başarısız kılıyor**
 
 **Git**
 - **YENİ DALI HER ZAMAN `main`'DEN AÇ:**
@@ -379,8 +408,8 @@ Dal: `feature/planli-gorevler` (öneri)
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
   `--org-id org-still-water-86075112` şart
 - `psql` **kurulu değil** → uzak sorgu için `npx tsx --env-file=.env` + Prisma
-  betiği. ⚠️ **Betik PROJE KÖKÜNDE ve `.mts` uzantılı olmalı**;
-  ⚠️ **boş `-e ""` çağrısı ASILI KALIYOR**, hiç kullanma
+  betiği. ⚠️ **Betik PROJE KÖKÜNDE ve `.mts` uzantılı olmalı** ve
+  **commit edilmeden SİLİNMELİ**; ⚠️ **boş `-e ""` çağrısı ASILI KALIYOR**
 - **Chrome DevTools MCP yalnızca ÇALIŞMA ALANI İÇİNDEKİ dosyayı yükleyebiliyor**
 - Docker Desktop kapalı olabilir → `open -a Docker`, sonra `npm run db:up`
 - ESLint `console.log`'u ve efekt içinde `setState`'i yasaklıyor
@@ -393,6 +422,10 @@ Dal: `feature/planli-gorevler` (öneri)
 `npm run db:up · db:migrate · db:reset · db:studio`
 `npm run test · test:db · lint · typecheck · format · format:check · build`
 `gh` PATH'te. `vercel` ve `neonctl` için `npx`.
+
+**Planlı görevi elle tetikleme (local):**
+`npm run build && npm run start`, sonra
+`curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/daily`
 
 **E2E'yi elle koşturma sırası:** `rate_limit_counters`'ı boşalt → `uptime` bak
 (yük < 2.5) → portu boşalt (`lsof -ti:3000 | xargs kill -9`) → `npx playwright
