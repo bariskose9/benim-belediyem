@@ -7,6 +7,7 @@ import { messages } from "@/config/messages";
 import { StepHeader } from "@/features/auth/components/StepHeader";
 import { VerificationPanels } from "@/features/auth/components/VerificationPanels";
 import { getRegistrationState } from "@/features/auth/services/registration.service";
+import { RegistrationLegalNotice } from "@/features/legal/components/RegistrationLegalNotice";
 
 /**
  * ADIM 3 — iki bağımsız doğrulama paneli.
@@ -57,6 +58,9 @@ export default async function RegisterVerifyPage() {
         turnstileSiteKey={publicEnv.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
         isSimulated={!isProductionEnv}
       />
+
+      {/* Hesap bu adımda açılıyor; yasal bildirim de bu yüzden burada. */}
+      <RegistrationLegalNotice />
     </>
   );
 }

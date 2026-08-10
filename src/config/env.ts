@@ -141,6 +141,26 @@ const serverEnvBaseSchema = z.object({
   SMS_PROVIDER_KEY: optionalSecret,
   TURNSTILE_SECRET_KEY: optionalSecret,
 
+  /**
+   * YASAL SAYFALARDAKİ VERİ SORUMLUSU (adım 17 · PRD §5.10).
+   *
+   * ⛔ NEDEN KODA YAZILMIYOR: bu iki değer GERÇEK bir kişiyi tanımlar. Depo
+   * herkese açık; koda yazılan bir ad ve e-posta adresi sonsuza kadar git
+   * geçmişinde kalır ve toplayıcı botlara açık olur. Veri minimizasyonu
+   * yalnızca KULLANICININ verisi için değil, proje sahibinin verisi için de
+   * geçerlidir (14-privacy-and-compliance.md).
+   *
+   * ⛔ ZORUNLU DEĞİL, BİLİNÇLİ: eksikse uygulama açılır ve yasal sayfalar
+   * başvuru kanalı olarak kaynak kodu deposunu gösterir. Zorunlu olsaydı
+   * değişkeni girilmemiş bir ortam hiç açılmazdı — `EMAIL_API_KEY` ile aynı
+   * gerekçe (CLAUDE.md §6.1: `main` her zaman deploy edilebilir kalmalı).
+   */
+  LEGAL_CONTROLLER_NAME: optionalSecret,
+  LEGAL_CONTACT_EMAIL: z
+    .email({ error: "geçerli bir e-posta adresi olmalı" })
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+
   // Tohumlama okur, hepsi boşsa hesabı atlar (PRD.md §5.0 "Tek gerçek hesap").
   // Uygulama çalışma anında bu değerleri KULLANMAZ; burada yalnızca yazım
   // hatası erken yakalansın diye tanımlılar.

@@ -174,6 +174,22 @@ export async function cleanupTestData(): Promise<void> {
     where: { OR: [{ id: startsWith }, { userId: startsWith }] },
   });
 
+  /**
+   * Rıza kayıtları (adım 17) — KULLANICIDAN ÖNCE silinmeli.
+   *
+   * ⛔ `consent_records.user_id` üzerindeki yabancı anahtar `Restrict`: satır
+   * kalırsa test kullanıcısı SİLİNEMEZ ve bir sonraki koşu "kullanıcı zaten
+   * var" hatasıyla patlar (`accounts`'takinin tersi — orası `Cascade`).
+   *
+   * ÜÇ ÖLÇÜT: satırı UYGULAMA yazıyor ve kimliği `cuid()` oluyor, yani test
+   * önekini yalnızca `userId` veya `anonymousId` taşıyor.
+   */
+  await prisma.consentRecord.deleteMany({
+    where: {
+      OR: [{ id: startsWith }, { userId: startsWith }, { anonymousId: startsWith }],
+    },
+  });
+
   await prisma.user.deleteMany({ where: { id: startsWith } });
 
   /**
@@ -227,6 +243,20 @@ export async function cleanupRegistration(email: string, nationalIdHash: string)
     },
   });
   await prisma.auditLog.deleteMany({ where: { userId: { in: userIds } } });
+
+  /**
+   * Rıza kayıtları (adım 17) — KULLANICIDAN ÖNCE.
+   *
+   * ⛔ ADIM 17'DE ÖĞRENİLDİ: kayıt akışı artık hesap açılırken iki rıza satırı
+   * (`terms_of_use` + `privacy_notice`) yazıyor ve
+   * `consent_records.user_id` yabancı anahtarı `Restrict`. Bu satır olmadan
+   * E2E kayıt testlerinin temizliği `23001` ile patlıyor — YAŞANDI.
+   *
+   * DERS: kullanıcıya bağlı YENİ bir tablo yazılmaya başladığında iki temizlik
+   * fonksiyonu da (`cleanupTestData` ve buradaki) güncellenmek zorunda.
+   */
+  await prisma.consentRecord.deleteMany({ where: { userId: { in: userIds } } });
+
   await prisma.registrationDraft.deleteMany({ where: { nationalIdHash } });
   await prisma.user.deleteMany({ where: { id: { in: userIds } } });
 }

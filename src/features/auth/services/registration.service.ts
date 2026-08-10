@@ -47,6 +47,7 @@ import type {
   RegistrationIdentityView,
   RegistrationState,
 } from "@/features/auth/types";
+import { recordRegistrationConsents } from "@/features/legal/services/consent.service";
 import { lookupIdentity } from "@/features/identity/services/identity-lookup.service";
 import type { IdentityRecord } from "@/features/identity/types";
 import { maskPhone } from "@/features/otp/providers/email-sms-simulation-channel";
@@ -378,6 +379,17 @@ async function finalizeRegistration(
     entityId: created.id,
     ipHash: actorIpHash,
   });
+
+  /**
+   * Kullanım şartları ve aydınlatma metninin gösterildiği kaydedilir
+   * (adım 17 · PRD §5.10). Kayıt düğmesinin üstünde iki bağlantı ve "kayıt
+   * olarak kabul etmiş olursunuz" cümlesi duruyor.
+   *
+   * HESAP AÇILDIKTAN SONRA yazılıyor: rızanın öznesi hesap, hesap ise bu
+   * satırdan önce yok. Hatası hesabı düşürmez — gerekçe
+   * `recordRegistrationConsents` içinde yazılı.
+   */
+  await recordRegistrationConsents({ userId: created.id, ipHash: actorIpHash });
 
   return { completed: true, isStaff: created.isStaff };
 }

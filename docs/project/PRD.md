@@ -531,6 +531,14 @@ bulunur; footer'dan erişilir. Zorunlu olmayan çerez rıza alınmadan çalışt
   kayıt hesabına bağlanır. Rıza zaman damgasıyla saklanır ve geri alınabilir
 - Aydınlatma metninde **yurt dışına aktarım** açıkça belirtilir: Cloudflare
   (bot koruması) ve e-posta servisi ABD merkezlidir
+- **Kabul kriteri (adım 17'de karşılandı):** ziyaretçi bandı görür, "Anladım"
+  der, bant kaybolur ve sayfa yenilenince geri gelmez; çerez politikası
+  sayfasından tercih geri alınabilir ve bant yeniden çıkar; rıza kaydı
+  `consent_records`'ta zaman damgasıyla durur ve geri alma eski satırı silmez
+- ⚠️ **Bugün zorunlu olmayan çerez YOK**, bu yüzden bant "kabul et/reddet"
+  değil **bilgilendirme**. Analitik veya ölçüm aracı eklendiği gün bant onay
+  bandına dönüşür — çerez kataloğu (`cookie-registry.ts`) tek kaynak olduğu
+  için arayüz kendiliğinden değişir, ama onay akışı ayrıca yazılmalıdır
 
 ### 5.11 Hesap yönetimi ve veri hakları
 

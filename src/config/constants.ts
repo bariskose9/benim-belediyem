@@ -882,3 +882,50 @@ export const RENEWAL_BATCH_LIMIT = 200;
  * Ayrı bir sabit yazılmadı ki ikisi birbirinden kaymasın.
  */
 export const DOCTOR_CALENDAR_HORIZON_DAYS = APPOINTMENT_VISIBLE_DAYS;
+
+// ===========================================================================
+// YASAL SAYFALAR VE ÇEREZ RIZASI (PRD §5.10 · 14-privacy-and-compliance.md ·
+// adım 17)
+// ===========================================================================
+
+/**
+ * Çerez bildiriminin görüldüğünü taşıyan çerez.
+ *
+ * ⛔ RIZANIN KENDİSİ BURADA DEĞİL: kanıt `consent_records` tablosunda, zaman
+ * damgasıyla ve geri alınabilir biçimde duruyor. Bu çerez yalnızca "bandı bir
+ * daha çizme" demek için var, yani bir ARAYÜZ DURUMUDUR. Kanıtı çereze
+ * yazsaydık kullanıcı çerezi silince kaydı da silmiş olurdu.
+ *
+ * Değeri, kullanıcının gördüğü metnin SÜRÜMÜDÜR. Metin değişirse sürüm artar
+ * ve bant herkese yeniden çıkar — eski bir metne verilmiş onay yeni metni
+ * kapsamaz (14-privacy-and-compliance.md → "aydınlatma güncellenirse yeniden
+ * bilgilendirilir").
+ */
+export const COOKIE_NOTICE_COOKIE_NAME = "bb_cookie_notice" as const;
+
+/**
+ * Yürürlükteki çerez bildirimi sürümü.
+ *
+ * ⛔ ÇEREZ LİSTESİ VEYA BANDIN METNİ DEĞİŞTİĞİNDE ARTIRILIR. Artırılmazsa
+ * daha önce "anladım" demiş ziyaretçi yeni metni hiç görmez.
+ */
+export const COOKIE_NOTICE_VERSION = "1" as const;
+
+/**
+ * Bildirimin hatırlanma süresi (1 yıl).
+ *
+ * `ANONYMOUS_ID_TTL_MS` ile aynı: rıza kaydı ziyaretçi kimliğine bağlanıyor,
+ * kimlik düştüğünde kaydın bağlanacağı özne de kalmıyor. İki süreyi ayırmak,
+ * "bandı görmüyorum ama kaydım kimseye bağlı değil" durumunu üretirdi.
+ */
+export const COOKIE_NOTICE_TTL_MS = ANONYMOUS_ID_TTL_MS;
+
+/**
+ * Rıza yazma ucunun hız sınırı (CLAUDE.md §5.5 → "yazma uçlarında rate limit").
+ *
+ * Cömert seçildi çünkü meşru kullanıcı bu ucu bir-iki kez çağırır; sınırın
+ * amacı `consent_records` tablosunu şişiren bir döngüyü durdurmak, insanı
+ * yavaşlatmak değil.
+ */
+export const CONSENT_RATE_LIMIT_MAX = 20;
+export const CONSENT_RATE_LIMIT_WINDOW_MS = 60 * 60_000;
