@@ -26,8 +26,9 @@ Roadmap adım **0 → 15, 15b, 15c-1 ve 15c-2 bitti.**
   · **Sipariş takibi + bildirim** · **Etkinlik + koltuk** · **Spor salonu**
   · **Destek talebi** · **Bilgi panosu** · **Profil merkezi** · **Hakkımızda**
   · **Profilden Google bağlantısı** çalışıyor ve canlıda
-- **Kimlik doğrulama** (adım 15c-2, teknik borç #32 ÖDENDİ) — `/kimlik-dogrulama`.
-  ⚠️ **CANLIDA MI, DOĞRULA:** `/api/health` içindeki `commit` alanına bak
+- **Kimlik doğrulama** çalışıyor ve **CANLIDA** (2026-08-10, commit `65fc6e1`,
+  PR #42) — `/kimlik-dogrulama`, teknik borç #32 ÖDENDİ. Duman testi geçti:
+  girişsiz sayfa 307, girişsiz uç 401
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında:** dal adresini
@@ -36,7 +37,10 @@ Roadmap adım **0 → 15, 15b, 15c-1 ve 15c-2 bitti.**
   Google OAuth akışına dokunuyorsan Google redirect URI listesine de
   (`/api/auth/google/callback` ekleyerek). Teknik borç #31.
   **Adım 16'da Turnstile satırı MUHTEMELEN GEREKMİYOR** — planlı görevler
-  ekran değil, ama ekranda bir şey değişecekse yeniden değerlendir
+  ekran değil, ama ekranda bir şey değişecekse yeniden değerlendir.
+  ⛔ **ADIM 15c-2'DE PANELE HİÇ GİRİLMEDİ ve bu bir KARAR:** proje sahibi
+  preview'ı atlayıp doğrudan production'a çıktı, production hostname'i zaten
+  kayıtlıydı. Liste bu adımda BÜYÜMEDİ — ama hâlâ 10 sınırında
 
 ## 📱 TOPLU ELLE TEST — OTURUMUN BAŞINDA GÜNDEME GETİR
 
@@ -97,6 +101,8 @@ spor salonu ekranları yalnızca personele açık.
 
 ### B3) ADIM 15c-2 — KİMLİK DOĞRULAMA (yeni)
 
+> ✅ **PRODUCTION'DA ÇALIŞIYOR, panel işi GEREKMİYOR** — production'ın Turnstile
+> hostname'i zaten kayıtlı.
 > ⚠️ Bu test **Google ile açılmış, kimliği doğrulanmamış** bir hesap istiyor.
 > Şifreyle giriş yapılan tohum hesaplarının kimliği ZATEN doğrulanmış — onlarda
 > ekran "kimliğiniz doğrulanmış" der ve form hiç çıkmaz (bu da geçerli bir test).
@@ -108,8 +114,7 @@ spor salonu ekranları yalnızca personele açık.
 2. **Hastane**'ye git → "Kimlik doğrulaması gerekiyor" + **"Kimlik
    doğrulamasına git"** bağlantısı çıkıyor mu (⛔ bu bağlantı KAYIT ekranına
    GİTMEMELİ)
-3. Bağlantıya bas → bot kutusu **çiziliyor mu** (çizilmiyorsa panel işi eksik,
-   E bölümüne bak)
+3. Bağlantıya bas → bot kutusu **çiziliyor mu** (production'da çizilmeli)
 4. **Yanlış doğum yılıyla** dene → "Girdiğiniz bilgiler doğrulanamadı" tek tip
    mesajı çıkıyor mu
 5. **Kendi T.C. kimlik numaran ÇALIŞMAZ** — sahte KPS'te yoksun.
@@ -136,21 +141,23 @@ spor salonu ekranları yalnızca personele açık.
 2. **Talepten 30 dakika sonra** (borç #62): `/destek` → talep **`İnceleniyor`**
    olmalı (`Çözüldü` eşiği 180 dakika, beklemeye gerek yok)
 
-### E) 🔧 PANELDE YAPILACAK TEK İŞ (tarayıcı, telefon değil)
+### E) 🔧 PANEL İŞİ — ŞU AN ZORUNLU DEĞİL
 
-**Cloudflare Turnstile → Hostname Management** listesini aç:
+**Bu turda panele girmen gerekmiyor.** Adım 15c-2 production'a doğrudan çıktı,
+production'ın Turnstile hostname'i zaten kayıtlı ve liste büyümedi.
 
-- **EKLE (adım 15c-2 için ZORUNLU, yoksa kimlik doğrulama ekranı preview'da
-  denenemez):** `benim-belediyem-git-feature-kimlik-dogrulama-barisss.vercel.app`
-  — dal merge edilip silindiyse bu satır da silinebilir
-- **SİL:** adı `benim-belediyem-git-feature-...` ile başlayan ve dalı merge
-  edilmiş HER satır (google-ile-giris · sifre-sifirlama · market · restoran ·
-  etkinlik-bilet · spor-salonu-uyeligi · destek-talebi · bilgi-widgetlari ·
-  hakkimizda · google-baglantisi)
+⏳ **TETİK — ne zaman gerekecek:** giriş gerektiren bir ekranı **preview'da**
+denemek istediğin ilk seferde. Liste 10 sınırında olduğu için o gün boş satır
+bulunmayacak. O zaman **Cloudflare Turnstile → Hostname Management**'ta:
+
 - **KALACAK:** `benim-belediyem.vercel.app` (production)
+- **SİLİNECEK:** adı `benim-belediyem-git-feature-...` ile başlayan ve dalı
+  merge edilmiş HER satır (google-ile-giris · sifre-sifirlama · market ·
+  restoran · etkinlik-bilet · spor-salonu-uyeligi · destek-talebi ·
+  bilgi-widgetlari · hakkimizda · google-baglantisi)
 
-⚠️ Ajan bu listeyi panelden GÖREMİYOR. Temizledikten sonra söyle ki
-`altyapi-durumu.md` gerçeğe göre güncellensin. Sınır 10 hostname.
+⚠️ Ajan bu listeyi panelden GÖREMİYOR. Temizlik yapılırsa söylenmeli ki
+`altyapi-durumu.md` gerçeğe göre güncellensin.
 
 > **Neden bekleme gerekiyor (D bölümü):** durumlar veritabanında bir kolonda
 > tutulmuyor, **okuma anında zamandan türetiliyor** (ADR-013).
