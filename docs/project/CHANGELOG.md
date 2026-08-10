@@ -4,6 +4,54 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 16: Planlı görevler (teknik borç #18, #38, #53, #55, #63)
+
+- **Günlük planlı görev geldi**: `GET /api/cron/daily`, TR saatiyle 03:00'te
+  (`0 0 * * *` UTC). Altında **dokuz bağımsız görev** var; biri patlarsa
+  diğerleri çalışmaya devam ediyor ve hata sunucu log'una + koşu özetine
+  düşüyor. Koruma kaldırılıp testin kırmızıya döndüğü görüldü
+- **Uç `CRON_SECRET` ile korunuyor**: `Authorization: Bearer` başlığı sabit
+  süreli karşılaştırmadan geçiyor (`===` zamanlama saldırısına açıktı).
+  ⛔ Anahtar tanımlı değilse uç **herkese kapalı** — "koruma yoksa serbest"
+  davranışı, değişkeni unutan bir ortamda veri silen bir ucu internete açardı
+- **Temizlik: `rate_limit_counters`** (borç #18, hem hız sınırı hem devre
+  kesici), **koltuk kilitleri** (borç #53), **oturumlar**, **kayıt taslakları**,
+  **doğrulama kodları** ve **dış veri önbelleği** (borç #63)
+- **Temizlik "payla" siliyor (24 saat)**: süresi dolan satır anında değil,
+  hiçbir canlı akışın ona bakmayacağı kadar sonra siliniyor. Pay olmasaydı
+  yarıda kalan bir kayıt akışının kodu silinebilirdi. Pay kaldırılıp testin
+  kırmızıya döndüğü görülerek ölçüldü
+- ⛔ **Koltuk temizliği SATILMIŞ bilete dokunmuyor**: koşul `status = 'held'`
+  ve bu da kırmızıya döndürülerek ölçüldü — kaybolacak şey bir mali kayıt olurdu
+- ⚠️ **Dış veri önbelleğinin ölçütü FARKLI**: `expiresAt` değil `fetchedAt`.
+  Süresi dolmuş kayıt burada ölü değil, sağlayıcı çöktüğünde 24 saate kadar
+  "güncellenemiyor" notuyla ekrana çıkıyor (ADR-015). `expiresAt`'e göre silen
+  bir görev, tam da sağlayıcının çöktüğü gün yedeği silerdi
+- **Aidat tahsilatı ve yenileme hatırlatması** (borç #55): mantık
+  KOPYALANMADI — görev adım 12'nin `renewMembershipPeriod()`'unu, hatırlatma da
+  ekranın kullandığı `syncMembershipNotifications()`'ı çağırıyor. **İki kez
+  çalıştırıldı, vadesi gelen dönem için tek tahsilat satırı kaldı** (PRD §5.6)
+- **Doktor takvimi her gün 14 güne tamamlanıyor** (borç #38): saatler artık tek
+  yerde (`slot-calendar.ts`), tohumlama da oradan okuyor. Görev "bir gün ekle"
+  değil "eksikleri tamamla" — cron bir hafta çalışmazsa ilk koşu boşluğu kapatıyor
+- **Her görev ayrı denetim kaydı yazıyor** (`scheduled_task_run`): cron
+  kaçırılan koşu için log bile üretmediğinden, "bu iş bugün çalıştı mı"
+  sorusunun tek güvenilir cevabı bu kayıt. `userId` boş, IP özeti sabit
+  "system" — denetim kaydına yanıltıcı bir istemci izi yazılmıyor
+- **"Durum simülasyonu" GEREKMEDİ**: sipariş, destek ve üyelik durumları zaten
+  okuma anında türetiliyor (ADR-013), ilerletecek bir göreve ihtiyaç yok
+
+### Karar — ADR-017: kimlik kanıtı adaptör sınırına alındı (teknik borç #76)
+
+- Kod değişmedi; **sınır çizildi**. Bugünkü kanıt (T.C. numarası + doğum yılı)
+  bilgi temellidir ve **geçici** olarak işaretlendi; gerçek sağlayıcıya
+  (e-Devlet / banka doğrulaması) geçiş tek dosyalık bir iş olarak tanımlandı
+- **Kimlik ≠ yetki** ve **her bağlama geri alınabilir olmalı** kuralları yazıldı;
+  ikisi de roadmap'e adım oldu (17b ve yeni 17c)
+- OTP eklemek REDDEDİLDİ (kod saldırganın kendi kanalına gidiyor, kanıt gücü
+  artmıyor); ek KPS alanı sormak da REDDEDİLDİ (kanıtın sınıfını değiştirmiyor)
+- ⛔ **Gerçek kişisel veriyle çalıştırma kapısı KAPALI** — üç iş bitene kadar
+
 ### Eklendi — adım 15c (2/2): Google ile girenin KPS doğrulaması (teknik borç #32)
 
 - **`/kimlik-dogrulama` ekranı geldi**: Google ile açılan hesap artık kimliğini

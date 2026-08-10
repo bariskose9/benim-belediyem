@@ -99,15 +99,86 @@ export async function findOwnedMembership(
 }
 
 /**
+ * Vadesi GELMİŞ ve otomatik yenilenecek üyelikler — günlük tahsilat görevi için
+ * (PRD §5.6 · adım 16).
+ *
+ * ⛔ SAHİPLİK SÜZGECİ YOK ve bu bilinçli: çağıran bir kullanıcı değil,
+ * zamanlayıcının kendisi. Uç `CRON_SECRET` ile korunuyor (ADR-007) ve bu
+ * fonksiyon HTTP katmanından çağrılamıyor — arada servis var.
+ *
+ * `status = active` + `next_billing_at` üzerinde bileşik index var
+ * (`@@index([status, nextBillingAt])`), sorgu onu kullanır.
+ *
+ * ⚠️ `payment_pending` üyelikler BİLEREK DIŞARIDA: tahsilat bir kez denendi ve
+ * reddedildi; her gün yeniden denemek kullanıcının kartını arka arkaya
+ * zorlamak olurdu. Ödeme süresi (3 gün) dolunca üyelik okuma anında `expired`
+ * sayılıyor (ADR-013) ve kullanıcı yeni üyelik alabiliyor.
+ */
+export async function listMembershipsDueForRenewal(
+  input: { now: Date; limit: number },
+  client: Client = prisma,
+): Promise<MembershipRow[]> {
+  const rows = await client.membership.findMany({
+    where: {
+      status: "active",
+      autoRenewEnabled: true,
+      nextBillingAt: { lte: input.now },
+    },
+    select: MEMBERSHIP_SELECT,
+    // En eski vade önce: gecikmiş bir tahsilat, yeni vadesi gelenin arkasında
+    // kalmamalı.
+    orderBy: { nextBillingAt: "asc" },
+    take: input.limit,
+  });
+
+  return rows.map(toMembershipRow);
+}
+
+/**
+ * Yenileme hatırlatması gönderilecek üyelikler (PRD §5.6: "yenilemeden 3 gün
+ * önce hatırlatma").
+ *
+ * ⚠️ WHERE KOŞULLARI `isRenewalReminderDue()`'NUN AYNADAKİ HÂLİDİR — pencere
+ * `[nextBillingAt - 3 gün, nextBillingAt)`. İkisi ayrı yazıldı çünkü biri tek
+ * satır için saf bir karar, diğeri binlerce satır için indeksli bir sorgu;
+ * ikisini birden `tests/db/scheduled-tasks.test.ts` aynı senaryolarla sınıyor.
+ *
+ * ⛔ "HATIRLATMA ZATEN GÖNDERİLDİ Mİ" SORUSU BU SORGUDA SORULMUYOR ve bu
+ * bilinçli. Cevap iki kolonu karşılaştırmayı gerektirirdi
+ * (`renewal_reminder_for_billing_at != next_billing_at`); onun yerine tek
+ * koruma `claimRenewalReminder`'ın koşullu güncellemesinde bırakıldı. İki
+ * yerde iki ayrı koşul yazmak, birinin diğerinden kaymasının en kısa yolu —
+ * ve buradaki süzgeç yarışı zaten çözmezdi. Bedeli, hatırlatması gönderilmiş
+ * birkaç satırı boşuna okumak: pencere 3 gün, liste zaten küçük.
+ */
+export async function listMembershipsDueForReminder(
+  input: { now: Date; windowOpensBefore: Date; limit: number },
+  client: Client = prisma,
+): Promise<MembershipRow[]> {
+  const rows = await client.membership.findMany({
+    where: {
+      status: "active",
+      autoRenewEnabled: true,
+      nextBillingAt: { gt: input.now, lte: input.windowOpensBefore },
+    },
+    select: MEMBERSHIP_SELECT,
+    orderBy: { nextBillingAt: "asc" },
+    take: input.limit,
+  });
+
+  return rows.map(toMembershipRow);
+}
+
+/**
  * Ömrü dolmuş üyelikleri KOLONA YAZARAK kapatır ve `active_user_id`'yi boşaltır.
  *
  * ═══ NEDEN GEREKLİ ═══
  * Ekranda gösterilen durum kuraldan türetiliyor (`membership-state.ts`), ama
  * "aynı anda tek üyelik" kuralını zorlayan benzersiz indeks KOLONA bakıyor.
- * Yenileme görevi henüz yok (adım 16) ve olduğunda da günde bir çalışacak;
- * bu arada ömrü dolmuş bir üyelik kolonda `active` kalır ve kullanıcı yeni
- * üyelik alamazdı. Bu fonksiyon o boşluğu kapatıyor: temizlik YAZMA yolunda,
- * okuma anında yapılıyor (ADR-007'nin tembel temizlik deseni).
+ * Günlük yenileme görevi (adım 16) günde bir çalışıyor; bu arada ömrü dolmuş
+ * bir üyelik kolonda `active` kalır ve kullanıcı yeni üyelik alamazdı. Bu
+ * fonksiyon o boşluğu kapatıyor: temizlik YAZMA yolunda, okuma anında
+ * yapılıyor (ADR-007'nin tembel temizlik deseni).
  *
  * ⚠️ WHERE KOŞULLARI `deriveMembershipState`'İN AYNADAKİ HÂLİDİR. Biri
  * değişirse diğeri de değişmeli; ikisini birden `tests/db/` içindeki testler

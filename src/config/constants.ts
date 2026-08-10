@@ -837,3 +837,48 @@ export const ADDRESS_MAX_PER_USER = 20;
  */
 export const PROFILE_WRITE_RATE_LIMIT_MAX = 30;
 export const PROFILE_WRITE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+// ===========================================================================
+// PLANLI GÖREVLER (ADR-007 · PRD §5.6 · adım 16)
+//
+// ⛔ BU BÖLÜMDEKİ HİÇBİR DEĞER DOĞRULUKTAN SORUMLU DEĞİLDİR.
+// Süresi dolmuş kayıt, satırı silinmeden ÖNCE de okuma anında yok sayılıyor
+// (ADR-007). Buradaki görevler yalnızca ÇÖP TOPLAR. Görev hiç çalışmazsa
+// uygulama yanlış davranmaz; sadece ölü satırlar birikir.
+// ===========================================================================
+
+/**
+ * Süresi dolmuş bir satır, silinmeden önce ne kadar bekletilir.
+ *
+ * ⛔ NEDEN "TAM SÜRE DOLDUĞUNDA" SİLİNMİYOR: silmek doğruluğa hiçbir şey
+ * katmıyor (yukarıdaki not), ama tam anında silmek CANLI BİR AKIŞA çarpabilir.
+ * Somut örnek: `otp_challenges` satırı 5 dakikada süresini doldurur, ama
+ * TÜKETİLMİŞ bir satır kayıt taslağı yaşadığı sürece (15 dakika) hâlâ
+ * okunuyor — `findConsumedPurposes()` "hangi kanallar doğrulandı" sorusunu
+ * ondan cevaplıyor. Süre dolar dolmaz silen bir görev, yarıda kalan bir kaydı
+ * bozardı.
+ *
+ * 24 saat, sistemdeki HER akış penceresinden (en uzunu 15 dakika) kat kat
+ * uzun. Cron zaten günde bir çalışıyor (teknik borç #3), yani daha hassas bir
+ * değer pratikte hiçbir şey değiştirmezdi.
+ */
+export const CLEANUP_GRACE_MS = 24 * 60 * 60_000;
+
+/**
+ * Tek koşuda en fazla kaç üyelik işlenir (tahsilat + hatırlatma ayrı ayrı).
+ *
+ * Tahsilat sahte ödeme sağlayıcısına gidiyor ve her çağrı gecikme simüle
+ * ediyor; sınırsız bir liste fonksiyon süresini aşardı. Aşan üyelikler ertesi
+ * gün işlenir ve kullanıcı bu arada YANLIŞ DURUM GÖRMEZ — durum okuma anında
+ * türetiliyor (ADR-013), ödeme süresi de 3 gün (`MEMBERSHIP_PAYMENT_GRACE_DAYS`).
+ */
+export const RENEWAL_BATCH_LIMIT = 200;
+
+/**
+ * Doktor takviminin kaç gün ileriye dolu tutulacağı.
+ *
+ * `APPOINTMENT_VISIBLE_DAYS` ile AYNI olmak zorunda: ekran 14 gün gösteriyorsa
+ * takvim de 14 gün dolu olmalı, yoksa son günler boş görünür (teknik borç #38).
+ * Ayrı bir sabit yazılmadı ki ikisi birbirinden kaymasın.
+ */
+export const DOCTOR_CALENDAR_HORIZON_DAYS = APPOINTMENT_VISIBLE_DAYS;

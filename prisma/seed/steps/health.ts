@@ -1,13 +1,18 @@
+import { buildDaySlotTimes } from "../../../src/features/appointments/services/slot-calendar.js";
 import { SPECIALTIES } from "../data/catalog.js";
 import { FEMALE_FIRST_NAMES, LAST_NAMES, MALE_FIRST_NAMES } from "../data/people.js";
 import { createRng } from "../lib/rng.js";
-import { addDays, insertInChunks, seedId, turkeyTimeToUtc } from "../lib/seed-helpers.js";
+import { addDays, insertInChunks, seedId } from "../lib/seed-helpers.js";
 import type { SeedContext, SeededUser } from "../types.js";
 
 /**
  * Hastane randevu verisi (fake-data-guide.md "Hastane randevu").
  * Ücret yoktur. 8 branş × 3-5 doktor; her doktora önümüzdeki 14 gün için
  * 20 dakikalık slotlar (09:00-12:00 ve 13:30-16:30, Türkiye saati).
+ *
+ * ⛔ SAATLERİ BU DOSYA TANIMLAMIYOR: `slot-calendar.ts` tanımlıyor ve adım
+ * 16'nın planlı görevi (takvimi ileri kaydırma) aynı yerden okuyor. İki yerde
+ * ayrı yazılsalardı 15. günün saatleri ilk 14 günden farklı olurdu.
  *
  * DOLULUK vs RANDEVU — ikisi aynı şey değildir:
  *  · Slotların %30'u `isBooked = true` yapılır; salon gerçekçi görünsün diye.
@@ -20,9 +25,6 @@ import type { SeedContext, SeededUser } from "../types.js";
  */
 
 const SLOT_DAYS = 14;
-const SLOT_MINUTES = 20;
-const MORNING = { startHour: 9, endHour: 12 };
-const AFTERNOON = { startHour: 13, startMinute: 30, endHour: 16, endMinute: 30 };
 const BOOKED_RATIO = 0.3;
 const MAX_APPOINTMENTS_PER_USER = 2;
 
@@ -113,7 +115,7 @@ function buildSlots(
   for (let dayOffset = 0; dayOffset < SLOT_DAYS; dayOffset += 1) {
     const day = addDays(today, dayOffset);
 
-    for (const startsAt of buildDaySlots(day)) {
+    for (const startsAt of buildDaySlotTimes(day)) {
       slots.push({
         // Kimlik tarih ve saati içerir: aynı gün tekrar tohumlanırsa aynı satır,
         // ertesi gün tohumlanırsa yeni günün slotları eklenir.
@@ -125,30 +127,6 @@ function buildSlots(
   }
 
   return slots;
-}
-
-function buildDaySlots(day: Date): Date[] {
-  const times: Date[] = [];
-
-  const morningEnd = turkeyTimeToUtc(day, MORNING.endHour, 0);
-  for (
-    let cursor = turkeyTimeToUtc(day, MORNING.startHour, 0);
-    cursor < morningEnd;
-    cursor = new Date(cursor.getTime() + SLOT_MINUTES * 60 * 1000)
-  ) {
-    times.push(cursor);
-  }
-
-  const afternoonEnd = turkeyTimeToUtc(day, AFTERNOON.endHour, AFTERNOON.endMinute);
-  for (
-    let cursor = turkeyTimeToUtc(day, AFTERNOON.startHour, AFTERNOON.startMinute);
-    cursor < afternoonEnd;
-    cursor = new Date(cursor.getTime() + SLOT_MINUTES * 60 * 1000)
-  ) {
-    times.push(cursor);
-  }
-
-  return times;
 }
 
 /** `20260731-0900` biçiminde okunabilir ve sıralanabilir slot anahtarı. */

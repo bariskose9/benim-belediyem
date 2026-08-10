@@ -280,6 +280,16 @@ enum AuditAction {
   /// Kayda kimlik numarası YAZILMAZ; KPS sorgusunun kendi kaydı zaten
   /// `kps_query_logs` tablosunda tutuluyor.
   identity_verify
+  /// Günlük planlı görevin TEK BİR İŞİNİN çalışması (adım 16 · ADR-007).
+  ///
+  /// NEDEN DENETLENİYOR: bu işler kullanıcı adına satır SİLİYOR ve para
+  /// TAHSİL EDİYOR; ikisi de CLAUDE.md §5.11'in saydığı kritik işlemler.
+  /// Ayrıca cron "en iyi çaba" ile çalışır (Vercel: kaçırılan koşu logsuz
+  /// kalır) — bu kayıt, işin o gün GERÇEKTEN çalışıp çalışmadığının tek
+  /// güvenilir kanıtıdır.
+  ///
+  /// `userId` NULL: işi bir kullanıcı başlatmadı, zamanlayıcı başlattı.
+  scheduled_task_run
 }
 
 enum AuditEntityType {
@@ -297,6 +307,10 @@ enum AuditEntityType {
   saved_card
   /// `accounts` satırı — bir giriş yönteminin hesaba bağlanması (adım 15c).
   account
+  /// Planlı görevin kendisi (adım 16). `entityId` görevin SABİT ADIDIR
+  /// (`cleanup_rate_limits` gibi) — kayıt kimliği değil. Kişisel veri
+  /// içermez ve denetim kaydını "hangi iş" diye süzülebilir kılar.
+  scheduled_task
 }
 
 enum ConsentType {
