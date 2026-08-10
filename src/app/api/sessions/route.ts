@@ -4,6 +4,7 @@ import { login } from "@/features/auth/services/login.service";
 import { readSessionToken, writeSessionCookie } from "@/features/auth/services/session-context";
 import { revokeSession } from "@/features/auth/services/session.service";
 import { mergeGuestCartIntoUserCart } from "@/features/cart/services/cart.service";
+import { linkVisitorConsentsToUser } from "@/features/legal/services/consent.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { created, fail } from "@/lib/http";
 import { readActorIp } from "@/lib/rate-limit";
@@ -52,6 +53,14 @@ export async function POST(request: Request) {
      * yerden devam eder"). Aynı ürün varsa adetler toplanır, stok aşılmaz.
      */
     await mergeGuestCart({ userId: result.userId, anonymousId });
+
+    /**
+     * Ziyaretçiyken verilen çerez rızası hesaba bağlanır (PRD §5.10 · adım 17).
+     * Sepetle aynı gerekçe: kullanıcı hangi kapıdan girerse girsin, giriş
+     * öncesi yaptığı seçim kaybolmamalı. Hatası girişi düşürmez — gerekçe
+     * `linkVisitorConsentsToUser` içinde yazılı.
+     */
+    await linkVisitorConsentsToUser({ anonymousId, userId: result.userId });
 
     /**
      * Aynı tarayıcının önceki oturumu kapatılır.

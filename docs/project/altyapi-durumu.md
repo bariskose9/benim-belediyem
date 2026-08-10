@@ -484,6 +484,13 @@ Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
 | `AUTH_SECRET` · `AUTH_URL` | ✘ | ✘ | ✘ | **Hiç kullanılmıyor ve gerekmiyor.** Auth.js kurulmadı (ADR-005 güncelleme notu); OAuth işlem çerezi `httpOnly` olduğu için imzalanmıyor. `.env.example`'da duruyor ama boş kalabilir |
 | `CRON_SECRET` | ✔ | ✘ | ✔ | **Planlı görevler HİÇ çalışmaz** — `/api/cron/daily` her isteğe 401 döner (fail-closed, adım 16). Uygulama açılır, ekranlar etkilenmez; yalnızca temizlik, aidat tahsilatı ve doktor takvimi durur. Preview'da bilerek yok: cron yalnızca **production dağıtımında** çalışıyor (Vercel) |
 | `OWNER_*` | ✘ | ✘ | ✘ | Tohumlama proje sahibi hesabını **atlar** (kasıtlı: gerçek kişisel veri uzak ortama gitmiyor) |
+| `LEGAL_CONTROLLER_NAME` · `LEGAL_CONTACT_EMAIL` | ✘ | ✘ | ⚠️ **girilmeli** | Yasal sayfalar açılır ama veri sorumlusu adı yerine "bu gösterim uygulamasını işleten gerçek kişi" yazar ve KVKK başvuru kanalı olarak yalnızca GitHub deposu gösterilir. Uygulama açılır (adım 17) |
+
+> 🔧 **PANEL İŞİ — adım 17'nin TEK dış dünya işi.** `LEGAL_CONTROLLER_NAME` ve
+> `LEGAL_CONTACT_EMAIL` **production'da girilmeli**: KVKK aydınlatma metni,
+> başvuruların ulaşabileceği gerçek bir kanal göstermek zorunda. Değerler
+> **koda yazılmaz** (depo herkese açık), yalnızca Vercel panelinde durur.
+> Local ve preview'da boş kalabilir — orada yayımlanmış bir metin yok.
 
 **Anahtarlar ortama özeldir** (`13-environments.md`): `NATIONAL_ID_*` değerleri
 preview ve production'da **farklıdır** ve local'inkiyle de aynı değildir.

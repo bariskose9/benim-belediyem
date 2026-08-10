@@ -4,6 +4,56 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 17: Yasal sayfalar ve çerez rızası (teknik borç #71 kısmen)
+
+- **Dört yasal belge geldi**: `/gizlilik` (KVKK aydınlatma), `/cerez-politikasi`,
+  `/kullanim-sartlari`, `/iletisim`. Hepsi ziyaretçiye açık — aydınlatma
+  yükümlülüğü kişi hesap açmadan ÖNCE de geçerli — ve alt bilgiden erişiliyor
+- **Metnin iddiaları ÖLÇÜLEREK yazıldı, ezberden değil**: işleyici listesi
+  `integrations.md`'den, saklama süreleri `data-model.md`'den, sunucu konumları
+  panelden okundu (Neon → Almanya/Frankfurt, Vercel fonksiyonları → ABD).
+  Yayımlanmış yanlış bir aydınlatma metni, hiç olmamasından ağırdır
+- **Çerez listesi TEK KAYNAKTAN üretiliyor** (`cookie-registry.ts`): politika
+  sayfasının tablosu, bandın kipi ve aydınlatma metnindeki "otomatik yollarla
+  toplananlar" bölümü hep aynı kataloğu okuyor. Elle yazılmış üç liste, ilk
+  değişiklikte gerçeğe aykırı düşerdi
+- ⛔ **Bant "kabul et/reddet" DEĞİL, BİLGİLENDİRME** — çünkü bugün zorunlu
+  olmayan tek bir çerez bile yok (analitik yok, Sentry henüz bağlı değil).
+  Reddedilecek bir şey yokken reddet düğmesi göstermek kullanıcıyı yanıltırdı.
+  **Kataloğa `analytics` satırı eklenirse test KIRMIZIYA DÖNÜYOR**, yani onay
+  arayüzü yazılmadan analitik eklenemiyor
+- **Bant SIFIR JAVASCRIPT**: sunucu bileşeni + düz `<form method="post">` +
+  303 yönlendirme. İstemci bileşeni olsaydı bandın kodu sitenin TAMAMINA
+  yüklenirdi — bant her sayfada çiziliyor. Betikleri kapalı tarayıcıda da
+  çalıştığı curl ile doğrulandı
+- **Rıza kaydı EKLEMELİ (append-only)**: geri alma eski satırı değiştirmiyor,
+  üzerine `isGranted = false` yazıyor. Güncellenen bir satır "ne zaman verildi"
+  bilgisini yok eder ve kayıt kanıt olmaktan çıkardı — testle ölçüldü
+- **Ziyaretçinin rızası da alınıyor** (PRD §5.10): giriş yapmamış kullanıcının
+  kaydı çerezdeki rastgele kimliğe bağlanıyor, giriş yapınca **aynı satır
+  üzerinden** hesaba taşınıyor. Yeni satır yazılsaydı rızanın tarihi giriş
+  anına kayardı; korunduğu testle kanıtlandı
+- **Kayıt akışı iki rıza kaydı yazıyor** (`terms_of_use` + `privacy_notice`) ve
+  son adımda kullanıcı bunu bildiren bir cümle görüyor. ⚠️ Onay KUTUSU yok —
+  teknik borç #85
+- ⛔ **Veri sorumlusunun kişisel verisi KODA YAZILMADI**: ad ve başvuru
+  e-postası `LEGAL_CONTROLLER_NAME` / `LEGAL_CONTACT_EMAIL` ortam
+  değişkenlerinden okunuyor. Depo herkese açık; koda yazılan bir ad git
+  geçmişinden çıkarılamazdı. Değişken eksikse sayfa yine çiziliyor ve başvuru
+  kanalı olarak kaynak kodu deposunu gösteriyor
+- **Güvenlik**: uçta CSRF kapısı (`Origin` başlığı), açık yönlendirme koruması
+  (`sanitizeRedirectPath` hem `returnTo` hem `Referer` için), Zod ile girdi
+  doğrulama, yazma hız sınırı (sınır **yazmadan önce** çalışıyor), IDOR
+  koruması (özne gövdeden değil oturumdan/çerezden), adresteki hata kodu
+  ekrana basılmıyor. Hepsi curl ve Playwright ile ayrı ayrı doğrulandı
+- **SEO**: her belgenin kendi `title`/`description`'ı, canonical adresi ve tek
+  bir `h1`'i var; `sitemap.xml` artık ana sayfa + `/hakkimizda` + dört yasal
+  sayfayı ilan ediyor (borç #71 kısmen ödendi)
+- ⚠️ **Yeni teknik borç**: #84 (bant tüm sayfaları istek anında çizilir hâle
+  getirdi, bedel ölçülmedi), #85 (kayıtta onay kutusu yok), #86 (hastane
+  randevusundaki branş bilgisi özel nitelikli veri sayılabilir — aydınlatma
+  metninde açıkça yazıldı, gizlenmedi)
+
 ### Eklendi — adım 16: Planlı görevler (teknik borç #18, #38, #53, #55, #63)
 
 - **Günlük planlı görev geldi**: `GET /api/cron/daily`, TR saatiyle 03:00'te

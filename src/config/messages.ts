@@ -3,7 +3,13 @@
  *
  * Neden tek dosya: metin koda dağılırsa hem tutarlılık kaybolur hem de ileride
  * ikinci bir dil eklenecekse her bileşeni tek tek açmak gerekir.
+ *
+ * TEK İSTİSNA `messages-legal.ts`: yasal belgeler arayüz kopyası değil, yürürlük
+ * tarihi olan metinlerdir ve tek başlarına yüzlerce satır tutar. Ayrı dosyada
+ * duruyorlar ama BURADAN dışa açılıyorlar (`messages.legal`), yani "metinler
+ * tek giriş noktasından okunur" kuralı korunuyor.
  */
+import { legal } from "@/config/messages-legal";
 
 /**
  * Bot kapısının metinleri — kayıt VE giriş akışının ikisi de aynı kapıyı
@@ -22,6 +28,9 @@ const botCheckErrors = {
 } as const;
 
 export const messages = {
+  /** Yasal belgeler — gövdesi `messages-legal.ts` içinde (adım 17). */
+  legal,
+
   app: {
     name: "benim belediyem",
     title: "benim belediyem",
@@ -227,8 +236,10 @@ export const messages = {
       "geliştirilmiş bir örnektir; kurum adları, kişiler, ürünler ve tüm veriler uydurmadır.",
     sourceCode: "Kaynak kodu (GitHub)",
     sourceCodeUrl: "https://github.com/bariskose9/benim-belediyem",
-    /** Kurumsal bilgi sayfası (adım 15b). Yasal sayfalar adım 17'de eklenecek. */
+    /** Kurumsal bilgi sayfası (adım 15b). */
     about: "Hakkımızda",
+    /** Alt bilgideki bağlantı öbeğinin erişilebilir adı (adım 17). */
+    legalNavLabel: "Yasal bilgiler ve kurumsal sayfalar",
   },
 
   /**

@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Toaster } from "@/components/ui/sonner";
 import { isProductionEnv, publicEnv } from "@/config/env";
 import { messages } from "@/config/messages";
+import { CookieNotice } from "@/features/legal/components/CookieNotice";
 import { themeInitScript } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -75,6 +76,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <SiteFooter />
+
+        {/*
+          Çerez bildirimi (adım 17). ALT BİLGİDEN SONRA çiziliyor ve `sticky`:
+          içerikten sonra gelmesi, klavye ve ekran okuyucu kullanıcısının önce
+          sayfayı okuyup en sonda bandı bulmasını sağlıyor — üste konsaydı her
+          sayfada ilk odak bant olurdu. Rızası olan ziyaretçiye HİÇ çizilmiyor.
+        */}
+        <CookieNotice />
 
         {/*
           Bildirim balonları. Kökte duruyor ki her sayfadan çağrılabilsin ve

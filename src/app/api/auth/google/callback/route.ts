@@ -13,6 +13,7 @@ import {
   writeSessionCookie,
 } from "@/features/auth/services/session-context";
 import { mergeGuestCartIntoUserCart } from "@/features/cart/services/cart.service";
+import { linkVisitorConsentsToUser } from "@/features/legal/services/consent.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { revokeSession } from "@/features/auth/services/session.service";
 import { DEFAULT_REDIRECT_PATH } from "@/lib/redirect";
@@ -89,15 +90,24 @@ export async function GET(request: Request) {
      * girişte olduğu gibi burada da: kullanıcı hangi kapıdan girerse
      * girsin sepetini kaybetmemeli. Hatası girişi düşürmez.
      */
+    const anonymousId = await ensureAnonymousId();
+
     try {
       await mergeGuestCartIntoUserCart({
         userId: outcome.userId,
-        anonymousId: await ensureAnonymousId(),
+        anonymousId,
         now: new Date(),
       });
     } catch (mergeError) {
       console.error("[CART_MERGE] ziyaretçi sepeti taşınamadı", mergeError);
     }
+
+    /**
+     * Ziyaretçiyken verilen çerez rızası hesaba bağlanır (PRD §5.10 · adım 17).
+     * Şifreyle girişteki (`POST /api/sessions`) davranışın aynısı — kullanıcı
+     * hangi kapıdan girerse girsin sonuç aynı olmalı.
+     */
+    await linkVisitorConsentsToUser({ anonymousId, userId: outcome.userId });
 
     return redirectTo(outcome.isNewUser ? DEFAULT_REDIRECT_PATH : transaction.returnTo);
   } catch (error) {
