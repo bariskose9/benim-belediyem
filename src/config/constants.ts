@@ -929,3 +929,38 @@ export const COOKIE_NOTICE_TTL_MS = ANONYMOUS_ID_TTL_MS;
  */
 export const CONSENT_RATE_LIMIT_MAX = 20;
 export const CONSENT_RATE_LIMIT_WINDOW_MS = 60 * 60_000;
+
+// ===========================================================================
+// HESAP YÖNETİMİ VE VERİ HAKLARI (PRD §5.11 · ADR-017 · adım 17b)
+// ===========================================================================
+
+/**
+ * Veri indirme bütçesi — KULLANICI başına.
+ *
+ * ⚠️ DAR SEÇİLDİ (profil yazma bütçesi 30/15dk iken burada 5/saat) ve sebebi
+ * maliyeti: bu uç kullanıcının SEKİZ tablodaki tüm kayıtlarını tek yanıtta
+ * üretiyor, yani projedeki en pahalı okuma yolu. Meşru kullanıcı kendi verisini
+ * saatte beş kez indirmez; sınır bir döngüyü durdurmak için var.
+ */
+export const ACCOUNT_EXPORT_RATE_LIMIT_MAX = 5;
+export const ACCOUNT_EXPORT_RATE_LIMIT_WINDOW_MS = 60 * 60_000;
+
+/**
+ * Geri alınamaz hesap işlemlerinin bütçesi (silme · kimlik çözme) —
+ * KULLANICI başına.
+ *
+ * Bu uçlar şifre doğruluyor, yani aynı zamanda bir şifre deneme yüzeyi.
+ * Giriş akışıyla aynı bütçe (5 / 15 dk) bilerek seçildi: çalınmış bir oturumla
+ * gelen saldırgan burada da giriş ekranındaki kadar deneme hakkı bulur.
+ */
+export const ACCOUNT_DESTRUCTIVE_RATE_LIMIT_MAX = 5;
+export const ACCOUNT_DESTRUCTIVE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * İndirilen dosyanın biçim sürümü.
+ *
+ * Dosyayı yıllar sonra açan bir araç, hangi şemaya göre yazıldığını bilmek
+ * zorunda. Alan eklemek sürümü DEĞİŞTİRMEZ; alan kaldırmak veya anlamını
+ * değiştirmek değiştirir.
+ */
+export const ACCOUNT_EXPORT_FORMAT_VERSION = "1" as const;

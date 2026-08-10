@@ -309,4 +309,4 @@ Süresi dolan kayıtları temizleyen planlı görev günde bir çalışır (ADR-
 | `Appointment`, `SeatReservation` | 3 yıl | Anonimleştirilir |
 | `Order`, `OrderItem`, `Payment`, `Refund`, `MembershipPayment` | 10 yıl | Mali kayıt — kişisel alanlar anonimleştirilir, tutarlar korunur |
 | `AuditLog`, `ConsentRecord` | 10 yıl | Silinmez |
-| `User` (hesap silinince) | — | Kişisel alanlar anonimleştirilir, mali kayıt bağı korunur |
+| `User` (hesap silinince) | — | Kişisel alanlar **silinir** (ad, e-posta, telefon, doğum tarihi, kimlik numarasının üç hâli, şifre, nüfus il/ilçe, personel bağı); satır kalır çünkü mali kayıtlar ona `Restrict` ile bağlı. ⛔ Bu **anonimleştirme değil takma adlaştırmadır** — gerçek anonimleştirme, mali kayıtların 10 yılı dolup imha edilmesiyle tamamlanır (`14-privacy-and-compliance.md`) |

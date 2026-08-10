@@ -280,6 +280,25 @@ enum AuditAction {
   /// Kayda kimlik numarası YAZILMAZ; KPS sorgusunun kendi kaydı zaten
   /// `kps_query_logs` tablosunda tutuluyor.
   identity_verify
+  /// Hesaba bağlı KPS kimliğinin ÇÖZÜLMESİ (adım 17b · ADR-017 ilke 3).
+  ///
+  /// NEDEN `identity_verify` İLE AYNI DEĞER DEĞİL: ikisi ZIT YÖNDE yetki
+  /// değişikliği. Doğrulama hesabı `kps_verified` yapıp personel yetkisi
+  /// verebiliyor; çözme ikisini de geri alıyor ve kimlik numarasını başka bir
+  /// hesabın kullanımına AÇIYOR. Tek değerle kaydedilselerdi denetim kaydı
+  /// "bu hesapta ne oldu" sorusunu cevaplayamazdı.
+  ///
+  /// Kayda kimlik numarası YAZILMAZ; `entityId` hesabın kendi kimliği.
+  identity_unlink
+  /// İletişim bilgisi güncellemesi — bugün yalnızca telefon (teknik borç #80).
+  ///
+  /// NEDEN DENETLENİYOR: iletişim kanalı bir HESAP KURTARMA yüzeyidir. Bugün
+  /// şifre sıfırlama e-postadan gidiyor, ama numara değişikliği yine de
+  /// hesabın kime ulaşacağını değiştiren bir olaydır ve kaydı olmadan
+  /// "bu numarayı kim, ne zaman yazdı" sorusu cevapsız kalır.
+  ///
+  /// ⛔ Kayda NUMARANIN KENDİSİ YAZILMAZ (CLAUDE.md §5.11).
+  contact_update
   /// Günlük planlı görevin TEK BİR İŞİNİN çalışması (adım 16 · ADR-007).
   ///
   /// NEDEN DENETLENİYOR: bu işler kullanıcı adına satır SİLİYOR ve para

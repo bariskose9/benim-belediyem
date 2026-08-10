@@ -4,6 +4,68 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 17b: Hesap yönetimi ve veri hakları (teknik borç #80)
+
+- **`/hesabim/verilerim` ekranı geldi**: verimi indir · telefon güncelleme ·
+  kimlik bağlantısını çözme · hesabımı sil. Kartların sırası en zararsızdan
+  en yıkıcıya doğru ve yalnızca silme kartı kırmızı çerçeveli
+- **Verimi indir (JSON)**: profil, adresler, siparişler, ödemeler, randevular,
+  biletler, üyelikler, destek talepleri ve rıza kayıtları tek dosyada.
+  ⛔ **Dosyaya şifre özeti, oturum jetonu ve şifreli kimlik numarası
+  KONMUYOR** — bu alanlar sorgunun seçim listesinde HİÇ YOK, sonradan
+  filtrelenmiyor: okunmayan veri yanlışlıkla yazılamaz. Kimlik numarası
+  yalnızca maskeli. Uç `no-store` + `attachment` + `nosniff` başlıklarıyla
+  dönüyor ve indirme denetim kaydına düşüyor
+- **Hesabımı sil**: kişisel alanlar SİLİNİYOR (ad, e-posta, telefon, doğum
+  tarihi, kimlik numarasının üç hâli, şifre, oturumlar, Google bağlantısı,
+  adresler, kart sahibi adı, bildirimler, sepet, destek talepleri ve ekleri);
+  mali kayıtlar tutar ve tarih olarak KALIYOR
+- ⛔ **BUNA "ANONİMLEŞTİRME" DENMİYOR — ve bu kozmetik bir düzeltme değil.**
+  KVKK Yönetmeliği m.10 anlamında anonimleştirme GERİ DÖNDÜRÜLEMEZ olmak
+  zorunda; `users` satırı bir kullanıcı kimliği üzerinden mali kayda bağlı
+  kaldığı sürece yapılan şey takma adlaştırmadır. PRD, veri modeli, roadmap ve
+  ekran metinlerindeki "anonimleştirme" kelimesi bu adımda kaldırıldı
+- **Neyin saklandığı ve HANGİ KANUN gereği saklandığı ekranda yazıyor** —
+  onay panelinden ÖNCE ve silme sonrası `/hesap-silindi` sayfasında bir kez
+  daha. Yönetmelik m.12/1-c kısmen karşılanan talebin gerekçesiyle
+  bildirilmesini istiyor; liste bir "ayrıntılar" düğmesinin arkasına
+  saklanırsa bildirim yapılmamış olur. E2E testi bu gerilemeyi yakalıyor
+- **Silme işleminin denetim kaydı hesapla BİRLİKTE silinmiyor** (Yönetmelik
+  m.7/3: imha işlemlerinin kaydı en az üç yıl saklanır)
+- **PRD §5.11 kabul kriteri ölçüldü**: silinen hesabın kimlik numarasıyla
+  yeniden kayıt olunabiliyor (`national_id_hash` benzersiz kolonu serbest
+  kalıyor) ve eski sipariş duruyor ama kişiye bağlanamıyor. Koruma geçici
+  olarak kaldırılıp iki testin de KIRMIZIYA döndüğü görüldü
+- **Üyelik İPTAL EDİLMİYOR, otomatik yenilemesi kapatılıyor**: iptal, taahhüt
+  varsa erken çıkış farkı TAHSİL EDERDİ — yani "hesabımı sil" düğmesi
+  kullanıcının kartından habersizce para çekerdi. Kullanıcı silmeden önce
+  uyarılıyor (PRD §5.11)
+- **Kimlik bağlantısını çözme geldi** (ADR-017 ilke 3: "her bağlama geri
+  alınabilir olmalıdır"). Bağ çözülünce kimlik numarası serbest kalıyor ve
+  başka bir hesaba bağlanabiliyor — testle kanıtlandı
+- ⛔ **Kimlik çözme, Google bağlantısı olmayan hesapta ENGELLENİYOR.** Bu
+  projede giriş kullanıcıyı T.C. numarasının özetinden buluyor; bağ koparsa
+  şifreyle giriş de ölür ve kullanıcı hesabına bir daha giremez.
+  `login-methods.ts`'teki "son giriş yöntemi kaldırılamaz" korumasının aynısı.
+  Koruma kaldırılıp testin kırmızıya döndüğü görüldü
+- **Çözme, artık çalışmayan şifreyi de siliyor**: ekranda "Şifre: Tanımlı"
+  yazıp çalışmayan bir giriş yöntemi göstermek yalan olurdu
+- **Telefon güncelleme** (teknik borç #80): numara **doğrulanmamış** olarak
+  yazılıyor ve ekranda öyle görünüyor. OTP adımı EKLENMEDİ — bu projede
+  telefon doğrulaması simüle (borç #1), kod telefona değil kullanıcının kendi
+  e-postasına gidiyor, yani kanıt üretmiyor. ADR-017 aynı gerekçeyle kimlik
+  doğrulamasına OTP eklemeyi reddetmişti
+- **Güvenlik**: silme ve kimlik çözme, şifresi olan hesapta ŞİFRE YENİDEN
+  DOĞRULAMASI istiyor (çalınmış oturum tek başına yetmesin); üç uçta da
+  kullanıcı kimliği yalnızca oturumdan okunuyor; silme tek transaction ve tek
+  koşullu yazma (iki eşzamanlı silmeden yalnızca biri denetim kaydı yazıyor,
+  ölçüldü); indirme ve yıkıcı işlemler için ayrı hız sınırı bütçeleri
+- **Yeni migration**: `AuditAction` enum'una `identity_unlink` ve
+  `contact_update` eklendi. Geriye uyumlu, tablo/kolon/satır değişmiyor;
+  ⚠️ tek yönlü (PostgreSQL'de `DROP VALUE` yok)
+- **Standart güncellendi**: `14-privacy-and-compliance.md` → "Hesap silme"
+  bölümü. Kural proje kitine (`proje-kiti` 1.4.0) de yazıldı
+
 ### Eklendi — adım 17: Yasal sayfalar ve çerez rızası (teknik borç #71 kısmen)
 
 - **Dört yasal belge geldi**: `/gizlilik` (KVKK aydınlatma), `/cerez-politikasi`,

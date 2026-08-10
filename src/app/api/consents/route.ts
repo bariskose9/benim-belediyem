@@ -13,6 +13,7 @@ import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { AppError } from "@/lib/errors";
 import { readActorIp } from "@/lib/rate-limit";
 import { sanitizeRedirectPath } from "@/lib/redirect";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 /**
  * `POST /api/consents` — çerez bildirimi tercihini kaydeder (adım 17 · PRD §5.10).
@@ -37,7 +38,21 @@ const ERROR_REDIRECT_PATH = "/cerez-politikasi";
 
 export async function POST(request: Request) {
   try {
-    assertSameOriginRequest(request.headers);
+    /**
+     * BAŞKA BİR SİTEDEN GÖNDERİLEN FORMU REDDEDER (CSRF).
+     *
+     * ⛔ NEDEN GEREKLİ — 2026-08-10 güvenlik denetiminde bulundu: bu uç düz bir
+     * form kabul ediyor, yani saldırganın sayfasındaki gizli bir form kurbanın
+     * tarayıcısından buraya POST atabilir. Çerezlerimiz `sameSite: lax` olduğu
+     * için kurbanın `bb_anon` çerezi O İSTEKLE GİTMEZ; sonuç olarak
+     * `ensureAnonymousId()` kimliği bulamaz, YENİSİNİ ÜRETİR ve cevaptaki
+     * `Set-Cookie` kurbanın gerçek ziyaretçi kimliğini EZER. Bedeli: ziyaretçi
+     * sepeti ve hız sınırı sayacı sıfırlanır.
+     *
+     * Kapının kendisi `lib/same-origin.ts` içinde — adım 17b'de hesap uçları
+     * da aynı kapıyı isteyince ortak bir yere taşındı.
+     */
+    if (!isSameOriginRequest(request.headers)) throw new InvalidConsentRequestError();
 
     const parsed = consentInputSchema.safeParse(await readFormBody(request));
 
@@ -102,32 +117,6 @@ async function readFormBody(request: Request): Promise<Record<string, string>> {
     return entries;
   } catch {
     return {};
-  }
-}
-
-/**
- * BAŞKA BİR SİTEDEN GÖNDERİLEN FORMU REDDEDER (CSRF).
- *
- * ⛔ NEDEN GEREKLİ — 2026-08-10 güvenlik denetiminde bulundu: bu uç düz bir
- * form kabul ediyor, yani saldırganın sayfasındaki gizli bir form kurbanın
- * tarayıcısından buraya POST atabilir. Çerezlerimiz `sameSite: lax` olduğu
- * için kurbanın `bb_anon` çerezi O İSTEKLE GİTMEZ; sonuç olarak
- * `ensureAnonymousId()` kimliği bulamaz, YENİSİNİ ÜRETİR ve cevaptaki
- * `Set-Cookie` kurbanın gerçek ziyaretçi kimliğini EZER. Bedeli: ziyaretçi
- * sepeti ve hız sınırı sayacı sıfırlanır.
- *
- * Ölçüt `Origin` başlığı: tarayıcılar POST isteklerinde bunu gönderir ve
- * içeriği JavaScript'ten değiştirilemez. Başlık HİÇ YOKSA istek bir tarayıcı
- * formundan gelmiyordur (curl, test, mobil istemci) — CSRF de bir tarayıcı
- * saldırısı olduğu için orada reddedecek bir şey yok.
- */
-function assertSameOriginRequest(headers: Headers): void {
-  const origin = headers.get("origin");
-
-  if (!origin) return;
-
-  if (origin !== new URL(publicEnv.NEXT_PUBLIC_APP_URL).origin) {
-    throw new InvalidConsentRequestError();
   }
 }
 
