@@ -665,6 +665,69 @@ export const messages = {
 
       /** Kimlik numarası burada bile maskeli gösterilir (05-auth-security.md). */
       maskedNotice: "Kimlik numaranız güvenlik gereği maskeli gösterilir.",
+
+      /**
+       * Doğrulanmamış hesaba gösterilen çağrı (adım 15c-2 · teknik borç #32).
+       *
+       * Google ile açılan hesap `dogrulanmamis` başlıyor ve kullanıcı bunu
+       * yalnızca bir hizmete girmeye çalışınca fark ediyordu. Profilde de
+       * görünmesi, kullanıcının ne eksik olduğunu ARAMADAN öğrenmesi demek.
+       */
+      identityPrompt: {
+        title: "Kimliğiniz henüz doğrulanmadı",
+        description:
+          "Hastane randevusu ve spor salonu üyeliği için nüfus kayıtlarıyla doğrulama gerekiyor. " +
+          "Diğer hizmetleri doğrulama olmadan da kullanabilirsiniz.",
+        cta: "Kimliğimi doğrula",
+      },
+    },
+
+    /**
+     * Kimlik doğrulama ekranı (adım 15c-2 · teknik borç #32).
+     *
+     * MEVCUT hesaba kimlik bağlar — yeni hesap açmaz. Google ile giren
+     * kullanıcının gideceği sayfa burasıydı ve yoktu; erişim uyarısındaki
+     * bağlantı yanlışlıkla kayıt ekranına gidiyordu.
+     */
+    identityVerification: {
+      pageTitle: "Kimlik doğrulama",
+      title: "Kimlik doğrulama",
+      description:
+        "T.C. kimlik numaranız ve doğum yılınız Nüfus ve Vatandaşlık İşleri kayıtlarıyla " +
+        "karşılaştırılır. Bilgileriniz hesabınıza bağlanır, ekranda değiştirilemez.",
+
+      /** Neden isteniyor — kullanıcı kimlik numarasını boşuna girmiş hissetmesin. */
+      purposeNotice:
+        "Doğrulama yalnızca hastane randevusu ve spor salonu üyeliği için gerekiyor. " +
+        "Kimlik numaranız şifrelenerek saklanır ve ekranlarda maskeli gösterilir.",
+
+      submit: "Kimliğimi doğrula",
+      submitting: "Doğrulanıyor…",
+
+      /** Zaten doğrulanmış kullanıcı formu hiç görmez. */
+      verified: {
+        title: "Kimliğiniz doğrulanmış",
+        description: "Hesabınız nüfus kayıtlarıyla doğrulandı. Bu adımı tekrarlamanız gerekmiyor.",
+        cta: "Hesabıma dön",
+      },
+
+      success: {
+        title: "Kimliğiniz doğrulandı",
+        description: (fullName: string) =>
+          `Hoş geldiniz ${fullName}. Hesabınız nüfus kayıtlarıyla doğrulandı.`,
+        /** Personel eşleşmesi çıktıysa kullanıcı bunu bilmeli — yeni hizmetler açıldı. */
+        staffNotice:
+          "Kurum personeli olarak tanındınız: hastane randevusu ve spor salonu üyeliği " +
+          "hizmetleri hesabınıza açıldı.",
+        citizenNotice:
+          "Hastane ve spor salonu hizmetleri yalnızca kurum personeline açıktır; " +
+          "diğer tüm hizmetleri kullanabilirsiniz.",
+        cta: "Devam et",
+      },
+
+      errors: {
+        alreadyVerified: "Kimliğiniz zaten doğrulanmış. Bu adımı tekrarlamanız gerekmiyor.",
+      },
     },
 
     /**

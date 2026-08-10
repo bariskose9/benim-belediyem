@@ -1,0 +1,23 @@
+-- Google ile girenin KPS doğrulaması (roadmap adım 15c-2 · teknik borç #32) —
+-- denetim sözlüğüne kimlik doğrulama işlemi ekleniyor.
+--
+-- NEDEN DENETLENİYOR: kimlik doğrulaması bir YETKİ DEĞİŞİKLİĞİDİR. Hesap
+-- `kps_verified` kademesine çıkar ve personel eşleşmesi varsa hastane ile spor
+-- salonu hizmetleri açılır (CLAUDE.md §5.11 → "yetki değişikliği denetim
+-- kaydına yazılır").
+--
+-- GERİYE UYUMLU: yalnızca yeni bir enum DEĞERİ ekleniyor. Hiçbir tablo, kolon
+-- veya satır değişmiyor; eski sürüm kod bu değeri hiç bilmeden çalışmaya devam
+-- eder (13-environments.md → geriye uyumlu adımlar).
+--
+-- GERİ ALMA: bir enum değerini PostgreSQL'den kaldırmanın doğrudan yolu yok
+-- (`DROP VALUE` yok). Değer eklemek bu yüzden bilinçli olarak TEK YÖNLÜ kabul
+-- ediliyor; riski yok, kullanılmayan bir enum değeri hiçbir davranışı
+-- değiştirmez (adım 15 ve 15c-1'deki aynı karar).
+--
+-- PostgreSQL 12+ `ADD VALUE` ifadesine transaction içinde izin verir; şart,
+-- eklenen değerin AYNI transaction içinde kullanılmamasıdır. Burada yalnızca
+-- ekleme var, kullanım yok.
+
+-- AlterEnum
+ALTER TYPE "AuditAction" ADD VALUE 'identity_verify';

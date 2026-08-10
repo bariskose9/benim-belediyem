@@ -1,3 +1,4 @@
+import type { IdentityStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/db";
 
 /**
@@ -173,6 +174,129 @@ export async function updateUserPassword(userId: string, passwordHash: string): 
   });
 
   return result.count;
+}
+
+/**
+ * Hesabın bugünkü kimlik durumu — kimlik doğrulama akışının ilk kapısı.
+ *
+ * Kimliği ÇAĞIRAN VERİR ve yalnızca oturumdan alır; istemciden gelen bir
+ * kullanıcı kimliği buraya ulaşamaz (IDOR koruması, 05-auth-security.md).
+ */
+export async function findIdentityStatusByUserId(userId: string): Promise<IdentityStatus | null> {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: { identityStatus: true },
+  });
+
+  return user?.identityStatus ?? null;
+}
+
+export type AttachVerifiedIdentityInput = {
+  userId: string;
+  nationalIdEncrypted: string;
+  nationalIdHash: string;
+  nationalIdMasked: string;
+  /** KPS'ten gelen GERÇEK ad soyad — Google'ın verdiği geçici adın yerine geçer. */
+  fullName: string;
+  birthDate: Date;
+  registeredProvince: string;
+  registeredDistrict: string;
+  /** Personel rehberinde eşleşen kayıt — SUNUCUDA hesaplanır, istemciden gelmez. */
+  staffMemberId: string | null;
+  verifiedAt: Date;
+};
+
+export type AttachVerifiedIdentityOutcome =
+  | "attached"
+  /** Bu hesap arada başka bir istekle zaten doğrulanmış. */
+  | "already_verified"
+  /** Kimlik numarası arada başka bir hesaba bağlanmış (benzersizlik kısıtı). */
+  | "national_id_taken";
+
+/**
+ * MEVCUT hesaba KPS kimliğini bağlar (PRD §5.0 · teknik borç #32).
+ *
+ * ═══ TEK KOŞULLU YAZMA — "ÖNCE OKU, SONRA YAZ" DEĞİL ═══
+ * Koşul (`identityStatus: "unverified"`) sorgunun `WHERE`'inde duruyor ve
+ * karar ETKİLENEN SATIR SAYISINDAN okunuyor. Önce okuyup sonra yazan iki
+ * adımlı desende, aynı anda gelen iki istek de "doğrulanmamış" görür ve
+ * ikincisi birincinin yazdığının üstüne yazardı. Aynı disiplin
+ * `seat-reservation` ve `membership` akışlarında da uygulanıyor.
+ *
+ * `nationalIdHash` BENZERSİZ: iki FARKLI hesap aynı numarayı bağlamaya
+ * çalışırsa kararı veritabanı verir (P2002). O hata burada yakalanıp anlamlı
+ * bir sonuca çevriliyor — ham kısıt hatası çağırana da kullanıcıya da gitmez.
+ *
+ * `isStaff` GİRDİDE YOK: değeri yalnızca `staffMemberId`'den türetiliyor, yani
+ * "personel eşleşmesi olmadan personel olmak" bu fonksiyondan geçemiyor
+ * (05-auth-security.md → "Yetki kaynağı yalnızca sunucuda").
+ */
+export async function attachVerifiedIdentity(
+  input: AttachVerifiedIdentityInput,
+): Promise<AttachVerifiedIdentityOutcome> {
+  try {
+    const result = await prisma.user.updateMany({
+      where: { id: input.userId, deletedAt: null, identityStatus: "unverified" },
+      data: {
+        nationalIdEncrypted: input.nationalIdEncrypted,
+        nationalIdHash: input.nationalIdHash,
+        nationalIdMasked: input.nationalIdMasked,
+        fullName: input.fullName,
+        birthDate: input.birthDate,
+        registeredProvince: input.registeredProvince,
+        registeredDistrict: input.registeredDistrict,
+        identityStatus: "kps_verified",
+        isStaff: input.staffMemberId !== null,
+        staffMemberId: input.staffMemberId,
+        kpsSyncedAt: input.verifiedAt,
+      },
+    });
+
+    return result.count === 1 ? "attached" : "already_verified";
+  } catch (error) {
+    if (isNationalIdConflict(error)) return "national_id_taken";
+
+    throw error;
+  }
+}
+
+/**
+ * Bu P2002 GERÇEKTEN kimlik numarası çakışması mı?
+ *
+ * Aynı güncellemede İKİ benzersiz kolon var: `national_id_hash` ve
+ * `staff_member_id`. Her P2002'yi "bu numara başkasına ait" saymak, personel
+ * kaydındaki bir çakışmayı kullanıcıya YANLIŞ ve korkutucu bir cümleyle
+ * gösterir, üstelik gerçek bir bütünlük hatasını sessizce yutardı
+ * (CLAUDE.md §7 → "anlamadığın hatayı gömme"). Tanımadığımız çakışma yeniden
+ * fırlatılıyor ve 500 olarak sunucu log'una düşüyor.
+ *
+ * ⚠️ HATANIN BİÇİMİ EZBERDEN DEĞİL, ÖLÇÜLEREK YAZILDI: Prisma 7 + `pg` sürücü
+ * adaptöründe (ADR-008) çakışan kolonlar `meta.target` altında DEĞİL,
+ * `meta.driverAdapterError.cause.constraint.fields` altında geliyor. Eski
+ * `meta.target` yolu yedek olarak duruyor — sürüm yükseltmesinde biçim
+ * değişirse `tests/db/identity-verification.test.ts` kırmızıya döner.
+ */
+function isNationalIdConflict(error: unknown): boolean {
+  const known = error as {
+    code?: string;
+    meta?: {
+      target?: unknown;
+      driverAdapterError?: { cause?: { constraint?: { fields?: unknown } } };
+    };
+  };
+
+  if (known.code !== "P2002") return false;
+
+  const candidates = [
+    known.meta?.driverAdapterError?.cause?.constraint?.fields,
+    known.meta?.target,
+  ];
+
+  return candidates.some((candidate) => {
+    const fields = Array.isArray(candidate) ? candidate.map(String) : [String(candidate ?? "")];
+
+    return fields.some((field) => field.includes("national_id_hash"));
+  });
 }
 
 export async function findUserIdByEmail(email: string): Promise<string | null> {

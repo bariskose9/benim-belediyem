@@ -34,7 +34,7 @@ export async function StaffOnlyService({
       {guard.allowed ? (
         <p className="text-base text-muted-foreground">{messages.staffServices.comingSoon}</p>
       ) : (
-        <AccessDeniedNotice decision={guard.decision} />
+        <AccessDeniedNotice decision={guard.decision} returnTo={path} />
       )}
     </main>
   );

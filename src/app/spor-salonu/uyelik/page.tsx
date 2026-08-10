@@ -38,7 +38,7 @@ export default async function MembershipPage() {
         <h1 className="font-heading text-3xl font-bold tracking-tight">
           {copy.membership.heading}
         </h1>
-        <AccessDeniedNotice decision={guard.decision} />
+        <AccessDeniedNotice decision={guard.decision} returnTo="/spor-salonu/uyelik" />
       </main>
     );
   }

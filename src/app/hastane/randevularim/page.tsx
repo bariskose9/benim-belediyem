@@ -40,7 +40,7 @@ export default async function MyAppointmentsPage({
     return (
       <main className="page-shell flex flex-col gap-6 py-8">
         <Header />
-        <AccessDeniedNotice decision={guard.decision} />
+        <AccessDeniedNotice decision={guard.decision} returnTo="/hastane/randevularim" />
       </main>
     );
   }
