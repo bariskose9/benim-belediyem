@@ -19,6 +19,22 @@ export function sanitizeRedirectPath(
 ): string {
   if (!value) return fallback;
 
+  /**
+   * ⛔ KONTROL KARAKTERİ TAŞIYAN DEĞER HİÇ İNCELENMEZ (2026-08-10 güvenlik
+   * denetimi).
+   *
+   * WHATWG URL standardı TAB, LF ve CR karakterlerini adresten AYRIŞTIRMADAN
+   * ÖNCE SİLİYOR. Yani `/\t/sahte.example` aşağıdaki kontrollere "yol" gibi
+   * görünür — tek eğik çizgiyle başlar, `//` ile başlamaz — ama tarayıcı onu
+   * `//sahte.example` olarak okuyup BAŞKA SİTEYE gider. Filtrenin gördüğü
+   * dizeyle tarayıcının gördüğü adres aynı olmadığı sürece hiçbir kontrol
+   * güvenilir değildir.
+   *
+   * Temizleyip devam etmek yerine REDDEDİLİYOR: bu karakterleri taşıyan
+   * meşru bir dönüş adresi yok, dolayısıyla kaybedilen bir şey de yok.
+   */
+  if (/[\u0000-\u001F\u007F]/.test(value)) return fallback;
+
   // `//ornek.test` ve `/\ornek.test` tarayıcıda ŞEMASIZ MUTLAK ADRESTİR:
   // tek eğik çizgiyle başladığı için "yol" sanılır ama başka siteye gider.
   if (!value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return fallback;

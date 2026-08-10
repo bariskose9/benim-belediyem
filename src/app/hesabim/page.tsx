@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { BadgeCheckIcon } from "lucide-react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { messages } from "@/config/messages";
 import { FormAlert } from "@/features/auth/components/FormAlert";
@@ -101,6 +104,21 @@ export default async function AccountPage({
       </Card>
 
       <p className="max-w-prose text-base text-muted-foreground">{copy.maskedNotice}</p>
+
+      {/* Doğrulanmamış hesabın gideceği yer (adım 15c-2 · teknik borç #32).
+          Kullanıcı eksiğini bir hizmete çarpmadan da görebilmeli. */}
+      {guard.session.identityStatus === "unverified" ? (
+        <Alert role="status">
+          <BadgeCheckIcon aria-hidden="true" />
+          <AlertTitle>{copy.identityPrompt.title}</AlertTitle>
+          <AlertDescription className="flex flex-col gap-2">
+            <span>{copy.identityPrompt.description}</span>
+            <Link href="/kimlik-dogrulama" className="font-medium underline underline-offset-4">
+              {copy.identityPrompt.cta}
+            </Link>
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       <section aria-labelledby="kayitlarim" className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">

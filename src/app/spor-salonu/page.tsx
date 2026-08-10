@@ -34,7 +34,7 @@ export default async function GymPage() {
     return (
       <main className="page-shell flex flex-col gap-6 py-8">
         <PageHeader />
-        <AccessDeniedNotice decision={guard.decision} />
+        <AccessDeniedNotice decision={guard.decision} returnTo="/spor-salonu" />
       </main>
     );
   }

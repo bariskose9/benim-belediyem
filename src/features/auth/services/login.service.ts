@@ -5,13 +5,8 @@ import {
   LOGIN_RATE_LIMIT_WINDOW_MS,
 } from "@/config/constants";
 import { serverEnv } from "@/config/env";
-import {
-  BotCheckFailedError,
-  BotCheckRequiredError,
-  BotCheckUnavailableError,
-  InvalidCredentialsError,
-  LoginRateLimitedError,
-} from "@/features/auth/errors";
+import { InvalidCredentialsError, LoginRateLimitedError } from "@/features/auth/errors";
+import { assertBotCheckPassed } from "@/features/auth/services/bot-check";
 import { findAuthUserByNationalIdHash } from "@/features/auth/repositories/user.repository";
 import type { LoginPayload } from "@/features/auth/schemas/login.schema";
 import { verifyPassword } from "@/features/auth/services/password.service";
@@ -25,7 +20,6 @@ import {
   rateLimitKey,
   resetRateLimit,
 } from "@/lib/rate-limit";
-import { verifyTurnstileToken } from "@/lib/turnstile";
 
 /**
  * Giriş akışı (PRD §5.0 "Giriş akışı").
@@ -198,12 +192,9 @@ async function assertBotCheckPassedIfNeeded(
 ): Promise<void> {
   if (!(await isBotCheckRequired(keys, now))) return;
 
-  const outcome = await verifyTurnstileToken({ token, actorIp });
-
-  if (outcome === "success") return;
-  if (outcome === "unavailable") throw new BotCheckUnavailableError();
-
-  throw token ? new BotCheckFailedError() : new BotCheckRequiredError();
+  // Kapının KENDİSİ ortak (`bot-check.ts`); buradaki tek fark kapının HER
+  // ZAMAN değil, yalnızca üst üste başarısız denemeden sonra inmesi.
+  await assertBotCheckPassed(token, actorIp);
 }
 
 async function isBotCheckRequired(keys: LoginKeys, now: Date): Promise<boolean> {

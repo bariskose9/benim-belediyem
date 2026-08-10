@@ -2,7 +2,10 @@ import { z } from "zod";
 
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, OTP_CODE_LENGTH } from "@/config/constants";
 import { messages } from "@/config/messages";
-import { isValidNationalId } from "@/lib/crypto";
+import {
+  identityChallengeSchema,
+  turnstileTokenSchema,
+} from "@/features/identity/schemas/identity-challenge.schema";
 
 /**
  * Kayıt akışının girdi şemaları.
@@ -17,36 +20,14 @@ import { isValidNationalId } from "@/lib/crypto";
 const copy = messages.auth.register.errors;
 
 /**
- * Kimlik numarası. Kontrol basamağı BURADA da doğrulanıyor ama asıl kapı
- * `lookupIdentity` içinde; buradaki kontrol yalnızca geçersiz numaralar için
- * gereksiz bir dış servis çağrısını önlüyor.
+ * ADIM 1 girdisi — kimlik numarası + doğum yılı + bot jetonu.
  *
- * Hata mesajı TEK TİP: hangi kuralın tutmadığı söylenmiyor
- * (05-auth-security.md → numara taraması koruması).
+ * ŞEMANIN KENDİSİ `identity-challenge.schema.ts` İÇİNDE ve ORTAK: aynı üçlüyü
+ * kimlik doğrulama akışı da soruyor (mevcut hesaba kimlik bağlama, adım 15c-2).
+ * Buradaki isim korunuyor çünkü kayıt akışının okunurluğu "başlangıç adımı"
+ * kavramına bağlı; şema tek yerde, adı akışa özel.
  */
-const nationalIdSchema = z
-  .string()
-  .trim()
-  .refine(isValidNationalId, { error: messages.identity.lookupFailed });
-
-const birthYearSchema = z.coerce
-  .number({ error: copy.invalidBirthYear })
-  .int({ error: copy.invalidBirthYear })
-  .min(1900, { error: copy.invalidBirthYear })
-  .max(new Date().getUTCFullYear(), { error: copy.invalidBirthYear });
-
-/**
- * Bot doğrulama jetonu. Boş string kabul ediliyor ki "hiç gönderilmedi"
- * durumu şema hatası (422) değil, BOT_CHECK_REQUIRED (403) olarak dönsün —
- * PRD kabul kriteri bu uç için 403 istiyor.
- */
-const turnstileTokenSchema = z.string().default("");
-
-export const registrationStartSchema = z.object({
-  nationalId: nationalIdSchema,
-  birthYear: birthYearSchema,
-  turnstileToken: turnstileTokenSchema,
-});
+export const registrationStartSchema = identityChallengeSchema;
 
 export type RegistrationStartPayload = z.infer<typeof registrationStartSchema>;
 

@@ -274,6 +274,12 @@ enum AuditAction {
   /// Denetim kaydına Google kimliği YAZILMAZ, yalnızca olayın kendisi.
   google_link
   google_unlink
+  /// Mevcut hesaba KPS kimliğinin bağlanması (adım 15c-2). Kimlik doğrulaması
+  /// bir YETKİ DEĞİŞİKLİĞİDİR: hesap `kps_verified` kademesine çıkar ve
+  /// personel eşleşmesi varsa hastane/spor salonu hizmetleri açılır.
+  /// Kayda kimlik numarası YAZILMAZ; KPS sorgusunun kendi kaydı zaten
+  /// `kps_query_logs` tablosunda tutuluyor.
+  identity_verify
 }
 
 enum AuditEntityType {

@@ -4,9 +4,6 @@ import { REGISTRATION_DRAFT_TTL_MS, REGISTRATION_TOKEN_BYTES } from "@/config/co
 import { serverEnv } from "@/config/env";
 import {
   AgeRestrictedError,
-  BotCheckFailedError,
-  BotCheckRequiredError,
-  BotCheckUnavailableError,
   EmailAlreadyRegisteredError,
   IdentityAlreadyRegisteredError,
   IdentityCheckFailedError,
@@ -39,6 +36,7 @@ import type {
   RegistrationContactPayload,
   RegistrationStartPayload,
 } from "@/features/auth/schemas/registration.schema";
+import { assertBotCheckPassed } from "@/features/auth/services/bot-check";
 import { checkPasswordPolicy } from "@/features/auth/services/password-policy.service";
 import { hashPassword } from "@/features/auth/services/password.service";
 import { isAdultOn } from "@/features/auth/services/registration-age.service";
@@ -58,7 +56,6 @@ import { messages } from "@/config/messages";
 import { recordAuditLog } from "@/lib/audit";
 import { decryptSecret, encryptSecret, hashNationalId, maskNationalId } from "@/lib/crypto";
 import { hashActorIp, hashDestination } from "@/lib/rate-limit";
-import { verifyTurnstileToken } from "@/lib/turnstile";
 
 /**
  * Kayıt akışı (PRD §5.0).
@@ -383,18 +380,6 @@ async function finalizeRegistration(
   });
 
   return { completed: true, isStaff: created.isStaff };
-}
-
-/**
- * Bot kapısı. `unavailable` ASLA geçmiş sayılmaz (ADR-004 bedel 2).
- */
-async function assertBotCheckPassed(token: string, actorIp: string): Promise<void> {
-  const outcome = await verifyTurnstileToken({ token, actorIp });
-
-  if (outcome === "success") return;
-  if (outcome === "unavailable") throw new BotCheckUnavailableError();
-
-  throw token ? new BotCheckFailedError() : new BotCheckRequiredError();
 }
 
 async function sendCode(

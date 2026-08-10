@@ -44,7 +44,7 @@ export default async function MembershipPurchasePage({
     return (
       <main className="page-shell flex flex-col gap-6 py-8">
         <h1 className="font-heading text-3xl font-bold tracking-tight">{copy.purchase.heading}</h1>
-        <AccessDeniedNotice decision={guard.decision} />
+        <AccessDeniedNotice decision={guard.decision} returnTo={`/spor-salonu/paket/${planId}`} />
       </main>
     );
   }

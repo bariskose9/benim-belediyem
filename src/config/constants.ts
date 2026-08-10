@@ -329,6 +329,17 @@ export const TURNSTILE_SCRIPT_ORIGIN = "https://challenges.cloudflare.com" as co
  */
 export const TURNSTILE_TIMEOUT_MS = 3_000;
 
+/**
+ * İstemciden kabul edilen bot jetonunun üst sınırı.
+ *
+ * Cloudflare jetonu 2048 karakteri geçmiyor; sınır iki katına konuldu ki
+ * sağlayıcı biçimi büyütürse akış sessizce kırılmasın. Sınırın kendisi bir
+ * KAYNAK KORUMASI: jeton doğrulanmak üzere Cloudflare'a gönderiliyor, yani
+ * üst sınırsız bir alan girişli bir kullanıcıya bedava yük üretme imkânı
+ * verirdi (2026-08-10 güvenlik denetimi).
+ */
+export const TURNSTILE_TOKEN_MAX_LENGTH = 4096;
+
 // ===========================================================================
 // GOOGLE İLE GİRİŞ — OpenID Connect (PRD §5.0 · adım 4c)
 //

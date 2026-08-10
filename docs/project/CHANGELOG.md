@@ -4,6 +4,74 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 15c (2/2): Google ile girenin KPS doğrulaması (teknik borç #32)
+
+- **`/kimlik-dogrulama` ekranı geldi**: Google ile açılan hesap artık kimliğini
+  kendi doğrulatabiliyor. Bugüne kadar kullanıcı doğru mesajı görüyordu ama
+  mesajdaki bağlantı `/kayit`'a, yani hesabı OLAN birini yeni hesap açma
+  ekranına gönderiyordu
+- **Sıra güvenlik gereği**: bot kapısı → "zaten doğrulanmış mı" → KPS sorgusu
+  (hız sınırı + devre kesici + denetim kaydı + sabit yanıt süresi) → 18 yaş →
+  "bu numara başka hesapta mı" → personel eşleştirme. Kayıt akışındaki sıranın
+  aynısı; ortak parçalar kopyalanmadı, paylaşıldı
+- **Yazma TEK KOŞULLU**: `UPDATE ... WHERE identity_status = 'unverified'` ve
+  karar etkilenen satır sayısından okunuyor. Koruma **kaldırılıp testin
+  kırmızıya döndüğü görülerek** ölçüldü. Aynı numarayı iki hesabın bağlamasını
+  ise veritabanı kısıtı engelliyor
+- **Ad soyad KPS'ten geliyor**: Google ile açılan hesapta ad e-postanın `@`
+  öncesinden türetiliyordu; doğrulamadan sonra gerçek ad soyadla değişiyor
+- **`isStaff` yalnızca sunucuda**: değer `staff_members` eşleşmesinden
+  türetiliyor, girdi tipinde yeri yok. Personel kaydı başka bir hesaba bağlıysa
+  kullanıcı vatandaş olarak doğrulanıyor
+- **Doğrulama sonrası kullanıcı GELDİĞİ hizmete dönüyor** (`?donus=`): hastanede
+  uyarıyı gören kullanıcı doğrulamayı bitirince hastaneye geri gidiyor ve orada
+  artık farklı bir mesaj görüyor ("yalnızca kurum personeline açıktır")
+- **`/hesabim`'da doğrulanmamış hesaba çağrı kartı**: kullanıcı eksiğini bir
+  hizmete çarpmadan da görebiliyor
+- **Denetim kaydına yeni işlem** (`identity_verify`): kimlik doğrulaması bir
+  YETKİ DEĞİŞİKLİĞİ. ⛔ Kayda kimlik numarası yazılmıyor
+
+### Düzeltildi — açık yönlendirme (open redirect) atlatması
+
+- **`sanitizeRedirectPath` kontrol karakteriyle atlatılabiliyordu**: WHATWG URL
+  standardı TAB/LF/CR karakterlerini adresten ayrıştırmadan önce siliyor, yani
+  `/<TAB>/sahte.example` filtreden "yol" gibi geçiyor ama tarayıcıda
+  `//sahte.example` olup BAŞKA SİTEYE gidiyordu. `node` ile fiilen doğrulandı,
+  önce kırmızı test yazıldı, sonra düzeltildi. Bu fonksiyon giriş sonrası
+  dönüşte ve Google callback'inde de kullanılıyor — düzeltme üçünü birden kapatıyor
+- **Bot jetonuna uzunluk sınırı** (`TURNSTILE_TOKEN_MAX_LENGTH`): sınırsız alan,
+  girişli bir kullanıcıya hem bize hem Cloudflare'a bedava yük ürettirme imkânı
+  veriyordu
+- **Benzersizlik çakışması ayırt ediliyor**: her `P2002` "bu numara başkasına
+  ait" sayılmıyor; yalnızca `national_id_hash` çakışması. Hatanın biçimi
+  ezberden değil, gerçek veritabanına sorularak yazıldı
+
+### Değişti — adım 15c (2/2)
+
+- **Bot kapısı ortak dosyaya taşındı** (`bot-check.ts`) ve **DÖRT akışın
+  hepsi** oraya bağlandı: kayıt, kod yeniden gönderme, şifre sıfırlama ve
+  giriş. Davranış değişmedi; `unavailable` hâlâ "geçti" sayılmıyor.
+  Kod incelemesi ilk denemede yalnızca kayıt akışının taşındığını, kuralın
+  hâlâ üç yerde ayrı ayrı yaşadığını gösterdi — ortaklaştırma tamamlandı
+- **Bot jetonu şeması da ortaklaştı ve ÜÇ ucun hepsine uzunluk sınırı geldi**:
+  kayıt, kod yeniden gönderme ve şifre sıfırlama. Sınırın en çok gerektiği yer
+  şifre sıfırlamaydı — o uç giriş bile gerektirmiyor
+- **Kimlik sorgusu şeması ortaklaştı** (`identity-challenge.schema.ts`):
+  aynı üçlüyü kayıt ve kimlik doğrulama akışları soruyor. İki kopya olsaydı
+  birinde sıkılaştırılan kural diğerinde gevşek kalabilirdi
+- **Oturumu düşen kullanıcının dönüş adresi kaybolmuyor**: giriş ekranına
+  giderken `?donus=` de taşınıyor, doğrulamadan sonra kullanıcı hastaneye
+  dönüyor — hesabına değil
+- **Üç güvenlik dalı daha teste bağlandı**: bot doğrulamasına ULAŞILAMADIĞINDA
+  kapının kapandığı (ADR-004 bedel 2), KPS hız sınırı ve KPS çökmesi. Üçünde de
+  hesabın `unverified` kaldığı ölçülüyor
+- **Migration `20260810120000_add_identity_verification_audit_action`**: denetim
+  sözlüğüne bir işlem eklendi. Geriye uyumlu, yalnızca enum DEĞERİ ekliyor.
+  ⚠️ Tek yönlü (PostgreSQL'de `DROP VALUE` yok)
+- `AccessDeniedNotice` artık dönüş adresi alıyor; hastane ve spor salonu
+  sayfaları bulundukları yolu ona veriyor
+
+
 ### Eklendi — adım 15c (1/2): Profilden Google bağlantısı (teknik borç #33)
 
 - **`/hesabim`'a "Giriş yöntemleri" kartı geldi**: şifre tanımlı mı, Google bağlı

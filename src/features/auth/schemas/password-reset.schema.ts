@@ -3,6 +3,7 @@ import { z } from "zod";
 import { OTP_CODE_LENGTH } from "@/config/constants";
 import { messages } from "@/config/messages";
 import { passwordSchema } from "@/features/auth/schemas/registration.schema";
+import { turnstileTokenSchema } from "@/features/identity/schemas/identity-challenge.schema";
 
 /**
  * Şifre sıfırlama uçlarının girdi şemaları (adım 4b-3).
@@ -12,13 +13,6 @@ import { passwordSchema } from "@/features/auth/schemas/registration.schema";
 
 const copy = messages.auth.passwordReset.errors;
 const registerCopy = messages.auth.register.errors;
-
-/**
- * Bot doğrulama jetonu. Boş string kabul ediliyor ki "hiç gönderilmedi" durumu
- * şema hatası (422) değil `BOT_CHECK_REQUIRED` (403) olarak dönsün — ekran
- * kutuyu buna göre açıyor.
- */
-const turnstileTokenSchema = z.string().default("");
 
 /**
  * KONTROL BASAMAĞI BURADA DOĞRULANMIYOR ve bu bilinçli.

@@ -12,9 +12,6 @@ import {
 import { messages } from "@/config/messages";
 import { serverEnv } from "@/config/env";
 import {
-  BotCheckFailedError,
-  BotCheckRequiredError,
-  BotCheckUnavailableError,
   LeakedPasswordError,
   OtpChannelUnavailableError,
   OtpExpiredError,
@@ -26,6 +23,7 @@ import {
   PasswordResetSendRateLimitedError,
   WeakPasswordError,
 } from "@/features/auth/errors";
+import { assertBotCheckPassed } from "@/features/auth/services/bot-check";
 import {
   findPasswordPolicyProfile,
   findPasswordResetTargetByNationalIdHash,
@@ -54,7 +52,6 @@ import {
 import { recordAuditLog } from "@/lib/audit";
 import { decryptNationalId, hashNationalId } from "@/lib/crypto";
 import { consumeRateLimit, hashActorIp, rateLimitKey } from "@/lib/rate-limit";
-import { verifyTurnstileToken } from "@/lib/turnstile";
 import { sleep } from "@/lib/utils";
 
 /**
@@ -420,16 +417,6 @@ async function assertWithinSendBudget(subject: string, now: Date): Promise<void>
   });
 
   if (!decision.allowed) throw new PasswordResetSendRateLimitedError();
-}
-
-/** Bot kapısı. `unavailable` ASLA geçmiş sayılmaz (ADR-004 bedel 2). */
-async function assertBotCheckPassed(token: string, actorIp: string): Promise<void> {
-  const outcome = await verifyTurnstileToken({ token, actorIp });
-
-  if (outcome === "success") return;
-  if (outcome === "unavailable") throw new BotCheckUnavailableError();
-
-  throw token ? new BotCheckFailedError() : new BotCheckRequiredError();
 }
 
 /**

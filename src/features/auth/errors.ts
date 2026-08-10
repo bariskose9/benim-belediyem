@@ -84,6 +84,26 @@ export class IdentityAlreadyRegisteredError extends AppError {
   }
 }
 
+/**
+ * Hesap ZATEN doğrulanmış (adım 15c-2).
+ *
+ * `IdentityAlreadyRegisteredError`'dan AYRI bir sınıf çünkü söylediği şey
+ * farklı: orada numara BAŞKASININ hesabında, burada kullanıcının kendi hesabı
+ * zaten doğrulanmış durumda. Tek bir mesaj, kimliğini yeni doğrulatmış bir
+ * kullanıcıya "bu numara başkasına ait" gibi yanlış ve korkutucu bir cümle
+ * gösterirdi.
+ *
+ * Hiçbir şey sızdırmıyor: kullanıcının KENDİ hesabına dair bir bilgi.
+ */
+export class IdentityAlreadyVerifiedError extends AppError {
+  readonly code = "IDENTITY_ALREADY_VERIFIED";
+  readonly status = 409;
+
+  constructor() {
+    super(messages.auth.identityVerification.errors.alreadyVerified);
+  }
+}
+
 export class EmailAlreadyRegisteredError extends AppError {
   readonly code = "EMAIL_ALREADY_REGISTERED";
   readonly status = 409;

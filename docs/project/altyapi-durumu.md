@@ -9,7 +9,48 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-10 · roadmap adım 15c-1 sonrası
+**Son güncelleme:** 2026-08-10 · roadmap adım 15c-2 sonrası
+
+> ## Adım 15c-2 — YENİ HESAP YOK, AMA PANEL İŞİ VAR (Turnstile, ZORUNLU)
+>
+> Kimlik doğrulama ekranı **giriş gerektiriyor ve bot kutusu taşıyor**, yani
+> `feature/kimlik-dogrulama` dalının preview adresi Cloudflare listesinde
+> olmadan o ekran preview'da **denenemez** (widget çizilmez, konsolda
+> `Error: 110200`).
+>
+> | Panel | Eklenecek | Zorunlu mu |
+> |---|---|---|
+> | Cloudflare Turnstile → Hostname Management | `benim-belediyem-git-feature-kimlik-dogrulama-barisss.vercel.app` | ✅ **EVET** |
+> | Google Cloud → Clients → Authorized redirect URIs | — | ❌ **HAYIR** — bu adım OAuth akışına hiç dokunmuyor |
+>
+> ⚠️ **TURNSTILE LİSTESİ SINIRA DAYANDI (10 hostname).** Yeni satır eklenirken
+> merge edilmiş dalların satırları da silinmeli. **KALACAK:**
+> `benim-belediyem.vercel.app`. **SİLİNEBİLİR:** adı
+> `benim-belediyem-git-feature-...` ile başlayan ve dalı merge edilmiş HER satır
+> (google-ile-giris · sifre-sifirlama · market · restoran · etkinlik-bilet ·
+> spor-salonu-uyeligi · destek-talebi · bilgi-widgetlari · hakkimizda ·
+> google-baglantisi). Silmenin tek bedeli: o eski dalın preview adresine geri
+> dönülürse orada bot kutusu çizilmez.
+> ⛔ **Ajan bu listeyi panelden GÖREMİYOR** — temizlik yapılınca bu dosya
+> gerçeğe göre güncellenmeli.
+>
+> Yeni hesap, yeni servis, yeni ortam değişkeni ve yeni bağımlılık **YOK**
+> (`npm audit`: 0 açık). **Yeni bir migration VAR**
+> (`20260810120000_add_identity_verification_audit_action`) ama elle
+> çalıştırılacak bir şey değil: Vercel derleme komutu `prisma migrate deploy`
+> ile başlıyor. Migration **yalnızca enum DEĞERİ ekliyor** — tablo, kolon ve
+> satır değişmiyor. ⚠️ Tek yönlü (PostgreSQL'de `DROP VALUE` yok).
+>
+> ✅ **TOHUM BU ADIMDA DEĞİŞMEDİ.** Uzak ortamlardaki eksik altı demo hesap
+> (#11-#16) aynen duruyor, yenisi eklenmedi: kimlik doğrulama E2E'si kendi
+> kullanıcısını kurup sonunda siliyor. Her adımda tohuma hesap eklemek uzak
+> ortamlarla farkı büyütüyordu.
+>
+> ⚠️ **PREVIEW'DA KİMLİK DOĞRULAMA EKRANI HENÜZ DENENMEDİ** — Turnstile satırı
+> eklenmeden denenemez. Local'de Cloudflare'ın test anahtarlarıyla tarayıcıda
+> uçtan uca doğrulandı (mutlu yol, hatalı bilgi, bot kapısı, açık/koyu tema).
+>
+> **Son güncelleme (önceki):** 2026-08-10 · roadmap adım 15c-1 sonrası
 
 > ✅ **Adım 15c-1 CANLIDA** (2026-08-10, commit `40ca7c9`, PR #40). Sağlık ucu
 > `db: ok`; girişsiz `/hesabim` 307, girişsiz `POST /api/auth/google/connections`
