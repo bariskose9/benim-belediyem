@@ -26,8 +26,16 @@ Roadmap adım **0 → 17b bitti** (15, 15b, 15c-1, 15c-2, 16, 17, 17b dahil).
   · **Profilden Google bağlantısı** · **Kimlik doğrulama** · **Planlı görevler**
   · **Yasal sayfalar + çerez rızası** · **Hesap yönetimi ve veri hakları**
   çalışıyor
-- **Adım 17b 2026-08-10'da yazıldı** — ⚠️ **HENÜZ CANLIYA ÇIKMADI mı, kontrol
-  et:** `/api/health` içindeki `commit` alanına ve son PR'a bak
+- ⛔ **ADIM 17b YAZILDI AMA MERGE EDİLMEDİ — İLK İŞİN BU.**
+  **PR #47** açık: https://github.com/bariskose9/benim-belediyem/pull/47
+  (dal `feature/hesap-yonetimi`, commit `d9e5668`). Proje sahibi 2026-08-10
+  gecesi uyumaya gitti; merge ve production dağıtımı ONAYINA bırakıldı.
+  **Yapılacaklar:** (1) `gh pr checks 47` ile Playwright ve Docker
+  kontrollerinin yeşile döndüğünü doğrula — kapanışta ikisi hâlâ `pending`
+  idi, diğer dördü geçmişti; (2) proje sahibinden merge onayı al;
+  (3) merge sonrası `/api/health` içindeki `commit` alanının DEĞİŞTİĞİNİ
+  doğrula (Neon uykudaysa `P1001` ile patlar → `npx vercel redeploy
+  <dagitim-url> --scope barisss`)
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında:** dal adresini
