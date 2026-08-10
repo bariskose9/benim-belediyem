@@ -27,9 +27,9 @@ Roadmap adım **0 → 15 ve 15b bitti.** Hakkımızda sayfası çalışıyor.
 - **Hakkımızda** çalışıyor ve **CANLIDA** (2026-08-10, commit `9d64199`):
   `/hakkimizda` — kurum bilgileri, teşkilat şeması (açılır kapanır ağaç),
   100 kişilik personel rehberi. **Giriş gerektirmiyor**
-- **Profilden Google bağlantısı** çalışıyor (adım 15c-1, teknik borç #33 ÖDENDİ):
-  `/hesabim` → "Giriş yöntemleri" kartı. Bağlama şifre istiyor, son giriş
-  yöntemi kaldırılamıyor
+- **Profilden Google bağlantısı** çalışıyor ve **CANLIDA** (2026-08-10, commit
+  `40ca7c9`) — adım 15c-1, teknik borç #33 ÖDENDİ: `/hesabim` → "Giriş
+  yöntemleri" kartı. Bağlama şifre istiyor, son giriş yöntemi kaldırılamıyor
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında ilk iş:** dal adresini

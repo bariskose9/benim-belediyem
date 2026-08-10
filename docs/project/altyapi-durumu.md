@@ -11,6 +11,11 @@
 
 **Son güncelleme:** 2026-08-10 · roadmap adım 15c-1 sonrası
 
+> ✅ **Adım 15c-1 CANLIDA** (2026-08-10, commit `40ca7c9`, PR #40). Sağlık ucu
+> `db: ok`; girişsiz `/hesabim` 307, girişsiz `POST /api/auth/google/connections`
+> 401 dönüyor. `feature/google-baglantisi` dalı merge edilip **silindi** —
+> panellerdeki satırları artık gereksiz.
+>
 > ## Adım 15c-1 — PANEL İŞİ YAPILDI, YENİ HESAP AÇILMADI
 >
 > Profilden Google bağlantısı hem girişe hem Google akışına dokunduğu için bu
