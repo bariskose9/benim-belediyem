@@ -11,20 +11,37 @@
 
 **Son güncelleme:** 2026-08-10 · roadmap adım 15c-2 sonrası
 
-> ## Adım 15c-2 — YENİ HESAP YOK, AMA PANEL İŞİ VAR (Turnstile, ZORUNLU)
+> ✅ **Adım 15c-2 CANLIDA** (2026-08-10, commit `65fc6e1`, PR #42). Sağlık ucu
+> `db: ok`; girişsiz `/kimlik-dogrulama` 307, girişsiz
+> `POST /api/identity-verifications` 401 dönüyor. `feature/kimlik-dogrulama`
+> dalı merge edilip **silindi**.
+>
+> ⛔ **BU DALIN TURNSTILE SATIRI HİÇ EKLENMEDİ ve artık GEREKMİYOR.** Panel işi
+> ZORUNLU'ydu ama yalnızca preview'da denemek için; proje sahibi preview'ı
+> atlayıp doğrudan production'a çıkmayı seçti ve production hostname'i zaten
+> kayıtlı. **Sonuç: liste bu adımda BÜYÜMEDİ.** Sonraki oturum "eksik kalmış"
+> sanmasın — bu bir karar.
+>
+> ⚠️ **AMA SINIR HÂLÂ ORADA:** liste 10 sınırında ve **giriş gerektiren bir
+> ekranı preview'da denemek isteyen bir sonraki adım** boş satır bulamayacak.
+> Tetik bu: o adım geldiğinde merge edilmiş dalların satırları toplu silinmeli.
+>
+> ## Adım 15c-2 — YENİ HESAP YOK; PANEL İŞİ ATLANDI (bilinçli)
 >
 > Kimlik doğrulama ekranı **giriş gerektiriyor ve bot kutusu taşıyor**, yani
-> `feature/kimlik-dogrulama` dalının preview adresi Cloudflare listesinde
-> olmadan o ekran preview'da **denenemez** (widget çizilmez, konsolda
-> `Error: 110200`).
+> preview'da denenebilmesi için dal adresinin Cloudflare listesinde olması
+> gerekiyordu (yoksa widget çizilmez, konsolda `Error: 110200`). Proje sahibi
+> **preview'ı atlayıp doğrudan production'a çıkmayı** seçti; production
+> hostname'i zaten kayıtlı olduğu için panele hiç girilmedi.
 >
-> | Panel | Eklenecek | Zorunlu mu |
-> |---|---|---|
-> | Cloudflare Turnstile → Hostname Management | `benim-belediyem-git-feature-kimlik-dogrulama-barisss.vercel.app` | ✅ **EVET** |
-> | Google Cloud → Clients → Authorized redirect URIs | — | ❌ **HAYIR** — bu adım OAuth akışına hiç dokunmuyor |
+> | Panel | Durum |
+> |---|---|
+> | Cloudflare Turnstile → Hostname Management | dal satırı **eklenmedi ve gerekmedi** (production hostname'i yeterli) |
+> | Google Cloud → Clients → Authorized redirect URIs | **dokunulmadı** — bu adım OAuth akışına hiç dokunmuyor |
 >
-> ⚠️ **TURNSTILE LİSTESİ SINIRA DAYANDI (10 hostname).** Yeni satır eklenirken
-> merge edilmiş dalların satırları da silinmeli. **KALACAK:**
+> ⚠️ **TURNSTILE LİSTESİ SINIRA DAYANDI (10 hostname)** ve bu adımda
+> temizlenmedi. Bir sonraki "giriş gerektiren ekranı preview'da dene" ihtiyacı
+> doğduğunda merge edilmiş dalların satırları silinmeli. **KALACAK:**
 > `benim-belediyem.vercel.app`. **SİLİNEBİLİR:** adı
 > `benim-belediyem-git-feature-...` ile başlayan ve dalı merge edilmiş HER satır
 > (google-ile-giris · sifre-sifirlama · market · restoran · etkinlik-bilet ·
@@ -46,9 +63,10 @@
 > kullanıcısını kurup sonunda siliyor. Her adımda tohuma hesap eklemek uzak
 > ortamlarla farkı büyütüyordu.
 >
-> ⚠️ **PREVIEW'DA KİMLİK DOĞRULAMA EKRANI HENÜZ DENENMEDİ** — Turnstile satırı
-> eklenmeden denenemez. Local'de Cloudflare'ın test anahtarlarıyla tarayıcıda
-> uçtan uca doğrulandı (mutlu yol, hatalı bilgi, bot kapısı, açık/koyu tema).
+> ⚠️ **KİMLİK DOĞRULAMA EKRANI PREVIEW'DA HİÇ DENENMEDİ** (yukarıdaki karar).
+> Local'de Cloudflare'ın test anahtarlarıyla tarayıcıda uçtan uca doğrulandı
+> (mutlu yol, hatalı bilgi, bot kapısı, açık/koyu tema) ve production'da duman
+> testi geçti. **Gerçek cihazda hiç denenmedi — proje sahibinin listesinde.**
 >
 > **Son güncelleme (önceki):** 2026-08-10 · roadmap adım 15c-1 sonrası
 
