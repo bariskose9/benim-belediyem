@@ -28,6 +28,12 @@ Roadmap adım **0 → 17 bitti** (15, 15b, 15c-1, 15c-2, 16, 17 dahil).
   · **Yasal sayfalar + çerez rızası** çalışıyor
 - **Planlı görevler (adım 16) 2026-08-10'da canlıya çıktı** (`fe7cf16`).
   `/api/cron/daily` yetkisiz isteğe 401 dönüyor (canlıda doğrulandı)
+- **Yasal sayfalar (adım 17) 2026-08-10'da canlıya çıktı** (`5b1f814`).
+  Canlıda doğrulandı: dört sayfa 200, site haritası altı adresi ilan ediyor,
+  çerez bandı çiziliyor, rıza ucunda yabancı `Origin` reddediliyor ve dış
+  adrese yönlendirme engelleniyor.
+  ⚠️ **`LEGAL_*` değişkenleri HENÜZ GİRİLMEDİ** — `/gizlilik` şu an veri
+  sorumlusu yerine "bu gösterim uygulamasını işleten gerçek kişi" yazıyor
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 - ⚠️ **Yeni dal açtığında:** dal adresini
