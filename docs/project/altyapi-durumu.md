@@ -9,7 +9,8 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-11 · roadmap adım 18a sonrası
+**Son güncelleme:** 2026-08-11 · roadmap adım 18a sonrası ·
+**bekleyen panel işi YOK** (Sentry ve `LEGAL_*` girildi, ikisi de canlıda doğrulandı)
 
 > ✅ **Adım 18a CANLIDA** (2026-08-11, commit `6712d32`, PR #52). Sağlık ucu
 > `db: ok`. Duman testi: `/` · `/market` · `/restoran` · `/hakkimizda` ·
@@ -146,11 +147,13 @@
 > 5.000 hata · 1 kullanıcı · 30 gün saklama. Gerçek kullanıcı 0 olan bu proje
 > için fazlasıyla yeterli.
 >
-> ### 🔧 PANEL İŞİ 2 — `LEGAL_*` (adım 17'den DEVREDİYOR, hâlâ girilmedi)
+> ### ✅ PANEL İŞİ 2 — `LEGAL_*`: **YAPILDI** (2026-08-11, aynı gün)
 >
-> ⛔ **2026-08-11'de PANELDEN ÖLÇÜLDÜ:** production'da 16 değişken var ve
-> `LEGAL_CONTROLLER_NAME` ile `LEGAL_CONTACT_EMAIL` **ikisi de listede YOK.**
-> Ayrıntı aşağıda (adım 17b bölümü).
+> Gün içinde ölçüldüğünde production'da **yoktu**; sonra girildi ve canlıda
+> doğrulandı: `/gizlilik` sayfasındaki "Veri sorumlusu" kutusu gerçek adı ve
+> tıklanabilir başvuru e-postasını gösteriyor, yer tutucu metin kayboldu.
+> ⛔ **Adım 18a'nın iki panel işinin de kapandığı an burasıdır** — daha aşağıdaki
+> adım 17b/17c bölümleri o tarihlerdeki fotoğraftır, güncel durum DEĞİLDİR.
 >
 > ### Adım 18a'da kodda ne değişti (dış dünyayı ilgilendiren kısmı)
 >
@@ -177,7 +180,17 @@
 > - ⚠️ **PREVIEW'DA HİÇ DENENMEDİ** (proje sahibinin alışkanlığı). Local'de
 >   derleme, lint, typecheck, 756 birim + 344 veritabanı testi yeşil
 
-> ## Adım 17c — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ, PANEL İŞİ DE YOK
+---
+
+## ⛔ BURADAN AŞAĞISI ARŞİVDİR — GÜNCEL DURUM DEĞİLDİR
+
+Aşağıdaki bölümler **yazıldıkları günün fotoğrafıdır** ve kararların nedenini
+saklamak için duruyor. Bir işin "yapılmadı / girilmedi" dediği yer, o tarihte
+öyleydi demektir. **Güncel durum yalnızca yukarıdaki özet ile ortam değişkeni
+matrisidir.** Örnek: aşağıda `LEGAL_*` için "girilmedi" yazan iki satır var;
+ikisi de 2026-08-11'de geçersiz kaldı (girildi ve canlıda doğrulandı).
+
+> ## Adım 17c (2026-08-11 arşiv) — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ, PANEL İŞİ DE YOK
 >
 > Personel doğrulaması tamamen kendi verimizle çalışıyor: yeni hesap, yeni
 > servis, **yeni ortam değişkeni YOK** ve yeni bağımlılık YOK
@@ -774,15 +787,15 @@ Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
 | `AUTH_SECRET` · `AUTH_URL` | ✘ | ✘ | ✘ | **Hiç kullanılmıyor ve gerekmiyor.** Auth.js kurulmadı (ADR-005 güncelleme notu); OAuth işlem çerezi `httpOnly` olduğu için imzalanmıyor. `.env.example`'da duruyor ama boş kalabilir |
 | `CRON_SECRET` | ✔ | ✘ | ✔ | **Planlı görevler HİÇ çalışmaz** — `/api/cron/daily` her isteğe 401 döner (fail-closed, adım 16). Uygulama açılır, ekranlar etkilenmez; yalnızca temizlik, aidat tahsilatı ve doktor takvimi durur. Preview'da bilerek yok: cron yalnızca **production dağıtımında** çalışıyor (Vercel) |
 | `OWNER_*` | ✘ | ✘ | ✘ | Tohumlama proje sahibi hesabını **atlar** (kasıtlı: gerçek kişisel veri uzak ortama gitmiyor) |
-| `NEXT_PUBLIC_SENTRY_DSN` | ✘ | ✘ | ⚠️ **girilmeli** (Vercel entegrasyonu ekler) | Sentry sessizce devre dışı kalır — uygulama normal çalışır, yalnızca canlıdaki hatalar hiçbir yere düşmez. Local ve preview'da boş kalması NORMAL. ⚠️ `NEXT_PUBLIC_*` derleme anında gömülür: eklendikten sonra yeniden dağıtım şart (adım 18a) |
-| `SENTRY_ORG` · `SENTRY_PROJECT` · `SENTRY_AUTH_TOKEN` | ✘ | ✘ | ⚠️ **girilmeli** (Vercel entegrasyonu ekler) | Yalnızca DERLEME sırasında okunur. Yoksa kaynak haritası yüklenmez ve Sentry'deki yığın izi küçültülmüş görünür; hata yine yakalanır (adım 18a) |
-| `LEGAL_CONTROLLER_NAME` · `LEGAL_CONTACT_EMAIL` | ✘ | ✘ | ⚠️ **girilmeli** | Yasal sayfalar açılır ama veri sorumlusu adı yerine "bu gösterim uygulamasını işleten gerçek kişi" yazar ve KVKK başvuru kanalı olarak yalnızca GitHub deposu gösterilir. Uygulama açılır (adım 17). ⚠️ **Adım 17b bunu daha önemli hâle getirdi**: hesap silme ekranı artık m.12/1-c bildirimi yapıyor ve bildirimin muhatabı belirsiz kalıyor |
+| `NEXT_PUBLIC_SENTRY_DSN` | ✘ | ✘ | ✔ **GİRİLDİ** (2026-08-11, Vercel entegrasyonu ekledi) | Sentry sessizce devre dışı kalır — uygulama normal çalışır, yalnızca canlıdaki hatalar hiçbir yere düşmez. Local ve preview'da boş kalması NORMAL. ⚠️ `NEXT_PUBLIC_*` derleme anında gömülür: eklendikten sonra yeniden dağıtım şart (adım 18a) |
+| `SENTRY_ORG` · `SENTRY_PROJECT` · `SENTRY_AUTH_TOKEN` | ✘ | ✘ | ✔ **GİRİLDİ** (2026-08-11, Vercel entegrasyonu ekledi) | Yalnızca DERLEME sırasında okunur. Yoksa kaynak haritası yüklenmez ve Sentry'deki yığın izi küçültülmüş görünür; hata yine yakalanır (adım 18a) |
+| `LEGAL_CONTROLLER_NAME` · `LEGAL_CONTACT_EMAIL` | ✘ | ✘ | ✔ **GİRİLDİ** (2026-08-11, canlıda doğrulandı) | Yasal sayfalar açılır ama veri sorumlusu adı yerine "bu gösterim uygulamasını işleten gerçek kişi" yazar ve KVKK başvuru kanalı olarak yalnızca GitHub deposu gösterilir. Uygulama açılır (adım 17). ⚠️ **Adım 17b bunu daha önemli hâle getirdi**: hesap silme ekranı artık m.12/1-c bildirimi yapıyor ve bildirimin muhatabı belirsiz kalıyor |
 
-> 🔧 **PANEL İŞİ — adım 17'nin TEK dış dünya işi.** `LEGAL_CONTROLLER_NAME` ve
-> `LEGAL_CONTACT_EMAIL` **production'da girilmeli**: KVKK aydınlatma metni,
-> başvuruların ulaşabileceği gerçek bir kanal göstermek zorunda. Değerler
-> **koda yazılmaz** (depo herkese açık), yalnızca Vercel panelinde durur.
-> Local ve preview'da boş kalabilir — orada yayımlanmış bir metin yok.
+> ✅ **PANEL İŞİ KALMADI (2026-08-11).** `LEGAL_CONTROLLER_NAME` ve
+> `LEGAL_CONTACT_EMAIL` production'a **girildi ve canlıda doğrulandı**; Sentry'nin
+> dört değişkeni de entegrasyonla geldi. Değerler **koda yazılmaz** (depo herkese
+> açık), yalnızca Vercel panelinde durur. Local ve preview'da boş kalması
+> NORMALDİR — orada yayımlanmış bir metin yok ve Sentry yalnızca production'a bağlı.
 
 **Anahtarlar ortama özeldir** (`13-environments.md`): `NATIONAL_ID_*` değerleri
 preview ve production'da **farklıdır** ve local'inkiyle de aynı değildir.

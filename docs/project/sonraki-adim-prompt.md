@@ -22,21 +22,24 @@ Roadmap adım **0 → 18a bitti**.
 - Tüm hizmetler çalışıyor, **hizmet ızgarasında kapalı hizmet kalmadı**
 - **Adım 18a (gözlemlenebilirlik) CANLIDA** (`6712d32`) — 285 E2E + 756 birim +
   344 veritabanı testi yeşil, CI 5/5, duman testi geçti
-- ⛔ **AMA HATA TAKİBİ HÂLÂ SESSİZ:** Sentry DSN'i girilmediği için SDK devre
-  dışı. Canlıda bir hata olursa hâlâ kimsenin haberi olmaz. "18a canlıda" ile
-  "hata görünürlüğü var" aynı şey DEĞİL
+- ✅ **HATA TAKİBİ ARTIK AÇIK:** Sentry DSN'i 2026-08-11'de girildi ve canlıda
+  uçtan uca doğrulandı (ayrıntı aşağıda §1). Yani "18a canlıda" ile "hata
+  görünürlüğü var" bu tarihten itibaren AYNI şey
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 
-> ### 📌 ÖNCEKİ OTURUMUN KAPANIŞ NOTLARI (2026-08-11, TR ~15:30)
+> ### 📌 KAPANIŞ NOTLARI (2026-08-11, TR ~18:00 — GÜNCEL)
 >
 > | İş | Durum | Kim yapacak |
 > |---|---|---|
 > | Adım 18a kodu | ✅ **CANLIDA** (`6712d32`, PR #52 merge edildi, duman testi geçti) | bitti |
-> | **Sentry hesabı** | ⛔ **AÇILMADI — ZORUNLU PANEL İŞİ** | proje sahibi |
-> | `LEGAL_*` panel işi | ⛔ hâlâ girilmedi (adım 17'den) | proje sahibi |
-> | Toplu elle test | ⛔ **DOKUZUNCU kez ertelendi** | proje sahibi |
+> | **Sentry hesabı** | ✅ **AÇILDI ve CANLIDA DOĞRULANDI** (bkz. §1) | bitti |
+> | `LEGAL_*` panel işi | ✅ **GİRİLDİ ve doğrulandı** (bkz. §2) | bitti |
+> | Toplu elle test | ⛔ **ONUNCU kez ertelendi** | proje sahibi |
 > | Cron ilk koşusu | ⏳ 12 Ağustos 00:00 UTC penceresi bekleniyor | aşağıya bak |
-> | Kit sürüm 1.8.0 | ✅ push edildi (`8ae8067`) | proje sahibi `/plugin`'den GÜNCELLESİN |
+> | Kit sürüm **1.9.0** | ✅ push edildi | proje sahibi `/plugin`'den GÜNCELLESİN (ertelendi, acelesi yok) |
+>
+> ⛔ **PANEL İŞİ KALMADI.** Adım 18b'ye temiz başlanabilir; proje sahibinden
+> beklenen tek şey elle test listesi ve kit kurulumu — ikisi de bilinçli ertelendi.
 
 ## 🔧 PANEL İŞİ — BİRİ BİTTİ, BİRİ DURUYOR
 
@@ -92,7 +95,7 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **yalnızca
 okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT SÜRÜM 1.8.0 — YAYINLANDI
+## 📦 KİT SÜRÜM 1.9.0 — YAYINLANDI
 
 Adım 18a'nın dört dersi `docs/standards/` ve kit kopyasına **ikisine birden**
 yazıldı; `diff` ile 17/18 dosyanın birebir aynı olduğu kanıtlandı (kapı 8).
@@ -102,6 +105,9 @@ Kit deposunda sürüm 1.7.0 → **1.8.0** yapıldı ve GitHub'a **push edildi**
 ⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ HÂLÂ ESKİ.** `/plugin` ekranından
 güncellemesi gerekiyor. Bu, kapı 8'in parçası DEĞİL — yalnızca `/yeni-proje`
 veya `/kit-senkron` çalıştırılmadan hemen önce önemli.
+**2026-08-11 kapanışında proje sahibi bunu bilerek erteledi** — sonraki oturum
+kendiliğinden hatırlatmasın; yalnızca o iki komuttan biri çalıştırılacağı gün
+"önce kiti güncelle" desin.
 
 ⚠️ **KİT DEPOSU 5 COMMIT GERİDEYDİ ve bu oturumda `git pull` yapıldı.**
 Karşılaştırmadan önce daima `git fetch` + `git pull` yap; bayat bir kopyayla
@@ -114,16 +120,23 @@ Sürüm 1.7.0 istisnayı dosya değil **bölüm** seviyesine indirdi
 yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya dokunmadı
 (CLAUDE.md §7: aynı anda tek modül)** — sonraki oturum karar versin.
 
-## 📱 TOPLU ELLE TEST — DOKUZUNCU KEZ ERTELENDİ
+## 📱 TOPLU ELLE TEST — ONUNCU KEZ ERTELENDİ
 
-> Proje sahibine bu oturumda liste **ikiye bölünmüş hâlde** sunuldu
+> Proje sahibine bir önceki oturumda liste **ikiye bölünmüş hâlde** sunuldu
 > ("bu oturum yalnızca B5+B6+B7, kalanı sonraki") ve yine "sonraya bırak"
 > dendi. Yani bölme önerisi de sorunu çözmedi.
 >
-> ⚠️ **DESEN ARTIK ÇOK NET.** Sonraki oturum listeyi yeniden sunmasın; bunun
-> yerine **tek bir madde** önersin (örn. yalnızca B7, 5 dakika) ya da proje
-> sahibine açıkça sorsun: "bu liste hiç yapılmayacaksa roadmap'ten silelim mi?"
-> Sürekli büyüyen ve hiç yapılmayan bir liste, yapılmış gibi görünen bir borçtur.
+> **2026-08-11 kapanışında (TR ~18:00) onuncu kez ertelendi** — bu kez liste
+> hiç sunulmadı bile; proje sahibi kendiliğinden "benlik işlerin hepsini
+> erteleyelim" dedi. Aynı kapanışta **kit 1.8.0 kurulumu da** ertelendi
+> (sorun değil, `/yeni-proje` veya `/kit-senkron` gününe kadar beklet).
+>
+> ⚠️ **DESEN ARTIK ÇOK NET — İKİ KEZ DENENDİ, İKİSİ DE TUTMADI** (tam liste,
+> sonra bölünmüş liste). Sonraki oturum listeyi **yeniden sunmasın** ve tek
+> madde önerisini de tekrarlamasın; bunun yerine **doğrudan kararı sorsun:**
+> "bu liste hiç yapılmayacaksa roadmap'ten silelim mi, yoksa 'yapılmadı' etiketiyle
+> teknik borç olarak mı bırakalım?" Sürekli büyüyen ve hiç yapılmayan bir liste,
+> yapılmış gibi görünen bir borçtur.
 >
 > ⛔ **SEKİZ ADIMIN gerçek cihaz doğrulaması birikmiş durumda.** Otomatik
 > testler ve `mobile-375` ölçümü hepsinde yeşil — BİLİNEN bir arıza yok.
@@ -532,6 +545,13 @@ Dal: `feature/api-belgeleri` (öneri)
 > Bir ders öğrenildiğinde **İKİSİNE DE** yazılır ve `diff` ile kanıtlanır
 > (CLAUDE.md kapı 8).
 
+- **Sürüm 1.9.0** (2026-08-11, kapanış) — iki ders: (1) bir dış dünya durumu
+  değiştiğinde o durumu yazan HER satır güncellenir ve `grep` ile kanıtlanır
+  (`15-oturum-devri`), (2) "belgede öyle yazıyor" ile "ölçtüm" ayrı şeylerdir;
+  "doğrulandı" yalnızca bu oturumda ölçülen için kullanılır (`15-oturum-devri`).
+  ⚠️ Ayrıca **`14-privacy` kite hiç gitmemişti** (kapı 8 kaçağı) — o da senkronlandı.
+  ✅ Kapı 8 kanıtı: `docs/standards` ile kit kopyası arasında **yalnızca
+  `00-stack.md` ve `sablonlar/*` farkı kaldı** (ikisi de bilinen/beklenen)
 - **Sürüm 1.8.0 GitHub'a yayınlandı** (2026-08-11, `8ae8067`) — adım 18a'nın dört
   dersi: `no-console` istisnasız yasak (`12-operations`), süzgeç değerin
   biçimine de bakar (`12-operations`), üçüncü taraf SDK varsayılanları
