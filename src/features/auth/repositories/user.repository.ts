@@ -24,12 +24,23 @@ export type CreateVerifiedUserInput = {
   passwordHash: string;
   registeredProvince: string;
   registeredDistrict: string;
-  /** Personel rehberinde eşleşen kayıt — SUNUCUDA hesaplanır, istemciden gelmez. */
-  staffMemberId: string | null;
   verifiedAt: Date;
 };
 
-export type CreatedUser = { id: string; isStaff: boolean };
+/**
+ * ⛔ `staffMemberId` BU TİPTE ARTIK YOK (adım 17c · ADR-017 ilke 2).
+ *
+ * Kayıt akışı eskiden kimlik numarasının özetini personel rehberiyle
+ * eşleştirip hesabı personel olarak açıyordu. "Kim olduğun" ile "ne yapmaya
+ * yetkili olduğun" ayrı sorular ve ayrı kanıt ister: bir kişinin kurum
+ * personeli olduğu kimliğinden TÜRETİLEMEZ, işverenin doğrulaması gerekir.
+ * Yetki artık yalnızca `src/features/staff-verification/` akışından geliyor.
+ *
+ * Alan tipten SİLİNDİ, `null` geçilmedi: olmayan alana yanlışlıkla
+ * yazılamaz (bu dosyanın en başındaki veri minimizasyonu disiplininin aynısı).
+ */
+
+export type CreatedUser = { id: string };
 
 export async function findUserIdByNationalIdHash(nationalIdHash: string): Promise<string | null> {
   const user = await prisma.user.findUnique({
@@ -201,8 +212,6 @@ export type AttachVerifiedIdentityInput = {
   birthDate: Date;
   registeredProvince: string;
   registeredDistrict: string;
-  /** Personel rehberinde eşleşen kayıt — SUNUCUDA hesaplanır, istemciden gelmez. */
-  staffMemberId: string | null;
   verifiedAt: Date;
 };
 
@@ -227,9 +236,15 @@ export type AttachVerifiedIdentityOutcome =
  * çalışırsa kararı veritabanı verir (P2002). O hata burada yakalanıp anlamlı
  * bir sonuca çevriliyor — ham kısıt hatası çağırana da kullanıcıya da gitmez.
  *
- * `isStaff` GİRDİDE YOK: değeri yalnızca `staffMemberId`'den türetiliyor, yani
- * "personel eşleşmesi olmadan personel olmak" bu fonksiyondan geçemiyor
- * (05-auth-security.md → "Yetki kaynağı yalnızca sunucuda").
+ * ⛔ BU FONKSİYON PERSONEL YETKİSİNE HİÇ DOKUNMUYOR (adım 17c · ADR-017 ilke 2).
+ * Eskiden `isStaff` ve `staffMemberId` burada, kimlik bağlamayla AYNI işlemde
+ * yazılıyordu; kurbanın kimlik numarasını bilen biri onun personel yetkisini
+ * de kazanıyordu. Artık `isStaff` yalnızca `staff-verification` akışının
+ * yazabildiği bir alan ve o akış işverenin kanalından (kurumsal e-posta)
+ * kanıt istiyor. Buradaki güncelleme iki alanı da HİÇ ANMIYOR: `false` yazmak
+ * bile yanlış olurdu — zaten personel olan bir hesabın kimliği yeniden
+ * bağlanırsa (bugün mümkün değil ama yarın olabilir) yetkisini sessizce
+ * düşürürdü.
  */
 export async function attachVerifiedIdentity(
   input: AttachVerifiedIdentityInput,
@@ -246,8 +261,6 @@ export async function attachVerifiedIdentity(
         registeredProvince: input.registeredProvince,
         registeredDistrict: input.registeredDistrict,
         identityStatus: "kps_verified",
-        isStaff: input.staffMemberId !== null,
-        staffMemberId: input.staffMemberId,
         kpsSyncedAt: input.verifiedAt,
       },
     });
@@ -263,9 +276,11 @@ export async function attachVerifiedIdentity(
 /**
  * Bu P2002 GERÇEKTEN kimlik numarası çakışması mı?
  *
- * Aynı güncellemede İKİ benzersiz kolon var: `national_id_hash` ve
- * `staff_member_id`. Her P2002'yi "bu numara başkasına ait" saymak, personel
- * kaydındaki bir çakışmayı kullanıcıya YANLIŞ ve korkutucu bir cümleyle
+ * ⚠️ ADIM 17c'DEN SONRA GÜNCELLEMEDE TEK BENZERSİZ KOLON KALDI
+ * (`national_id_hash`); `staff_member_id` artık bu yazmanın parçası değil.
+ * Kontrol yine de KOLON ADINA bakmaya devam ediyor ve bu bilinçli: her
+ * P2002'yi "bu numara başkasına ait" saymak, ileride eklenecek başka bir
+ * benzersiz kolonun çakışmasını kullanıcıya YANLIŞ ve korkutucu bir cümleyle
  * gösterir, üstelik gerçek bir bütünlük hatasını sessizce yutardı
  * (CLAUDE.md §7 → "anlamadığın hatayı gömme"). Tanımadığımız çakışma yeniden
  * fırlatılıyor ve 500 olarak sunucu log'una düşüyor.
@@ -308,14 +323,18 @@ export async function findUserIdByEmail(email: string): Promise<string | null> {
 /**
  * Hesabı oluşturur.
  *
- * `identityStatus` KPS doğrulaması tamamlandığı için `kps_verified`,
- * `isStaff` ise personel eşleşmesinden geliyor — ikisi de SUNUCUDA belirlenir.
- * İstemciden gelen bir `role` / `isStaff` / `identityStatus` alanı bu
- * fonksiyona hiç ulaşamaz çünkü girdi tipinde yerleri yok
- * (05-auth-security.md → "Yetki kaynağı").
+ * `identityStatus` KPS doğrulaması tamamlandığı için `kps_verified` ve bu
+ * değer SUNUCUDA belirleniyor. İstemciden gelen bir `role` / `isStaff` /
+ * `identityStatus` alanı bu fonksiyona hiç ulaşamaz çünkü girdi tipinde
+ * yerleri yok (05-auth-security.md → "Yetki kaynağı").
  *
  * `role` verilmiyor; şema varsayılanı `user`. Yönetici rolü hiçbir kayıt
  * akışından atanamaz.
+ *
+ * ⛔ `isStaff` ve `staffMemberId` DE VERİLMİYOR (adım 17c · ADR-017 ilke 2):
+ * şema varsayılanları `false` ve `null`. Yeni açılan hiçbir hesap personel
+ * olarak doğmaz — kimlik numarası personel rehberinde eşleşse bile. Yetki
+ * ayrı bir akıştan, işverenin kanalından gelir.
  */
 export async function createVerifiedUser(input: CreateVerifiedUserInput): Promise<CreatedUser> {
   const created = await prisma.user.create({
@@ -331,13 +350,11 @@ export async function createVerifiedUser(input: CreateVerifiedUserInput): Promis
       phoneVerifiedAt: input.verifiedAt,
       passwordHash: input.passwordHash,
       identityStatus: "kps_verified",
-      isStaff: input.staffMemberId !== null,
-      staffMemberId: input.staffMemberId,
       registeredProvince: input.registeredProvince,
       registeredDistrict: input.registeredDistrict,
       kpsSyncedAt: input.verifiedAt,
     },
-    select: { id: true, isStaff: true },
+    select: { id: true },
   });
 
   return created;

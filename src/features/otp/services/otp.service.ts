@@ -298,6 +298,33 @@ export async function readVerifiedPurposes(registrationId: string): Promise<Set<
 }
 
 /**
+ * Bekleyen kod GERÇEKTEN bu hedefe mi gönderilmişti? (adım 17c)
+ *
+ * ═══ ⛔ BU KAPI OLMADAN CİDDİ BİR AÇIK VAR ═══
+ * Personel doğrulamasında akış kimliği kullanıcının kendisi. Kullanıcı ilk
+ * adımda KENDİ kurumsal adresine kod alır, ikinci adımda aynı kodu BAŞKA bir
+ * personelin adresiyle gönderirse — bağlama kontrol edilmezse — o kişinin
+ * yetkisini kendi hesabına alırdı. Kod doğru, akış doğru, hedef YANLIŞ.
+ *
+ * Karşılaştırma düz adres üzerinden değil, `hashDestination` özetleri
+ * üzerinden yapılıyor: veritabanında düz hedef zaten saklanmıyor.
+ *
+ * Bekleyen kod yoksa `false` döner — çağıran bunu "kod geçersiz" ile aynı
+ * kefeye koyar, çünkü kullanıcı için ikisi de aynı şey.
+ */
+export async function pendingChallengeMatchesDestination(
+  registrationId: string,
+  purpose: OtpPurpose,
+  destinationValue: string,
+): Promise<boolean> {
+  const challenge = await findPendingChallenge(registrationId, purpose);
+
+  if (!challenge) return false;
+
+  return challenge.destinationHash === hashDestination(destinationValue);
+}
+
+/**
  * KODUN EKRANA ÇIKABİLECEĞİ TEK KAPI.
  *
  * Production'da her zaman `undefined` döner. Route katmanı `revealedCode`

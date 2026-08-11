@@ -63,6 +63,37 @@ export function buildPhoneSimulationEmail(code: string, maskedPhone: string): Ot
   };
 }
 
+/**
+ * Personel yetkisi doğrulaması (adım 17c · ADR-017 ilke 2).
+ *
+ * ⛔ BU E-POSTA DİĞERLERİNDEN FARKLI BİR KUTUYA GİDİYOR: kullanıcının kendi
+ * adresine değil, kurum rehberindeki adrese. Bu yüzden gövde alıcıya "bu
+ * isteği sen yapmadıysan" demekle yetinmiyor — İSTEĞİ BAŞKASININ YAPMIŞ
+ * OLABİLECEĞİNİ açıkça söylüyor ve ne yapması gerektiğini yazıyor. Kanıtın
+ * değeri tam olarak buradan geliyor: kutunun sahibi olmayan biri kodu
+ * göremez, gören kişi de yetkisiz bir denemeyi fark edebilir.
+ */
+export function buildStaffVerificationEmail(code: string): OtpEmailContent {
+  return {
+    subject: `${messages.app.name} — kurum personeli doğrulama kodunuz`,
+    text: [
+      "Merhaba,",
+      "",
+      `${messages.app.name} üzerinde bir hesap, bu kurumsal adresin sahibi olduğunu`,
+      "ve kurum personeli yetkisi alması gerektiğini bildirdi. Doğrulama kodu:",
+      "",
+      `    ${code}`,
+      "",
+      `Kod ${MINUTES} dakika geçerlidir ve yalnızca bir kez kullanılabilir.`,
+      "",
+      "── BU İSTEĞİ SİZ YAPMADIYSANIZ ──",
+      "Kodu KİMSEYLE PAYLAŞMAYIN ve bu e-postayı yok sayın; kod kullanılmadığı",
+      "sürece hiçbir hesap personel yetkisi almaz. İsteği sizin yapmadığınızı",
+      "biliyorsanız bilgi işlem biriminize haber verin.",
+    ].join("\n"),
+  };
+}
+
 export function buildPasswordResetEmail(code: string): OtpEmailContent {
   return {
     subject: `${messages.app.name} — şifre sıfırlama kodunuz`,

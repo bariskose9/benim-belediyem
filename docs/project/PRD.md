@@ -186,16 +186,35 @@ Erişemeyen kullanıcıya, eksiğinin ne olduğuna göre farklı mesaj gösteril
 
 #### Personel durumu nereden gelir
 
-**KPS'ten gelmez.** KPS nüfus bilgisi verir, kimin nerede çalıştığını bilmez.
-Gerçek kurumlarda bu bilgi insan kaynakları / personel sisteminden gelir.
-Bu projede aynı ayrım korunur:
+**KPS'ten gelmez ve KİMLİKTEN TÜRETİLMEZ.** KPS nüfus bilgisi verir, kimin nerede
+çalıştığını bilmez. Gerçek kurumlarda bu bilgi insan kaynakları / personel
+sisteminden gelir. Bu projede aynı ayrım korunur:
 
 - Personel bilgisi `StaffMember` tablosundadır (Hakkımızda modülündeki rehberin aynısı)
-- KPS doğrulaması tamamlandığında kimlik numarası personel rehberinde aranır
-- Eşleşme varsa hesap `isStaff = true` olur ve hangi birime bağlı olduğu görünür
-- Eşleşme yoksa hesap normal vatandaş olarak kalır
-- Personel durumu **her KPS senkronizasyonunda yeniden hesaplanır** (işten ayrılma senaryosu)
-- Kullanıcı bu alanı hiçbir şekilde kendisi değiştiremez
+- Kullanıcı **kurumsal e-posta adresini** girer; kod `staff_members.work_email`
+  adresine — yani **kurumun kendi kaydındaki kanala** — gönderilir
+- Kodu doğrulayan hesap `isStaff = true` olur ve personel kaydına bağlanır
+- Kullanıcı bu alanı hiçbir şekilde kendisi değiştiremez; yetki yalnızca sunucuda
+  hesaplanır ve istemciden gelen `isStaff` alanı hiçbir yazma yoluna ulaşamaz
+- **Ön koşul:** hesabın kimliği `kps_verified` olmalı. Kimlik yetki VERMEZ ama
+  yetkinin ön koşuludur — yetkinin kime verildiği belirsiz kalmamalı
+
+> ⛔ **BU KURAL 2026-08-11'DE (adım 17c) DEĞİŞTİ — ADR-017 ilke 2.**
+> Önceki hâlinde KPS doğrulaması tamamlandığında kimlik numarası personel
+> rehberinde aranıyor, eşleşme varsa hesap AYNI İŞLEMDE personel oluyordu.
+> T.C. kimlik numarası Türkiye'de gizli bilgi olmadığı için bu, kurbanın
+> numarasını bilen herkese onun hastane ve spor salonu yetkisini veriyordu
+> (teknik borç #76). **"Kim olduğun" ile "ne yapmaya yetkili olduğun" ayrı
+> sorulardır ve ayrı kanıt ister**; bir kişinin kurum personeli olduğu
+> işverenin doğrulaması gereken bir bilgidir.
+>
+> ⚠️ **"Her KPS senkronizasyonunda yeniden hesaplanır" kuralı da KALKTI.**
+> Yetki artık KPS senkronizasyonunun bir çıktısı değil; işten ayrılma
+> senaryosu personel kaydının `deletedAt` alanıyla yönetilir ve o kayıt yeni
+> doğrulamalara kapanır. **Bugün ZATEN BAĞLI bir hesabın yetkisini işten
+> ayrılma otomatik olarak kaldırmıyor** — bu bilinçli bir sınır, roadmap
+> teknik borcunda değil burada yazılı: gerçek bir İK entegrasyonu geldiğinde
+> ele alınacak.
 
 #### Tek gerçek hesap (proje sahibi)
 

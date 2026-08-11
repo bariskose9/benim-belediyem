@@ -38,6 +38,7 @@ export const dynamic = "force-dynamic";
 const copy = messages.auth.account;
 const profileCopy = messages.profile;
 const accountCopy = messages.account;
+const staffCopy = messages.staffVerification;
 
 export const metadata: Metadata = {
   title: copy.pageTitle,
@@ -116,6 +117,23 @@ export default async function AccountPage({
             <span>{copy.identityPrompt.description}</span>
             <Link href="/kimlik-dogrulama" className="font-medium underline underline-offset-4">
               {copy.identityPrompt.cta}
+            </Link>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {/* Personel yetkisi (adım 17c · ADR-017 ilke 2).
+          ⛔ YALNIZCA KİMLİĞİ DOĞRULANMIŞ VE HENÜZ PERSONEL OLMAYAN hesapta
+          görünüyor: doğrulanmamış hesap yukarıdaki kimlik uyarısını görüyor
+          ve iki çağrıyı aynı anda göstermek sırayı belirsizleştirirdi. */}
+      {guard.session.identityStatus === "kps_verified" && !guard.session.isStaff ? (
+        <Alert role="status">
+          <BadgeCheckIcon aria-hidden="true" />
+          <AlertTitle>{staffCopy.entry.title}</AlertTitle>
+          <AlertDescription className="flex flex-col gap-2">
+            <span>{staffCopy.entry.description}</span>
+            <Link href="/personel-dogrulama" className="font-medium underline underline-offset-4">
+              {staffCopy.entry.cta}
             </Link>
           </AlertDescription>
         </Alert>

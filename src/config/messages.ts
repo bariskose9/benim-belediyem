@@ -726,13 +726,29 @@ export const messages = {
         title: "Kimliğiniz doğrulandı",
         description: (fullName: string) =>
           `Hoş geldiniz ${fullName}. Hesabınız nüfus kayıtlarıyla doğrulandı.`,
-        /** Personel eşleşmesi çıktıysa kullanıcı bunu bilmeli — yeni hizmetler açıldı. */
-        staffNotice:
-          "Kurum personeli olarak tanındınız: hastane randevusu ve spor salonu üyeliği " +
-          "hizmetleri hesabınıza açıldı.",
+        /**
+         * ⛔ ESKİ `staffNotice` KALDIRILDI (adım 17c · ADR-017 ilke 2).
+         *
+         * "Kurum personeli olarak tanındınız" cümlesi, kimlik doğrulamasının
+         * yetki de verdiği döneme aitti. Artık vermiyor: personel yetkisi ayrı
+         * bir akıştan, işverenin kanalından geliyor. Cümle bırakılsaydı
+         * kullanıcıya olmayan bir yetki bildirilmiş olurdu.
+         */
         citizenNotice:
           "Hastane ve spor salonu hizmetleri yalnızca kurum personeline açıktır; " +
           "diğer tüm hizmetleri kullanabilirsiniz.",
+        /**
+         * Kimliği doğrulanan kullanıcıya bir SONRAKİ adımı gösteren cümle.
+         *
+         * NEDEN BURADA: kullanıcı hastanedeki "kimlik doğrulaması gerekiyor"
+         * uyarısından gelmiş olabilir ve doğrulamayı bitirdiğinde hâlâ
+         * giremediğini görecek. Nedenini ve ne yapması gerektiğini burada
+         * söylemezsek, ekran onu çözümsüz bir duvara bırakır.
+         */
+        staffHint:
+          "Kurum personeliyseniz, personel yetkisi için kurumsal e-posta adresinizi de " +
+          "doğrulamanız gerekiyor.",
+        staffCta: "Kurum personeli doğrulaması",
         cta: "Devam et",
       },
 
@@ -2242,6 +2258,110 @@ export const messages = {
    * kısmen karşılanan silme talebinin GEREKÇESİYLE bildirilmesini istiyor;
    * bu liste o bildirimin kendisi.
    */
+  /**
+   * Personel yetkisi doğrulaması (adım 17c · ADR-017 ilke 2).
+   *
+   * ⛔ METİNLER "KİMLİĞİNİ DOĞRULA" DEMİYOR, "PERSONEL OLDUĞUNU KANITLA"
+   * DİYOR. Bu ayrım bu adımın tamamı: kullanıcı kimliğini zaten doğrulamış
+   * durumda ve buradaki soru bambaşka. Metinler karışırsa kullanıcı iki
+   * ekranın neden ayrı olduğunu anlayamaz.
+   */
+  staffVerification: {
+    errors: {
+      codeInvalid: "Kod doğrulanamadı. Kodu kontrol edin veya yenisini isteyin.",
+      tooManyAttempts: "Çok fazla deneme yaptınız. Yeni bir kod isteyin.",
+      alreadyVerified: "Hesabınız zaten kurum personeli olarak tanımlı.",
+      identityRequired: "Personel doğrulaması için önce kimliğinizi doğrulamanız gerekiyor.",
+      rateLimited: "Çok fazla kod istediniz. Bir süre sonra tekrar deneyin.",
+      invalidRequest: "Geçerli bir kurumsal e-posta adresi girin.",
+    },
+
+    /** `/hesabim` üzerindeki kart — kullanıcı buradan giriyor. */
+    entry: {
+      title: "Kurum personeli doğrulaması",
+      description:
+        "Kurum personeliyseniz kurumsal e-posta adresinizle doğrulayın; hastane " +
+        "randevusu ve spor salonu üyeliği açılır.",
+      cta: "Personel doğrulamasına git",
+      verifiedTitle: "Kurum personeli",
+      verifiedDescription: "Hastane randevusu ve spor salonu üyeliği hesabınıza açık.",
+    },
+
+    page: {
+      pageTitle: "Kurum personeli doğrulaması",
+      title: "Kurum personeli doğrulaması",
+      description:
+        "Kurum personeli olduğunuzu, kurumsal e-posta adresinize gönderilen bir kodla " +
+        "doğrulayın.",
+      /**
+       * ⛔ BU CÜMLE ÇIKARILMAZ — ADR-017'nin ilke 2'sinin kullanıcıya
+       * anlatılmış hâli. Kullanıcı "kimliğimi doğrulamıştım, neden bir adım
+       * daha?" diye sorduğunda cevabı burada bulmalı.
+       */
+      whyNotice:
+        "Kimliğinizi doğrulamış olmanız kurum personeli olduğunuzu göstermez: kim " +
+        "olduğunuz ile neye yetkili olduğunuz ayrı sorulardır. Personel yetkisi bu " +
+        "yüzden kurumun kendi kayıtlarındaki adresten doğrulanır.",
+      /**
+       * ⛔ BU CÜMLE DE ÇIKARILMAZ. Canlıda kod teslim edilemiyor (tohum
+       * adresleri `@ornek.test`, Resend'de doğrulanmış alan adı yok —
+       * teknik borç #25). Kullanıcıyı gelmeyecek bir kodu beklemeye
+       * bırakmak, sınırı yazmaktan çok daha kötü.
+       */
+      demoNotice:
+        "Bu bir gösterim uygulamasıdır: kurum rehberindeki adresler örnek adreslerdir " +
+        "(@ornek.test) ve canlı ortamda bu adreslere posta teslim edilemez. Akış " +
+        "yalnızca geliştirme ortamında uçtan uca tamamlanabilir.",
+      backToAccount: "Hesabıma dön",
+    },
+
+    /** 1. adım — kurumsal adres. */
+    request: {
+      heading: "Kurumsal e-posta adresiniz",
+      description:
+        "Kurum rehberinde kayıtlı adresinizi yazın. Kod o adrese gönderilir; kendi " +
+        "kişisel adresinize değil.",
+      emailLabel: "Kurumsal e-posta",
+      emailHint: "Örnek: ad.soyad@ornek.test",
+      action: "Kod gönder",
+      pending: "Gönderiliyor…",
+      /**
+       * ⛔ KOŞULLU CÜMLE ("kayıtlıysa") BİLİNÇLİ: adres rehberde olsa da
+       * olmasa da aynı yanıt dönüyor (hesap sayımı koruması). Kesin bir
+       * "gönderildi" cümlesi, gönderilmediği durumda kullanıcıya yalan
+       * söylemiş olurdu.
+       */
+      sent:
+        "Bu adres kurum rehberinde kayıtlıysa ve henüz bir hesaba bağlı değilse, oraya " +
+        "bir doğrulama kodu gönderildi.",
+    },
+
+    /** 2. adım — kod. */
+    confirm: {
+      heading: "Doğrulama kodu",
+      description: "Kurumsal e-posta kutunuza gelen 6 haneli kodu yazın.",
+      codeLabel: "Doğrulama kodu",
+      action: "Doğrula",
+      pending: "Doğrulanıyor…",
+      changeEmail: "Başka bir adres kullan",
+      /**
+       * ⚠️ Bu kutu yalnızca local ve preview'da dolabilir: kodu ekrana
+       * taşıyan tek kapı `otp.service.ts` → `revealCodeIfAllowed()` ve o
+       * production'da her zaman `undefined` döndürüyor. Sahte kanal
+       * production'da zaten seçilemiyor (`src/config/env.ts`).
+       */
+      simulationNotice:
+        "Test ortamı — personel doğrulama kodu: {code}. Bu kutu yalnızca local ve " +
+        "preview ortamlarında görünür, canlı sitede asla gösterilmez.",
+    },
+
+    success: {
+      title: "Personel yetkiniz tanımlandı",
+      description: "Hastane randevusu ve spor salonu üyeliği hesabınıza açıldı.",
+      cta: "Hesabıma dön",
+    },
+  },
+
   account: {
     errors: {
       passwordMismatch: "Şifreniz doğrulanamadı. Tekrar deneyin.",

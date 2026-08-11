@@ -16,6 +16,16 @@ export type OtpChallengeRow = {
   attemptCount: number;
   consumedAt: Date | null;
   /**
+   * Kodun GİTTİĞİ hedefin tuzlanmış özeti — düz adres/numara saklanmıyor.
+   *
+   * NEDEN OKUNUYOR (adım 17c): personel doğrulamasında kullanıcı ikinci
+   * ekranda kurumsal adresi TEKRAR gönderiyor ve akış onun ilk adımdaki
+   * adresle aynı olduğunu kanıtlamak zorunda. Kanıtlanmasaydı, kendi
+   * adresine kod alan biri o kodu BAŞKA bir personelin adresiyle
+   * gönderip o kişinin yetkisini alabilirdi.
+   */
+  destinationHash: string;
+  /**
    * Kodun ait olduğu hesap. Kayıt akışında `null` (hesap henüz yok), şifre
    * sıfırlamada dolu — akışın hangi hesabı sıfırladığı YALNIZCA burada yazar,
    * tarayıcıda değil.
@@ -101,6 +111,7 @@ export async function findPendingChallenge(
       expiresAt: true,
       attemptCount: true,
       consumedAt: true,
+      destinationHash: true,
       userId: true,
     },
   });
@@ -131,6 +142,7 @@ export async function findLatestChallenge(
       expiresAt: true,
       attemptCount: true,
       consumedAt: true,
+      destinationHash: true,
       userId: true,
     },
   });

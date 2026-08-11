@@ -90,6 +90,14 @@ enum OtpPurpose {
   register_email
   register_phone
   password_reset
+  /// Kurumsal e-posta doğrulaması — personel yetkisi (adım 17c · ADR-017 ilke 2).
+  ///
+  /// NEDEN AYRI BİR AMAÇ: kod kullanıcının KENDİ adresine değil, personel
+  /// rehberindeki `staff_members.work_email` adresine gidiyor. Diğer üç amaçta
+  /// hedef kullanıcının kendi kanalı; burada hedef İŞVERENİN kanalı ve kanıtın
+  /// anlamı bu yüzden farklı. Tek bir amaç değeriyle kaydedilselerdi denetim
+  /// kaydı ve hız sınırı iki farklı güven düzeyini aynı kefeye koyardı.
+  staff_verification
 }
 
 enum OtpChannel {

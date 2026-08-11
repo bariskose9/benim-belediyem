@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -26,7 +27,12 @@ import { apiRequest } from "@/features/auth/components/api-client";
 
 const copy = messages.auth.identityVerification;
 
-type SuccessState = { fullName: string; isStaff: boolean };
+/**
+ * ⛔ `isStaff` BU TİPTEN KALDIRILDI (adım 17c · ADR-017 ilke 2): kimlik
+ * doğrulaması artık personel yetkisi vermiyor, dolayısıyla uç de öyle bir
+ * alan döndürmüyor.
+ */
+type SuccessState = { fullName: string };
 
 export function IdentityVerificationForm({
   turnstileSiteKey,
@@ -94,13 +100,23 @@ export function IdentityVerificationForm({
           <AlertTitle>{copy.success.title}</AlertTitle>
           <AlertDescription className="flex flex-col gap-2">
             <span>{copy.success.description(success.fullName)}</span>
-            <span>{success.isStaff ? copy.success.staffNotice : copy.success.citizenNotice}</span>
+            <span>{copy.success.citizenNotice}</span>
+            {/* Personel yetkisi ayrı bir akış (ADR-017 ilke 2). Kullanıcı
+                hastanedeki uyarıdan gelmişse hâlâ giremeyeceğini görecek —
+                nedenini ve devamını burada söylemezsek duvara çarpar. */}
+            <span>{copy.success.staffHint}</span>
           </AlertDescription>
         </Alert>
 
-        <Button type="button" onClick={handleContinue} className="w-full sm:w-auto">
-          {copy.success.cta}
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button type="button" onClick={handleContinue} className="min-h-11 w-full sm:w-auto">
+            {copy.success.cta}
+          </Button>
+
+          <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
+            <Link href="/personel-dogrulama">{copy.success.staffCta}</Link>
+          </Button>
+        </div>
       </div>
     );
   }

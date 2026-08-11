@@ -73,7 +73,6 @@ async function runRegistration() {
     passwordHash: await hashPassword(PASSWORD),
     registeredProvince: STORED.registeredProvince,
     registeredDistrict: STORED.registeredDistrict,
-    staffMemberId: null,
     verifiedAt: new Date(),
   });
 

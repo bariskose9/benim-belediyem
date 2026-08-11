@@ -54,7 +54,9 @@ export async function POST(request: Request) {
       sessionId: session.sessionId,
     });
 
-    return created({ isStaff: result.isStaff, fullName: result.fullName });
+    // ⛔ `isStaff` YANITTAN KALDIRILDI (adım 17c · ADR-017 ilke 2): kimlik
+    // doğrulaması artık personel yetkisi vermiyor, söyleyecek bir şeyi yok.
+    return created({ fullName: result.fullName });
   } catch (error) {
     return fail(error);
   }

@@ -52,7 +52,9 @@ export async function POST(request: Request) {
     // Hesap açıldı; taslak çerezi artık işe yaramaz ve tarayıcıda kalmamalı.
     store.delete(REGISTRATION_COOKIE_NAME);
 
-    return created({ completed: true, isStaff: result.isStaff });
+    // ⛔ `isStaff` YANITTAN KALDIRILDI (adım 17c): yeni açılan hiçbir hesap
+    // personel olarak doğmuyor.
+    return created({ completed: true });
   } catch (error) {
     // Kalan deneme hakkı istemciye ayrıntı olarak veriliyor: kod hakkında ipucu
     // vermez ama kullanıcı kaç hakkı kaldığını görmeli (07-ui-design-system.md).

@@ -183,7 +183,8 @@ describe("verifyIdentity — mutlu yol", () => {
   it("hesabı doğrular, kimliği bağlar ve adı KPS'ten gelenle değiştirir", async () => {
     const result = await verify(GOOGLE_USER, FREE_NATIONAL_ID);
 
-    expect(result).toEqual({ isStaff: false, fullName: "Zeynepdeneme Ozkantest" });
+    // ⛔ Yanıtta `isStaff` YOK (adım 17c): kimlik doğrulaması yetki vermiyor.
+    expect(result).toEqual({ fullName: "Zeynepdeneme Ozkantest" });
 
     const user = await readUser(GOOGLE_USER);
 
@@ -237,33 +238,48 @@ describe("verifyIdentity — mutlu yol", () => {
   });
 });
 
-describe("verifyIdentity — personel eşleştirme", () => {
+describe("verifyIdentity — KİMLİK DOĞRULAMASI YETKİ VERMEZ (adım 17c · ADR-017 ilke 2)", () => {
   /**
-   * ⭐ `isStaff` İSTEMCİDEN GELMEZ: girdi tipinde yeri yok, değer yalnızca
-   * `staff_members` tablosundaki eşleşmeden hesaplanıyor (PRD §5.0).
+   * ⭐ BU ADIMIN KABUL KRİTERİ TESTİ — GEVŞETİLMEZ.
+   *
+   * Adım 17c'den ÖNCE bu test tam tersini bekliyordu: kimlik numarası personel
+   * rehberinde eşleşirse hesap personel oluyordu. T.C. kimlik numarası
+   * Türkiye'de gizli bilgi olmadığı için bu, kurbanın numarasını bilen herkese
+   * onun hastane ve spor salonu yetkisini veriyordu (teknik borç #76).
+   *
+   * ⛔ Bu test kırmızıya dönerse "beklenti güncellenmemiş" DEĞİL, KAPI GERİ
+   * AÇILMIŞ demektir. Beklentiyi değiştirmeden önce ADR-017 okunmalı.
    */
-  it("personel rehberinde eşleşme varsa hesabı personel yapar", async () => {
-    const result = await verify(STAFF_USER, STAFF_NATIONAL_ID);
-
-    expect(result.isStaff).toBe(true);
+  it("kimlik numarası personel rehberinde EŞLEŞSE BİLE hesabı personel YAPMAZ", async () => {
+    await verify(STAFF_USER, STAFF_NATIONAL_ID);
 
     const user = await readUser(STAFF_USER);
 
-    expect(user.isStaff).toBe(true);
-    expect(user.staffMemberId).toBe(STAFF_FREE);
-  });
-
-  /** Personel kaydı BAŞKA bir hesaba bağlıysa kullanıcı vatandaş olarak doğrulanır. */
-  it("personel kaydı başka hesaba bağlıysa vatandaş olarak doğrular", async () => {
-    const result = await verify(STAFF_USER, STAFF_TAKEN_NATIONAL_ID);
-
-    expect(result.isStaff).toBe(false);
-
-    const user = await readUser(STAFF_USER);
-
+    // Kimlik bağlandı: doğrulamanın kendi işi yapılmış olmalı.
     expect(user.identityStatus).toBe("kps_verified");
+
+    // Ama yetki VERİLMEDİ — asıl kural bu.
     expect(user.isStaff).toBe(false);
     expect(user.staffMemberId).toBeNull();
+  });
+
+  /** Personel kaydı BOŞTA olsa bile kimlik doğrulaması ona dokunmuyor. */
+  it("boştaki personel kaydını hesaba BAĞLAMAZ", async () => {
+    await verify(STAFF_USER, STAFF_NATIONAL_ID);
+
+    const staffMember = await prisma.staffMember.findUnique({
+      where: { id: STAFF_FREE },
+      select: { user: { select: { id: true } } },
+    });
+
+    expect(staffMember?.user).toBeNull();
+  });
+
+  /** Yetki verilmediğine göre denetim kaydında da yetki değişikliği olmamalı. */
+  it("yetki değişikliği denetim kaydı YAZMAZ", async () => {
+    await verify(STAFF_USER, STAFF_NATIONAL_ID);
+
+    expect(await auditActions(STAFF_USER)).not.toContain("role_change");
   });
 });
 
@@ -415,7 +431,6 @@ describe("verifyIdentity — yarış koruması", () => {
       birthDate: new Date("1990-01-01T00:00:00.000Z"),
       registeredProvince: "Ezilmemeli",
       registeredDistrict: "Ezilmemeli",
-      staffMemberId: STAFF_FREE,
       verifiedAt: new Date(),
     });
 

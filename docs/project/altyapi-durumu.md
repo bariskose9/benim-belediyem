@@ -9,7 +9,86 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-10 · roadmap adım 17b sonrası
+**Son güncelleme:** 2026-08-11 · roadmap adım 17c sonrası
+
+> ## Adım 17c — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ, PANEL İŞİ DE YOK
+>
+> Personel doğrulaması tamamen kendi verimizle çalışıyor: yeni hesap, yeni
+> servis, **yeni ortam değişkeni YOK** ve yeni bağımlılık YOK
+> (`npm audit`: 0 açık).
+>
+> **Yeni bir migration VAR**
+> (`20260811010000_add_staff_verification_otp_purpose`) ama elle çalıştırılacak
+> bir şey değil: Vercel derleme komutu `prisma migrate deploy` ile başlıyor.
+> Migration **yalnızca bir enum DEĞERİ ekliyor** (`OtpPurpose.staff_verification`)
+> — tablo, kolon ve satır değişmiyor. ⚠️ Tek yönlü (PostgreSQL'de `DROP VALUE`
+> yok).
+>
+> ⛔ **MEVCUT PERSONEL HESAPLARINA DOKUNULMADI ve bu bilinçli.** Toplu bir
+> `is_staff = false` güncellemesi canlıdaki personel hesaplarını hastane ve
+> spor salonu ekranlarından atardı; geri dönüşü ise kurumsal e-posta
+> gerektirirdi ve o bugün canlıda teslim edilemiyor (aşağıya bak). Tohumun
+> bağladığı yetki zaten İŞVERENİN verisinden geliyor, kullanıcının kendi
+> iddiasından değil.
+>
+> ⛔ **TURNSTILE SATIRI GEREKMEDİ.** Yeni ekran (`/personel-dogrulama`) giriş
+> gerektiriyor ama **bot kutusu TAŞIMIYOR** — Turnstile yalnızca kayıt, giriş
+> ve kimlik doğrulama ekranlarında var. **Liste bu adımda da BÜYÜMEDİ, hâlâ
+> 10 sınırında.** Sonraki oturum "eksik kalmış" sanmasın — bu bir karar.
+>
+> ⚠️ **PREVIEW'DA HİÇ DENENMEDİ** — proje sahibinin alışkanlığı gereği
+> doğrudan production'a çıkılıyor. Local'de tarayıcıda uçtan uca doğrulandı
+> (kart → adres → kod → yanlış kod → doğru kod → hastane açıldı) ve Playwright
+> `desktop-chrome` + `mobile-375` projelerinde 6 test geçti; tam E2E setinde
+> 285 test yeşil.
+>
+> ✅ **TOHUM BU ADIMDA DEĞİŞMEDİ.**
+>
+> ## ⚠️ ADIM 17c'NİN CANLIDAKİ SINIRI — ÖNEMLİ
+>
+> **Personel doğrulaması production'da TAMAMLANAMAZ** (teknik borç #92):
+> tohum personel adresleri `@ornek.test` uzantılı (`.test` IANA'nın rezerve
+> ettiği alan adı, oraya posta teslim EDİLEMEZ) ve Resend'de doğrulanmış alan
+> adımız yok (borç #25). Yani canlıda **kimse YENİ personel yetkisi alamaz.**
+>
+> Bu bir gerileme değil, **güvenli tarafa kapanma**: önceki hâlde yetki yanlış
+> bir kanıtla (kimlik numarası) dağıtılıyordu. Mevcut personel hesapları
+> etkilenmiyor. Sınır kullanıcıdan gizlenmiyor — ekran bunu açıkça yazıyor.
+>
+> ⛔ **DURAN TEK PANEL İŞİ HÂLÂ ADIM 17'DEN:** `LEGAL_CONTROLLER_NAME` ve
+> `LEGAL_CONTACT_EMAIL` production'da **girilmedi**.
+>
+> ## ⏰ ADIM 16 CRON'U CANLIDA HÂLÂ HİÇ ÇALIŞMADI — ÖLÇÜLDÜ
+>
+> **2026-08-11 UTC 01:06'da production veritabanından doğrulandı** (pencere
+> 00:00–00:59 UTC kapandıktan SONRA, yani yanıltıcı negatif değil):
+>
+> | Ölçüm | Sonuç |
+> |---|---|
+> | `audit_logs` → `scheduled_task_run` (son 3 gün) | **0 kayıt** |
+> | En ileri `doctor_slots.starts_at` | **2026-08-13** (cron çalışsaydı ~2026-08-25 olmalıydı) |
+>
+> **Muhtemel sebep ve sorumluluk:** PR #48 (belge PR'ı) **UTC 00:31'de**, yani
+> cron penceresinin tam ortasında merge edildi ve production'a yeni bir dağıtım
+> tetikledi (canlı commit `6e05fd5`). Zamanlanmış koşunun dağıtım sırasında
+> düşmüş olması kuvvetle muhtemel. İkinci ihtimal: ücretsiz planda saat garanti
+> değil ve **kaçırılan koşu yeniden denenmiyor, log bile üretmiyor.**
+>
+> ⛔ **DERS — SONRAKİ OTURUMLARA:** UTC 00:00–00:59 arasında production'a
+> dağıtım tetikleyen bir merge YAPMA. O pencere cron'un penceresi.
+>
+> **Sonraki oturum ne yapmalı:** 2026-08-12 UTC 01:00'den sonra aynı sorguyu
+> tekrarlasın. Yine 0 çıkarsa sebep dağıtım değil demektir ve `CRON_SECRET`
+> ile Vercel → Settings → Cron Jobs → View Logs incelenmelidir.
+>
+> **Production veritabanına okuma erişimi nasıl alınır** (bu oturumda kuruldu,
+> ezberden değil ölçülerek):
+> `npx neonctl connection-string production --project-id lively-night-99128871
+> --org-id org-still-water-86075112 --pooled false`
+> → çıkan adresi `PROD_DATABASE_URL` olarak verip proje kökünde `.mts` betik
+> koştur. ⛔ Betik **commit edilmeden silinir** ve **yalnızca okur.**
+>
+> **Son güncelleme (önceki):** 2026-08-10 · roadmap adım 17b sonrası
 
 > ## Adım 17b — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ, PANEL İŞİ DE YOK
 >
