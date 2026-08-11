@@ -39,6 +39,28 @@ uygulanır**. Yüklenmeden yazılan etiket yanlış beyandır.
 Varsayım yapma. Sor. Yanlış varsayımla yazılmış 200 satır,
 sorulmuş 1 sorudan pahalıdır.
 
+## Devralınan kaydın ÖNERDİĞİ ÇÖZÜM de bir iddiadır
+
+`06-testing.md` bir kaydın **sebebinin** doğrulanmadan devralınamayacağını
+söylüyor. Bir adım ötesi de geçerli: teknik borcun, devir notunun veya ADR'nin
+**"şöyle çözülür"** satırı da doğrulanmamış bir iddiadır — ve genellikle o iş
+hiç yapılmadan, sebep henüz ölçülmemişken yazılmıştır.
+
+Ölçülmüş üç sapma biçimi:
+
+| Sapma | Ne olur |
+|---|---|
+| **Çözüm etkisiz** | Kayıt "A yerine B'yi oku" der; belge ikisinin **aynı** değer olduğunu söyler. İş yapılmış görünür, hiçbir şey değişmez |
+| **İş zaten yapılmış** | Kayıt iki maddeden söz eder, biri önceki bir adımda çoktan yapılmıştır. Yapılmışı "yaptım" diye raporlamak, denetimi yalancı çıkarır |
+| **Risk gerçek değil** | Kaydın anlattığı saldırı, platform veya kütüphane tarafından zaten engelleniyordur |
+
+**Kural:** Bir borcu ödemeye başlarken **üçünü ayrı ayrı ölç** — (1) sorun bugün
+hâlâ var mı, (2) sebep doğru mu, (3) önerilen çözüm o sebebi gerçekten
+çözüyor mu. Üçü de doğrulanmadan koda dokunma.
+
+Bir kaydı kapatırken, **yanlış çıkan kısmını da yaz.** "Ödendi" demek yetmez;
+sonraki oturum aynı yanlış cümleyi yeniden devralır.
+
 ## Dış dünya bilgisi: ezberden DEĞİL, güncelinden
 
 Ajanın eğitim verisi eskidir. Üçüncü parti paneller, API'ler, kütüphane sürümleri

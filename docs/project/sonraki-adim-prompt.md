@@ -1,26 +1,24 @@
-# Sonraki oturum için hazır prompt — adım 18d
+# Sonraki oturum için hazır prompt — adım 19 öncesi
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 18d bitince **yeniden yazılır** (üstüne eklenmez).
+> Sonraki adım bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **18d**'ye geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **18d bitti**. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku
-- `docs/project/roadmap.md` — adım 18d satırı ve teknik borç listesi (#108-#110 YENİ)
-- `docs/standards/09-ci-cd-deploy.md` — ⭐ **"cırcır (ratchet)" bölümü YENİ**
-- `docs/standards/06-testing.md` — ⭐ **"yeşil test yanlış şeyi ölçüyor olabilir" YENİ**
+- `docs/project/guvenlik-denetimi-2026-08.md` — ⭐ **YENİ, adım 18d'nin ana
+  çıktısı.** OWASP Top 10 denetimi + sahibin karar vermesi gereken iki konu
+- `docs/project/roadmap.md` — teknik borç listesi (#112, #113 YENİ)
+- `docs/standards/05-auth-security.md` + `09-ci-cd-deploy.md`
 
 ## ⛔ İLK İŞ: DURUM BÖLÜMÜNE İNANMA, ÖLÇ
 
-`15-oturum-devri.md`'ye bu adımda yazılan yeni kural: bu dosyanın DURUM
-bölümü **daima merge'den önceki dünyayı** anlatır, çünkü commit kapısında
-beklerken yazılıyor. Geçen oturum tam da bunu yaşadı — dosya "18b merge
-edilmedi, `main` `ab3c627`" diyordu, oysa `main` `cbf1a99`'daydı ve hem 18b
-hem kit çoktan gitmişti.
+`15-oturum-devri.md` kuralı: bu dosyanın DURUM bölümü **merge'den önceki
+dünyayı** anlatıyor olabilir, çünkü commit kapısında beklerken yazılıyor.
 
 **İlk üç komut:**
 
@@ -34,119 +32,118 @@ Depoda görülen, dosyada yazandan üstündür. Çelişki bulursan **söyle.**
 
 ## DURUM
 
-Roadmap adım **0 → 18c bitti**.
+Roadmap adım **0 → 18d bitti**. Roadmap'te yazılı olarak **tek adım kaldı: 19
+(Expo mobil uygulama)**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- ✅ **Adım 18c MERGE EDİLDİ ve CANLIDA** (PR #62 → `main` = `e7709bd`).
-  Dağıtım `/api/health` ile doğrulandı: `commit: e7709bd`, `db: ok`.
-  Duman testi temiz (`/` · `/market` · `/etkinlikler` · `/giris` ·
-  `/gizlilik` hepsi 200; `/api/docs` 404 ve bu **beklenen** — ADR-019
-  production'da belgeyi varsayılan kapalı tutuyor)
-- ⭐ **Bu satır merge'den SONRA yazıldı** — `15-oturum-devri.md`'nin bu adımda
-  eklenen kuralı gereği. Yine de körü körüne güvenme: `git log --oneline -3`
-  ve `curl -s https://benim-belediyem.vercel.app/api/health` ile teyit et
-- CI'da kalite kapısı **gerçek koşucuda 19/19 geçti** (1,4 dk). Korkulan
-  senaryo (yavaş koşucuda LCP'nin kararsız kırmızı vermesi) gerçekleşmedi
-- Uygulama kodu (`src/`) adım 18c'de **hiç değişmedi** — iş tamamen test,
-  CI ve belge tarafında
-- Hata takibi (Sentry) canlıda ve uçtan uca doğrulandı (2026-08-11)
+- ⚠️ **Adım 18d bu satır yazılırken commit kapısında bekliyordu.** Merge edilip
+  edilmediğini `git log --oneline -3` ile ve `/api/health` içindeki `commit`
+  alanıyla **teyit et**
 - Gerçek kullanıcı 0
+- Hata takibi (Sentry) canlıda ve uçtan uca doğrulanmış
 
-## 📌 ADIM 18c'DE NE YAPILDI
+## 📌 ADIM 18d'DE NE YAPILDI
 
-`09-ci-cd-deploy.md`'nin üç kapısı (`bundle-size` · `lighthouse` · `axe`)
-yazılı bir dilekten CI'da fiilen ölçülen kapıya döndü. Yeni klasör
-`tests/quality/`, ayrı Playwright projesi `quality`, tek eşik dosyası
-`tests/quality/budget.ts`.
+Güvenlik denetimi raporu yazıldı (`docs/project/guvenlik-denetimi-2026-08.md`)
+ve üç borç ödendi. **Bilinen kritik/yüksek açık: 0.**
 
-- ⭐ **YALNIZCA BİR PAKET EKLENDİ:** `@axe-core/playwright` (geliştirme
-  bağımlılığı, kullanıcıya giden pakete girmiyor, `npm audit` 0 açık).
-  **Lighthouse paketi GEREKMEDİ** — ölçüldü, Playwright + Chrome protokolü
-  (4 kat CPU kısıtı + Yavaş 4G) yetti
-- CI'da **ayrı bir adım**: `npm run test:quality`. `npm run test:e2e` artık
-  yalnızca davranış projelerini koşuyor
-- Kapılar **mutasyonla kanıtlandı**: bütçe 100 KB'a indirildi → altı sayfa
-  kırmızı; `/iletisim`'e `alt`sız görsel eklendi → yalnızca o sayfa
-  `critical: image-alt` ile düştü
+- **#10 ÖDENDİ — nonce tabanlı sıkı CSP.** `script-src`'den `'unsafe-inline'`
+  kalktı. Politika artık `src/proxy.ts`'te
+- **#78 ÖDENDİ** — ve endişesi yanlış çıktı (aşağıda)
+- **#99 ÖDENDİ** — 11/11 action tam SHA'ya sabitlendi
+- **#110 ÖDENDİ** — CHANGELOG'daki 17c/18a/18b boşluğu commit gövdelerinden
+  dolduruldu
+- Güvenlik başlıkları için **19 testlik kapı** (`tests/e2e/guvenlik-basliklari.spec.ts`)
+  ve action sabitlemesi için `tests/unit/workflows.test.ts`
+- Üç kapı da **mutasyonla** kırmızıya döndürülerek kanıtlandı
 
-### ⭐ 18c'NİN ÜÇ DERSİ
+### ⭐ 18d'NİN DÖRT DERSİ
 
-1. **DEVRALINAN BİR BORCUN SEBEBİ DE BİR İDDİADIR.** Borç #84 "çerez bandı
-   tüm sayfaları dinamik yaptı" diyordu. Mutasyonla ölçüldü: bant tek başına
-   hiçbir şeyi statikleştirmiyor, `SiteHeader` de öyle — başlık oturum
-   çerezini **adım 4a'dan beri** okuyor. Yanlış sebep, doğru ölçülmüş bir
-   soruna yanlış çözüm yazdırır.
-2. **`200` DÖNMESİ "DOĞRU SAYFA AÇILDI" DEMEK DEĞİL.** İlk bütçe listesinde
-   `/spor-salonu` vardı; personele özel, `guardPage()` yönlendirmesi
-   **hidrasyondan sonra** uygulanıyor. Ölçüm sessizce giriş sayfasını ölçtü ve
-   `/spor-salonu` "en hızlı sayfa" göründü (240 ms). Çözüm `expectRoute`.
-3. ⛔ **AYAKTA KALMIŞ `npm run start` ESKİ YAPIYI SERVİS EDİYOR — VE BU BİR
-   MUTASYON DENEYİNİ YANLIŞLIKLA YEŞİL GEÇİRDİ.** `alt`sız görsel eklendi,
-   `npm run build` koşturuldu, test yeşil kaldı. Sebep: Playwright
-   `reuseExistingServer` ile eski sunucuyu kullandı. **Ölçüm yapmadan önce
-   `lsof -ti:3000 | xargs kill -9`.**
+1. ⛔ **BİR BORÇ KAYDININ ÖNERDİĞİ ÇÖZÜM DE BİR İDDİADIR.** 18c "borcun SEBEBİ
+   bir iddiadır" demişti; bu adım bir üstünü öğretti. Borç #78 hem yanlış bir
+   risk hem **yanlış bir çözüm** yazıyordu (`x-real-ip`'i önce oku — oysa Vercel
+   belgesi "identical" diyor, yani hiçbir şey değişmezdi). Borç #99 ise işin
+   yarısını "yapılacak" diye yazıyordu, oysa `permissions:` blokları zaten vardı.
+2. ⛔ **"KONSOL TEMİZ" ≠ "ÇALIŞIYOR".** `style-src` nonce'a çevrildiğinde 45
+   görsel ve 14 859 karakterlik bir stil sayfası bloklandı — **tarayıcı konsoluna
+   tek satır bile düşmeden.** Kırıklık ancak `getComputedStyle` ile ÖLÇÜLEREK
+   görüldü. Görsel bir şeyi doğrularken konsola bakmak yetmez, hesaplanan
+   değeri ölç.
+3. ⭐ **KORKULAN MALİYETİ ÖDEMEDEN ÖNCE ÖLÇ.** Next belgesi nonce CSP için "tüm
+   sayfalar dinamik olur, statik render ve CDN önbelleği kaybolur" diye
+   uyarıyor. Ölçüldü: statik rota **3→3**, dinamik **77→77**. Bu projede
+   kaybedilecek statik render zaten yoktu, yani bedel **sıfırdı**.
+4. ⭐ **BİR KIRILMAYI SUÇLAMADAN ÖNCE KONTROLLÜ DENEY YAP.** Turnstile iframe'i
+   çizilmeyince bunu CSP'ye yormak çok kolaydı. Proxy tamamen kaldırıldı,
+   yeniden derlendi, ölçüm tekrarlandı — **iframe CSP olmadan da çizilmiyordu.**
 
-## ⚠️ İKİ BÜTÇE HEDEFİ TUTMUYOR — cırcırla kapatıldı (#108, #109)
+## ⚠️ İKİ KONU PROJE SAHİBİNİN KARARINI BEKLİYOR
 
-Kapılar hedefe değil **bugün ölçülen değere** kuruldu. Gerekçe ve ilke
-`09-ci-cd-deploy.md` → "Bütçe zaten aşılmışken kapı nasıl kurulur".
+Rapor §5'te ayrıntılı. **Teknik iş değil, karar işi** — sen karar verme, sor:
 
-| # | Ne | Sayı |
-|---|---|---|
-| 108 | ⛔ **İlk yük JS bütçesi aşılıyor** — ağırlığın ~150 KB'ı Sentry SDK'sı | 281,7 KB / hedef 200 KB |
-| 109 | **LCP kapısı gerçek ağı ölçmüyor** — CI localhost'a bakıyor | local 588 ms / canlı **2844 ms** / hedef 2500 |
-| 110 | Değişiklik günlüğünde 17c, 18a, 18b girdisi yok | — |
+- **#23 sızmış şifre kontrolü:** (a) HIBP ekle, (b) yerel listeyi büyüt (dış
+  servis yok), (c) bugünkü hâliyle bırak
+- **#89 Google hesabında ikinci kanıt:** (a) "yeniden kimlik doğrula" OAuth modu
+  (~1 oturumluk iş), (b) bugünkü hâliyle bırak
 
-⛔ **#108 muhtemelen borç #96 ile aynı iş:** Sentry'nin ağaç budama seçenekleri
-SDK'da `webpack.` altında, bu proje Turbopack ile derleniyor. **Emin değilim —
-doğrulanmadı.** Önce ÖLÇ: budama açılabiliyor mu, açılınca kaç KB düşüyor.
+## ⛔ ADIM 19'DAN ÖNCE ÖDENMESİ ZORUNLU İKİ BORÇ
 
-⛔ **#103 ve #107 adım 19 (mobil uygulama) başlamadan ÖNCE ödenmeli.**
+Bunlar mobil uygulama başlamadan **önce** ödenmeli, çünkü o günden itibaren
+kullanıcının telefonundaki eski sürüm güncellenemez:
 
-## ✅ LİSANS SORUSU KAPANDI (18c) — ve soru YANLIŞ BİLGİYLE sorulmuştu
+- **#103** — API sürümlenmemiş, kırıcı değişiklik politikası uygulanmıyor. ADR gerektirir
+- **#107** — yanıt gövdelerinin şeması belgelenmedi. ~40 route'a dokunmayı gerektirir
 
-⛔ **`LICENSE` DOSYASI ZATEN VARDI.** Bir önceki devir notu "depoda `LICENSE`
-dosyası yok" diyordu; ajan bunu **doğrulamadan devraldı** ve proje sahibine
-yanlış bilgiyle soru sordu. Hata ancak `git status` dosyayı "yeni" değil
-"değişti" gösterince yakalandı.
+## ⚠️ YENİ BORÇLAR — #112, #113
 
-Bu, 18c'nin 1. dersinin ta kendisidir ve ajan onu yazdıktan SONRA yine
-düştü: **devraldığın her iddia doğrulanana kadar hipotezdir.** Bir dosyanın
-varlığı `ls` ile bir saniyede ölçülür — ölçmeden soru sorma.
+- ⛔ **SIKI CSP BİR ŞEYİ FİİLEN KIRDI VE LOCAL'DE HİÇ GÖRÜNMEDİ:** `frame-src`
+  Vercel'in önizleme araç çubuğunu (`vercel.live`) blokladı. 803 unit + 344 db
+  + 341 e2e + 19 bütçe testinin hiçbiri yakalayamazdı; yalnızca **preview
+  dağıtımının tarayıcı konsolunda** vardı. Düzeltildi (üretim DIŞINDA izinli,
+  üretimde değil — orada hiç yüklenmiyor, ölçüldü) ve testle kilitlendi.
+  ⭐ **Ders: bir CSP değişikliği ancak GERÇEK dağıtım ortamında doğrulanabilir.**
+- **#112** — `style-src` hâlâ `'unsafe-inline'`. **Sebebi ölçüldü:**
+  `next/image` `fill` modu inline `style` ÖZNİTELİĞİ yazıyor (nonce özniteliğe
+  takılamaz — mimari sınır) ve `sonner` nonce'suz `<style>` enjekte ediyor
+  (`ToasterProps`'ta `nonce` alanı yok). ⛔ `'nonce-…'` + `'unsafe-inline'`
+  birlikte yazmak ÇÖZÜM DEĞİL: CSP'ye göre nonce varken `'unsafe-inline'`
+  yok sayılır
+- **#113** — ⛔ **BU DAL CANLIYA ÇIKINCA ELLE DOĞRULA:** `/kayit` sayfasında
+  Turnstile bulmaca kutusu hâlâ görünüyor mu ve gönder düğmesi kilitli
+  kalmıyor mu? (Formu göndermeye gerek YOK — bozulursa `onUnavailable`
+  tetiklenip düğme kilitlenir, yani kilitsiz olması yeterli kanıt.)
+  ⭐ **Local ve preview'da çizilmemesinin sebebi ARTIK KESİN:** Turnstile
+  `110200` = *"Domain not authorized"* veriyor, yani o alan adları panelde
+  yetkili değil. CSP'yle ilgisi yok
+- **#114** — Turnstile önizleme ortamında çalışmıyor (yukarıdaki `110200`).
+  ⚠️ **İSTEĞE BAĞLI panel işi**, zorunlu değil — production etkilenmiyor
 
-Fiilen yapılan iş: MIT metnindeki bozukluk (`OUT OF,` → `OUT OF OR`)
-düzeltildi ve lisans `tests/unit/license.test.ts` ile korunuyor.
-**Bir daha sorma.** ⚠️ Testin bugün yakalayamadığı boşluk: teknik borç #111.
+## ❓ PROJE SAHİBİNE SORULACAK — TEK CÜMLEYLE
 
-## ❓ PROJE SAHİBİNE SORULACAK — 18d SONUNDA, TEK CÜMLEYLE
+**Toplu elle test listesi** — on ikinci kez ertelendi (sayaç: **13**).
 
-**Toplu elle test listesi** — on birinci kez ertelendi ve proje sahibi
-18c'de "kendi yapacaklarımı yine sonraki oturuma ver" dedi, yani bilinçli
-olarak bir kez daha ertelendi (sayaç: **12**).
-
-> ⛔ **Oturumun BAŞINDA bu konuyu AÇMA.** Hatırlatma, iş listesine koyma,
-> "önce şunu yap" deme. 18d'nin önünde engel değil.
+> ⛔ **Oturumun BAŞINDA bu konuyu AÇMA.** Listeyi yeniden sunma, tek madde
+> önerisini de tekrarlama — ikisi de denendi, ikisi de tutmadı.
 >
-> ⛔ Listeyi **yeniden sunma** ve tek madde önerisini de **tekrarlama** —
-> ikisi de denendi, ikisi de tutmadı.
->
-> ✅ **Adım 18d BİTTİKTEN sonra**, tek seferlik ve tek cümlelik şu kararı sor:
-> "bu liste hiç yapılmayacaksa roadmap'ten silelim mi, yoksa 'yapılmadı'
-> etiketiyle teknik borç olarak mı bırakalım?" Cevap yine "sonra" olursa
-> **ısrar etme**, sayacı bir artır ve geç.
+> ✅ Sıradaki adım BİTTİKTEN sonra tek cümleyle sor: "bu liste hiç
+> yapılmayacaksa roadmap'ten silelim mi, yoksa 'yapılmadı' etiketiyle teknik
+> borç olarak mı bırakalım?" Cevap yine "sonra" olursa **ısrar etme**, sayacı
+> bir artır ve geç.
 
-Liste git geçmişinde (`sonraki-adim-prompt.md`, commit `ab3c627`).
 **Nerede:** https://benim-belediyem.vercel.app · **telefondan**
 **Hesap:** `docs/project/test-hesaplari.md` → şifre `Test1234!`,
 **personel olan** bir hesap seç. ⛔ #11-#16 arası hesaplar production'da YOK.
 
-## ⏰ CRON — 12 AĞUSTOS PENCERESİ KONTROL EDİLMEDİ
+## ⏰ CRON — 12 AĞUSTOS PENCERESİ HÂLÂ KONTROL EDİLMEDİ
 
-11 Ağustos penceresi ölçüldü → **0 kayıt** (`CRON_SECRET` o günün penceresi
-geçtikten sonra girilmişti). **12 Ağustos penceresi bu oturumda BAKILMADI.**
+⛔ **Adım 18d oturumu bu pencereye YETİŞEMEDİ.** Oturum UTC 11 Ağustos
+20:27'de başladı, 12 Ağustos penceresi UTC **12 Ağustos 00:00–00:59**'da
+açılıyor — yani oturum bittiğinde pencere henüz gelmemişti. Bu bir atlama
+değil, zamanlama.
 
-**Sonraki oturum:** sorguyu tekrarla. Yine 0 çıkarsa Vercel → Settings →
-Cron Jobs → View Logs incelenmeli.
+**Sonraki oturum:** 12 Ağustos penceresini sorgula. 0 çıkarsa Vercel →
+Settings → Cron Jobs → View Logs incelenmeli (11 Ağustos penceresi de 0'dı,
+ama o gün `CRON_SECRET` penceresi geçtikten sonra girilmişti).
 
 ⛔ **UTC 00:00–00:59 arasında production'a dağıtım tetikleyen merge YAPMA.**
 
@@ -160,54 +157,62 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **yalnızca
 okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT SÜRÜM 1.12.0 — kapı 8 geçildi
+## 📦 KİT — sürüm 1.13.0 yayınlandı, kurulu sürüm 1.11.0
 
-18c'nin dört standart güncellemesi (`06-testing`, `09-ci-cd-deploy`,
-`15-oturum-devri`, `16-yeni-proje-kurulumu`) **hem projeye hem kite** yazıldı.
-✅ `diff` kanıtı: **18 standart dosyasından 17'si birebir aynı**; tek fark
-`00-stack.md` (bilinen/beklenen).
+✅ **KAPI 8 GEÇİLDİ.** Adım 18d'nin iki dersi hem projeye hem kite yazıldı:
+`06-testing.md` ("konsol temiz bir kanıt değildir") ve `11-agent-workflow.md`
+("devralınan kaydın ÖNERDİĞİ ÇÖZÜM de bir iddiadır").
+⭐ **diff KANITI: 18 standart dosyasından 17'si birebir AYNI**; tek fark
+`00-stack.md` ve o bilinen/beklenen (aşağıdaki açık soru).
+Kit commit'i: `79292c9`, sürüm 1.12.0 → **1.13.0**.
 
-⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ 1.11.0 — ESKİ.** Bu kapı 8'in parçası
-DEĞİL; yalnızca `/yeni-proje` veya `/kit-senkron` çalıştırılacağı gün
-"önce `/plugin` ekranından kiti güncelle" de. **Bilinçli olarak ertelendi;
-kendiliğinden hatırlatma.**
+⚠️ **Bu adımda kit deposunda bir engel çıktı ve çözüldü** — not olarak dursun:
+yerel klon uzaktan 4 commit gerideydi ve içinde commit edilmemiş 20 satırlık
+bir değişiklik vardı, bu yüzden `git pull` iptal oluyordu. Ölçüldü: o
+değişiklik uzaktaki sürümle **birebir aynıydı** (yani önceki oturum push
+etmiş, yerel kopya artık gereksizdi), bu yüzden atmak kayıpsızdı.
+⭐ **Ders: kirli bir çalışma alanını temizlemeden ÖNCE, o değişikliğin uzakta
+zaten var olup olmadığını ölç.** Körlemesine `stash` veya `checkout` iş
+kaybettirebilirdi.
+
+⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ 1.11.0 — ESKİ (artık iki sürüm geride).**
+Yalnızca `/yeni-proje` veya `/kit-senkron` çalıştırılacağı gün "önce `/plugin`
+ekranından kiti güncelle" de. **Bilinçli olarak ertelendi; kendiliğinden
+hatırlatma.**
 
 ⛔ **`00-stack.md` HÂLÂ FARKLI ve bu AÇIK BİR SORU.** Sürüm 1.7.0 istisnayı
 bölüm seviyesine indirdi (`<!-- ⛔ SENKRON SINIRI -->`) ama projedeki fark
 **sınırın ÜSTÜNDE** kalıyor (satır 19-68): oradaki Auth.js metni bu projeye
 özel. Ya sınır yanlış yerde ya da o metin sınırın altına taşınmalı.
-Adım 18c bu dosyaya dokunmadı (§7: aynı anda tek modül) — **karar hâlâ bekliyor**.
+**Karar hâlâ bekliyor.**
 
 ⚠️ Kit deposunu karşılaştırmadan önce daima `git fetch` + `git pull` yap.
 
-## YAPILACAK — roadmap adım 18d
+## YAPILACAK — roadmap adım 19 (veya önce #103 + #107)
 
-"Güvenlik denetimi raporu — borç #10 (sıkı CSP), #23, #78, #89 toplu
-değerlendirilir"
+"Expo mobil uygulama (aynı API)"
 
-Dal: `feature/guvenlik-denetimi` (öneri)
-
-### Bu adımda özellikle dikkat
-- ⛔ **Borç #99 bu adıma yazılı:** 11 `uses:` satırı tam commit SHA'sına
-  çevrilir (yanına `# vX.Y.Z` yorumu) + her iş akışına açık `permissions:`
-  bloğu. ⚠️ `e2e.yml` 18c'de değişti, önce onu oku
-- **Borç #10 (nonce tabanlı CSP) bir ara katman gerektiriyor** — #97, #102 ve
-  #104 de aynı ara katmanla ödenebilir. Dördü tek işte birleşir, ama bu
-  adımın kapsamını genişletir: önce ÖLÇ, sonra karar ver
-- ⛔ **Yeni bir paket gerekiyorsa proje sahibine SOR** (CLAUDE.md §7). Ama
-  önce 18b ve 18c'deki gibi **gerçekten gerekli mi diye ÖLÇ** — iki adımda da
-  devir notu "paket gerekir" demişti ve iki adımda da gerekmedi
+⚠️ **Adım 19 tek satır ama devasa.** 17 ve 18 nasıl a/b/c/d'ye bölündüyse 19 da
+bölünmeli. Kod yazmadan önce **plan sun** ve bölünmeyi öner.
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
-- ⭐ **`tests/quality/`** — YENİ. Bütçe eşikleri (`budget.ts`), performans ve
-  erişilebilirlik kapıları, `expectRoute` yardımcısı.
-  **Yeni bir genel sayfa eklersen `accessibility.spec.ts` listesine de yaz**
+- ⭐ **`src/proxy.ts`** — YENİ. Nonce üretimi + tüm CSP politikası tek yerde.
+  **Yeni bir dış alan adı (CDN, analytics, ödeme) eklenirse CSP'ye buradan
+  yazılır** — `next.config.ts`'e İKİNCİ bir CSP satırı EKLEME, test yakalar
+- ⭐ **`tests/e2e/guvenlik-basliklari.spec.ts`** — YENİ. **Yeni bir genel sayfa
+  eklersen `korunmasiSartYollar` listesine de yaz**
+- ⭐ **`tests/unit/workflows.test.ts`** — YENİ. Yeni bir action eklersen tam SHA
+  + `# vX.Y.Z` yorumu ŞART, yoksa CI kırmızı
+- **`tests/quality/`** — bütçe eşikleri (`budget.ts`), performans ve
+  erişilebilirlik kapıları. **Yeni genel sayfa `accessibility.spec.ts`'e de yazılır**
 - **`src/features/api-docs/`** — kütük + üretici + sapma kapıları.
   **Yeni bir uç eklersen kütüğe de yaz, yoksa CI kırmızıya döner**
 - **`src/lib/log-redact.ts`** — log, Sentry ve API belgesi aynı süzgeçten geçiyor
 - **`src/lib/logger.ts`** · **`src/lib/sentry-options.ts`**
 - **`src/lib/http.ts`** — `ok`/`created`/`noContent`/`fail`, tek tip hata biçimi
+- **`src/lib/rate-limit.ts`** — `readActorIp` (⚠️ başlık sırası 18d'de değişti,
+  4 test onu kilitliyor) · `consumeRateLimit` · `rateLimitKey`
 - **`src/features/staff-verification/`** — iki adımlı doğrulama deseni
 - **`src/features/account/`** — geri alınamaz işlem deseni
 - **`src/lib/same-origin.ts`** — `Origin` kapısı
@@ -217,6 +222,7 @@ Dal: `feature/guvenlik-denetimi` (öneri)
   `guardPage()` (⚠️ yönlendirme hidrasyondan SONRA uygulanıyor)
 - **`src/features/identity/`** · **`src/features/otp/`** · **`src/features/catalog/`**
 - **`src/lib/external-fetch.ts`** — **yeni dış servis buradan geçer**
+- **`src/lib/file-upload.ts`** — bayt imzasından tür doğrulama
 - **`src/lib/money.ts`** — para TAM SAYI KURUŞ
 - **`src/features/events/`** — **YARIŞ KORUMASI DESENİ**
 - **`src/features/notifications/`** — tembel senkronizasyon
@@ -225,39 +231,47 @@ Dal: `feature/guvenlik-denetimi` (öneri)
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
 
-**Adım 18c'de yeni öğrenilenler**
+**Adım 18d'de yeni öğrenilenler**
+- ⛔ **CSP İNLINE STİLİ SESSİZCE BLOKLUYOR** — konsola tek satır düşmüyor.
+  Doğrulama `getComputedStyle` ile yapılmak zorunda
+- ⚠️ **NEXT 16'DA ARA KATMANIN ADI `middleware` DEĞİL `proxy`.** 16.2.12 ikisini
+  de tanıyor ama belge ve gelecek sürümler `proxy` diyor. Build çıktısı
+  `ƒ Proxy (Middleware)` satırıyla tanıdığını doğruluyor
+- ⚠️ **TARAYICI NONCE'U DOM'DAN GİZLİYOR** ("nonce hiding" — CSS seçici
+  saldırısına karşı). `getAttribute("nonce")` **boş döner**; değer yalnızca
+  `.nonce` property'sinde. Öznitelikle ölçen test yanlış alarm verir
+- ⚠️ **ELLE YAZILAN `<script>`'E NEXT NONCE TAKMIYOR** — yalnızca kendi
+  ürettiklerine takıyor. `layout.tsx`'teki tema betiğine nonce ELLE veriliyor
+- ⚠️ **`'nonce-…'` VARKEN `'unsafe-inline'` YOK SAYILIR** (CSP kuralı). İkisini
+  yan yana yazmak "sıkı görünen ama yine kırık" bir politika üretir
+- ⚠️ **İKİ `Content-Security-Policy` BAŞLIĞI = KESİŞİM.** Gevşek olan sıkı olanı
+  gevşetmez, ama sıkı olanın izin verdiğini bloklar
+- ⚠️ **`argon2` MALİYETİ GİRDİ UZUNLUĞUNDAN BAĞIMSIZ** (ölçüldü: 4 MB → 28,6 ms,
+  normal → 15,8 ms). "Uzun şifre göndererek CPU tüketme" diye bir vektör yok
+- ⚠️ **GEÇİCİ `.mts` BETİK PROJE KÖKÜNDE OLMALI** — `/tmp`'de `node_modules`
+  çözümlenmiyor, `ERR_MODULE_NOT_FOUND` alırsın
+- ⚠️ **CHROME DEVTOOLS EKRAN GÖRÜNTÜSÜ ÇALIŞMA ALANI DIŞINA YAZILAMIYOR**
+
+**Adım 18c'de öğrenilenler**
 - ⛔ **ÖLÇÜM YAPMADAN ÖNCE PORTU BOŞALT** (`lsof -ti:3000 | xargs kill -9`).
-  Ayakta kalmış `npm run start` eski yapıyı servis ediyor ve Playwright onu
-  `reuseExistingServer` ile kullanıyor — bir mutasyon deneyi bu yüzden
-  yanlışlıkla yeşil geçti
-- ⛔ **KORUNAN SAYFA `page.goto`'ya `200` DÖNDÜRÜYOR.** Yönlendirme
-  hidrasyondan sonra. Ölçüm/denetim yapan test `expectRoute` ile hangi adreste
-  olduğunu doğrulamak zorunda
-- ⚠️ **CHROME'UN AĞ KISITI ANA BELGEYE UYGULANMIYOR** — alt kaynaklara
-  uygulanıyor (ölçüldü: en yavaş kaynak 32 ms → 15 059 ms, ama TTFB 10 ms →
-  6 ms). Yani localhost LCP ölçümü gerçek kullanıcıyı temsil etmiyor
-- ⚠️ **`tsx` İLE KOŞULAN BETİKTE `page.evaluate` İÇİNE İSİMLİ FONKSİYON
-  YAZMA** — esbuild `--keep-names` `__name` yardımcısı enjekte ediyor ve
-  tarayıcıda `ReferenceError: __name is not defined` alıyorsun. Düz döngü yaz
-- ⚠️ **`encodedBodySize` GZİP'Lİ BOYUTTUR** ama `loadEventEnd`'den sonra gelen
-  istekleri saymazsan doğru olur: Next görünürdeki bağlantıları önden indiriyor
-- ⚠️ **`requestfailed` OLAYI İPTAL EDİLEN ÖN-YÜKLEMELERİ DE SAYIYOR** —
-  `net::ERR_ABORTED` ayıklanmazsa 13 sayfada 367 sahte "başarısız istek" çıkar
-- ⚠️ **Next 16 + Turbopack BUILD ÇIKTISINDA ARTIK BOYUT SÜTUNU YOK** ve
-  `app-build-manifest.json` de yok — paket boyutu ancak tarayıcıda ölçülür
-- ⚠️ **`fish` KABUĞUNDA `2>&1`'İ KAÇIRMA** (`2>\&1` yazma) — `&1` adında bir
-  dosya oluşturur ve depoda kalır
+  Ayakta kalmış `npm run start` eski yapıyı servis ediyor
+- ⛔ **KORUNAN SAYFA `page.goto`'ya `200` DÖNDÜRÜYOR.** Yönlendirme hidrasyondan
+  sonra → `expectRoute`
+- ⚠️ **CHROME'UN AĞ KISITI ANA BELGEYE UYGULANMIYOR**, alt kaynaklara uygulanıyor
+- ⚠️ **`tsx` İLE KOŞULAN BETİKTE `page.evaluate` İÇİNE İSİMLİ FONKSİYON YAZMA**
+- ⚠️ **`encodedBodySize` GZİP'Lİ BOYUTTUR**
+- ⚠️ **`requestfailed` OLAYI İPTAL EDİLEN ÖN-YÜKLEMELERİ DE SAYIYOR**
+- ⚠️ **Next 16 + Turbopack BUILD ÇIKTISINDA BOYUT SÜTUNU YOK**
+- ⚠️ **`fish` KABUĞUNDA `2>&1`'İ KAÇIRMA** (`2>\&1` yazma)
 
 **E2E koşarken**
-- **`npm run start` ile KENDİ sunucunu açıp sonra `npx playwright test` KOŞMA.**
-  Doğrusu: portu boşalt, sonra tek başına `npx playwright test`
+- **`npm run start` ile KENDİ sunucunu açıp sonra `npx playwright test` KOŞMA**
 - ⚠️ **PLAYWRIGHT SONRASI `npm run start` YANLIŞ YAPIYI SERVİS EDİYOR**:
-  `NEXT_PUBLIC_*` değerleri DERLEME ANINDA gömülüyor → önce `npm run build`
+  `NEXT_PUBLIC_*` DERLEME ANINDA gömülüyor → önce `npm run build`
 - **Sunucu ayaktayken `.next`'i silme**
 - **YÜK 3'ÜN ÜZERİNDEYKEN TAM SET KOŞMA.** `uptime` bak (< 2.5)
-- ⚠️ **LOCAL'DE İKİ İŞÇİYLE KOŞARKEN `hospital.spec.ts` DÜŞEBİLİYOR** — iki
-  Playwright projesi aynı personel hesabını paylaşıyor. CI tek işçi olduğu için
-  orada çıkmıyor; `CI=1 npx playwright test` ile doğrula
+- ⚠️ **LOCAL'DE İKİ İŞÇİYLE KOŞARKEN `hospital.spec.ts` DÜŞEBİLİYOR** →
+  `CI=1 npx playwright test` ile doğrula
 - ⚠️ **E2E'Yİ 15 DAKİKA İÇİNDE ÜST ÜSTE KOŞTURMA** (hız sınırı). Çözüm:
   `rate_limit_counters` tablosunu boşalt, sonra **tek sefer** koş.
   **Bir testin düşmesini koda yormadan ÖNCE kaç kez koştuğuna bak**
@@ -279,12 +293,12 @@ Dal: `feature/guvenlik-denetimi` (öneri)
 - ⚠️ **SAHTE (decoy) OTP KAYITLARI `userId` TAŞIMAZ**; `registrationId`'den yakala
 
 **Vitest**
-- ⚠️ **`vi.resetModules()` + dinamik `import` ile `instanceof` ÇALIŞMAZ** —
+- ⚠️ **`vi.resetModules()` + dinamik `import` ile `instanceof` ÇALIŞMAZ** →
   hata KODUNA bak
 - ⚠️ **`vi.resetModules()` KULLANAN TESTLERDE LOG SATIRINI METİN OLARAK
-  KARŞILAŞTIRMA** — satır artık JSON; `JSON.parse` edip ALANLARINA bak
+  KARŞILAŞTIRMA** — satır JSON; `JSON.parse` edip ALANLARINA bak
 - ⛔ **BİR TEST DOSYASINDA HEM `vi.mock("@/config/env")` HEM GERÇEK `__testing`
-  KULLANILAMAZ** — mock modülün tamamını değiştiriyor
+  KULLANILAMAZ**
 - ⚠️ **`NEXT_PUBLIC_ENV_LABEL`'i "production" yapmak env.ts'in TÜM tutarlılık
   kurallarını tetikliyor** — modülü mock'la
 - ⚠️ **`z.coerce.boolean()` ORTAM DEĞİŞKENİNDE KULLANILMAZ:** `"false"` dizesini
@@ -310,15 +324,15 @@ Dal: `feature/guvenlik-denetimi` (öneri)
 - ⚠️ **macOS'ta pencere 375px'e İNMİYOR** (alt sınır ~485px) → `mobile-375`
   Playwright projesiyle ölç
 - ⚠️ **`fullPage` ekran görüntüsü `sticky`/`fixed` öğeleri YANILTICI gösteriyor**
-  → `document.elementFromPoint` ile ölç
-- ⚠️ **`get_network_request` dosya yolu ÇALIŞMA ALANI İÇİNDE olmalı**
+- ⚠️ **`get_network_request` VE EKRAN GÖRÜNTÜSÜ dosya yolu ÇALIŞMA ALANI İÇİNDE olmalı**
 
 **Next.js**
 - ⚠️ **`router.refresh()`'i BAŞARI PANELİNİ ÇİZDİĞİN ANDA ÇAĞIRMA**
 - **Sunucu bileşeninde `cookies().set()` İSTİSNA FIRLATIR**
 - ⚠️ **KÖK YERLEŞİMDE `cookies()` OKUMAK TÜM SAYFALARI DİNAMİK YAPAR** — bunu
-  hem `SiteHeader` hem `CookieNotice` yapıyor (borç #84 ÖLÇÜLDÜ ve KAPANDI:
-  bedel kabul edilebilir çıktı)
+  hem `SiteHeader` hem `CookieNotice` yapıyor (borç #84 ÖLÇÜLDÜ ve KAPANDI).
+  ⭐ **18d'de bu bir AVANTAJA dönüştü:** nonce CSP zaten dinamik olan bir
+  uygulamada hiçbir şey kaybettirmedi
 - **Sunucuda çizilen sayfa istemci yazdıktan sonra tazelenmez** → `router.refresh()`.
   ⛔ **Ama hesabı SİLDİKTEN sonra çağırma**
 - **Formu sıfırlamak için bileşene `key` ver**
@@ -409,7 +423,7 @@ Dal: `feature/guvenlik-denetimi` (öneri)
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
   `--org-id org-still-water-86075112` şart
-- `psql` **kurulu değil** → `npx tsx` + Prisma betiği (proje kökünde, `.mts`,
+- `psql` **kurulu değil** → `npx tsx` + Prisma betiği (**proje kökünde**, `.mts`,
   commit edilmeden SİLİNİR). `--env-file=.env` ile koştur
 - ⚠️ **ESLint geçici `.mts` betiklerdeki `console.log`'u da yakalıyor** →
   `console.error` kullan veya betiği lint'ten önce sil
@@ -424,10 +438,15 @@ Dal: `feature/guvenlik-denetimi` (öneri)
 `npm run test · test:db · test:e2e · test:quality · lint · typecheck · format · build`
 `gh` PATH'te. `vercel` ve `neonctl` için `npx`.
 
+**Güvenlik başlıkları kapısını tek başına koşturma:**
+`lsof -ti:3000 | xargs kill -9`, sonra
+`CI=1 npx playwright test tests/e2e/guvenlik-basliklari.spec.ts --project=desktop-chrome`
+
+**CSP'yi elle görme:**
+`curl -sI http://localhost:3000/ | grep -i content-security-policy`
+
 **Bütçe kapısını tek başına koşturma:**
 `lsof -ti:3000 | xargs kill -9`, sonra `npm run test:quality`
-(sunucuyu Playwright kendi kurar). Ölçülen sayılar test raporunda "ölçüm"
-başlığı altında yazıyor.
 
 **API belgesini doğrulama:**
 `npm run build && npm run start`, sonra
