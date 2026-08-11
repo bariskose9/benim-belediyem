@@ -48,9 +48,39 @@
 > kimsenin haberi olmuyor ve `12-operations-and-scaling.md` "üretimdeki her
 > istisna yakalanır" diyor. Anahtarsız bir alternatifi yok.
 >
-> ### 🔧 PANEL İŞİ 1 — Sentry (YENİ)
+> ### ✅ PANEL İŞİ 1 — Sentry: **YAPILDI** (2026-08-11)
 >
-> **Vercel paneli → benim-belediyem → Integrations → Sentry → Add / Install**
+> Kaynak `sentry-amber-lamp`, plan **Developer** (ücretsiz), **yalnızca
+> production**'a bağlı. Yedi değişken de doğru adlarla geldi ve
+> `npx vercel env ls production` ile ÖLÇÜLDÜ. Preview'da Sentry değişkeni YOK
+> (bilinçli: preview hataları gerçek hatalarla karışıp kotayı yerdi).
+>
+> ⛔ **KURULUMDA İKİ TUZAK ÇIKTI — sonraki projede yine çıkar:**
+>
+> 1. **Entegrasyonu kurmak YETMİYOR.** Hesap seviyesinde kurulunca proje hâlâ
+>    değişkenleri görmüyor; ayrıca **kaynağı projeye BAĞLAMAK** gerekiyor
+>    (kaynak sayfası → Projects → Connect Project). İlk denemede atlandı ve
+>    `vercel env ls` hâlâ 16 değişken gösteriyordu — yani panelde "Available"
+>    yazması işin bittiği anlamına GELMİYOR.
+> 2. ⛔ **"Custom Environment Variable Prefix" kutusu BOŞ BIRAKILMALI.**
+>    İçindeki soluk `OBSERVABILITY` yazısı örnek, değer değil. Doldurulsaydı tüm
+>    adların başına eklenirdi (`OBSERVABILITY_NEXT_PUBLIC_SENTRY_DSN`) ve kod o
+>    adı aramadığı için Sentry **hata vermeden, sessizce** çalışmazdı.
+>
+> **Gelen yedi değişken:** `NEXT_PUBLIC_SENTRY_DSN` · `SENTRY_ORG` ·
+> `SENTRY_PROJECT` · `SENTRY_AUTH_TOKEN` (dördünü kod kullanıyor) +
+> `SENTRY_PUBLIC_KEY` · `SENTRY_OTLP_TRACES_URL` ·
+> `SENTRY_VERCEL_LOG_DRAIN_URL` (üçü kullanılmıyor; Zod tanımadığı anahtarı
+> eler, zararsız).
+>
+> ⛔ **`vercel redeploy` YETMEDİ — 2026-08-11'de ÖLÇÜLDÜ.** Değişkenler
+> girildikten sonra eski bir dağıtım `redeploy` edildi; tünel yolu HÂLÂ 404
+> döndü ve canlı commit geriye gitti. Sebebi: `redeploy` var olan bir dağıtımı
+> yeniden kuruyor ve o dağıtımın kendi commit'ine bağlı kalıyor. **Yeni ortam
+> değişkenini yürürlüğe sokmanın güvenilir yolu `main`'e yeni bir commit
+> göndermek**, yani taze bir git dağıtımı tetiklemek.
+>
+> **Kurulum yolu (arşiv):** Vercel paneli → Integrations → Browse Marketplace → Sentry
 >
 > Bu yol bilerek seçildi: hesabı Vercel açıyor ve **dört ortam değişkenini
 > projeye KENDİSİ enjekte ediyor**, yani elle değer girmen gerekmiyor:
@@ -505,7 +535,7 @@
 | **Cloudflare** | Turnstile widget `benim-belediyem` | 1M çözüm/ay | Bot koruması (ADR-004) |
 | **Resend** | — | 3.000 e-posta/ay | Doğrulama kodu e-postası |
 | **Google Cloud** | proje `benim-belediyem` · OAuth istemcisi `benim-belediyem-web` | ücretsiz | Google ile giriş (adım 4c) |
-| **Sentry** | ⚠️ **HENÜZ AÇILMADI** — Vercel → Integrations → Sentry ile açılacak | Developer: 5.000 hata/ay · 1 kullanıcı · 30 gün | Hata takibi (adım 18a). Kurulunca bu satır güncellenir |
+| **Sentry** | ✅ **AÇILDI** (2026-08-11) · Vercel Marketplace · kaynak `sentry-amber-lamp` (`ir_b3arMILjNzm4yIQH`) · Sentry ID `4511892457717840` | **Developer** (ücretsiz): 5.000 hata/ay · 1 kullanıcı · 30 gün | Hata takibi (adım 18a) |
 
 ### PostgreSQL eklentileri
 
