@@ -11,6 +11,24 @@
 
 **Son güncelleme:** 2026-08-11 · roadmap adım 18a sonrası
 
+> ✅ **Adım 18a CANLIDA** (2026-08-11, commit `6712d32`, PR #52). Sağlık ucu
+> `db: ok`. Duman testi: `/` · `/market` · `/restoran` · `/hakkimizda` ·
+> `/gizlilik` · `/cerez-politikasi` **200**; girişsiz `/hesabim` ve
+> `/personel-dogrulama` **307**; yetkisiz `/api/cron/daily` **401**.
+> Tarayıcıda konsol hatası ve başarısız istek YOK.
+> `feature/gozlemlenebilirlik` dalı merge edilip **silindi**.
+>
+> ⚠️ **`/sentry-tunnel` şu an 404 DÖNÜYOR ve bu DOĞRU DAVRANIŞ.** Tünel yolu
+> yalnızca DSN tanımlıyken kuruluyor (bir route değil, `rewrite`). Sentry
+> entegrasyonu yapıldıktan ve yeniden dağıtım koştuktan sonra bu adres 404
+> dönmeyi bırakmalı — **entegrasyonun gerçekten devreye girdiğinin en hızlı
+> kanıtı budur.**
+>
+> ⛔ **KOD CANLIDA AMA HATA TAKİBİ HÂLÂ SESSİZ.** DSN girilmediği için Sentry
+> devre dışı. "Adım 18a canlıda" ile "canlıda hata görünürlüğü var" AYNI ŞEY
+> DEĞİL; ikincisi aşağıdaki panel işine bağlı. Bugün kazanılan tek şey sunucu
+> log'larının JSON olması ve kişisel verinin süzülmesi.
+
 > ## 🔧 ADIM 18a — YENİ BİR DIŞ HESAP GEREKİYOR (Sentry) · İKİ PANEL İŞİ
 >
 > Bu, ADR-016'dan beri ilk kez proje sahibinden **yeni bir hesap** isteyen
