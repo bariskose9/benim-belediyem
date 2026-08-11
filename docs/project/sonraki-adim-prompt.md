@@ -50,13 +50,21 @@ Uçtan uca ölçüldü: canlı sayfada bilerek fırlatılan hata
 gövdede kart/kimlik/e-posta **sıfır kez** geçti (üçü de `[gizlendi]`) ve
 yığın izi bozulmadı. Ayrıntı: `altyapi-durumu.md`.
 
-### 2. ⛔ `LEGAL_CONTROLLER_NAME` + `LEGAL_CONTACT_EMAIL` — HÂLÂ GİRİLMEDİ
+### 2. ✅ `LEGAL_CONTROLLER_NAME` + `LEGAL_CONTACT_EMAIL` — **GİRİLDİ**
 
-Adım 17'den devrediyor. **2026-08-11'de panelden ölçüldü: production'da 23
-değişken var, bu ikisi YOK.** Hesap silme ekranı KVKK m.12/1-c bildirimi
-yapıyor ve bildirimin muhatabı belirsiz kalıyor.
+2026-08-11'de girildi (Production, **Non-sensitive**) ve canlıda doğrulandı:
+`/gizlilik` sayfasındaki "Veri sorumlusu" kutusu artık gerçek adı ve tıklanabilir
+başvuru e-postasını gösteriyor, yer tutucu metin kayboldu.
 
-⛔ **Bu, adım 18b'ye geçmeden önce sorulacak İLK ŞEY.**
+⛔ **PANEL İŞİ KALMADI. Adım 18b'ye temiz başlanabilir.**
+
+⚠️ **Bilinen kabul:** başvuru adresi proje sahibinin ANA kişisel Gmail'i. Herkese
+açık bir sayfada duruyor, yani spam toplayıcılara açık. Uyarı yapıldı, tercih
+bilinçli. Değiştirmek isterse değişken `Non-sensitive` olduğu için tek adımlık iş.
+
+⚠️ Teknik borç **#91 canlıda görüldü:** çerez bandı `/gizlilik` sayfasında "Veri
+sorumlusu" kutusunu örtüyor; bant kapatılınca görünüyor. Aynı desen
+`/hesap-silindi` sayfasında da var.
 
 ## ⏰ CRON — SONRAKİ PENCERE 12 AĞUSTOS 00:00 UTC
 

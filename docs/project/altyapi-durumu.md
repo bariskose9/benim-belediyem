@@ -55,12 +55,31 @@
 > olay kimliği var mı diye bak → **istek gövdesini oku**, kişisel veri
 > `[gizlendi]` mi.
 >
-> ### ⛔ `vercel redeploy` YENİ ORTAM DEĞİŞKENİNİ YÜRÜRLÜĞE SOKMUYOR
+> ### ⚠️ `vercel redeploy` HAKKINDA — ÖNCE YANLIŞ YAZILDI, SONRA ÖLÇÜLDÜ
 >
-> Ölçüldü: değişkenler girildikten sonra `redeploy` çalıştırıldı, Sentry
-> devreye girmedi **ve canlı commit geriye gitti** (`f722442` → `6712d32`).
-> `redeploy` var olan bir dağıtımı yeniden kuruyor ve o dağıtımın commit'ine
-> bağlı kalıyor. **Doğru yol: `main`'e yeni bir commit göndermek.**
+> ⛔ **Bu bölümün ilk hâli "redeploy yeni ortam değişkenini yürürlüğe sokmuyor"
+> diyordu. BU YANLIŞTI ve 2026-08-11'de ölçülerek çürütüldü.**
+>
+> **Doğrusu:** `vercel redeploy` **güncel ortam değişkenlerini ALIYOR.**
+> `LEGAL_CONTROLLER_NAME` ve `LEGAL_CONTACT_EMAIL` panelde tanımlandıktan
+> sonra EN SON production dağıtımı `redeploy` edildi ve `/gizlilik` sayfası
+> yer tutucu metni bırakıp gerçek adı göstermeye başladı. Canlı commit de
+> yerinde kaldı.
+>
+> **Gerçek tuzak başkaydı:** ilk denemede **ESKİ bir dağıtım** yeniden
+> kurulmuştu. `redeploy` hedef aldığı dağıtımın commit'ine bağlı olduğu için
+> canlı commit GERİYE GİTTİ (`f722442` → `6712d32`). Ortam değişkeni sorunu
+> değil, **yanlış dağıtımı hedefleme** sorunuydu.
+>
+> ⛔ **KURAL:** `redeploy` çağırırken hedefin **en son** production dağıtımı
+> olduğunu doğrula (`npx vercel ls benim-belediyem` çıktısının ilk production
+> satırı). Eski bir adresi yeniden kurmak sürümü geri alır.
+>
+> ⚠️ **BU HATANIN KÖKÜ:** "Sentry redeploy'dan sonra da çalışmadı" sonucu,
+> sonradan bozuk olduğu anlaşılan tünel kontrolüne dayanıyordu. Bozuk bir
+> ölçüm, yanlış bir nedene götürdü. Ölçüm aracına güvenmeden çıkarılan sebep,
+> sebep değildir.
+
 >
 > ✅ **HATA TAKİBİ ARTIK ÇALIŞIYOR.** Canlıdaki bir istisna Sentry'ye düşüyor
 > ve kişisel veri taşımıyor. Adım 18a'nın asıl faydası devrede.
