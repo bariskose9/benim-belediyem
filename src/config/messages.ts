@@ -75,6 +75,9 @@ export const messages = {
     // "Bir hata oluştu" değil: kullanıcıya ne yapacağını söyler
     // (docs/standards/02-coding-standards.md → copy kuralları)
     unexpected: "Şu an bağlanamıyoruz. Lütfen biraz sonra tekrar deneyin.",
+    // Kök hata sınırı (`global-error.tsx`) başlıksız kalmasın diye; orada
+    // yerleşim çizilmediği için sayfanın kendi başlığı da yok.
+    unexpectedTitle: "Sayfa açılamadı",
     databaseUnavailable: "Veritabanına şu an ulaşılamıyor. Lütfen biraz sonra tekrar deneyin.",
   },
 

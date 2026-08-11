@@ -15,6 +15,7 @@ import {
 import { mergeGuestCartIntoUserCart } from "@/features/cart/services/cart.service";
 import { linkVisitorConsentsToUser } from "@/features/legal/services/consent.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
+import { logger } from "@/lib/logger";
 import { revokeSession } from "@/features/auth/services/session.service";
 import { DEFAULT_REDIRECT_PATH } from "@/lib/redirect";
 import { readActorIp } from "@/lib/rate-limit";
@@ -99,7 +100,7 @@ export async function GET(request: Request) {
         now: new Date(),
       });
     } catch (mergeError) {
-      console.error("[CART_MERGE] ziyaretçi sepeti taşınamadı", mergeError);
+      logger.error("guest_cart_merge_failed", { error: mergeError });
     }
 
     /**
@@ -116,7 +117,7 @@ export async function GET(request: Request) {
      * `id_token`, Google'ın 5xx'i, kullanıcının izni reddetmesi — AYNI ekrana
      * çıkar. Ayrıştırmak, saldırgana hangi korumaya takıldığını söylerdi.
      */
-    console.error("google_oauth_callback_failed", error);
+    logger.error("google_oauth_callback_failed", { error });
 
     return redirectToLogin("google_girisi_tamamlanamadi");
   }

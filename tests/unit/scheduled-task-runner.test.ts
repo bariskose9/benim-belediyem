@@ -34,6 +34,20 @@ async function run() {
   return runDailyTasks(NOW);
 }
 
+/**
+ * Log satırı adım 18a'dan beri tek satırlık JSON. Testler metni harfi harfine
+ * karşılaştırmak yerine ayrıştırıp ALANLARINA bakıyor: mesajın kelimeleri
+ * değişse bile olay adı ve bağlam sabit kalmalı.
+ */
+function lastLoggedEntry(): Record<string, unknown> {
+  const spy = vi.mocked(console.error);
+  const call = spy.mock.calls.at(-1);
+
+  expect(call, "log satırı hiç yazılmadı").toBeDefined();
+
+  return JSON.parse(String(call?.[0])) as Record<string, unknown>;
+}
+
 beforeEach(() => {
   vi.resetModules();
   auditMock.recordAuditLog.mockReset();
@@ -129,10 +143,17 @@ describe("bir görev patladığında", () => {
 
     await run();
 
-    expect(console.error).toHaveBeenCalledWith(
-      "[CRON] görev başarısız: cleanup_sessions",
-      expect.any(Error),
-    );
+    /**
+     * Adım 18a'dan itibaren log YAPILANDIRILMIŞ (JSON) yazılıyor, düz metin
+     * değil. Bu yüzden satır ayrıştırılıp ALANLARINA bakılıyor — eskisinden
+     * daha güçlü bir doğrulama: hem olay adını hem hatanın kendisinin
+     * taşındığını kanıtlıyor.
+     */
+    const entry = lastLoggedEntry();
+
+    expect(entry.event).toBe("cron_task_failed");
+    expect(entry.task).toBe("cleanup_sessions");
+    expect((entry.error as { message: string }).message).toBe("veritabanı düştü");
   });
 
   it("patlayan görev sıfır satır etkilemiş sayılır", async () => {
@@ -159,9 +180,9 @@ describe("denetim kaydı yazılamazsa", () => {
 
     expect(summary.failedCount).toBe(0);
     expect(summary.tasks[0]!.affected).toBe(4);
-    expect(console.error).toHaveBeenCalledWith(
-      "[CRON] denetim kaydı yazılamadı: cleanup_sessions",
-      expect.any(Error),
-    );
+    const entry = lastLoggedEntry();
+
+    expect(entry.event).toBe("cron_audit_write_failed");
+    expect(entry.task).toBe("cleanup_sessions");
   });
 });

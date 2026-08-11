@@ -5,6 +5,7 @@ import {
   createGoogleAuthorizationRequest,
   isGoogleLoginConfigured,
 } from "@/features/auth/services/google-oauth.service";
+import { logger } from "@/lib/logger";
 import { DEFAULT_REDIRECT_PATH, sanitizeRedirectPath } from "@/lib/redirect";
 import { consumeRateLimit, rateLimitKey, readActorIp } from "@/lib/rate-limit";
 
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
      * şifreyle girmeye devam edebilir (CLAUDE.md §5.9). Hata detayı istemciye
      * SIZDIRILMAZ, yalnızca sunucu günlüğüne yazılır.
      */
-    console.error("google_oauth_start_failed", error);
+    logger.error("google_oauth_start_failed", { error });
 
     return redirectToLogin("google_kullanilamiyor");
   }

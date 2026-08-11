@@ -78,9 +78,8 @@ export async function recordCookieNoticeConsent({
  * ⛔ SESSİZCE BAŞARISIZ OLMASI GEREKİYOR: bu bağlama, girişin başarısının bir
  * parçası DEĞİL. Burada atılan bir istisna kullanıcının giriş yapamamasına yol
  * açardı — rıza kaydının öznesini çözemediğimiz için kimseyi kapıda bırakmak
- * orantısız olurdu. Hata yutulmuyor, günlüğe düşüyor (`console.error` ESLint
- * tarafından yasak olduğu için `http.ts`'deki desen: hata yukarı taşınmıyor
- * ama sayısı ölçülebiliyor).
+ * orantısız olurdu. Hata yutulmuyor, yapılandırılmış log'a düşüyor: hata
+ * yukarı taşınmıyor ama ölçülebiliyor ve Sentry'ye de gidiyor (adım 18a).
  *
  * @returns bağlanan satır sayısı; bağlanamadıysa 0
  */

@@ -4,6 +4,7 @@ import { messages } from "@/config/messages";
 import { prisma } from "@/lib/db";
 import { ServiceUnavailableError } from "@/lib/errors";
 import { fail, ok } from "@/lib/http";
+import { logger } from "@/lib/logger";
 
 /**
  * `GET /api/health` — uygulama + veritabanı sağlık ucu (CLAUDE.md §5.9).
@@ -46,7 +47,7 @@ async function isDatabaseReachable(): Promise<boolean> {
     return true;
   } catch (error) {
     // Sessizce yutulmuyor: sunucu log'una yazılıyor, istemciye detay gitmiyor.
-    console.error("[HEALTH] veritabanına ulaşılamadı", error);
+    logger.error("health_db_unreachable", { error });
 
     return false;
   } finally {

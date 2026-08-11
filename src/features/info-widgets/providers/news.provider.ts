@@ -1,5 +1,6 @@
 import { NEWS_ALLOWED_HOSTS, NEWS_FEED_URL, NEWS_ITEM_LIMIT } from "@/config/constants";
 import { type ExternalFetchResult, fetchExternalText } from "@/lib/external-fetch";
+import { logger } from "@/lib/logger";
 import { parseRssItems } from "@/lib/rss";
 
 import { newsSnapshotSchema, type NewsSnapshot } from "../schemas/snapshots";
@@ -38,7 +39,7 @@ export async function fetchNews(): Promise<ExternalFetchResult<NewsSnapshot>> {
   // değişmiş olabilir (ADR-016 bedel 1). Boş kart göstermek yerine başarısız
   // sayılıyor, böylece bayat veri veya dürüst bir hata durumu devreye giriyor.
   if (!parsed.success || parsed.data.items.length === 0) {
-    console.error("[EXTERNAL:news-rss] akıştan kullanılabilir başlık çıkarılamadı");
+    logger.error("external_payload_unusable", { provider: "news-rss" });
 
     return { ok: false };
   }

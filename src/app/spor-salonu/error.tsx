@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { AlertCircleIcon } from "lucide-react";
 import { useEffect } from "react";
 
@@ -12,12 +13,13 @@ import { messages } from "@/config/messages";
  *
  * KULLANICIYA İÇ DETAY GÖSTERİLMEZ — `error.message` ekrana basılmaz; stack
  * trace, SQL veya dosya yolu içerebilir (03-api-guidelines.md). Ayrıntı
- * sunucu log'una gidiyor (Sentry adım 18'de bağlanacak).
+ * hata takibine gidiyor (Sentry, adım 18a).
  */
-export default function GymError({ reset }: { error: Error; reset: () => void }) {
+export default function GymError({ error, reset }: { error: Error; reset: () => void }) {
   useEffect(() => {
-    console.error("[SPOR SALONU] beklenmeyen hata");
-  }, []);
+    // Önceki hâl yalnızca sabit bir metin yazıyordu, yani hata KAYBOLUYORDU.
+    Sentry.captureException(error);
+  }, [error]);
 
   return (
     <div className="page-shell flex flex-col items-start gap-4 py-8">

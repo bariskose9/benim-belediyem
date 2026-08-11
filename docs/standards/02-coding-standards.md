@@ -30,6 +30,16 @@
 - "Ne" değil **"neden"** yazılır. Kodun kendisi "ne"yi anlatmalı.
 - Ölü kod yorum satırına alınmaz, silinir (git'te duruyor zaten).
 - `TODO` bırakılacaksa: `// TODO(#issue-no): <ne yapılacak>` — issue'suz TODO yasak.
+- ⛔ **BİR "NEDEN" YAZMADAN ÖNCE İDDİAYI ÖLÇ.** Yorum bir davranış iddiası
+  içeriyorsa ("bu sıra önemli", "bu kontrol şunu engelliyor"), iddiayı geçici
+  olarak BOZ ve testin kırmızıya döndüğünü gör. Dönmüyorsa iddian yanlıştır.
+
+  Bir projede yaşandı: "desenlerin sırası önemli, yoksa kartın ilk 11 hanesi
+  kimlik sanılır" yazılmıştı; sıra ters çevrildi ve testler yeşil kaldı. Gerçek
+  koruma sıra değil, düzenli ifadedeki lookaround'lardı. Yorum düzeltildi.
+
+  **Yanlış bir gerekçe, yorumsuz bırakmaktan kötüdür:** sonraki geliştirici onu
+  doğru sanıp üzerine karar kurar ve gerçek korumayı fark etmeden kaldırabilir.
 
 ## Sihirli değerler
 Sayı ve metin sabitleri koda gömülmez; `src/config/` altında adlandırılır.

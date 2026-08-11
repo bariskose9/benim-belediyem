@@ -171,6 +171,38 @@ Kim, ne zaman, hangi kayıtta, ne yaptı — ayrı `audit_logs` tablosunda tutul
 - Hata takip aracına gönderilen veriler maskelenir.
 - Üçüncü parti bir servise veri gönderiliyorsa bu listelenir ve gerekçelendirilir.
 
+### ⛔ ÜÇÜNCÜ TARAF SDK'SININ VARSAYILANLARI DENETLENİR VE TESTLE KİLİTLENİR
+
+Hata takibi ve analitik SDK'larının varsayılan ayarı genellikle **"elinden
+geleni topla"**dır. Kurulum sihirbazına güvenmek, kişisel veriyi sessizce
+yurt dışına göndermek demek olabilir. Bir projede SDK'nın kendi tip tanımından
+okunan varsayılanlar:
+
+| Ayar | Varsayılan | Ne anlama gelirdi |
+|---|---|---|
+| HTTP istek gövdesi | toplanır | Kayıt formunun tamamı: şifre + kimlik numarası |
+| Çerezler | toplanır | Oturum çerezi |
+| HTTP başlıkları | toplanır | `Authorization`, `Cookie` |
+| Veritabanı sorgu verisi | toplanır | Sorgunun PARAMETRE DEĞERLERİ |
+| Yığın çerçevesi değişkenleri | toplanır | Yereldeki `password`, `nationalId` |
+| Adres sorgu parametreleri | toplanır | Tek kullanımlık jetonlar |
+
+**Yapılacak:** her birini açıkça kapat ve **bir birim testiyle kilitle**. Test
+bir gerileme kapısıdır: SDK yükseltmesi veya bir başkasının "şunu da açalım"
+demesi kırmızıya döner.
+
+### ⛔ OTURUM TEKRARI (session replay) kişisel veri toplayan ekranlarda AÇILMAZ
+Kullanıcının ekranını kaydeder. Maskeleme seçenekleri açık olsa bile **kaydın
+kendisi** yeni bir işleme faaliyetidir ve aydınlatma metninde yazmıyorsa
+hukuki dayanağı yoktur. Açılacaksa sıra: ADR → aydınlatma metni → rıza → kod.
+
+### ⛔ HER SAYFA GÖRÜNTÜLEMESİNDE ÜÇÜNCÜ SERVİSE PİNG ATILMAZ
+Hata takip SDK'ları varsayılan olarak "oturum izleme" yapar: hiçbir hata
+olmadan, her sayfa yüklemesinde olay gönderir. Çerez politikasında "ölçüm ve
+istatistik yapılmıyor" yazan bir sitede bu, yazdığın cümleyi yanlışlar.
+**Kapat; üçüncü servise yalnızca gerçek bir hata olduğunda istek gitsin.**
+Tarayıcıda ölçerek doğrula: temiz sayfa açılışında sıfır istek olmalı.
+
 ## Erişim
 - En az yetki ilkesi: her rol yalnızca işini yapacak kadar erişir.
 - Üretim veritabanına doğrudan erişim istisnadır; yapıldığında kaydedilir.

@@ -8,6 +8,7 @@ import { renewMembershipPeriod } from "@/features/gym/services/membership-billin
 import { syncMembershipNotifications } from "@/features/notifications/services/membership-notification.service";
 import { systemActorIpHash } from "@/features/scheduled-tasks/services/system-actor";
 import type { ScheduledTask } from "@/features/scheduled-tasks/types";
+import { logger } from "@/lib/logger";
 
 /**
  * Aidat tahsilatı ve yenileme hatırlatması (PRD §5.6 · teknik borç #55).
@@ -67,7 +68,10 @@ export const renewMembershipsTask: ScheduledTask = {
 
         if (outcome.status === "charged") charged += 1;
       } catch (error) {
-        console.error("[CRON] üyelik yenilemesi başarısız", { membershipId: membership.id, error });
+        logger.error("cron_membership_renewal_failed", {
+          membershipId: membership.id,
+          error,
+        });
       }
     }
 
@@ -104,7 +108,7 @@ export const sendRenewalRemindersTask: ScheduledTask = {
       try {
         written += await syncMembershipNotifications({ userId: membership.userId, now });
       } catch (error) {
-        console.error("[CRON] yenileme hatırlatması yazılamadı", {
+        logger.error("cron_renewal_reminder_failed", {
           membershipId: membership.id,
           error,
         });

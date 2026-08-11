@@ -156,9 +156,9 @@ describe("sunucu ortam değişkenleri", () => {
 
   it("boş string'i 'verilmemiş' sayar", () => {
     // `.env` dosyalarında `KEY=` yaygındır; bu boş metin değil, eksik değer demektir.
-    const parsed = parseEnv(serverEnvSchema, { ...validServerEnv, SENTRY_DSN: "" }, "test");
+    const parsed = parseEnv(serverEnvSchema, { ...validServerEnv, SENTRY_ORG: "" }, "test");
 
-    expect(parsed.SENTRY_DSN).toBeUndefined();
+    expect(parsed.SENTRY_ORG).toBeUndefined();
   });
 
   it("İzmir koordinatlarını varsayılan olarak kullanır", () => {

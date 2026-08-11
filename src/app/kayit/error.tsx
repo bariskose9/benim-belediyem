@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { AlertCircleIcon } from "lucide-react";
 import { useEffect } from "react";
 
@@ -12,14 +13,14 @@ import { messages } from "@/config/messages";
  *
  * Kullanıcıya İÇ DETAY GÖSTERİLMEZ — `error.message` ekrana basılmaz; stack
  * trace, SQL veya dosya yolu içerebilir (03-api-guidelines.md). Ekranda genel
- * ve ne yapılacağını söyleyen Türkçe bir mesaj var; ayrıntı sunucu log'una
- * (ileride Sentry'ye, adım 18) gidiyor.
+ * ve ne yapılacağını söyleyen Türkçe bir mesaj var; ayrıntı hata takibine
+ * (Sentry, adım 18a) gidiyor.
  */
-export default function RegisterError({ reset }: { error: Error; reset: () => void }) {
+export default function RegisterError({ error, reset }: { error: Error; reset: () => void }) {
   useEffect(() => {
-    // Ayrıntı yalnızca geliştirici konsoluna; kullanıcıya değil.
-    console.error("[KAYIT] beklenmeyen hata");
-  }, []);
+    // Önceki hâl yalnızca sabit bir metin yazıyordu, yani hata KAYBOLUYORDU.
+    Sentry.captureException(error);
+  }, [error]);
 
   return (
     <div className="flex flex-col items-start gap-4">
