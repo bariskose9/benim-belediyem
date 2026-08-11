@@ -73,6 +73,51 @@ Tipik ödenen bedeller (gerçek örneklerden):
 - Bir kütüphanenin önerdiği yol değişmiştir; ezberden verilen kurulum,
   projenin yazılı bir kararını sessizce bozan bir paket getirir
 
+## ⛔ GERÇEK PROJE VARSAYILANI — demo çözümü varsayılan olamaz
+
+Bu proje bir **öğrenme projesi** olabilir; ama **öğrenilen şey gerçek üretim
+pratiğidir.** İki seçenek arasında kalındığında ölçüt "hangisi daha hızlı
+biter" veya "portföyde daha iyi görünür" değil, **"gerçek kullanıcısı ve
+gerçek nöbetçisi olan bir üründe hangisi doğru olurdu"**dur.
+
+**Kural:** Her teknik seçimde önce sektörde yerleşik pratiği tespit et ve
+**varsayılan olarak onu uygula.** Ondan sapılacaksa sapma bilinçli, yazılı ve
+gerekçeli olur — sessizce değil.
+
+### Bu neden bir kural, tercih değil
+
+Demo kısayolu tek başına zararsız görünür; zarar **birikince** çıkar. Kısayolla
+yazılan kod, gerçek yüke, gerçek saldırgana ve gerçek nöbetçiye çarptığında
+"düzeltilecek bir detay" değil **yeniden yazılacak bir katman** olur. Üstelik
+kısayol öğrenilen alışkanlığı da bozar: yanlış refleks bir sonraki projeye
+bedava taşınır.
+
+### Sapma nasıl yazılır
+
+Gerçek pratikten sapan her karar şu üçünü söyler:
+
+1. **Yerleşik pratik ne?** (kaynağıyla — resmî doküman, RFC, sağlayıcı kılavuzu)
+2. **Biz ne yapıyoruz ve neden?** (somut kısıt: ücretsiz katman sınırı, gerçek
+   sağlayıcının olmaması, kapsam dışılık)
+3. **Gerçeğine ne zaman ve nasıl geçilir?** (roadmap adımı veya teknik borç no)
+
+Kısıt gerçekse sapma meşrudur. ⛔ **Meşru olmayan tek şey, sapmayı yazmamaktır** —
+yazılmayan sapma, sonraki okuyucuya "burada doğru olan buymuş" diye görünür.
+
+⚠️ **"Portföy projesi" bir sapma gerekçesi DEĞİLDİR.** Portföyün değeri tam da
+gerçeğine benzemesindedir. Sahte olması gereken tek şey **veridir** (sahte kimlik
+servisi, sahte ödeme, uydurma isimler); **mühendislik sahte olmaz.**
+
+### Ölçütü tersinden oku
+
+Bir kararı savunurken şu cümlelerden birini kuruyorsan dur ve yeniden düşün:
+
+- "Nasıl olsa gerçek kullanıcı yok" → yarın var. Kod kalır
+- "Bu sadece bir demo" → demo olduğu için değil, **doğru olduğu için** yapılır
+- "Şimdilik böyle kalsın" → o hâlde teknik borç numarası nerede?
+- "Zaten depo herkese açık" → açık kaynak olmak, saldırı yüzeyini genişletmek
+  için gerekçe değildir. İkisi ayrı sorulardır
+
 ## Kapsam kontrolü
 İstenmeyen iyileştirme yapma. "Bu arada şunu da düzelttim" yasak —
 gördüğün sorunu **bildir**, ayrı iş olarak planla.
