@@ -558,6 +558,30 @@ Dal: `feature/uretime-hazirlik` (öneri)
 **Git**
 - **YENİ DALI HER ZAMAN `main`'DEN AÇ:**
   `git checkout main && git pull && git checkout -b <yeni-dal>`
+- ⛔ **YENİ (adım 17c) — 25 DAKİKA YEDİ, EN SİNSİ TUZAKLARDAN BİRİ:**
+  **AÇIK BİR PR VARKEN DAL AÇMA; önce onu merge et.**
+
+  Adım 17c'de dal, PR #48 (belge PR'ı) **merge edilmeden önce** `main`'den
+  açıldı. #48 tam da bu adımda baştan yazılan iki devir belgesine dokunuyordu,
+  yani PR açılınca **çakışma** doğdu. Sonuç:
+
+  ⚠️ **GitHub, çakışan bir PR'da `refs/pull/<N>/merge` referansını
+  ÜRETEMİYOR — ve `pull_request` iş akışları o referans üzerinde koştuğu için
+  HİÇ BAŞLAMIYOR.**
+
+  ⛔ **BU HATA SESSİZ.** PR'da kırmızı bir kontrol görünmüyor (kontrol hiç
+  oluşmuyor), Actions sayfasında uyarı yok, `gh run list` boş dönüyor.
+  "Actions bozulmuş" veya "faturalandırma sorunu" sanılıyor. Adım 17c'de üç
+  tetikleyici boşuna denendi (PR aç, kapat-yeniden aç, boş commit iterek
+  `synchronize`) — üçü de hiçbir koşu başlatmadı.
+
+  **TEŞHİS TEK KOMUT:**
+  `gh pr view <N> --json mergeable,mergeStateStatus`
+  → `CONFLICTING` / `DIRTY` görüyorsan sebep budur. CI'ı kurcalama.
+
+  **ÇÖZÜM (force-push YOK):** `git merge origin/main` → çakışmayı çöz →
+  commit → push. PR anında `MERGEABLE` olur ve iş akışları saniyeler içinde
+  başlar.
 
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
