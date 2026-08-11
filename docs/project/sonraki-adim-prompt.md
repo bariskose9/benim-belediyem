@@ -36,9 +36,14 @@ Roadmap adım **0 → 18d bitti**. Roadmap'te yazılı olarak **tek adım kaldı
 (Expo mobil uygulama)**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- ⚠️ **Adım 18d bu satır yazılırken commit kapısında bekliyordu.** Merge edilip
-  edilmediğini `git log --oneline -3` ile ve `/api/health` içindeki `commit`
-  alanıyla **teyit et**
+- ✅ **Adım 18d MERGE EDİLDİ ve CANLIDA** (PR #64 → `main` = `a07c99d`).
+  ⭐ Bu satır merge'den SONRA yazıldı. Dağıtım doğrulandı:
+  `commit: a07c99d`, `db: ok`. Duman testi temiz — altı sayfa 200 döndü ve
+  hepsinde nonce'lu CSP var, `script-src`'de `unsafe-inline` YOK.
+  `vercel.live` production'a sızmadı (0). Yine de körü körüne güvenme:
+  `git log --oneline -3` ve `curl -s .../api/health` ile teyit et
+- ⛔ **AMA BİR SORUN AÇIK: canlıda Turnstile bulmacası çizilmiyor (borç #113).**
+  Aşağıda ayrıntısı var ve **sonraki oturumun ilk işi**
 - Gerçek kullanıcı 0
 - Hata takibi (Sentry) canlıda ve uçtan uca doğrulanmış
 
@@ -76,6 +81,27 @@ ve üç borç ödendi. **Bilinen kritik/yüksek açık: 0.**
 4. ⭐ **BİR KIRILMAYI SUÇLAMADAN ÖNCE KONTROLLÜ DENEY YAP.** Turnstile iframe'i
    çizilmeyince bunu CSP'ye yormak çok kolaydı. Proxy tamamen kaldırıldı,
    yeniden derlendi, ölçüm tekrarlandı — **iframe CSP olmadan da çizilmiyordu.**
+
+## ⛔ İLK İŞ — BORÇ #113: CANLIDA TURNSTILE ÇİZİLMİYOR
+
+`/kayit` sayfasında bulmaca konteyneri var (71,5 px) ama içi boş — yalnızca
+`<input type="hidden" name="cf-turnstile-response">`, **iframe yok**.
+
+⭐ **CSP KAYNAKLI DEĞİL, ÖLÇÜLEREK ELENDİ.** Sıkı CSP altında, production'da,
+Cloudflare'ın resmî test anahtarıyla `window.turnstile.render()` çağrıldı:
+**`callback` tetiklendi ve jeton üretildi.** Belge de doğruluyor — gereken tek
+şey `script-src` + `frame-src` (ikisi de var) ve "Turnstile works with
+strict-dynamic". Production'da `110200` hatası da YOK, yani alan adı yetkili.
+Geriye kalan tek fark **gerçek site anahtarı**.
+
+**Sıra (panelden bakılacak):**
+1. Turnstile panelinde site anahtarının **widget modu** ne? "Invisible" veya
+   "Managed" ise kutu zaten çizilmez ve davranış DOĞRU olabilir
+2. Vercel'deki `NEXT_PUBLIC_TURNSTILE_SITE_KEY` panel değeriyle aynı mı
+3. Hostname Management'ta `benim-belediyem.vercel.app` yazılı mı
+
+⚠️ **Bu çözülene kadar kayıt akışının canlıda uçtan uca çalıştığı
+VARSAYILMAMALI** — sunucu boş jetonu reddediyor.
 
 ## ⚠️ İKİ KONU PROJE SAHİBİNİN KARARINI BEKLİYOR
 
