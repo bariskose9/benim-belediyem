@@ -14,7 +14,6 @@ import {
 } from "@/features/auth/repositories/user.repository";
 import { assertBotCheckPassed } from "@/features/auth/services/bot-check";
 import { isAdultOn } from "@/features/auth/services/registration-age.service";
-import { matchStaffMember } from "@/features/auth/services/staff-matching.service";
 import type { IdentityChallengePayload } from "@/features/identity/schemas/identity-challenge.schema";
 import { lookupIdentity } from "@/features/identity/services/identity-lookup.service";
 import { recordAuditLog } from "@/lib/audit";
@@ -48,7 +47,18 @@ import { hashActorIp } from "@/lib/rate-limit";
  *  5. "Bu numara başka hesapta mı" — `lookupIdentity`'DEN SONRA, tıpkı kayıt
  *     akışındaki gibi: önce bakılsaydı sabit yanıt süresinin dışında kalır ve
  *     zamanlama üzerinden bir hesap sayımı kanalı açılırdı.
- *  6. Personel eşleştirme — YALNIZCA sunucu hesaplar (`matchStaffMember`).
+ *
+ * ═══ ⛔ BU AKIŞ ARTIK PERSONEL YETKİSİ VERMİYOR (adım 17c · ADR-017 ilke 2) ═══
+ * Altıncı bir adım vardı: `matchStaffMember(nationalIdHash)`. Kimlik numarası
+ * personel rehberinde eşleşirse hesap AYNI İŞLEMDE personel oluyordu. Bu,
+ * "kim olduğun" sorusunun cevabından "ne yapmaya yetkili olduğun" sorusunun
+ * cevabını türetmekti — ve T.C. kimlik numarası Türkiye'de gizli bilgi
+ * olmadığı için, kurbanın numarasını bilen biri onun hastane ve spor salonu
+ * yetkisini de kazanıyordu (teknik borç #76).
+ *
+ * Yetki artık YALNIZCA `src/features/staff-verification/` akışından geliyor:
+ * kod personel rehberindeki kurumsal e-posta adresine gidiyor, yani kanıt
+ * kullanıcının BİLDİĞİ bir şey değil, işverenin kanalına SAHİP OLDUĞU.
  *
  * KATMAN: bu dosya iş kurallarını tutar. HTTP, çerez ve durum kodu bilgisi
  * YOKTUR — onlar route katmanının işi (01-architecture.md).
@@ -65,8 +75,6 @@ export type VerifyIdentityInput = {
 };
 
 export type VerifyIdentityResult = {
-  /** Personel eşleşmesinin sonucu — ekranda ne göstereceğini belirler. */
-  isStaff: boolean;
   /** KPS'ten gelen gerçek ad soyad; geçici Google adının yerine geçti. */
   fullName: string;
 };
@@ -110,7 +118,6 @@ export async function verifyIdentity(input: VerifyIdentityInput): Promise<Verify
    */
   if (owner) throw new IdentityAlreadyRegisteredError();
 
-  const staffMemberId = await matchStaffMember(nationalIdHash);
   const fullName = `${identity.firstName} ${identity.lastName}`;
 
   const outcome = await attachVerifiedIdentity({
@@ -125,7 +132,6 @@ export async function verifyIdentity(input: VerifyIdentityInput): Promise<Verify
     birthDate,
     registeredProvince: identity.registeredProvince,
     registeredDistrict: identity.registeredDistrict,
-    staffMemberId,
     verifiedAt: now,
   });
 
@@ -148,5 +154,5 @@ export async function verifyIdentity(input: VerifyIdentityInput): Promise<Verify
     ipHash: hashActorIp(input.actorIp),
   });
 
-  return { isStaff: staffMemberId !== null, fullName };
+  return { fullName };
 }

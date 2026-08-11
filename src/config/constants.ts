@@ -964,3 +964,37 @@ export const ACCOUNT_DESTRUCTIVE_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
  * değiştirmek değiştirir.
  */
 export const ACCOUNT_EXPORT_FORMAT_VERSION = "1" as const;
+
+/**
+ * Personel doğrulaması — KURUMSAL ADRES başına kod gönderim bütçesi
+ * (adım 17c · ADR-017 ilke 2).
+ *
+ * ⛔ `OTP_SEND_RATE_LIMIT_MAX`'TEN AYRI BİR ANAHTAR ve bu bilinçli. Bu bütçe,
+ * adres rehberde OLSA DA OLMASA DA — yani gerçek kod gönderilse de
+ * gönderilmese de — aynı şekilde tükeniyor. Ortak sayaç kullanılsaydı, yalnızca
+ * gerçek yol sayacı harcardı ve "429 aldım demek ki bu adres rehberde var"
+ * diyen bir hesap sayımı kanalı açılırdı.
+ */
+export const STAFF_VERIFICATION_SEND_RATE_LIMIT_MAX = 3;
+export const STAFF_VERIFICATION_SEND_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * Personel doğrulaması — KULLANICI başına bütçe.
+ *
+ * NEDEN İKİNCİ BİR BACAK: adres bazlı bütçe tek başına, tek bir hesabın
+ * rehberdeki 100 personelin hepsine sırayla kod göndermesini engellemiyor.
+ * Bu bacak hem o taramayı hem de personelin posta kutusunu meşgul etme
+ * (griefing) yolunu kapatıyor. Sayaç saldırganın KENDİ hesabına yazıldığı için
+ * hiçbir şey sızdırmıyor.
+ */
+export const STAFF_VERIFICATION_USER_RATE_LIMIT_MAX = 5;
+export const STAFF_VERIFICATION_USER_RATE_LIMIT_WINDOW_MS = 15 * 60_000;
+
+/**
+ * E-posta adresi üst sınırı — RFC 5321 §4.5.3.1.3'ün yol (`path`) sınırı.
+ *
+ * NEDEN VAR: sınırsız uzun bir adres, özet ve hız sınırı hesaplarını gereksiz
+ * yere pahalılaştırır ve bir hizmet dışı bırakma yüzeyi açar. Kayıt şemasında
+ * bu sınır yok (teknik borç) — yeni yazılan şemalar sınırla geliyor.
+ */
+export const EMAIL_MAX_LENGTH = 254;

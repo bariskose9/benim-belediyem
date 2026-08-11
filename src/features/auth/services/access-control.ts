@@ -36,9 +36,19 @@ export function evaluateAccess(
 
   if (requirement === "authenticated") return "allowed";
 
-  // Personel kademesi kimlik doğrulamasını KAPSAR: personel kaydı kimlik
-  // numarası eşleşmesiyle kurulduğu için doğrulanmamış bir personel olamaz.
-  // Yine de sıra korunuyor — veri bozulsa bile kullanıcı doğru mesajı görür.
+  /**
+   * Personel kademesi kimlik kademesini KAPSAR.
+   *
+   * ⚠️ GEREKÇE ADIM 17c'DE DEĞİŞTİ. Eskiden personel kaydı kimlik numarası
+   * eşleşmesiyle kurulduğu için "doğrulanmamış personel" zaten imkânsızdı.
+   * Artık yetki ayrı bir akıştan geliyor (ADR-017 ilke 2) ve kapsama
+   * KENDİLİĞİNDEN doğru değil, KURAL olarak sağlanıyor: personel doğrulaması
+   * `kps_verified` olmayan hesabı reddediyor
+   * (`staff-verification.service.ts` → `assertEligible`).
+   *
+   * Bu satır o kuralın ikinci katmanı: veri elle bozulsa bile kullanıcı
+   * doğru mesajı görür ve personel ekranı kimliği belirsiz bir hesaba açılmaz.
+   */
   if (session.identityStatus !== "kps_verified") return "identity_required";
 
   if (requirement === "identity_verified") return "allowed";

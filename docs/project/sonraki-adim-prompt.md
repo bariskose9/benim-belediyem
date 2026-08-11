@@ -1,47 +1,22 @@
-# Sonraki oturum için hazır prompt — adım 17c
+# Sonraki oturum için hazır prompt — adım 18
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 17c bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 18 bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **17c**'ye geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **18**'e geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
-- `docs/project/roadmap.md` — adım 17c satırı ve teknik borç listesi
-- `docs/project/decisions/ADR-017-*.md` — **ilke 2 bu adımın tam konusu**
+- `docs/project/roadmap.md` — adım 18 satırı ve teknik borç listesi (#92-#95 YENİ)
+- `docs/project/decisions/ADR-017-*.md` — 17b ve 17c bu ADR'den doğdu
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
 
 ## DURUM
 
-> ### 📌 ÖNCEKİ OTURUMUN KAPANIŞ NOTLARI (2026-08-11, TR 03:20)
->
-> **Adım 17b canlıya çıktı ve duman testi geçti.** Kapanışta yarım kalan
-> yalnızca şunlar:
->
-> | İş | Durum | Kim yapacak |
-> |---|---|---|
-> | PR #47 (adım 17b) | ✅ merge edildi, dal silindi, canlıda | bitti |
-> | PR #48 (belge notu) | ⏳ **açık bırakıldı** — Playwright ve Docker kontrolleri hâlâ koşuyordu | **sen: `gh pr checks 48` → yeşilse merge et** |
-> | 17b elle testi (B6) | ⛔ hiç yapılmadı | proje sahibi |
-> | Cron ilk koşusu (B4) | ⏳ bakılmadı — sebebi aşağıda | proje sahibi |
-> | `LEGAL_*` panel işi | ⛔ hâlâ girilmedi | proje sahibi |
->
-> **Canlıda fiilen doğrulananlar** (2026-08-11, commit `1b853cf`):
-> `/hesap-silindi` 200 · girişsiz `/hesabim/verilerim` 307 · girişsiz
-> `GET /api/account/export` 401 · `POST /api/account/deletions` 401 ·
-> `POST /api/account/identity-unlinks` 401 · `PUT /api/account/phone` 401 ·
-> sağlık ucu `db: ok`.
->
-> ⏰ **CRON NEDEN KONTROL EDİLMEDİ — bu bir atlama değil, zamanlama kararı:**
-> oturum UTC 00:20'de kapandı ve cron penceresi **00:00–00:59 UTC** arası.
-> Yani koşu ya birkaç dakika önce olmuştu ya da henüz olmamıştı. O anda bakıp
-> "log yok" görmek **yanıltıcı bir negatif** üretirdi ve "cron çalışmıyor"
-> sanılabilirdi. Doğrusu pencere kapandıktan sonra bakmak.
-
-Roadmap adım **0 → 17b bitti** (15, 15b, 15c-1, 15c-2, 16, 17, 17b dahil).
+Roadmap adım **0 → 17c bitti** (15, 15b, 15c-1, 15c-2, 16, 17, 17b, 17c dahil).
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - **Kayıt, giriş, çıkış, oturum, şifre sıfırlama, Google ile giriş** çalışıyor
@@ -50,24 +25,52 @@ Roadmap adım **0 → 17b bitti** (15, 15b, 15c-1, 15c-2, 16, 17, 17b dahil).
   · **Destek talebi** · **Bilgi panosu** · **Profil merkezi** · **Hakkımızda**
   · **Profilden Google bağlantısı** · **Kimlik doğrulama** · **Planlı görevler**
   · **Yasal sayfalar + çerez rızası** · **Hesap yönetimi ve veri hakları**
-  çalışıyor
-- ✅ **Adım 17b CANLIDA** (2026-08-11, commit `1b853cf`, PR #47). Sağlık ucu
-  `db: ok`; canlıda doğrulandı: `/hesap-silindi` 200, girişsiz
-  `/hesabim/verilerim` 307, girişsiz `GET /api/account/export` ve üç yazma
-  ucunun hepsi 401. `feature/hesap-yonetimi` dalı merge edilip **silindi**
-- ⚠️ **17b GERÇEK CİHAZDA HİÇ DENENMEDİ** — proje sahibi elle testi sonraki
-  oturuma bıraktı (aşağıdaki B6 listesi)
+  · **Personel yetkisi doğrulaması** çalışıyor
 - **Hizmet ızgarasında KAPALI HİZMET KALMADI**
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
-- ⚠️ **Yeni dal açtığında:** dal adresini
-  (`benim-belediyem-git-<dal>-barisss.vercel.app`) Cloudflare Turnstile
-  hostname listesine ekle — **yalnızca o ekranda BOT KUTUSU varsa.**
-  Teknik borç #31. **Liste hâlâ 10 sınırında.**
-  ⛔ **ADIM 15c-2, 16, 17 VE 17b'DE PANELE HİÇ GİRİLMEDİ** — proje sahibi
-  preview'ı atlayıp doğrudan production'a çıkıyor.
-  ✅ **Adım 17b'de gerekmedi:** `/hesabim/verilerim` giriş gerektiriyor ama
-  bot kutusu TAŞIMIYOR. Turnstile yalnızca kayıt, giriş ve kimlik doğrulama
-  ekranlarında var — bu ayrımı bilmek gereksiz panel işini önlüyor
+
+> ### 📌 ÖNCEKİ OTURUMUN KAPANIŞ NOTLARI (2026-08-11, TR ~04:20)
+>
+> | İş | Durum | Kim yapacak |
+> |---|---|---|
+> | PR #48 (belge notu) | ✅ merge edildi (UTC 00:31) | bitti |
+> | Adım 17c kodu | ✅ yazıldı, 285 E2E + 696 birim testi yeşil | PR/deploy durumu aşağıda |
+> | Cron ilk koşusu | ⛔ **ÇALIŞMAMIŞ — ÖLÇÜLDÜ** | aşağıya bak |
+> | Toplu elle test | ⛔ **YEDİNCİ ve SEKİZİNCİ kez ertelendi** (oturum başında + commit kapısında) | proje sahibi |
+> | `LEGAL_*` panel işi | ⛔ hâlâ girilmedi | proje sahibi |
+
+## ⏰ CRON CANLIDA HİÇ ÇALIŞMADI — İLK GÜNDEM MADDESİ
+
+**2026-08-11 UTC 01:06'da production veritabanından ÖLÇÜLDÜ** (pencere
+00:00–00:59 UTC kapandıktan SONRA, yani bu yanıltıcı bir negatif DEĞİL):
+
+| Ölçüm | Sonuç |
+|---|---|
+| `audit_logs` → `scheduled_task_run` (son 3 gün) | **0 kayıt** |
+| En ileri `doctor_slots.starts_at` | **2026-08-13** (cron çalışsaydı ~2026-08-25 olmalıydı) |
+
+**Muhtemel sebep:** PR #48 **UTC 00:31'de**, yani cron penceresinin tam
+ortasında merge edildi ve production'a yeni bir dağıtım tetikledi (canlı commit
+`6e05fd5`). Koşunun dağıtım sırasında düşmüş olması kuvvetle muhtemel. İkinci
+ihtimal: ücretsiz planda saat garanti değil ve **kaçırılan koşu yeniden
+denenmiyor, log bile üretmiyor.**
+
+⛔ **DERS: UTC 00:00–00:59 arasında production'a dağıtım tetikleyen merge YAPMA.**
+
+**Bu oturumda yapılacak:** UTC 01:00'den sonra aynı sorguyu tekrarla. Yine 0
+çıkarsa sebep dağıtım değildir; Vercel → Settings → Cron Jobs → View Logs
+incelenmeli ve `CRON_SECRET` sorgulanmalı.
+
+**Production veritabanına okuma erişimi** (bu oturumda kuruldu, çalışıyor):
+
+```
+npx neonctl connection-string production --project-id lively-night-99128871 \
+  --org-id org-still-water-86075112 --pooled false
+```
+
+Çıkan adresi `PROD_DATABASE_URL` olarak verip **proje kökünde `.mts` uzantılı**
+bir betik koştur (`npx tsx betik.mts`). ⛔ Betik **yalnızca okur** ve
+**commit edilmeden SİLİNİR**.
 
 ## 🔧 PANEL İŞİ — ZORUNLU, İKİ DEĞİŞKEN (adım 17'den DEVREDİYOR)
 
@@ -78,36 +81,40 @@ Roadmap adım **0 → 17b bitti** (15, 15b, 15c-1, 15c-2, 16, 17, 17b dahil).
 | `LEGAL_CONTROLLER_NAME` | Siteyi işleten **gerçek kişinin adı soyadı** |
 | `LEGAL_CONTACT_EMAIL` | KVKK başvurularının ulaşacağı **gerçek e-posta** |
 
-**Neden zorunlu ve neden ADIM 17b'DEN SONRA DAHA ÖNEMLİ:** artık kullanıcı
-hesabını silebiliyor ve ekranda "şu kayıtlar şu kanun gereği saklanıyor"
-yazıyor — bu, KVKK Yönetmeliği m.12/1-c anlamında resmî bir **bildirim**.
-Bildirimi yapan tarafın (veri sorumlusu) kim olduğunun belli olması gerekiyor.
+**Neden zorunlu:** kullanıcı hesabını silebiliyor ve ekranda "şu kayıtlar şu
+kanun gereği saklanıyor" yazıyor — bu, KVKK Yönetmeliği m.12/1-c anlamında
+resmî bir **bildirim**. Bildirimi yapan tarafın kim olduğu belli olmalı.
 Değişkenler boşken bildirim var ama **muhatabı yok**.
 
-⛔ **Bu değerler koda YAZILMADI ve yazılmayacak** — depo herkese açık. Ajan
-panele giremiyor, bu iş sende. Girdikten sonra **yeniden dağıtım gerekiyor**
+⛔ Bu değerler koda YAZILMADI ve yazılmayacak — depo herkese açık. Girdikten
+sonra **yeniden dağıtım gerekiyor**
 (`npx vercel redeploy <dagitim-url> --scope barisss`) ve `/gizlilik` sayfasının
 altında adının göründüğünü doğrula.
 
 ## 📱 TOPLU ELLE TEST — OTURUMUN BAŞINDA GÜNDEME GETİR
 
-> Proje sahibi bunu **2026-08-10'da ALTINCI kez erteledi.** Önce oturum
-> başında ("sonra — listeyi koru"), sonra adım 17b'nin commit kapısında
-> ("kontrolü yine sonraki session'a"). Liste eksilmedi; adım 17b'nin maddesi
-> (B6) eklendi ve o da **hiç elle denenmedi**.
+> Proje sahibi bunu **2026-08-11'de İKİ KEZ erteledi** — önce oturum başında
+> ("sonraya bırak, 17c'ye geç"), sonra adım 17c'nin commit kapısında
+> ("kontrolü yine sonrakilere bırakalım topluca"). Bu, listenin **YEDİNCİ ve
+> SEKİZİNCİ** ertelenmesi. Liste eksilmedi; adım 17c'nin maddesi (B7) eklendi.
 >
-> ⛔ **BU ARTIK KÜÇÜK BİR EKSİK DEĞİL.** Altı adımın (15, 15b, 15c-1, 15c-2,
-> 16, 17, 17b) gerçek cihaz doğrulaması birikmiş durumda. Otomatik testler ve
-> `mobile-375` ölçümü hepsinde yeşil, yani BİLİNEN bir arıza yok — eksik olan
-> yalnızca gerçek parmakla dokunma deneyimi. Ama liste büyüdükçe tek oturumda
-> bitirmek de zorlaşıyor. Sonraki oturum bunu **ilk gündem maddesi** yapsın ve
-> gerekirse listeyi ikiye bölmeyi önersin.
+> ⚠️ **DESEN ARTIK NET:** proje sahibi elle testi her seferinde "topluca sonra"
+> diye erteliyor ve liste her adımda büyüyor. Sonraki oturum bunu bir kez daha
+> "yapalım mı" diye sormakla yetinmesin — **listeyi ikiye bölünmüş hâlde
+> SUNSUN** (örn. "bu oturum yalnızca B5+B6+B7, kalanı sonraki") ki karar
+> "hepsi mi hiçbiri mi" olmaktan çıksın.
+>
+> ⛔ **YEDİ ADIMIN gerçek cihaz doğrulaması birikmiş durumda.** Otomatik testler
+> ve `mobile-375` ölçümü hepsinde yeşil, yani BİLİNEN bir arıza yok — eksik olan
+> yalnızca gerçek parmakla dokunma deneyimi. Sonraki oturum bunu **ilk gündem
+> maddesi** yapsın ve listeyi **ikiye bölmeyi ÖNERSİN** (artık tek oturumda
+> bitmez).
 > Kod yazmadan önce hatırlat ve **"şimdi mi yapalım, sonra mı?"** diye sor —
 > cevabı "sonra" ise bu bölümü olduğu gibi bırak, adım işine geç.
 >
 > Kapsanan teknik borçlar: **#50 · #62 · #73 · #83** + adım 15c-1 giriş
 > yöntemleri + adım 15c-2 kimlik doğrulama + adım 16 cron + adım 17 yasal
-> + adım 17b hesap yönetimi.
+> + adım 17b hesap yönetimi + adım 17c personel yetkisi.
 > Tamamlananları bu listeden ve roadmap'ten SİL, yarım kalanı bırak.
 
 **Nerede:** https://benim-belediyem.vercel.app (production) · **telefondan**
@@ -159,8 +166,7 @@ spor salonu ekranları yalnızca personele açık.
 
 > ✅ **PRODUCTION'DA ÇALIŞIYOR, panel işi GEREKMİYOR.**
 > ⚠️ Bu test **Google ile açılmış, kimliği doğrulanmamış** bir hesap istiyor.
-> Şifreyle giriş yapılan tohum hesaplarının kimliği ZATEN doğrulanmış — onlarda
-> ekran "kimliğiniz doğrulanmış" der ve form hiç çıkmaz (bu da geçerli bir test).
+> Şifreyle giriş yapılan tohum hesaplarının kimliği ZATEN doğrulanmış.
 
 1. **Google ile giriş yap** → `/hesabim` → "Kimliğiniz henüz doğrulanmadı"
    kartı görünüyor mu, "Kimlik durumu: Doğrulanmamış" yazıyor mu
@@ -174,94 +180,102 @@ spor salonu ekranları yalnızca personele açık.
    `docs/project/test-hesaplari.md` içindeki **sahte vatandaş** numaralarından
    HİÇBİR HESABA BAĞLI OLMAYAN birini kullan
 6. Doğru bilgilerle doğrula → "Kimliğiniz doğrulandı" + **gerçek ad soyad**
-   görünüyor mu → **"Devam et"** seni hastaneye geri götürüyor mu ve oradaki
-   mesaj **"yalnızca kurum personeline açıktır"** olarak DEĞİŞİYOR mu
-7. `/hesabim` → kimlik durumu "Nüfus kayıtlarıyla doğrulandı", ad soyad
+   görünüyor mu
+7. ⚠️ **ADIM 17c BURAYI DEĞİŞTİRDİ:** artık başarı panelinde "kurum personeli
+   olarak tanındınız" cümlesi **ÇIKMAMALI**. Onun yerine "kurum personeliyseniz
+   kurumsal e-postanızı da doğrulamanız gerekiyor" cümlesi ve **"Kurum personeli
+   doğrulaması"** düğmesi olmalı
+8. **"Devam et"** seni hastaneye geri götürüyor mu ve oradaki mesaj **"yalnızca
+   kurum personeline açıktır"** olarak DEĞİŞİYOR mu
+9. `/hesabim` → kimlik durumu "Nüfus kayıtlarıyla doğrulandı", ad soyad
    değişmiş, kimlik numarası **maskeli** (`912******32`) mi
-8. `/kimlik-dogrulama` adresini tekrar aç → form YOK, "Kimliğiniz doğrulanmış"
-   yazıyor mu
+10. `/kimlik-dogrulama` adresini tekrar aç → form YOK, "Kimliğiniz doğrulanmış"
+    yazıyor mu
 
 ### B4) ADIM 16 — PLANLI GÖREV (borç #83) — **BİLGİSAYARDAN**
 
-> ⚠️ **BU MADDE TELEFONDAN DEĞİL.** Ekranı yok; kanıt Vercel panelinde.
-> ✅ **Deploy 2026-08-10 18:22'de yapıldı**, yani ilk cron koşusu
-> **2026-08-11 gecesi** (TR 03:00–04:00).
-> 📌 **PROJE SAHİBİNİN NOTU (2026-08-10 gecesi): "cron'un ilk canlı koşusu bu
-> gece; YARIN bakılacak."** Yani bu madde **2026-08-11 sabahından itibaren**
-> yapılabilir durumda — sonraki oturum bunu ilk gündem maddesi yapsın.
-> ⚠️ **UTC 01:00'DEN ÖNCE BAKMA.** Pencere 00:00–00:59 UTC; içindeyken "log
-> yok" görmek koşunun hiç olmayacağı anlamına GELMEZ. 2026-08-11 00:20'de tam
-> bu sebeple bakılmadı.
-> ⛔ **VERCEL LOGLARI TEK KANIT DEĞİL.** Ücretsiz planda kaçırılan koşu log
-> bile üretmiyor; "bu iş bugün çalıştı mı" sorusunun güvenilir cevabı
-> `audit_logs` tablosundaki `scheduled_task_run` satırları. Panelde log
-> göremezsen production veritabanına bakmadan "çalışmadı" deme.
+> ⚠️ **BU MADDE TELEFONDAN DEĞİL.** Yukarıdaki "CRON CANLIDA HİÇ ÇALIŞMADI"
+> bölümünü oku — bu artık bir doğrulama değil, bir **arıza araştırması**.
 
 1. Vercel → proje → **Settings → Cron Jobs** → `/api/cron/daily` satırı
    görünüyor mu, zamanlaması `0 0 * * *` mi
 2. Aynı satırda **View Logs** → gece bir çağrı düşmüş mü, yanıt **200** mü
-   (401 görürsen `CRON_SECRET` production'da yok demektir — ama girildi,
-   `altyapi-durumu.md` ortam değişkeni matrisine bak)
-3. Yanıt gövdesinde `"failedCount": 0` ve **dokuz görev** var mı
-4. **Hastane**'ye gir → gün şeridinde **14 gün** görünüyor mu. ⛔ Adım 16'dan
-   önce production'da saatler 2026-08-15'te bitiyordu (borç #38); cron ilk kez
-   çalıştıktan sonra takvim her gün 14 güne tamamlanıyor olmalı
+   (401 görürsen `CRON_SECRET` production'da yok demektir)
+3. **Hastane**'ye gir → gün şeridinde **14 gün** görünüyor mu
 
 ### B5) ADIM 17 — YASAL SAYFALAR VE ÇEREZ BANDI
 
 1. Siteyi **temiz bir tarayıcıda** (veya gizli sekmede) aç → altta
    **"Bu sitede yalnızca zorunlu çerezler var"** bandı çıkıyor mu
 2. Bantta **yalnızca TEK düğme** ("Anladım") ve bir "Ayrıntılar" bağlantısı
-   olmalı — ⛔ "Reddet" düğmesi ÇIKMAMALI (zorunlu olmayan çerez yok)
+   olmalı — ⛔ "Reddet" düğmesi ÇIKMAMALI
 3. **"Anladım"**a bas → bant kayboluyor ve **aynı sayfada mı kalıyorsun**
-   (ana sayfaya atmamalı) → sayfayı yenile, bant geri gelmemeli
-4. Alt bilgide **dört yasal bağlantı** görünüyor mu (KVKK · Çerez · Kullanım
-   Şartları · İletişim) → dördünü de aç, hepsinde **yürürlük tarihi** ve
-   "bu gerçek bir belediye değildir" uyarısı var mı
+   → sayfayı yenile, bant geri gelmemeli
+4. Alt bilgide **dört yasal bağlantı** görünüyor mu → dördünü de aç, hepsinde
+   **yürürlük tarihi** ve "bu gerçek bir belediye değildir" uyarısı var mı
 5. `/gizlilik` → en altta **veri sorumlusu** kutusu. ⚠️ Panel işini yaptıysan
-   **adın ve e-postan** görünmeli; yapmadıysan "işleten gerçek kişi" yazar
+   **adın ve e-postan** görünmeli
 6. `/cerez-politikasi` → tablo **8 satır** listeliyor mu · "Ölçüm ve istatistik"
    ile "Pazarlama" grupları **boş** diyor mu · **"Tercihimi geri al"**a bas →
    durum değişiyor ve bant yeniden çıkıyor mu
 7. Telefonda: çerez tablosu **kendi içinde yana kayıyor** mu, **sayfa yana
    kaymıyor** mu
-8. Kayıt akışının **son adımında** (doğrulama kodları ekranı) "Kaydınızı
-   tamamladığınızda Kullanım Şartları'nı ve KVKK Aydınlatma Metni'ni …"
-   cümlesi ve iki bağlantı görünüyor mu
+8. Kayıt akışının **son adımında** Kullanım Şartları ve KVKK bağlantıları var mı
 
-### B6) ADIM 17b — HESAP YÖNETİMİ VE VERİ HAKLARI (YENİ)
+### B6) ADIM 17b — HESAP YÖNETİMİ VE VERİ HAKLARI
 
 > ⛔ **SON MADDEYİ (hesap silme) EN SONA BIRAK ve ayrı bir hesapla yap** —
-> geri alınamaz. Silinen hesabın kimlik numarası serbest kalıyor, yani o
-> numarayla yeniden kayıt olabilirsin, ama şifresi ve adresleri gitmiş olur.
+> geri alınamaz.
 
 1. **Hesabım** → "Verilerim ve hesap yönetimi" kartı görünüyor mu, tıklayınca
    `/hesabim/verilerim` açılıyor mu
 2. **"Verilerimi indir (JSON)"** → dosya iniyor mu, adı
    `benim-belediyem-verilerim-<tarih>.json` mi
-3. Dosyayı aç (telefonda zor olabilir, bilgisayardan bak): içinde **profil,
-   siparişler, rıza kayıtları** var mı · kimlik numarası **maskeli** mi
-   (`978******68`) · ⛔ **şifre veya oturum bilgisi GEÇMEMELİ**
+3. Dosyayı aç (bilgisayardan): içinde **profil, siparişler, rıza kayıtları**
+   var mı · kimlik numarası **maskeli** mi · ⛔ **şifre veya oturum bilgisi
+   GEÇMEMELİ**
 4. **Cep telefonum** → numarayı değiştir → kaydet → rozet **"Doğrulanmadı"**a
-   dönüyor mu. ⚠️ Bu bir arıza DEĞİL, bilinçli karar (borç #80 açıklaması)
+   dönüyor mu (bu bir arıza DEĞİL, bilinçli karar — borç #80)
 5. Hatalı numara yaz (`12345`) → "Geçerli bir cep telefonu numarası girin"
    çıkıyor mu
 6. **Kimlik bağlantım** → şifreyle giriş yapan tohum hesabında **"Şu an
-   çözülemiyor"** kutusu çıkmalı ve sebebi yazmalı (Google bağlantısı yok).
-   ⛔ "Kimlik bağlantımı çöz" düğmesi ÇIKMAMALI
+   çözülemiyor"** kutusu çıkmalı. ⛔ "Kimlik bağlantımı çöz" düğmesi ÇIKMAMALI
 7. **Hesabımı sil** kartında **iki liste** yan yana görünüyor mu:
    "Silinenler" ve "Saklananlar ve sebebi" → ikincisinde **"Türk Ticaret
-   Kanunu m.82"** geçiyor mu (bu bir yasal bildirim, kaybolursa arıza)
+   Kanunu m.82"** geçiyor mu (yasal bildirim, kaybolursa arıza)
 8. **"Hesabımı sil"** → onay paneli açılıyor mu, **şifre alanı** çıkıyor mu →
    **yanlış şifre** yaz → "Şifreniz doğrulanamadı" diyor mu ve hesap **duruyor**
    mu → **Vazgeç**'e bas
 9. ⏱️ **(İSTEĞE BAĞLI, GERİ ALINAMAZ)** Gözden çıkarabileceğin bir hesapla:
-   doğru şifreyle sil → `/hesap-silindi` sayfası açılıyor mu, "Saklananlar"
-   listesi orada da var mı → `/hesabim` adresini yaz → giriş ekranına
-   atıyor mu → **aynı kimlik numarasıyla yeniden kayıt olabiliyor musun**
+   doğru şifreyle sil → `/hesap-silindi` açılıyor mu → **aynı kimlik
+   numarasıyla yeniden kayıt olabiliyor musun**
 10. ⚠️ **Bilinen sorun (borç #91):** bandı hiç kapatmadıysan `/hesap-silindi`
-    sayfasında çerez bandı "Saklananlar" başlığını örtüyor. Bandı kapatınca
-    görünüyor — bu bilinen bir eksik, yeni bir arıza değil
+    sayfasında çerez bandı "Saklananlar" başlığını örtüyor
+
+### B7) ADIM 17c — PERSONEL YETKİSİ (YENİ)
+
+> ⛔ **CANLIDA BU AKIŞ TAMAMLANAMAZ ve bu BİLİNEN bir sınır (borç #92):**
+> tohum personel adresleri `@ornek.test` uzantılı ve oraya posta teslim
+> edilemez. Yani "kod gelmedi" **arıza değil, beklenen sonuç.** Test edilecek
+> şey ekranın bunu DÜRÜSTÇE söyleyip söylemediği.
+
+1. **Kimliği doğrulanmış ama personel OLMAYAN** bir hesapla gir (Google ile
+   açıp kimliğini doğruladığın hesap) → **Hesabım** → "Kurum personeli
+   doğrulaması" kartı görünüyor mu
+2. **Personel olan** bir tohum hesabıyla gir → bu kart **ÇIKMAMALI**, "Personel
+   durumu: Kurum personeli" yazmalı
+3. Karta bas → `/personel-dogrulama` açılıyor mu
+4. ⭐ Ekranda **"Kimliğinizi doğrulamış olmanız kurum personeli olduğunuzu
+   göstermez…"** cümlesi var mı (bu ADR-017'nin kullanıcıya anlatılmış hâli,
+   kaybolursa kullanıcı neden iki adım olduğunu anlayamaz)
+5. ⭐ **"Bu bir gösterim uygulamasıdır… @ornek.test… canlı ortamda teslim
+   edilemez"** uyarısı var mı (borç #92'nin kullanıcıya söylenmiş hâli)
+6. `/hakkimizda` rehberinden bir kurumsal adres kopyala → forma yaz → **Kod
+   gönder** → **"Bu adres kurum rehberinde kayıtlıysa…"** cümlesi çıkıyor mu
+7. **Var olmayan** bir adres yaz (örn. `hicyok@ornek.test`) → **AYNI cümle**
+   çıkıyor mu (çıkmazsa hesap sayımı koruması bozulmuş demektir — arıza)
+8. Rastgele bir kod gir → "Kod doğrulanamadı" tek tip mesajı çıkıyor mu
+9. 375px'te düzen bozuluyor mu, açık/koyu iki temada da okunuyor mu
 
 ### C) HER İKİ EKRAN İÇİN ORTAK
 
@@ -279,94 +293,81 @@ spor salonu ekranları yalnızca personele açık.
 > **Neden bekleme gerekiyor (D bölümü):** durumlar veritabanında bir kolonda
 > tutulmuyor, **okuma anında zamandan türetiliyor** (ADR-013).
 
-## ADIM 17b'DEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
+## ADIM 17c'DEN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
 
-- **`src/features/account/` YENİ BİR KATMAN**: `repositories/
-  data-export.repository.ts` (indirilecek veriyi okur),
-  `repositories/account-erasure.repository.ts` (SİLME ve KİMLİK ÇÖZME —
-  `users` satırına yazan tek yer), `services/account-guards.ts` (ortak bütçe +
-  şifre yeniden doğrulaması), `services/*` (iş kuralları), `components/`
-- ⛔ **"ANONİMLEŞTİRME" KELİMESİNİ KULLANMA.** KVKK Yönetmeliği m.10 anlamında
-  anonimleştirme GERİ DÖNDÜRÜLEMEZ olmak zorunda; bizim yaptığımız kişisel
-  alanları silip mali kayıtları saklamak, yani **takma adlaştırma**. Kural ve
-  gerekçe `docs/standards/14-privacy-and-compliance.md` → "Hesap silme"
-- ⛔ **SİLME EKRANINDAKİ "SAKLANANLAR" LİSTESİ SÜS DEĞİL, YASAL BİLDİRİM**
-  (Yönetmelik m.12/1-c). Bir "ayrıntılar" düğmesinin arkasına saklanırsa
-  bildirim yapılmamış olur. E2E testi bu gerilemeyi yakalıyor — **testi
-  gevşetme**
-- ⛔ **SİLMENİN DENETİM KAYDI HESAPLA BİRLİKTE SİLİNMİYOR** (m.7/3: imha
-  işlemlerinin kaydı en az üç yıl saklanır)
-- **KABUL KRİTERİ TESTİ `national_id_hash` KISITI ÜZERİNDEN ÖLÇÜYOR**: silme
-  sonrası aynı numarayla yeni bir satır YAZILIYOR. "Alan null oldu mu" diye
-  bakmak yetmezdi — asıl soru benzersiz kısıtın serbest kalması
-- ⛔ **KİMLİK ÇÖZME, GOOGLE BAĞLANTISI OLMAYAN HESAPTA ENGELLİ.** Giriş
-  kullanıcıyı T.C. numarasının özetinden buluyor (`findAuthUserByNationalIdHash`);
-  bağ koparsa şifreyle giriş de ölür. Bu kural `login-methods.ts`'teki "son
-  giriş yöntemi kaldırılamaz" korumasının aynısı
-- **ÇÖZME, ARTIK ÇALIŞMAYAN ŞİFREYİ DE SİLİYOR** — ekranda "Şifre: Tanımlı"
-  yazıp çalışmayan bir yöntem göstermek yalan olurdu
-- ⛔ **ÜYELİK SİLMEDE İPTAL EDİLMİYOR, yalnızca otomatik yenilemesi
-  kapatılıyor.** İptal, taahhüt varsa ERKEN ÇIKIŞ FARKI TAHSİL EDERDİ — yani
-  silme düğmesi kullanıcının kartından habersizce para çekerdi
-- **TELEFON DOĞRULANMAMIŞ YAZILIYOR** ve ekranda öyle görünüyor. OTP eklemek
-  ADR-017'nin reddettiği "güvenlik tiyatrosu" olurdu (kod kullanıcının kendi
-  e-postasına gidiyor)
-- **`src/lib/same-origin.ts` YENİ ORTAK KAPI**: `Origin` başlığı kontrolü.
-  Adım 17'de `/api/consents` içinde yazılmıştı, 17b'de ortak yere taşındı.
-  ⛔ **JSON gövdeli uçlarda da GEREKLİ:** `request.json()` `content-type`
-  başlığına BAKMIYOR, yani `enctype="text/plain"` ile gönderilmiş bir HTML
-  formunun gövdesi de geçerli JSON olarak ayrıştırılır
-- ⚠️ **YENİ EKRAN EKLERKEN BAŞLIK ÇAKIŞMASINA DİKKAT**: "Verilerim ve hesabım"
-  başlığı, `login.spec.ts`'teki `getByRole("heading", { name: "Hesabım" })`
-  seçicisiyle eşleşip testi kırdı (substring eşleşmesi). Başlık "Verilerim ve
-  hesap yönetimi" oldu ve eski seçiciye `exact: true` eklendi. **YAŞANDI**
+- **`src/features/staff-verification/` YENİ BİR KATMAN**:
+  `repositories/staff-claim.repository.ts` (**`users.is_staff` ve
+  `users.staff_member_id` alanlarına YAZAN TEK YER**),
+  `services/staff-verification.service.ts` (iki adımlı akış),
+  `schemas/`, `components/`, `errors.ts`
+- ⛔ **`matchStaffMember` SİLİNDİ.** Kimlik doğrulaması ve kayıt akışı artık
+  personel yetkisi VERMİYOR; `isStaff` ve `staffMemberId` o iki yazma
+  girdisinden tamamen çıkarıldı (alan yoksa yanlışlıkla yazılamaz)
+- ⛔ **İKİ YERİ BİRDEN KESMEK ŞARTTI.** Yalnızca kimlik doğrulamayı kapatmak
+  kapıyı kayıt tarafından açık bırakırdı: saldırgan kurbanın numarasıyla YENİ
+  hesap açar ve yetkiyi oradan alırdı
+- ⭐ **KANITIN DEĞERİ TEK BİR SATIRDA:** kod `staff_members.work_email`
+  adresine gidiyor, kullanıcının kendi adresine DEĞİL. ADR-017'nin
+  "güvenlik tiyatrosu" diye reddettiği OTP'de kod saldırganın KENDİ kanalına
+  gidiyordu; buradaki fark kanalın sahibi
+- ⛔ **İKİNCİ ADIMDA HEDEF BAĞLAMA KONTROLÜ VAR**
+  (`pendingChallengeMatchesDestination`). Olmasaydı: kendi adresine kod alan
+  biri o kodu BAŞKA bir personelin adresiyle gönderip onun yetkisini alırdı.
+  E2E ve db testi bu gerilemeyi yakalıyor — **testi gevşetme**
+- **ÖN KOŞUL `kps_verified`:** kimlik yetki VERMEZ ama yetkinin ÖN KOŞULUDUR.
+  `access-control.ts`'teki "personel kademesi kimlik kademesini kapsar"
+  cümlesinin GEREKÇESİ değişti — artık kendiliğinden değil, KURAL olarak doğru
+- **HESAP SAYIMI KORUMASI:** rehberde yok / işten ayrılmış / zaten bağlı üçü de
+  SAHTE akışa düşüyor (`issueDecoyChallenge`) ve aynı cümleyi üretiyor.
+  Kurumsal adresler `/hakkimizda`'da zaten açık; gizlenen şey adresin varlığı
+  değil **o personelin bu sitede hesabı olup olmadığı**
+- ⛔ **HIZ SINIRI GERÇEK/SAHTE AYRIMINDAN ÖNCE TÜKENİYOR.** Sonra olsaydı
+  dördüncü istekte 429 almak "bu adres rehberde ve boşta" demeye gelirdi
+- ⛔ **GÖNDERİM HATASI KULLANICIYA SÖYLENMİYOR** (borç #93) ve bu şifre
+  sıfırlamadaki karardan BİLEREK ayrılıyor: orada `unavailable` NADİR bir
+  arıza, burada production'ın BEKLENEN durumu (borç #92)
+- **MEVCUT PERSONEL HESAPLARINA DOKUNULMADI.** Toplu `is_staff = false`
+  canlıdaki personeli hastane ve spor salonundan atardı ve geri dönüşü bugün
+  imkânsızdı. Tohumun bağladığı yetki zaten İŞVERENİN verisinden geliyor
+- **`OtpChallengeRow`'a `destinationHash` EKLENDİ** — bağlama kontrolü bunu
+  okuyor. Düz hedef hiçbir yerde saklanmıyor
+- **`EmailChannel` artık AÇIK EŞLEME kullanıyor** (`Record<OtpPurpose, …>`):
+  enum'a yeni amaç eklenirse TypeScript derlemede durduruyor. Üçlü koşul
+  zinciri olsaydı yeni amaç sessizce yanlış metni alırdı
 
-## YAPILACAK — roadmap adım 17c
+## YAPILACAK — roadmap adım 18
 
-"Personel yetkisini kimlik doğrulamasından ayır (ADR-017): `isStaff` artık KPS
-eşleşmesinden değil, işveren kontrollü bir kanaldan (kurumsal e-posta
-doğrulaması) geliyor"
+"Güvenlik denetimi, E2E test seti, Swagger (`/api/docs`), performans bütçesi
+ölçümü, Sentry, axe"
 
-Dal: `feature/personel-yetkisi` (öneri)
+Dal: `feature/uretime-hazirlik` (öneri)
 
 ### Bu adımda özellikle dikkat
 
-- **ADR-017 İLKE 2 BU ADIMIN TAMAMI**: "Kim olduğun" ile "ne yapmaya yetkili
-  olduğun" ayrı sorulardır ve ayrı kanıt ister. Bir kişinin kurum personeli
-  olduğu, kimliğinden TÜRETİLEMEZ — **işverenin** doğrulaması gerekir
-- **BUGÜN `verifyIdentity` İKİSİNİ TEK İŞLEMDE VERİYOR**: kimlik bağlanınca
-  `matchStaffMember(nationalIdHash)` çalışıyor ve eşleşme varsa `isStaff`
-  açılıyor. Bu ayrılmalı
-- ⛔ **KAYIT AKIŞINDA DA AYNI ŞEY VAR** (`registration.service.ts` →
-  `createVerifiedUser`, `staffMemberId`). İki yerde birden ayrılmalı, yoksa
-  kapı bir taraftan açık kalır
-- **KURUMSAL E-POSTA DOĞRULAMASI** için `OtpChannel` adaptörü zaten var
-  (`src/features/otp/`). ⚠️ Ama Resend'de doğrulanmış alan adı YOK (borç #25):
-  production'da yalnızca hesabın kayıtlı adresine gönderim yapılıyor. Bu adımın
-  canlıda uçtan uca denenebilirliğini SORGULA — belki de kurumsal e-posta
-  yerine başka bir işveren kanalı gerekiyor
-- **`staff_members` TABLOSUNDA E-POSTA ALANI VAR MI?** `data-model.md`'ye bak:
-  bugün `nationalIdHash` (unique, nullable) ve `extensionNumber` var. Kurumsal
-  e-posta ile eşleştirme yapılacaksa **şema değişikliği gerekebilir** —
-  geriye uyumlu adımlara böl (önce kolon ekle, sonra kullan)
-- **HASTANE VE SPOR SALONU EKRANLARI `isStaff`'A BAĞLI.** Kapıyı değiştirirken
-  o iki modülün erişim testleri kırmızıya dönmeli ve sonra doğru sebeple
-  yeşile dönmeli
-- ⛔ **`isStaff` HÂLÂ İSTEMCİDEN GELMEYECEK.** Yeni kanal ne olursa olsun,
-  yetki yalnızca sunucuda hesaplanır (`05-auth-security.md`)
-- **`role_change` denetim işlemi ZATEN ENUM'DA VAR** — yeni migration
-  gerekmeyebilir
+- **BU ADIM ÇOK GENİŞ — proje sahibine BÖLMEYİ ÖNER.** Altı ayrı iş var ve
+  CLAUDE.md §7 "aynı anda tek modül" diyor. Muhtemel bölme: 18a (Sentry +
+  yapılandırılmış log), 18b (Swagger), 18c (performans bütçesi + axe),
+  18d (güvenlik denetimi raporu)
+- **PERFORMANS ÖLÇÜMÜ İÇİN BEKLEYEN BİR BORÇ VAR (#84):** çerez bandı kök
+  yerleşimde `cookies()` okuduğu için **hiçbir sayfa artık statik değil**.
+  Ölçüm hedefi (2,5 sn) aşıyorsa bant bir ara katmana taşınacak
+- **SENTRY YENİ BİR DIŞ HESAP DEMEK** — proje sahibine sormadan açtırma;
+  `altyapi-durumu.md`'deki hesap tablosuna bak, ADR-016'nın gerekçesi
+  ("proje sahibine yeni hesap açtırmamak, açtırmaktan iyidir") burada da geçerli
+- ⛔ **LOG'A ŞİFRE, TOKEN, KART, KİMLİK NUMARASI YAZILMAZ** (CLAUDE.md §5.11).
+  Sentry'ye giden veri de log'dur
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
+- **`src/features/staff-verification/`** — iki adımlı doğrulama deseni:
+  hesap sayımı koruması + hedef bağlama + tek koşullu yazma + denetim kaydı
 - **`src/features/account/`** — geri alınamaz işlem deseni: ortak bütçe +
-  şifre yeniden doğrulaması + CSRF kapısı + tek koşullu yazma
+  şifre yeniden doğrulaması + CSRF kapısı
 - **`src/lib/same-origin.ts`** — `Origin` kapısı
 - **`src/features/legal/`** — rıza kaydı, çerez kataloğu, yasal sayfa deseni
 - **`src/features/scheduled-tasks/`** — günlük iş eklemenin deseni
 - **`src/features/profile/`** — kullanıcıya ait kayıt yönetiminin DESENİ
-- **`src/features/auth/`** — oturum, Google OAuth (PKCE + `state` + `nonce`),
-  `staff-matching.service.ts` (**bu adımda değişecek olan**)
+- **`src/features/auth/`** — oturum, Google OAuth (PKCE + `state` + `nonce`)
 - **`src/features/identity/`** — KPS sorgusu, ortak şema
 - **`src/features/otp/`** — iki kanallı doğrulama kodu altyapısı
 - **`src/features/catalog/`** — ORTAK arama katmanı, Türkçe `unaccent` araması
@@ -395,23 +396,38 @@ Dal: `feature/personel-yetkisi` (öneri)
 - **YÜK 3'ÜN ÜZERİNDEYKEN TAM SET KOŞMA.** `uptime` bak. **Kırmızı görünce ÖNCE
   YÜKE BAK**
 - ⚠️ **E2E'Yİ 15 DAKİKA İÇİNDE ÜST ÜSTE KOŞTURMA** (hız sınırı). Çözüm:
-  `rate_limit_counters` tablosunu boşalt, sonra **tek sefer** koş
+  `rate_limit_counters` tablosunu boşalt, sonra **tek sefer** koş.
+  ⛔ **ADIM 17c'DE YİNE YAŞANDI ve yarım saat yedi:** `hospital.spec.ts` üst
+  üste koşularda "iptal işlemi gerçekleşmedi" diye düştü, tek başına koşunca
+  geçti. Değişikliği stash'leyip TEMİZ kodda koşunca bu kez `register.spec.ts`
+  düştü — yani sorun kodda değil, **art arda koşmaktaydı.** Sayaçlar boşaltılıp
+  yük düşünce 285 test tek seferde yeşil geçti. **Bir testin düşmesini koda
+  yormadan ÖNCE kaç kez koştuğuna bak**
 - **Adres kontrolünde `toHaveURL` DEĞİL `waitForURL` kullan**
 - **`npm run test:db` `docs/project/test-hesaplari.md` dosyasını YENİDEN
-  ÜRETEBİLİYOR.** Commit etmeden önce `git status`'a bak
+  ÜRETEBİLİYOR** (tarihler bir gün kayıyor). Commit etmeden önce `git status`'a
+  bak — adım 17c'de bu dosya bilerek geri alındı
 - **HER PLAYWRIGHT PROJESİNE AYRI PAYLAŞILAN KAYNAK VER**
 - ⚠️ **E2E KENDİ KULLANICISINI KURABİLİR**: oturum satırını doğrudan yazıp
   çereze ham jetonu koymak yeterli (`sessionToken` = jetonun SHA-256 özeti,
   çerez adı `bb_session`)
+- ⚠️ **YENİ (adım 17c): HIZ SINIRINI SAYAÇ SİLEREK DEĞİL, TAZE HEDEF KULLANARAK
+  ÇÖZ.** `otp_send:` öneki kayıt ve şifre sıfırlama akışlarıyla PAYLAŞILIYOR;
+  toplu silmek paralel koşan başka bir testin sınırını sessizce gevşetir.
+  `personel-dogrulama.spec.ts` her koşuda rastgele bir kurumsal adres üretiyor
+- ⚠️ **YENİ (adım 17c): E2E SPEC'İ `@/lib/rate-limit` GİBİ `serverEnv` OKUYAN
+  BİR MODÜLÜ IMPORT EDEMEZ** — Playwright süreci `NEXT_PUBLIC_*` değişkenlerini
+  yüklemiyor ve `env.ts` açılışta patlıyor ("No tests found" ile biter)
 - **E2E'nin ürettiği veriyi temizle — ama TOHUM VERİSİNİ ONAR, SİLME**
 - **Sipariş temizliğinde SIRA:** `refund → orderItem → order → notification →
   payment → cartItem → cart`. **Üyelikte:** `membershipPayment → membership →
   notification → savedCard`. **Teşkilatta:** önce `user`, sonra `staffMember`,
   sonra `orgUnit` (`users.staff_member_id` Restrict).
   ⚠️ `consentRecord` ve `auditLog` KULLANICIDAN ÖNCE silinmeli (ikisi Restrict)
-- ⚠️ **YENİ (adım 17b): SİLİNMİŞ HESABI E-POSTASINDAN BULAMAZSIN** — silme
-  `users.email` alanını NULL yapıyor. E2E temizliği `userId`'yi saklamak zorunda
-- ⚠️ **TÜM TABLOYA YAZAN BİR GÖREVİ TEST EDERKEN YAN ETKİYİ GERİ AL**
+- ⚠️ **SİLİNMİŞ HESABI E-POSTASINDAN BULAMAZSIN** — silme `users.email` alanını
+  NULL yapıyor. E2E temizliği `userId`'yi saklamak zorunda
+- ⚠️ **SAHTE (decoy) OTP KAYITLARI `userId` TAŞIMAZ**, yani kullanıcı silinince
+  basamaklı gitmezler. Akış kimliğinden (`registrationId`) yakala
 
 **Vitest**
 - ⚠️ **`vi.resetModules()` + dinamik `import` KULLANIRKEN `instanceof` ÇALIŞMAZ**
@@ -424,21 +440,23 @@ Dal: `feature/personel-yetkisi` (öneri)
   **Çözüm: aramayı BÖLGEYE sınırla** (`page.getByRole("region", { name: ... })`)
 - ⚠️ **ÇIPLAK `getByRole("listitem")` SAYFA İSKELETİNİ DE SAYAR**
 - ⚠️ **ÇIPLAK METİN DÜĞÜMÜ `getByText(..., { exact: true })` İLE BULUNAMAZ**
-- ⚠️ **AYNI METNİ İKİ BAŞLIKTA VEYA İKİ ERİŞİLEBİLİR ADDA KULLANMA** —
-  **adım 17b'de YİNE YAŞANDI**: yeni kart başlığı "Verilerim ve hesabım",
-  `login.spec.ts`'teki `name: "Hesabım"` seçicisiyle substring olarak eşleşti
-  ve o test strict mode ihlaliyle düştü. Ders çift taraflı: **yeni başlığı
-  çakışmayacak seç** VE **eski seçiciye `exact: true` ver**
+- ⚠️ **AYNI METNİ İKİ BAŞLIKTA VEYA İKİ ERİŞİLEBİLİR ADDA KULLANMA**
 - **Kapalı `<details>` içindeki öğe GÖRÜNMEZ sayılır**
 - ⚠️ **Yasal belgeler BİRBİRİNE de bağlantı veriyor.** Alt bilgi bağlantısını
   ararken `page.getByRole("navigation", { name: ... })` ile sınırla
 
 **Chrome DevTools MCP ile elle test**
-- ⚠️ **`click` ARAÇ ÇAĞRISI BAZEN SESSİZCE İŞLEMİYOR** (React yeniden
-  çizdikten sonra `uid` bayatlıyor; hata dönmüyor ama istek de gitmiyor).
-  **Adım 17b'de yaşandı ve "arıza var" sanıldı.** Çözüm: `evaluate_script`
+- ⚠️ **`click` ARAÇ ÇAĞRISI BAZEN SESSİZCE İŞLEMİYOR.** Çözüm: `evaluate_script`
   içinden gerçek DOM `click()` çağır ve `performance.getEntriesByType
   ("resource")` ile isteğin GİDİP GİTMEDİĞİNİ ölç
+- ⚠️ **YENİ (adım 17c): `document.cookie` İLE OTURUM ÇEREZİ YAZILAMIYOR** —
+  mevcut `bb_session` çerezi `httpOnly` ve JS onu ezemiyor. **Çözüm:
+  `new_page` çağrısına `isolatedContext` ver** (temiz çerez kavanozu), sonra
+  `document.cookie` çalışıyor
+- ⚠️ **YENİ (adım 17c): React kontrollü `<input>`'a `value` ATAMAK YETMİYOR** —
+  React'in kendi setter'ını çağır:
+  `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(el,v)`
+  ve ardından `new Event("input",{bubbles:true})` gönder
 - ⚠️ **macOS'ta tarayıcı penceresi 375px'e İNMİYOR** (alt sınır ~485px).
   Mobil ölçümü **Playwright `mobile-375` projesiyle** yap
 - ⚠️ **`fullPage` ekran görüntüsü `sticky`/`fixed` öğeleri YANILTICI
@@ -446,14 +464,12 @@ Dal: `feature/personel-yetkisi` (öneri)
   ile ölç
 
 **Next.js**
-- ⚠️ **`router.refresh()`'i BAŞARI PANELİNİ ÇİZDİĞİN ANDA ÇAĞIRMA**
-- **Sunucu bileşeninde `cookies().set()` İSTİSNA FIRLATIR** — route handler
-  veya server action gerekir
-- ⚠️ **KÖK YERLEŞİMDE `cookies()` OKUMAK TÜM SAYFALARI DİNAMİK YAPAR**
-  (adım 17'de yaşandı, borç #84)
+- ⚠️ **`router.refresh()`'i BAŞARI PANELİNİ ÇİZDİĞİN ANDA ÇAĞIRMA** — sunucu
+  yeni durumu görüp paneli siler. Kullanıcı "devam et" deyince çağır
+- **Sunucu bileşeninde `cookies().set()` İSTİSNA FIRLATIR**
+- ⚠️ **KÖK YERLEŞİMDE `cookies()` OKUMAK TÜM SAYFALARI DİNAMİK YAPAR** (borç #84)
 - **Sunucuda çizilen sayfa istemci bir şey yazdıktan sonra tazelenmez** —
-  `router.refresh()` çağır. ⛔ **Ama hesabı SİLDİKTEN sonra çağırma** —
-  oturum yok, kullanıcı giriş ekranına düşer. Yerine `router.replace()`
+  `router.refresh()` çağır. ⛔ **Ama hesabı SİLDİKTEN sonra çağırma**
 - **Formu sıfırlamak için alanları tek tek temizleme**, bileşene `key` ver
 - **Zamana bağlı metin hidrasyon uyuşmazlığı üretir** → `suppressHydrationWarning`
 - **`FormData` gövdesinde `content-type` başlığını ELLE YAZMA**
@@ -461,11 +477,10 @@ Dal: `feature/personel-yetkisi` (öneri)
 - ⚠️ **SUNUCU BİLEŞENİ SAYFANIN ADRESİNİ OKUYAMAZ.** Çözüm `Referer` başlığı
   (ama MUTLAKA aynı alan adı kontrolünden ve `sanitizeRedirectPath`'ten geçir)
 
-**Dosya indirme (adım 17b)**
+**Dosya indirme**
 - ⛔ **DÜZ `<a download>` KULLANMA**: uç hata döndüğünde tarayıcı ham JSON
   hata gövdesini yeni sekmede açar. `fetch` ile al, yanıtı kontrol et
-- ⛔ **`URL.createObjectURL` SONRASI `revokeObjectURL` ŞART** — yoksa dosyanın
-  tamamı (kişisel veri) sekme kapanana kadar bellekte kalır
+- ⛔ **`URL.createObjectURL` SONRASI `revokeObjectURL` ŞART**
 - ⛔ **DOSYA ADINI SUNUCU BAŞLIĞINDAN OKUMA**, istemcide yeniden üret
 
 **Test veritabanı temizliği**
@@ -509,7 +524,7 @@ Dal: `feature/personel-yetkisi` (öneri)
 - Tailwind v4 kanonik biçimi `aspect-4/3` ve `wrap-break-word`
 - Dokunma hedefleri en az 44px (`min-h-11`) · **Gövde metni en az 16px**
 - **Geniş tablo `overflow-x-auto` sarmalayıcıya girer** ve sarmalayıcıya
-  `tabIndex={0}` verilir; yoksa 375px'te SAYFANIN TAMAMI yana kayar
+  `tabIndex={0}` verilir
 - ⚠️ **ÇEREZ BANDI SAYFA ALTINDAKİ İÇERİĞİ ÖRTEBİLİYOR** (borç #91)
 
 **Bağımlılık**
@@ -518,14 +533,15 @@ Dal: `feature/personel-yetkisi` (öneri)
 
 **Prisma 7**
 - `datasource` bloğunda `url` / `directUrl` **yok** (ADR-008)
-- ⚠️ **`migrate dev` BU ORTAMDA ETKİLEŞİMLİ ÇALIŞAMIYOR.** İzlenen yol:
-  `npx prisma migrate diff --from-config-datasource --to-schema
-  prisma/schema.prisma --script` ile SQL üret → migration klasörünü elle
-  oluştur → `npx prisma migrate deploy` → `npx prisma generate`.
-  ⚠️ **`--to-schema-datamodel` BAYRAĞI KALDIRILDI**, `--to-schema` kullan
+- ⚠️ **`migrate dev` BU ORTAMDA ETKİLEŞİMLİ ÇALIŞAMIYOR.** Enum değeri eklemek
+  gibi basit değişikliklerde migration klasörünü **elle oluşturup**
+  `npx prisma migrate deploy` + `npx prisma generate` koşmak yeterli
+  (adım 17c'de böyle yapıldı)
 - **ENUM DEĞERİ EKLEMEK GERİYE UYUMLU ama TEK YÖNLÜDÜR**
 - **`prisma migrate reset --force` bayrağı yutuluyor.** Local'i sıfırlamak için
   `docker compose down -v` + `npm run db:up`
+- ⚠️ **`auditLog` modelinde `metadata` ALANI YOK** — `entityType` ve `entityId`
+  var. Ezberden alan yazma, şemaya bak
 
 **Yayın**
 - **Neon uykudayken deploy PATLIYOR** (`P1001`) — **production'da da PREVIEW'da
@@ -535,18 +551,46 @@ Dal: `feature/personel-yetkisi` (öneri)
   **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR**
 - ⚠️ **Ücretsiz planda cron GÜNDE 1 ve saati garanti DEĞİL**
+- ⛔ **YENİ (adım 17c): UTC 00:00–00:59 ARASINDA MERGE ETME** — o pencere
+  cron'un penceresi ve dağıtım zamanlanmış koşuyu düşürüyor. 2026-08-11'de
+  yaşandı
 
 **Git**
 - **YENİ DALI HER ZAMAN `main`'DEN AÇ:**
   `git checkout main && git pull && git checkout -b <yeni-dal>`
+- ⛔ **YENİ (adım 17c) — 25 DAKİKA YEDİ, EN SİNSİ TUZAKLARDAN BİRİ:**
+  **AÇIK BİR PR VARKEN DAL AÇMA; önce onu merge et.**
+
+  Adım 17c'de dal, PR #48 (belge PR'ı) **merge edilmeden önce** `main`'den
+  açıldı. #48 tam da bu adımda baştan yazılan iki devir belgesine dokunuyordu,
+  yani PR açılınca **çakışma** doğdu. Sonuç:
+
+  ⚠️ **GitHub, çakışan bir PR'da `refs/pull/<N>/merge` referansını
+  ÜRETEMİYOR — ve `pull_request` iş akışları o referans üzerinde koştuğu için
+  HİÇ BAŞLAMIYOR.**
+
+  ⛔ **BU HATA SESSİZ.** PR'da kırmızı bir kontrol görünmüyor (kontrol hiç
+  oluşmuyor), Actions sayfasında uyarı yok, `gh run list` boş dönüyor.
+  "Actions bozulmuş" veya "faturalandırma sorunu" sanılıyor. Adım 17c'de üç
+  tetikleyici boşuna denendi (PR aç, kapat-yeniden aç, boş commit iterek
+  `synchronize`) — üçü de hiçbir koşu başlatmadı.
+
+  **TEŞHİS TEK KOMUT:**
+  `gh pr view <N> --json mergeable,mergeStateStatus`
+  → `CONFLICTING` / `DIRTY` görüyorsan sebep budur. CI'ı kurcalama.
+
+  **ÇÖZÜM (force-push YOK):** `git merge origin/main` → çakışmayı çöz →
+  commit → push. PR anında `MERGEABLE` olur ve iş akışları saniyeler içinde
+  başlar.
 
 **Diğer**
 - `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
   `--org-id org-still-water-86075112` şart
-- `psql` **kurulu değil** → uzak sorgu için `npx tsx --env-file=.env` + Prisma
-  betiği. ⚠️ **Betik PROJE KÖKÜNDE ve `.mts` uzantılı olmalı** ve
-  **commit edilmeden SİLİNMELİ**; ⚠️ **boş `-e ""` çağrısı ASILI KALIYOR**
-  (dosya yaz, `-e` kullanma)
+- `psql` **kurulu değil** → uzak sorgu için `npx tsx` + Prisma betiği.
+  ⚠️ **Betik PROJE KÖKÜNDE ve `.mts` uzantılı olmalı** ve **commit edilmeden
+  SİLİNMELİ**; ⚠️ **boş `-e ""` çağrısı ASILI KALIYOR** (dosya yaz, `-e` kullanma)
+- ⚠️ **ESLint geçici `.mts` betiklerdeki `console.log`'u da yakalıyor** —
+  `console.error` kullan veya betiği lint'ten önce sil
 - **Chrome DevTools MCP yalnızca ÇALIŞMA ALANI İÇİNDEKİ dosyayı yükleyebiliyor**
 - Docker Desktop kapalı olabilir → `open -a Docker`, sonra `npm run db:up`
 - ESLint `console.log`'u ve efekt içinde `setState`'i yasaklıyor
@@ -556,11 +600,28 @@ Dal: `feature/personel-yetkisi` (öneri)
 
 ## PROJE KİTİ (`proje-kiti` plugin)
 
-- **Sürüm 1.4.0 GitHub'a yayınlandı** (2026-08-10) — KVKK hesap silme kuralları,
-  PRD/roadmap/data-model şablonlarındaki zorunlu veri hakları bölümü
+> ⛔ **KİTE KURAL YAZMAK BU PROJEYİ GÜNCELLEMİYOR — İKİ AYRI KOPYA VAR.**
+>
+> | Nerede | Ne işe yarar |
+> |---|---|
+> | `benim-belediyem/docs/standards/` | **Bu projenin bağlayıcı kuralları.** `CLAUDE.md` §1 hiyerarşisinde 1. sırada; oturum bunu okur |
+> | `proje-kiti` plugin'i | **Yeni proje kurulurken kopyalanan şablon.** Mevcut projelere kendiliğinden ulaşmaz |
+>
+> Bir ders öğrenildiğinde **İKİSİNE DE** yazılmalı. Kitte `kit-senkron` skill'i
+> bu iş için var ama **elle çağrılması gerekiyor** — otomatik değil.
+> Adım 17c'de bu atlandı ve proje sahibi fark etti: kurallar yalnızca kite
+> yazılmıştı, yani `/clear` sonrası yeni oturum onları görmeyecekti.
+
+- **Sürüm 1.5.0 GitHub'a yayınlandı** (2026-08-11) — adım 17c'nin üç dersi:
+  çakışan PR'ın CI'ı sessizce durdurması (`08-git-workflow`), kimlik≠yetki
+  ilkesi (`05-auth-security`), testi koda yormadan önce koşum sayısına bakmak
+  (`06-testing`). ✅ **Aynı üçü bu projenin `docs/standards/` klasörüne de
+  senkronlandı** (commit `d95c223`).
+- **Sürüm 1.4.0 GitHub'a yayınlandı** (2026-08-10)
 - ⚠️ **Proje sahibinin kurulu sürümü 1.2.0'dı**; güncellemesi gerekiyordu.
   Sonraki oturum, kite bir kural yazacaksa **sürümü yine artırıp push etmeli**
-  ve kullanıcıya `/plugin` ekranından güncellemesini hatırlatmalı
+  ve kullanıcıya `/plugin` ekranından güncellemesini hatırlatmalı.
+  ✅ **Adım 17c'nin üç kuralı 1.5.0 ile yazıldı ve projeye de senkronlandı.**
 
 ## KOMUTLAR
 

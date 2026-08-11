@@ -52,6 +52,14 @@ Böyle bir testte iddiayı zayıflatmak (beklentiyi silmek, `retry` artırmak,
   yoksa ikinci koşu, kodda olmayan bir hata bildirir.
 - **Kırmızı gördüğünde önce makinenin yükünü kontrol et.** Yüksek yükte oluşan
   zaman aşımını koda yıkmak saatler yakar.
+- ⛔ **BİR TESTİN DÜŞMESİNİ KODA YORMADAN ÖNCE "KAÇ KEZ KOŞTUM" DİYE SOR.**
+  Art arda koşulan setlerde hız sınırı sayaçları, artık veri ve yük birikir;
+  test kodda olmayan bir hata bildirir. Sıra: (1) sayaçları sıfırla,
+  (2) yükün düşmesini bekle, (3) **tek sefer** koş.
+- **Şüpheyi ÖLÇEREK gider, tahminle değil:** değişikliği geçici olarak kenara
+  al (`git stash`) ve aynı seti **temiz kodda** koştur. Aynı yerde ya da başka
+  bir yerde yine düşüyorsa sorun senin değişikliğinde değil, koşum ortamındadır.
+  Bu tek deney "benim yüzümden mi" sorusunu kesin cevaplar.
 
 ## Mobil doğrulama — üç ayrı şey, karıştırılmaz
 

@@ -588,7 +588,8 @@ describe("POST /api/registrations/current/verifications — kod doğrulama", () 
     const response = await callVerify("phone", codes.phone);
 
     expect(response.status).toBe(201);
-    expect((await readBody(response)).data).toMatchObject({ completed: true, isStaff: false });
+    // ⛔ `isStaff` yanıttan kaldırıldı (adım 17c): hiçbir hesap personel doğmuyor.
+    expect((await readBody(response)).data).toMatchObject({ completed: true });
     expect(db.users).toHaveLength(1);
   });
 
@@ -636,7 +637,17 @@ describe("POST /api/registrations/current/verifications — kod doğrulama", () 
     });
   });
 
-  it("personel rehberinde eşleşme varsa isStaff SUNUCUDA true olur", async () => {
+  /**
+   * ⭐ ADIM 17c'NİN KAYIT TARAFINDAKİ KABUL KRİTERİ — GEVŞETİLMEZ.
+   *
+   * Bu test adım 17c'den ÖNCE tam tersini bekliyordu: kimlik numarası personel
+   * rehberinde eşleşen her YENİ hesap personel olarak açılıyordu. Yalnızca
+   * kimlik doğrulama akışını kapatmak yetmezdi — saldırgan kurbanın
+   * numarasıyla yeni bir hesap açar ve yetkiyi bu taraftan alırdı.
+   *
+   * ⛔ Kırmızıya dönerse "beklenti eskimiş" DEĞİL, KAPI GERİ AÇILMIŞ demektir.
+   */
+  it("personel rehberinde eşleşme OLSA BİLE yeni hesap personel DOĞMAZ", async () => {
     const { hashNationalId } = await import("@/lib/crypto");
     db.staffMembers.push({
       id: "staff-1",
@@ -649,8 +660,12 @@ describe("POST /api/registrations/current/verifications — kod doğrulama", () 
     await callVerify("email", codes.email);
     const response = await callVerify("phone", codes.phone);
 
-    expect((await readBody(response)).data).toMatchObject({ isStaff: true });
-    expect(db.users[0]).toMatchObject({ isStaff: true, staffMemberId: "staff-1" });
+    expect((await readBody(response)).data).not.toHaveProperty("isStaff");
+
+    // Yazma girdisinde artık alan YOK: şema varsayılanları (`false` / `null`)
+    // geçerli oluyor, yani sahte veritabanında alanlar hiç yazılmamış görünür.
+    expect(db.users[0].isStaff).toBeUndefined();
+    expect(db.users[0].staffMemberId).toBeUndefined();
   });
 
   it("istemciden gelen isStaff ve role alanları YOK SAYILIR", async () => {
@@ -660,7 +675,9 @@ describe("POST /api/registrations/current/verifications — kod doğrulama", () 
     const { POST } = await import("@/app/api/registrations/current/verifications/route");
     await POST(jsonRequest({ channel: "phone", code: codes.phone, isStaff: true, role: "admin" }));
 
-    expect(db.users[0].isStaff).toBe(false);
+    // Alan yazma girdisinde HİÇ YOK (adım 17c): istemcinin gönderdiği değer
+    // kolona ulaşamıyor çünkü kolonu yazan bir yol kalmadı.
+    expect(db.users[0].isStaff).toBeUndefined();
     expect(db.users[0].role).toBeUndefined();
   });
 

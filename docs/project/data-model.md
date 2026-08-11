@@ -63,6 +63,19 @@ gerçekten silinir; `AuditLog`, `ConsentRecord`, `KpsQueryLog`, `Payment`,
 
   - `isStaff`, `role` ve `identityStatus` **yalnızca sunucuda** hesaplanır;
     istemciden gelen değer yok sayılır ve hata döner (`05-auth-security.md`)
+  - ⛔ **`isStaff` ve `staffMemberId` ALANLARINA YAZAN TEK YER
+    `src/features/staff-verification/repositories/staff-claim.repository.ts`**
+    (adım 17c · ADR-017 ilke 2). Kayıt akışının ve kimlik doğrulamanın yazma
+    girdilerinde bu alanlar HİÇ YOK — olmayan alana yanlışlıkla yazılamaz.
+    Yetkiyi KALDIRAN yol ayrıdır ve hesap silmede duruyor
+    (`account-erasure.repository.ts`): yetki vermek ile hesabı yok etmek aynı
+    iş değil.
+  - ⚠️ **`staff_members.workEmail` (unique) ARTIK BİR YETKİ ANAHTARI.** Adım
+    15b'de yalnızca rehberde gösterilen bir iletişim alanıydı; adım 17c'den
+    beri personel yetkisinin kanıtı o adrese gönderilen kodla üretiliyor. Yani
+    bu kolonu değiştirmek bir iletişim güncellemesi değil, bir **yetki
+    devri** — elle güncellenirse yeni adresin sahibi o personel kaydını
+    sahiplenebilir hâle gelir.
   - `fullName` doğrulanmamış (Google) kullanıcıda Google profil adından gelir ve
     kullanıcı düzenleyebilir. KPS doğrulaması tamamlandığında **KPS'ten gelen ad
     üzerine yazar** ve alan salt okunur olur

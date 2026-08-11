@@ -75,7 +75,33 @@ Kimlik numarası, telefon veya e-postayla kişi bilgisi dönen her uç
 Rol, personel durumu, doğrulama seviyesi gibi yetki belirleyici alanlar **yalnızca
 sunucuda hesaplanır**. İstemciden gelen böyle bir alan varsa yok sayılır, hata döner.
 Bu alanlar kullanıcının düzenleyebildiği hiçbir formda bulunmaz.
-Yetki kaynağı değiştiğinde (örn. personel listesinden çıkma) yeniden hesaplanır.
+
+### ⛔ KİMLİK DOĞRULAMASI YETKİ VERMEZ
+
+**"Kim olduğun" ile "ne yapmaya yetkili olduğun" AYRI sorulardır ve AYRI kanıt
+ister.** Bir kişinin bir kuruma/role ait olduğu, o kişinin kimliğinden
+**türetilemez** — o bağı **yetkiyi veren tarafın** (işveren, kurum, yönetici)
+doğrulaması gerekir.
+
+⛔ **Sık yapılan hata:** kimlik doğrulama akışının sonunda "bu kimlik şu
+listede de var mı" diye bakıp yetkiyi AYNI İŞLEMDE vermek. Kimlik bilgisi
+(T.C. kimlik numarası, doğum tarihi, e-posta) **gizli bilgi değildir**;
+kurbanın bilgisini bilen biri onun yetkisini de kazanır.
+
+**Doğrusu:**
+- Kimlik doğrulaması hesabı yalnızca "doğrulanmış kimlik" kademesine taşır.
+- Yetki **ayrı bir akıştan** gelir ve kanıtı **yetkiyi veren tarafın kontrol
+  ettiği bir kanaldan** üretilir (kurumsal e-posta adresine gönderilen kod,
+  yönetici onayı, kurumun kimlik sağlayıcısıyla federasyon).
+- Kimlik **ön koşul** olabilir (yetkinin kime verildiği belirsiz kalmasın) ama
+  **yeterli koşul asla değildir**.
+- ⛔ **Kanıtın kanalı, kanıtın kendisidir.** Kod kullanıcının KENDİ adresine
+  gidiyorsa hiçbir şey kanıtlamaz — güvenlik tiyatrosudur. Kanal, yetkiyi veren
+  tarafın kaydında olmalıdır.
+- Yetki alanına yazan **tek bir katman** olur; kimlik ve kayıt akışlarının
+  yazma girdilerinde o alan **hiç bulunmaz** (olmayan alana yanlışlıkla yazılamaz).
+
+Yetki kaynağı değiştiğinde (örn. personel listesinden çıkma) yeniden değerlendirilir.
 
 ## Tek kullanımlık kod (OTP) kuralları
 - 6 hane, en fazla 5 dakika geçerli, 3 deneme, tek kullanımlık.

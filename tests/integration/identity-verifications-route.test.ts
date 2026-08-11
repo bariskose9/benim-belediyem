@@ -176,14 +176,21 @@ describe("POST /api/identity-verifications — kimlik oturumdan gelir", () => {
     ]);
   });
 
-  it("başarılı yanıt yalnızca ekranın ihtiyacı olan iki alanı döner", async () => {
-    verifyIdentity.mockResolvedValue({ isStaff: true, fullName: "Zeynep Özkan" });
+  /**
+   * ⛔ YANITTA ARTIK TEK ALAN VAR (adım 17c · ADR-017 ilke 2).
+   *
+   * `isStaff` kaldırıldı: kimlik doğrulaması personel yetkisi vermiyor,
+   * dolayısıyla bu ucun yetki hakkında söyleyeceği bir şey yok. Alanın geri
+   * gelmesi, ayrılan iki sorunun yanıt gövdesinde yeniden birleşmesi olurdu.
+   */
+  it("başarılı yanıt yalnızca ekranın ihtiyacı olan tek alanı döner", async () => {
+    verifyIdentity.mockResolvedValue({ fullName: "Zeynep Özkan" });
 
     const response = await POST(request({ nationalId: VALID_NATIONAL_ID, birthYear: 1992 }));
     const body = (await response.json()) as { data: Record<string, unknown> };
 
     expect(response.status).toBe(201);
-    expect(body.data).toEqual({ isStaff: true, fullName: "Zeynep Özkan" });
+    expect(body.data).toEqual({ fullName: "Zeynep Özkan" });
   });
 });
 

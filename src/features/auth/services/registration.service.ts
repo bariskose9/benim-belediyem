@@ -41,7 +41,6 @@ import { checkPasswordPolicy } from "@/features/auth/services/password-policy.se
 import { hashPassword } from "@/features/auth/services/password.service";
 import { isAdultOn } from "@/features/auth/services/registration-age.service";
 import { isRegistrationOpen } from "@/features/auth/services/auth-availability";
-import { matchStaffMember } from "@/features/auth/services/staff-matching.service";
 import type {
   RegistrationContact,
   RegistrationIdentityView,
@@ -262,9 +261,16 @@ export type VerifyCodeInput = {
   now?: Date;
 };
 
+/**
+ * ⛔ `isStaff` BU SONUÇTAN KALDIRILDI (adım 17c · ADR-017 ilke 2).
+ *
+ * Kayıt biterken personel eşleştirmesi yapılıyor ve yeni hesap personel
+ * olarak doğabiliyordu. Artık hiçbir hesap personel olarak doğmuyor; yetki
+ * ayrı bir akıştan, işverenin kanalından geliyor. Ekran da bu yüzden "hoş
+ * geldin personel" diye ayrışmıyor — söyleyecek bir şeyi yok.
+ */
 export type VerifyCodeResult =
-  | { completed: false; emailVerified: boolean; phoneVerified: boolean }
-  | { completed: true; isStaff: boolean };
+  { completed: false; emailVerified: boolean; phoneVerified: boolean } | { completed: true };
 
 /**
  * ADIM 3 — kod doğrulama; iki kanal da tamamlanırsa hesap oluşur.
@@ -351,8 +357,16 @@ async function finalizeRegistration(
     throw new IdentityAlreadyRegisteredError();
   }
 
-  const staffMemberId = await matchStaffMember(draft.nationalIdHash);
-
+  /**
+   * ⛔ BURADA PERSONEL EŞLEŞTİRMESİ YOKTU DEĞİL — VARDI VE KALDIRILDI
+   * (adım 17c · ADR-017 ilke 2). `matchStaffMember(draft.nationalIdHash)`
+   * çağrısı, kimlik numarası personel rehberinde eşleşen her yeni hesabı
+   * personel olarak açıyordu.
+   *
+   * Kimlik doğrulama akışıyla BİRLİKTE kaldırılması şart: yalnızca birini
+   * kapatmak kapıyı diğer taraftan açık bırakırdı — saldırgan kurbanın
+   * numarasıyla yeni hesap açar ve yetkiyi oradan alırdı.
+   */
   const created = await createVerifiedUser({
     nationalIdEncrypted: encryptSecret(identity.nationalId, encryptionKey()),
     nationalIdHash: draft.nationalIdHash,
@@ -364,7 +378,6 @@ async function finalizeRegistration(
     passwordHash: requirePasswordHash(draft),
     registeredProvince: identity.registeredProvince,
     registeredDistrict: identity.registeredDistrict,
-    staffMemberId,
     verifiedAt: now,
   });
 
@@ -391,7 +404,7 @@ async function finalizeRegistration(
    */
   await recordRegistrationConsents({ userId: created.id, ipHash: actorIpHash });
 
-  return { completed: true, isStaff: created.isStaff };
+  return { completed: true };
 }
 
 async function sendCode(
