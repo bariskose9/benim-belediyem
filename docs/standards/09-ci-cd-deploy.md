@@ -53,8 +53,16 @@ Tek adımda kolon silen deploy yapılmaz.
 - Her deploy öncesi "bozulursa nasıl geri dönerim" sorusunun cevabı hazır olur.
 
 ## Ortam değişkenleri
-`.env.example` her zaman güncel tutulur. Yeni değişken eklendiğinde
-PR açıklamasında hangi ortama eklenmesi gerektiği yazılır.
+
+`.env.example` her zaman güncel tutulur ve **kurulum talimatı gibi** yazılır
+(ayrıntı: `05-auth-security.md` → "Sırlar depoda DEĞİL — o hâlde nerede?").
+Yeni değişken eklendiğinde PR açıklamasında **hangi ortama** eklenmesi gerektiği
+yazılır.
+
+⛔ **Bir ortam değişkeni üç yerde birden var olmak zorundadır:** `.env.example`
+(adı ve tarifi) · ortam şemasında (doğrulaması) · ilgili ortamın panelinde
+(değeri). Üçünden biri eksikse arıza **çalışma anında ve kullanıcının önünde**
+çıkar. Bu yüzden şema, eksik değişkeni açılışta yakalar.
 
 ## README ve devreye alma kolaylığı
 `README.md` şunları içerir: proje bir cümlede · gereksinimler (Node sürümü, Docker) ·

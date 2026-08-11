@@ -169,6 +169,12 @@ export function buildOpenApiDocument(): Record<string, unknown> {
     info: {
       title: "benim-belediyem API",
       version: APP_VERSION,
+      /**
+       * Lisans belgede de bildiriliyor: belgeyi bir istemci üreticisine veren
+       * kişi, deponun `LICENSE` dosyasını görmeden yalnızca bu dosyayla
+       * çalışıyor olabilir. Lisanssız bir sözleşme "her hakkı saklı"dır.
+       */
+      license: { name: "MIT", identifier: "MIT" },
       description: [
         "Bu API, benim-belediyem web arayüzünün kendi arka ucudur (BFF) — üçüncü taraflara",
         "sunulan bir ürün API'si değildir.",

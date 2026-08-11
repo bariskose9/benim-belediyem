@@ -72,6 +72,40 @@ Sonradan hatırlamaya çalışmak işe yaramaz — bu dosya tam olarak bu yüzde
 ### 6. İlk ADR'yi yaz
 Genellikle "neden bu stack / neden tek repo". `ADR-000-sablon.md` biçimi kullanılır.
 
+### 7. ⛔ DEPO HİJYENİ — ilk gün, sonraya bırakılmaz
+
+Bu üçü **deponun ilk saatinde** halledilir. Sonraya bırakılırsa hatırlanmaz;
+üstelik ikisinin bedeli geriye dönük ödenemez.
+
+| Ne | Neden ilk gün |
+|---|---|
+| **Görünürlük kararı** (public / private) | Public'e itilen bir sır, private'a alsan da sızmış sayılır |
+| **Sır taraması + push koruması** | Koruma ancak açıkken çalışır; sonradan açmak geçmişi geri almaz |
+| **`LICENSE` dosyası** | Lisanssız depo hukuken "her hakkı saklı"dır — kimse kullanamaz |
+
+**Lisans nasıl seçilir:**
+
+- **Public + portföy / öğrenme projesi** → izin verici bir lisans (MIT gibi).
+  Lisanssız bırakmak "kimse dokunmasın" demektir ve portföyün amacına terstir:
+  kod görünür ama hukuken kullanılamaz.
+- **Şirket içi / kuruma ait proje** → lisans dosyası yerine **sahiplik ve
+  gizlilik notu**; depo `private` olur. Burada varsayılan "her hakkı saklı"
+  zaten istenen şeydir.
+- ⛔ **Karar kod yazanın değil, işin SAHİBİNİN kararıdır.** Ajan lisans
+  uydurmaz; seçenekleri ve sonuçlarını anlatır, sahibi seçer.
+
+**Depo private ise ne değişir:**
+
+Güvenlik ayarlarının **gerekçesi** değişmez, yalnızca aciliyeti değişir. Private
+bir depoda sır sızması "internete açıldı" demek değildir — ama **erişimi olan
+herkese** açıldı demektir ve kurumsal ortamda bu, taşerondan stajyere geniş bir
+kitledir. Ayrıca sır bir kez geçmişe girdiğinde depo bir gün açılırsa veya
+yedeği dışarı çıkarsa birlikte gider.
+
+⚠️ Kurumsal ortamda bu ayarlar **senin kararın olmayabilir**: platform ekibi
+organizasyon seviyesinde politika uygulamış olabilir. O hâlde yapılacak şey
+kuralı görmezden gelmek değil, **kimin sorumlu olduğunu bulup istemektir**.
+
 ## Neyin projeye göre DEĞİŞTİĞİ
 
 | Dosya | Değişir mi | Ne değişir |
