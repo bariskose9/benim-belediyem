@@ -71,7 +71,54 @@ Bir oturumu kapatmadan önce ajan şunları yapar:
 3. **`CHANGELOG.md`'ye yaz** — ne eklendi, ne değişti, ne düzeltildi
 4. **`sonraki-adim-prompt.md`'yi yeniden yaz** — bir sonraki oturum bunu
    kopyalayıp yapıştıracak; içinde ne olması gerektiği aşağıda
-5. Kullanıcıya **"yeni oturuma şunu ver"** diye tek bir cümle söyle
+5. **Öğrenilen kalıcı kuralı İKİ kopyaya da yaz ve diff ile kanıtla**
+   (CLAUDE.md kapı 8 — aşağıdaki bölüm)
+6. Kullanıcıya **"yeni oturuma şunu ver"** diye tek bir cümle söyle
+
+## ⛔ Kurallar İKİ yerde yaşar — birine yazmak yetmez
+
+| Nerede | Ne işe yarar | Ne zaman etkili olur |
+|---|---|---|
+| `<proje>/docs/standards/` | **Bu projenin bağlayıcı kuralları.** `CLAUDE.md` §1 hiyerarşisinde 1. sırada | **Hemen** — bir sonraki oturum bunu okur |
+| `proje-kiti` → `skills/yeni-proje/dosyalar/docs/standards/` | **Yeni proje kurulurken kopyalanan şablon** | Yalnızca **yeni proje** kurulduğunda |
+
+İkisi **birbirini güncellemez.** Sonuçlar:
+
+- Yalnızca **kite** yazarsan → bu proje kuralı görmez; `/clear` sonrası yeni
+  oturum onu bilmez. **Ders bugün işe yaramaz.**
+- Yalnızca **projeye** yazarsan → sonraki proje dersi almadan başlar.
+  **Aynı hataya yeniden düşülür.**
+
+### Sıra ve kanıt
+
+```
+1. Projenin  docs/standards/<dosya>.md          → yaz
+2. Kitin     .../dosyalar/docs/standards/<aynı> → yaz
+3. KANIT:    diff <proje> <kit>   → çıktı boş olmalı
+```
+
+⛔ **3. adım olmadan iş bitmiş sayılmaz.** Bu adım atlandığı için 2026-08-11'de
+üç kural yalnızca kite yazıldı ve projede eksik kaldı; hatayı ajan değil proje
+sahibi fark etti ("bu kurallar bende var mı?").
+
+### Kurulu plugin sürümü ne zaman güncellenir
+
+⚠️ **Kural yazdıktan sonra DEĞİL.** Kurulu plugin yalnızca iki anda okunur:
+
+| Ne zaman | Neden |
+|---|---|
+| `/yeni-proje` çalıştırmadan **önce** | Yeni projeye kopyalanacak şablon güncel olmalı |
+| `/kit-senkron` çalıştırmadan **önce** | Karşılaştırma bayat bir kopyaya karşı yapılırsa yanlış sonuç verir |
+
+Mevcut bir projede çalışırken kurulu sürümün eski olması **hiçbir şeyi
+bozmaz** — o proje kendi `docs/standards/` klasörünü okur.
+
+Güncelleme kullanıcı tarafından çekilir, kendiliğinden inmez:
+```
+/plugin marketplace update
+/plugin update proje-kiti
+```
+ve Claude yeniden başlatılır.
 
 ## `sonraki-adim-prompt.md` — ne içerir
 

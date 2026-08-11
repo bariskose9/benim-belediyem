@@ -612,6 +612,14 @@ Dal: `feature/uretime-hazirlik` (öneri)
 > Adım 17c'de bu atlandı ve proje sahibi fark etti: kurallar yalnızca kite
 > yazılmıştı, yani `/clear` sonrası yeni oturum onları görmeyecekti.
 
+- **Sürüm 1.6.0 GitHub'a yayınlandı** (2026-08-11) — "iki kopya" sorununun
+  KALICI çözümü: `CLAUDE.md`'ye **8. kapı** eklendi (öğrenilen kuralı iki
+  kopyaya da yaz + `diff` ile kanıtla), `15-oturum-devri.md`'ye gerekçesi ve
+  sırası yazıldı, ve **`kit-senkron` onarıldı** — artık karşılaştırmayı bayat
+  kurulu önbellekten değil **kaynak depodan** yapıyor, önbellek geride ise
+  durup uyarıyor. ✅ Hepsi bu projeye de senkronlandı ve 17/18 standart
+  dosyasının birebir aynı olduğu `diff` ile kanıtlandı (`00-stack.md` bilerek
+  hariç — sürüm tablosu projeye özel).
 - **Sürüm 1.5.0 GitHub'a yayınlandı** (2026-08-11) — adım 17c'nin üç dersi:
   çakışan PR'ın CI'ı sessizce durdurması (`08-git-workflow`), kimlik≠yetki
   ilkesi (`05-auth-security`), testi koda yormadan önce koşum sayısına bakmak
