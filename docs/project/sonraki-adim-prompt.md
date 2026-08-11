@@ -20,15 +20,18 @@ Roadmap adım **0 → 18a bitti**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
 - Tüm hizmetler çalışıyor, **hizmet ızgarasında kapalı hizmet kalmadı**
-- **Adım 18a (gözlemlenebilirlik) kodu yazıldı** — 285 E2E + 756 birim +
-  344 veritabanı testi yeşil
+- **Adım 18a (gözlemlenebilirlik) CANLIDA** (`6712d32`) — 285 E2E + 756 birim +
+  344 veritabanı testi yeşil, CI 5/5, duman testi geçti
+- ⛔ **AMA HATA TAKİBİ HÂLÂ SESSİZ:** Sentry DSN'i girilmediği için SDK devre
+  dışı. Canlıda bir hata olursa hâlâ kimsenin haberi olmaz. "18a canlıda" ile
+  "hata görünürlüğü var" aynı şey DEĞİL
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
 
 > ### 📌 ÖNCEKİ OTURUMUN KAPANIŞ NOTLARI (2026-08-11, TR ~15:30)
 >
 > | İş | Durum | Kim yapacak |
 > |---|---|---|
-> | Adım 18a kodu | ✅ yazıldı, tüm testler yeşil | PR/deploy durumu aşağıda |
+> | Adım 18a kodu | ✅ **CANLIDA** (`6712d32`, PR #52 merge edildi, duman testi geçti) | bitti |
 > | **Sentry hesabı** | ⛔ **AÇILMADI — ZORUNLU PANEL İŞİ** | proje sahibi |
 > | `LEGAL_*` panel işi | ⛔ hâlâ girilmedi (adım 17'den) | proje sahibi |
 > | Toplu elle test | ⛔ **DOKUZUNCU kez ertelendi** | proje sahibi |
@@ -47,8 +50,12 @@ Dört ortam değişkenini Vercel **kendisi** enjekte eder:
 ⛔ **SONRA YENİDEN DAĞITIM ŞART.** `NEXT_PUBLIC_*` derleme anında gömülüyor:
 `npx vercel redeploy <dagitim-url> --scope barisss`
 
-✅ **Ajan bunu ÖLÇEBİLİR** — ezberden "yapıldı" deme:
-`npx vercel env ls production --scope barisss` → dört değişken görünmeli.
+✅ **Ajan bunu İKİ YOLDAN ÖLÇEBİLİR** — ezberden "yapıldı" deme:
+1. `npx vercel env ls production --scope barisss` → dört değişken görünmeli
+2. ⭐ **EN HIZLI KANIT:** `curl -o /dev/null -w '%{http_code}'
+   https://benim-belediyem.vercel.app/sentry-tunnel` →
+   **bugün 404** (tünel yalnızca DSN varken kuruluyor). Entegrasyon devreye
+   girip yeniden dağıtım koştuğunda **404 dönmeyi bırakmalı.**
 
 Ücretsiz katman: 5.000 hata/ay · 1 kullanıcı · 30 gün saklama.
 
