@@ -73,7 +73,43 @@ Bir oturumu kapatmadan önce ajan şunları yapar:
    kopyalayıp yapıştıracak; içinde ne olması gerektiği aşağıda
 5. **Öğrenilen kalıcı kuralı İKİ kopyaya da yaz ve diff ile kanıtla**
    (CLAUDE.md kapı 8 — aşağıdaki bölüm)
-6. Kullanıcıya **"yeni oturuma şunu ver"** diye tek bir cümle söyle
+6. **Değişen durumu, o durumu yazan HER satırda güncelle** — aşağıdaki bölüm
+7. Kullanıcıya **"yeni oturuma şunu ver"** diye tek bir cümle söyle
+
+### ⛔ Bir durum değiştiğinde tek bir yeri düzeltmek YETMEZ
+
+Aynı gerçek birden çok yerde yazılıdır: `altyapi-durumu.md`'nin özet satırı,
+ortam değişkeni matrisi, adım bölümleri ve `sonraki-adim-prompt.md`'nin DURUM
+başlığı. Biri güncellenip öteki unutulduğunda dosya **kendi içinde çelişir** ve
+sonraki oturum ilk okuduğu satıra inanır.
+
+**Gerçek olay (2026-08-11):** iki panel işi (hata takibi ve yasal değişkenler)
+yapıldı, ilgili bölümler güncellendi — ama **ortam değişkeni matrisi hâlâ
+"girilmeli" diyordu.** O tablo, "kullanıcıya panel işi vermeden önce oku" denen
+tablodur; sonraki oturum proje sahibine **zaten yaptığı işi tekrar yaptıracaktı.**
+Aynı gün `sonraki-adim-prompt.md`'nin ilk maddesi de "hata takibi hâlâ sessiz"
+diyordu, oysa aynı dosyanın 20 satır altında "doğrulandı" yazıyordu.
+
+**Kural — bir dış dünya durumu değiştiğinde:**
+1. Değişen terimi **tüm `docs/` içinde `grep`'le** (`girilmeli`, `açılmadı`,
+   `girilmedi`, `hâlâ`, `YOK`)
+2. Her isabeti ya güncelle ya da **tarihli arşiv** olduğunu başlığında açıkça yaz
+3. ⛔ **KANIT:** aynı `grep`'i tekrar koştur ve geriye yalnızca arşiv satırlarının
+   kaldığını göster
+
+**Arşiv satırı SİLİNMEZ** — geçmişteki fotoğraf, kararın nedenini açıklar. Ama
+başlığı tarih taşımak ve "güncel durum değildir" demek zorundadır.
+
+### ⛔ "Belgede öyle yazıyor" ile "ölçtüm" aynı şey değildir
+
+Bir durumu kullanıcıya raporlarken **kanıtın kaynağını söyle:** canlıdan mı
+ölçüldü, yoksa önceki bir oturumun notundan mı okundu. İkincisi geçerli bir
+kaynaktır (dosyanın varlık sebebi budur) ama **daha zayıftır** ve belge bayatsa
+hata sessizce çoğalır. "Doğrulandı" kelimesini yalnızca bu oturumda ölçtüğün
+şey için kullan; okuduğun şey için "belgeye göre" de.
+
+⚠️ Ölçüm aracının o soruyu cevaplayamadığı durumlar vardır. Cevaplayamıyorsa
+**"ölçemedim" de** — başarısız bir sınamayı "çalışmıyor" diye raporlama.
 
 ## ⛔ Kurallar İKİ yerde yaşar — birine yazmak yetmez
 
