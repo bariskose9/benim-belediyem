@@ -4,6 +4,82 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 18d: Güvenlik denetimi raporu ve sıkı CSP (teknik borç #10, #78, #99, #110)
+
+- **Güvenlik denetimi raporu** (`docs/project/guvenlik-denetimi-2026-08.md`):
+  OWASP Top 10 madde madde, her biri **ölçülerek** denetlendi. Ölçülemeyen
+  maddeler "iyi görünüyor" diye değil **"ölçülmedi"** diye yazıldı ve nedeni
+  söylendi. Bilinen kritik/yüksek açık: **0**
+- **Borç #10 ÖDENDİ — nonce tabanlı sıkı CSP.** Politika `next.config.ts`'ten
+  `src/proxy.ts`'e taşındı (⚠️ Next.js 16'da ara katmanın adı `middleware`
+  değil **`proxy`**) ve her istekte yeni bir nonce üretiyor.
+  `script-src`'den **`'unsafe-inline'` kalktı** — enjekte edilen bir betik artık
+  nonce'u bilemediği için çalışmıyor
+- ⭐ **Korkulan bedel ölçüldü ve SIFIR çıktı.** Next belgesi nonce'un maliyetini
+  "tüm sayfalar dinamik olur, statik render ve CDN önbelleği kaybolur" diye
+  anlatıyor. Build çıktısı önce ve sonra ölçüldü: statik rota **3→3**, dinamik
+  **77→77** değişmedi. Sebebi borç #84'te yazılı — kaybedilecek statik render
+  zaten yoktu
+- **Borç #78 ÖDENDİ — ve endişesi YANLIŞ çıktı.** Kayıt "resmî dokümandan
+  bakılmadan karar verilmemeli" diyordu; bakıldı. Vercel `x-forwarded-for`'u
+  **üzerine yazıyor** ve dış IP'leri iletmiyor (tam da IP sahteciliğini
+  engellemek için), yani atlatma senaryosu mümkün değil. Kaydın önerdiği çözüm
+  de etkisiz olurdu (`x-real-ip` belgede "identical" deniyor). Sıra yine de
+  `x-vercel-forwarded-for` önce olacak şekilde değişti — bugünü değil **yarını**
+  korumak için
+- **Borç #99 ÖDENDİ — tedarik zinciri sabitlemesi.** 11/11 GitHub Action tam
+  commit SHA'sına çevrildi, yanına okunabilir sürüm yorumu yazıldı. Major sürüm
+  **bilerek yükseltilmedi**. ⚠️ Kaydın "`permissions:` bloğu eklenir" kısmı
+  **zaten yapılmıştı** — gerçek iş kaydın söylediğinin yarısıydı
+- ⛔ **Güvenlik başlıkları bugüne kadar HİÇ test edilmiyordu** (adım 4b'den beri
+  yapılandırılmış, `tests/` altında tek eşleşme yok). **19 testlik kapı**
+  eklendi (`tests/e2e/guvenlik-basliklari.spec.ts`); CSP altı ayrı yolda
+  ölçülüyor, çünkü tek yol ölçmek `proxy.ts` matcher'ı daraltıldığında sessiz
+  kalırdı. Ayrıca `tests/unit/workflows.test.ts` action sabitlemesini koruyor
+- **Üç kapı da mutasyonla kanıtlandı:** `'unsafe-inline'` geri kondu → kırmızı;
+  IP sırası bozuldu → kırmızı; bir action etikete çevrildi ve `permissions:`
+  silindi → kırmızı
+- **Borç #110 ÖDENDİ** — aşağıdaki üç eksik girdi **commit gövdelerinden ve
+  roadmap satırlarından** üretildi, hatırdan değil
+
+### Eklendi — adım 18b: Zod şemalarından türetilen OpenAPI belgesi (teknik borç #99-#107)
+
+- 46 ucun tamamı belgelendi; istek sözleşmeleri **gerçek Zod şemalarından**
+  türetiliyor, elle yazılmıyor — elle yazılan belge sapan ikinci bir kaynak olurdu
+- **Yeni bağımlılık eklenmedi**: Zod 4'ün `toJSONSchema` dönüştürücüsü 42/42
+  şemayı çeviriyor ("temsil edilemeyeni sessizce atla" seçeneği KAPALI ölçüldü)
+- OpenAPI **3.1** seçildi çünkü JSON Schema 2020-12'yi olduğu gibi kullanıyor;
+  3.0 her şemanın elle ve sessizce kayıplı çevrilmesini gerektirirdi
+- CI'da **sapma kapıları**: rota listesi, hayalet rota, erişim seviyesi, hata kodları
+- Belgelenen erişim seviyesi, kaynaktaki gerçek `requireAccess` çağrısına bağlandı —
+  bir mutasyon, önceki testlerin yanlış etiketlenmiş bir uçla geçtiğini gösterdi
+- Belge production'da **varsayılan kapalı** (403 değil 404); üretmek ile yayımlamak
+  ayrı kararlar (ADR-019)
+- Adım 18a'nın maskeleme süzgeci belge üzerinde bir gizlilik kapısı olarak yeniden kullanıldı
+
+### Eklendi — adım 18a: Yapılandırılmış log ve hata takibi (teknik borç #79)
+
+- JSON log altyapısı; 32 düz `console.error` çağrısı ona taşındı
+- **Tek maskeleme süzgeci**: sunucu log'u ve Sentry aynı fonksiyondan geçiyor.
+  Süzgeç hem alan adlarını hem **değer biçimlerini** yakalıyor (ORM hataları
+  kişisel veriyi metnin içine gömüyor)
+- **Borç #79 ödendi**: `fail()` artık ham Prisma hata sebeplerini loglamıyor
+- Sentry aynı alan adı üzerinden tünelle bağlandı; **CSP'ye dokunulmadı**
+- SDK'nın veri toplama varsayılanları kapatıldı: oturum tekrarı ve oturum takibi yok
+- ESLint'te `console` tamamen yasaklandı — tek kapı logger
+- Kök yerleşim çökerse boş sayfa kalmasın diye `global-error` sınırı eklendi
+
+### Eklendi — adım 17c: Personel yetkisinin işveren kanalıyla doğrulanması
+
+- ⛔ **`matchStaffMember` kaldırıldı: kimlik doğrulaması artık personel yetkisi
+  VERMİYOR.** Kim olduğunu kanıtlamak, ne yapmaya yetkili olduğunu kanıtlamaz
+- Yeni `staff-verification` özelliği: iki adımlı akış, kod `work_email` adresine
+  gidiyor — yani yetkiyi işverenin kontrol ettiği kanal onaylıyor
+- Onay, kodun **fiilen gönderildiği** hedefe bağlanıyor
+- Bilinmeyen, ayrılmış ve daha önce sahiplenilmiş kayıtlar **aynı** cevabı alıyor
+- Hız sınırı, gerçek/sahte dal ayrımından **önce** tüketiliyor
+- `staff_verification` OTP amacı eklendi (geriye uyumlu enum değeri)
+
 ### Eklendi — adım 18c: Performans bütçesi ve erişilebilirlik kapıları (teknik borç #11, #84)
 
 - **Üç bütçe artık CI'da FİİLEN ÖLÇÜLÜYOR.** `09-ci-cd-deploy.md` bunları

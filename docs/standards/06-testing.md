@@ -83,6 +83,14 @@ yeşil kalan testtir.
   devir notundaki "şu yüzden oluyor" cümlesi doğrulanmadan devralınmaz; ilk iş
   o sebebi ölçmektir. Yanlış sebep, doğru ölçülmüş bir soruna yanlış çözüm
   yazdırır.
+- ⛔ **"KONSOL TEMİZ" BİR KANIT DEĞİLDİR.** Tarayıcı birçok şeyi **sessizce**
+  bozar: bir CSP yönergesi satır içi stili bloklar, öğe DOM'da durur, sayfa
+  açılır, konsola tek satır bile düşmez — ve ekran bozuktur. Konsolun boş
+  olması "hata yok" değil, yalnızca "hata **raporlanmadı**" demektir.
+  **Görsel veya davranışsal bir şeyi doğruluyorsan HESAPLANAN DEĞERİ ölç**
+  (`getComputedStyle`, gerçek konum, `styleSheet.cssRules.length`), etiketin
+  varlığını değil. Bir kez ölçülmüş örnek: nonce'lu bir politika 45 görseli ve
+  14 KB'lık bir stil sayfasını öldürdü, konsol boştu.
 
 ## Mobil doğrulama — üç ayrı şey, karıştırılmaz
 

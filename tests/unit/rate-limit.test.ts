@@ -207,4 +207,50 @@ describe("readActorIp — vekil başlığı", () => {
 
     expect(readActorIp(new Headers())).toBe("unknown");
   });
+
+  // ⭐ Aşağıdaki üç test SIRAYI kilitliyor (adım 18d, borç #78).
+  // Vercel `x-forwarded-for`'u üzerine yazdığı için bugün üçü de aynı değer;
+  // sıra, uygulamanın önüne bir gün vekil konduğu senaryoyu karşılıyor —
+  // o gün yalnızca `x-vercel-forwarded-for` platformun ölçtüğü değer kalır.
+  it("üç başlık da varsa platformun kendi başlığını TERCİH eder", async () => {
+    const { readActorIp } = await import("@/lib/rate-limit");
+    const headers = new Headers({
+      "x-vercel-forwarded-for": "203.0.113.42",
+      "x-forwarded-for": "198.51.100.7",
+      "x-real-ip": "192.0.2.9",
+    });
+
+    expect(readActorIp(headers)).toBe("203.0.113.42");
+  });
+
+  it("platform başlığı yoksa x-forwarded-for'a düşer", async () => {
+    const { readActorIp } = await import("@/lib/rate-limit");
+    const headers = new Headers({
+      "x-forwarded-for": "198.51.100.7",
+      "x-real-ip": "192.0.2.9",
+    });
+
+    expect(readActorIp(headers)).toBe("198.51.100.7");
+  });
+
+  it("hangi başlıktan gelirse gelsin EN SOLDAKİ adresi alır", async () => {
+    const { readActorIp } = await import("@/lib/rate-limit");
+
+    expect(readActorIp(new Headers({ "x-vercel-forwarded-for": "203.0.113.42, 70.41.3.18" }))).toBe(
+      "203.0.113.42",
+    );
+    expect(readActorIp(new Headers({ "x-real-ip": "192.0.2.9, 70.41.3.18" }))).toBe("192.0.2.9");
+  });
+
+  it("boş bir başlık sıradaki başlığı GÖLGELEMEZ", async () => {
+    // Vekil başlığı boş dizeyle gönderirse `""` bir adres değildir; sıradaki
+    // başlığa düşülmezse tüm istekler tek "unknown" sayacına toplanırdı.
+    const { readActorIp } = await import("@/lib/rate-limit");
+    const headers = new Headers({
+      "x-vercel-forwarded-for": "",
+      "x-forwarded-for": "198.51.100.7",
+    });
+
+    expect(readActorIp(headers)).toBe("198.51.100.7");
+  });
 });

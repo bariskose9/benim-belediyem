@@ -173,9 +173,28 @@ export function hashDestination(destination: string): string {
 }
 
 /**
- * İsteği atan IP'yi okur.
+ * İsteği atan IP'yi okur — hız sınırının IP bacağının anahtarı budur.
  *
- * `x-forwarded-for` birden fazla adres taşıyabilir (`istemci, vekil1, vekil2`);
+ * ⭐ SIRA ÖNEMLİ, ve sırası bu olan sebep ÖLÇÜLDÜ (2026-08-12, adım 18d).
+ * Vercel'in resmî `docs/headers/request-headers` sayfası şunu diyor:
+ *
+ *   - `x-forwarded-for` → "we currently **overwrite** the X-Forwarded-For
+ *     header and **do not forward external IPs**. This restriction is in place
+ *     to **prevent IP spoofing**."
+ *   - `x-real-ip` → "identical to the x-forwarded-for header"
+ *   - `x-vercel-forwarded-for` → "identical to the x-forwarded-for header.
+ *     However, **x-forwarded-for could be overwritten if you're using a proxy
+ *     on top of Vercel**."
+ *
+ * Yani BUGÜN üçü de aynı değeri taşıyor ve istemci hiçbirini sahteleyemiyor.
+ * Sıra, bugünü değil YARINI koruyor: uygulamanın önüne bir gün bir vekil
+ * (Cloudflare gibi) konursa `x-forwarded-for` artık o vekilin yazdığı değer
+ * olur ve istemcinin gönderdiğini taşıyabilir. `x-vercel-forwarded-for` o
+ * senaryoda da platformun kendi ölçtüğü değer olarak kalır — bu yüzden ÖNCE
+ * o okunur. Kod bugün doğru olmakla yetinmiyor, yanlışlanabilir olduğu günü
+ * de karşılıyor.
+ *
+ * Her başlık birden fazla adres taşıyabilir (`istemci, vekil1, vekil2`);
  * EN SOLDAKİ istemcidir. Başlığın tamamını anahtar yapmak, araya bir vekil
  * eklendiğinde anahtarı değiştirir ve saldırganın sayacı sıfırlamasına yol açar.
  *
@@ -183,9 +202,13 @@ export function hashDestination(destination: string): string {
  * TAMAMEN atlamak, korumayı "başlığı sil, serbest kal" ile devre dışı bırakılır
  * hale getirirdi. Yer tutucu tersine hepsini tek sayaca toplar — sıkı taraf.
  */
-export function readActorIp(headers: Headers): string {
-  const forwarded = headers.get("x-forwarded-for");
-  const first = forwarded?.split(",")[0]?.trim();
+const ACTOR_IP_HEADERS = ["x-vercel-forwarded-for", "x-forwarded-for", "x-real-ip"] as const;
 
-  return first || headers.get("x-real-ip")?.trim() || "unknown";
+export function readActorIp(headers: Headers): string {
+  for (const header of ACTOR_IP_HEADERS) {
+    const first = headers.get(header)?.split(",")[0]?.trim();
+    if (first) return first;
+  }
+
+  return "unknown";
 }

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { headers } from "next/headers";
 
 import { EnvBanner } from "@/components/layout/EnvBanner";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -39,7 +40,18 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  /*
+   * Sıkı CSP'nin nonce'u (`src/proxy.ts` üretiyor, adım 18d).
+   *
+   * ⛔ BU BETİK NEXT'İN ÜRETTİĞİ BİR BETİK DEĞİL, BİZİM YAZDIĞIMIZ. Next kendi
+   * betiklerine nonce'u otomatik takıyor; elle yazılmış `<script>` etiketleri
+   * bunun DIŞINDA kalıyor. Nonce verilmezse tema betiği sessizce bloklanır ve
+   * koyu tema kullanıcısı her açılışta beyaz parlama görür — sayfa yine açılır,
+   * yani hata konsola düşmeden fark edilmez.
+   */
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="tr" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <head>
@@ -48,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           React'ten sonra çalışsaydı koyu tema kullanıcısı her açılışta bir
           anlık beyaz parlama görürdü.
         */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="flex min-h-dvh flex-col">
         {/*
