@@ -33,7 +33,7 @@ Roadmap adım **0 → 18a bitti**.
 > | `LEGAL_*` panel işi | ⛔ hâlâ girilmedi (adım 17'den) | proje sahibi |
 > | Toplu elle test | ⛔ **DOKUZUNCU kez ertelendi** | proje sahibi |
 > | Cron ilk koşusu | ⏳ 12 Ağustos 00:00 UTC penceresi bekleniyor | aşağıya bak |
-> | Kit sürüm 1.8.0 | ⏳ yazıldı, **push edilmedi** — onay bekliyor | aşağıya bak |
+> | Kit sürüm 1.8.0 | ✅ push edildi (`8ae8067`) | proje sahibi `/plugin`'den GÜNCELLESİN |
 
 ## 🔧 PANEL İŞİ — İKİ TANE, İKİSİ DE ZORUNLU
 
@@ -84,13 +84,16 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **yalnızca
 okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT SÜRÜM 1.8.0 — YAZILDI, PUSH EDİLMEDİ
+## 📦 KİT SÜRÜM 1.8.0 — YAYINLANDI
 
 Adım 18a'nın dört dersi `docs/standards/` ve kit kopyasına **ikisine birden**
 yazıldı; `diff` ile 17/18 dosyanın birebir aynı olduğu kanıtlandı (kapı 8).
-Kit deposunda sürüm 1.7.0 → **1.8.0** yapıldı ama **push edilmedi** — proje
-sahibinin onayı bekleniyor. Onaylanırsa `/plugin` ekranından güncellemesi de
-hatırlatılmalı.
+Kit deposunda sürüm 1.7.0 → **1.8.0** yapıldı ve GitHub'a **push edildi**
+(`bariskose9/bariskose-skills`, commit `8ae8067`).
+
+⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ HÂLÂ ESKİ.** `/plugin` ekranından
+güncellemesi gerekiyor. Bu, kapı 8'in parçası DEĞİL — yalnızca `/yeni-proje`
+veya `/kit-senkron` çalıştırılmadan hemen önce önemli.
 
 ⚠️ **KİT DEPOSU 5 COMMIT GERİDEYDİ ve bu oturumda `git pull` yapıldı.**
 Karşılaştırmadan önce daima `git fetch` + `git pull` yap; bayat bir kopyayla
@@ -521,14 +524,13 @@ Dal: `feature/api-belgeleri` (öneri)
 > Bir ders öğrenildiğinde **İKİSİNE DE** yazılır ve `diff` ile kanıtlanır
 > (CLAUDE.md kapı 8).
 
-- **Sürüm 1.8.0 YAZILDI ama PUSH EDİLMEDİ** (2026-08-11) — adım 18a'nın dört
+- **Sürüm 1.8.0 GitHub'a yayınlandı** (2026-08-11, `8ae8067`) — adım 18a'nın dört
   dersi: `no-console` istisnasız yasak (`12-operations`), süzgeç değerin
   biçimine de bakar (`12-operations`), üçüncü taraf SDK varsayılanları
   denetlenir + replay/oturum izleme kapalı (`14-privacy`), bir "neden" yorumu
   yazmadan önce iddiayı mutasyonla ölç (`02-coding-standards`).
   ✅ **Kapı 8 geçildi:** 17/18 standart dosyasının birebir aynı olduğu `diff`
-  ile kanıtlandı. ⛔ Proje sahibi onaylarsa push edilecek ve `/plugin`
-  ekranından güncellemesi hatırlatılacak
+  ile kanıtlandı. ⛔ Proje sahibinin `/plugin` ekranından güncellemesi gerekiyor
 - **Sürüm 1.7.0** (2026-08-11) — `00-stack.md` istisnası bölüm seviyesine indi
 - **Sürüm 1.6.0** (2026-08-11) — 8. kapı eklendi, `kit-senkron` onarıldı
 - **Sürüm 1.5.0** (2026-08-11) — adım 17c'nin üç dersi
