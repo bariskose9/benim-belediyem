@@ -37,9 +37,16 @@ Depoda görülen, dosyada yazandan üstündür. Çelişki bulursan **söyle.**
 Roadmap adım **0 → 18c bitti**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- **Adım 18c commit onayı bekliyordu** — dal
-  `feature/performans-ve-erisilebilirlik-kapilari`. ⚠️ Yukarıdaki komutlarla
-  DOĞRULA, bu satıra güvenme
+- ✅ **Adım 18c MERGE EDİLDİ ve CANLIDA** (PR #62 → `main` = `e7709bd`).
+  Dağıtım `/api/health` ile doğrulandı: `commit: e7709bd`, `db: ok`.
+  Duman testi temiz (`/` · `/market` · `/etkinlikler` · `/giris` ·
+  `/gizlilik` hepsi 200; `/api/docs` 404 ve bu **beklenen** — ADR-019
+  production'da belgeyi varsayılan kapalı tutuyor)
+- ⭐ **Bu satır merge'den SONRA yazıldı** — `15-oturum-devri.md`'nin bu adımda
+  eklenen kuralı gereği. Yine de körü körüne güvenme: `git log --oneline -3`
+  ve `curl -s https://benim-belediyem.vercel.app/api/health` ile teyit et
+- CI'da kalite kapısı **gerçek koşucuda 19/19 geçti** (1,4 dk). Korkulan
+  senaryo (yavaş koşucuda LCP'nin kararsız kırmızı vermesi) gerçekleşmedi
 - Uygulama kodu (`src/`) adım 18c'de **hiç değişmedi** — iş tamamen test,
   CI ve belge tarafında
 - Hata takibi (Sentry) canlıda ve uçtan uca doğrulandı (2026-08-11)
