@@ -28,7 +28,7 @@ Her bulgunun yanında onu üreten komut veya dosya var.
 |---|---|
 | Bu adımda **kapatılan** borç | 3 (#10 · #78 · #99) |
 | Yanlış olduğu **ölçülerek** gösterilen devralınan iddia | 2 (#78'in tamamı, #99'un yarısı) |
-| Yeni **açılan** borç | 2 (#112 · #113) |
+| Yeni **açılan** borç | 3 (#112 · #113 · #114) |
 | Sahibin **karar vermesi** gereken açık konu | 2 (#23 · #89) |
 | Bilinen **kritik/yüksek** açık | **0** |
 
@@ -120,7 +120,7 @@ silme ve kimlik çözme için ikinci kanıt yok. Ayrıntı ve karar §5'te.
 ⛔ **Bu başlıklar bugüne kadar HİÇBİR testle korunmuyordu.** Adım 4b'de
 yapılandırılmışlar ve 2026-08-12'de ölçüldü: `tests/` altında tek bir eşleşme
 yoktu. `next.config.ts`'ten bir satır silinse hiçbir şey kırmızıya dönmezdi.
-Bu adımda **19 testlik bir kapı** yazıldı (`tests/e2e/guvenlik-basliklari.spec.ts`)
+Bu adımda **20 testlik bir kapı** yazıldı (`tests/e2e/guvenlik-basliklari.spec.ts`)
 ve CSP altı ayrı yolda ölçülüyor (`/` · `/giris` · `/kayit` · `/market` ·
 `/hesabim` · `/gizlilik`) — tek yol ölçmek, `proxy.ts`'teki `matcher` ifadesi
 yanlışlıkla daraltıldığında sessiz kalırdı.
@@ -244,7 +244,8 @@ iş akışının açık `permissions:` bloğu tanımlamasını doğruluyor.
 | # | Ne | Neden bugün ödenmedi |
 |---|---|---|
 | **112** | `style-src` hâlâ `'unsafe-inline'` | İki mimari engel ölçüldü (aşağıda) |
-| **113** | Turnstile bulmacasının CSP altında **çizildiği** doğrulanamadı | Local'de iframe CSP'siz de çizilmiyor (§6.3) |
+| **113** | Turnstile bulmacasının CSP altında **çizildiği** doğrulanamadı | Sebep bulundu ve CSP değil (§6.3) |
+| **114** | Turnstile önizleme ortamında çalışmıyor (`110200`) | Panel işi, isteğe bağlı; production etkilenmiyor |
 
 **#112'nin gerekçesi tahmin değil, ölçüm:** `style-src` nonce'a çevrildi, üretim
 yapısı derlendi ve tarayıcıda ölçüldü. İki şey kırıldı:
@@ -260,6 +261,25 @@ yapısı derlendi ve tarayıcıda ölçüldü. İki şey kırıldı:
 ⛔ **En sinsi taraf: bu kırılma tarayıcı konsoluna HİÇBİR ŞEY yazmadı.** "Konsol
 temiz" burada "çalışıyor" demek değildi; kırıklık ancak `getComputedStyle` ile
 ölçülerek görüldü. **Bu, bu adımın en önemli dersidir.**
+
+### 4.1 ⛔ Sıkı CSP bir şeyi FİİLEN kırdı — ve bunu ancak preview yakaladı
+
+`frame-src`, Vercel'in önizleme yorum araç çubuğunu (`vercel.live`) blokladı.
+Konsol kaydı: *"Framing 'https://vercel.live/' violates the following Content
+Security Policy directive: `frame-src 'self' https://challenges.cloudflare.com`"*.
+
+⛔ **Local'de HİÇ görünmedi**, çünkü araç çubuğu yalnızca Vercel dağıtımlarında
+yükleniyor. 803 unit, 344 db, 341 e2e ve 19 bütçe testinin hiçbiri bunu
+yakalayamazdı — kırılma yalnızca preview dağıtımının tarayıcı konsolunda vardı.
+
+**Düzeltildi ve iki yönü birden testle kilitlendi:** üretim DIŞINDA izin
+veriliyor, üretimde **verilmiyor**. İkincisi ölçüme dayanıyor — araç çubuğu
+production sayfalarına hiç yüklenmiyor (`curl | grep vercel.live` → 0), yani
+gerekmeyen bir alan adını politikaya yazmak saldırı yüzeyini bedava
+büyütmek olurdu. Kapı mutasyonla kanıtlandı.
+
+⭐ **Ders: bir CSP değişikliği ancak GERÇEK dağıtım ortamında doğrulanabilir.**
+Local'de var olmayan bir betik, local'de kırılamaz.
 
 ---
 
@@ -331,8 +351,16 @@ derlendi, aynı ölçüm tekrarlandı — **iframe CSP olmadan da çizilmiyor**.
 bu bir regresyon değil; local ortamda site anahtarı bu alan adına bağlı
 olmadığı için zaten çizilmiyor.
 
-⛔ **Bu yüzden #113 açık bir borç olarak duruyor:** Turnstile'ın CSP altında
-gerçekten çalıştığı ancak **preview veya production'da** doğrulanabilir.
+**Sonra sebep KESİN olarak bulundu.** Preview dağıtımının konsolunda
+Turnstile'ın kendi hata kodu vardı: **`110200`**. Cloudflare belgesi bunu
+*"Domain not authorized — Add current domain in Hostname Management"* diye
+tanımlıyor. Yani ne local ne preview alan adı Turnstile panelinde yetkili;
+**CSP'yle hiçbir ilgisi yok** (yeni borç #114).
+
+⛔ **#113 yine de açık:** production alan adı yetkili ve proje sahibi kutuyu
+orada görüyor — ama o gözlem **merge'den önceki** canlıya, yani eski CSP'ye
+ait. Sıkı CSP altında çalıştığı ancak bu dal canlıya çıktıktan sonra
+doğrulanabilir.
 
 ---
 

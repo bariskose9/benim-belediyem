@@ -29,7 +29,22 @@ function createNonce(): string {
   return btoa(String.fromCharCode(...bytes));
 }
 
-function buildContentSecurityPolicy(nonce: string, isDevelopment: boolean): string {
+/**
+ * Vercel'in önizleme araç çubuğunun alan adı.
+ *
+ * `NEXT_PUBLIC_ENV_LABEL` doğrudan okunuyor, `@/config/env` üzerinden DEĞİL:
+ * bu dosya Edge çalışma zamanında koşuyor ve `serverEnv`'i içeri almak
+ * yalnızca sunucuda çözülebilen bir doğrulama zincirini buraya taşırdı.
+ */
+const VERCEL_TOOLBAR_ORIGIN = "https://vercel.live";
+
+function buildContentSecurityPolicy(
+  nonce: string,
+  isDevelopment: boolean,
+  isProduction: boolean,
+): string {
+  const previewOrigins = isProduction ? "" : ` ${VERCEL_TOOLBAR_ORIGIN}`;
+
   return [
     "default-src 'self'",
 
@@ -88,11 +103,21 @@ function buildContentSecurityPolicy(nonce: string, isDevelopment: boolean): stri
 
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
-    `connect-src 'self' ${TURNSTILE_SCRIPT_ORIGIN}`,
+    `connect-src 'self' ${TURNSTILE_SCRIPT_ORIGIN}${previewOrigins}`,
 
-    // Bulmaca kendini bir iframe içinde gösteriyor. `frame-ancestors 'none'`
-    // aşağıda duruyor: biz kimseyi gömemeyiz demiyor, KİMSE BİZİ gömemez diyor.
-    `frame-src 'self' ${TURNSTILE_SCRIPT_ORIGIN}`,
+    /*
+     * Bulmaca kendini bir iframe içinde gösteriyor. `frame-ancestors 'none'`
+     * aşağıda duruyor: biz kimseyi gömemeyiz demiyor, KİMSE BİZİ gömemez diyor.
+     *
+     * ⭐ `vercel.live` YALNIZCA ÜRETİM DIŞINDA. Vercel'in önizleme yorum
+     * araç çubuğu çalışma anında bir iframe açıyor; sıkı CSP ilk kurulduğunda
+     * bu SESSİZCE bloklandı ve ancak preview dağıtımının konsolu okunarak
+     * görüldü ("Framing 'https://vercel.live/' violates ... frame-src").
+     * ⛔ Üretimde eklenmiyor ve bu bilinçli: ölçüldü, araç çubuğu production
+     * sayfalarına hiç yüklenmiyor (`curl | grep vercel.live` → 0). Gerekmeyen
+     * bir alan adını politikaya yazmak, saldırı yüzeyini bedava büyütmektir.
+     */
+    `frame-src 'self' ${TURNSTILE_SCRIPT_ORIGIN}${previewOrigins}`,
 
     "object-src 'none'",
     "base-uri 'self'",
@@ -107,6 +132,7 @@ export function proxy(request: NextRequest): NextResponse {
   const contentSecurityPolicy = buildContentSecurityPolicy(
     nonce,
     process.env.NODE_ENV === "development",
+    process.env.NEXT_PUBLIC_ENV_LABEL === "production",
   );
 
   /*

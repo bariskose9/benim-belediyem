@@ -139,6 +139,32 @@ test.describe("içerik güvenliği politikası (CSP)", () => {
     });
   }
 
+  test("üretim DIŞINDA Vercel araç çubuğuna izin veriliyor, üretimde VERİLMİYOR", async ({
+    request,
+  }) => {
+    /*
+     * ⛔ BU TEST BİR REGRESYONDAN DOĞDU. Sıkı CSP ilk kurulduğunda Vercel'in
+     * önizleme yorum araç çubuğu SESSİZCE bloklandı; hiçbir test kırmızıya
+     * dönmedi, yalnızca preview dağıtımının tarayıcı konsolunda görüldü:
+     * "Framing 'https://vercel.live/' violates ... frame-src".
+     *
+     * İki yön de kilitleniyor: preview'da çalışsın, üretimde gereksiz yere
+     * açık kalmasın (ölçüldü — araç çubuğu production sayfalarına hiç
+     * yüklenmiyor).
+     */
+    const policy = await fetchPolicy(request, "/");
+    const uretim = process.env.NEXT_PUBLIC_ENV_LABEL === "production";
+    const toolbar = "https://vercel.live";
+
+    if (uretim) {
+      expect(policy["frame-src"]).not.toContain(toolbar);
+      expect(policy["connect-src"]).not.toContain(toolbar);
+    } else {
+      expect(policy["frame-src"]).toContain(toolbar);
+      expect(policy["connect-src"]).toContain(toolbar);
+    }
+  });
+
   test("TEK bir CSP başlığı gönderiliyor", async ({ request }) => {
     /*
      * İki `Content-Security-Policy` başlığı gönderilirse tarayıcı ikisini de

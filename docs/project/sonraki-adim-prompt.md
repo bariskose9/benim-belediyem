@@ -96,6 +96,12 @@ kullanıcının telefonundaki eski sürüm güncellenemez:
 
 ## ⚠️ YENİ BORÇLAR — #112, #113
 
+- ⛔ **SIKI CSP BİR ŞEYİ FİİLEN KIRDI VE LOCAL'DE HİÇ GÖRÜNMEDİ:** `frame-src`
+  Vercel'in önizleme araç çubuğunu (`vercel.live`) blokladı. 803 unit + 344 db
+  + 341 e2e + 19 bütçe testinin hiçbiri yakalayamazdı; yalnızca **preview
+  dağıtımının tarayıcı konsolunda** vardı. Düzeltildi (üretim DIŞINDA izinli,
+  üretimde değil — orada hiç yüklenmiyor, ölçüldü) ve testle kilitlendi.
+  ⭐ **Ders: bir CSP değişikliği ancak GERÇEK dağıtım ortamında doğrulanabilir.**
 - **#112** — `style-src` hâlâ `'unsafe-inline'`. **Sebebi ölçüldü:**
   `next/image` `fill` modu inline `style` ÖZNİTELİĞİ yazıyor (nonce özniteliğe
   takılamaz — mimari sınır) ve `sonner` nonce'suz `<style>` enjekte ediyor
@@ -104,11 +110,13 @@ kullanıcının telefonundaki eski sürüm güncellenemez:
   yok sayılır
 - **#113** — ⛔ **BU DAL CANLIYA ÇIKINCA ELLE DOĞRULA:** `/kayit` sayfasında
   Turnstile bulmaca kutusu hâlâ görünüyor mu ve gönder düğmesi kilitli
-  kalmıyor mu? (Formu fiilen göndermeye gerek YOK — Turnstile bozulursa
-  `onUnavailable` tetiklenip düğme kilitlenir, yani kilitsiz olması yeterli
-  kanıt.) ⭐ Proje sahibi merge'den ÖNCE canlıda kutunun göründüğünü bildirdi;
-  bu "local'de anahtar alan adına bağlı olmadığı için çizilmiyor" hipotezini
-  doğruluyor ama borcu KAPATMIYOR — o gözlem hâlâ ESKİ CSP altındaydı
+  kalmıyor mu? (Formu göndermeye gerek YOK — bozulursa `onUnavailable`
+  tetiklenip düğme kilitlenir, yani kilitsiz olması yeterli kanıt.)
+  ⭐ **Local ve preview'da çizilmemesinin sebebi ARTIK KESİN:** Turnstile
+  `110200` = *"Domain not authorized"* veriyor, yani o alan adları panelde
+  yetkili değil. CSP'yle ilgisi yok
+- **#114** — Turnstile önizleme ortamında çalışmıyor (yukarıdaki `110200`).
+  ⚠️ **İSTEĞE BAĞLI panel işi**, zorunlu değil — production etkilenmiyor
 
 ## ❓ PROJE SAHİBİNE SORULACAK — TEK CÜMLEYLE
 
