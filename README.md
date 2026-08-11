@@ -166,4 +166,10 @@ Tam liste ve "neyi kullanmıyoruz": `docs/standards/00-stack.md`
 
 ## Lisans
 
-Bu bir öğrenme projesidir. Kurumsal kimlik öğeleri temsilidir.
+[MIT](LICENSE) — kodu kullanabilir, değiştirebilir ve ticari olarak
+kullanabilirsin; tek şart telif notunu ve lisans metnini korumak.
+
+⚠️ **Bu gerçek bir belediye uygulaması değildir.** Bir öğrenme ve portföy
+projesidir; kurumsal kimlik öğeleri temsilidir, kimlik sorgulama ve ödeme
+sağlayıcıları taklit edilmiştir (ADR-003, ADR-009). Lisans koda verilir,
+temsil edilen kuruma değil.

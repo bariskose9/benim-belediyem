@@ -86,6 +86,17 @@ describe("OpenAPI belgesi", () => {
     expect(undeclared).toEqual([]);
   });
 
+  it("belge lisansını bildiriyor", () => {
+    /**
+     * Belgeyi bir istemci üreticisine veren kişi deponun `LICENSE` dosyasını
+     * görmeden yalnızca bu dosyayla çalışıyor olabilir. Lisanssız bir
+     * sözleşme hukuken "her hakkı saklı"dır.
+     */
+    const info = spec.info as { license?: { name?: string } };
+
+    expect(info.license?.name).toBe("MIT");
+  });
+
   it("kullanılan her etiketin açıklaması var", () => {
     // 46 uç tek listede okunamaz; etiket açıklaması belgeyi gezen kişinin
     // "aradığım şey hangi grupta" sorusunu cevaplayan ilk şey.
