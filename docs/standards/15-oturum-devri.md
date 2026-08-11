@@ -101,6 +101,33 @@ Bir oturumu kapatmadan önce ajan şunları yapar:
 üç kural yalnızca kite yazıldı ve projede eksik kaldı; hatayı ajan değil proje
 sahibi fark etti ("bu kurallar bende var mı?").
 
+### İstisnalar — DOSYA değil BÖLÜM seviyesinde
+
+Tek bir dosya kısmen projeye özel olabilir. O dosyanın **tamamını** senkron
+dışı bırakmak kolay ama pahalıdır: genel bölümlere yazılan dersler de kaybolur.
+
+`00-stack.md` için kural:
+
+| Kural | Bölüm |
+|---|---|
+| ⛔ Asla senkronlanmaz | `## Zorunlu stack` — fiilen kurulu sürümler |
+| ⛔ Kite özel, projeye inmez | `## Sürüm sütunu nasıl doldurulur` |
+| ✅ Senkronlanır | Diğer tüm bölümler |
+
+**Karışık bölümlerde sınır bir işaretleyicidir:**
+
+```
+<!-- ⛔ SENKRON SINIRI -->
+```
+
+Üstü ortaktır ve eşitlenir; altı projeye aittir ve dokunulmaz.
+⛔ **Sınırı silme.** Silinirse o bölümün tamamı senkron dışı kalır ve kite
+yazılan yeni bir genel kural bu projeye hiç ulaşmaz — 2026-08-11'de yaşandı.
+
+⚠️ **Kanıt bu dosyalarda `diff` değil, BÖLÜM karşılaştırmasıdır.** Dosyalar
+farklı görünecektir ve bu normaldir; kanıtlanması gereken, **senkronlanması
+gereken bölümlerin** aynı olduğudur.
+
 ### Kurulu plugin sürümü ne zaman güncellenir
 
 ⚠️ **Kural yazdıktan sonra DEĞİL.** Kurulu plugin yalnızca iki anda okunur:
