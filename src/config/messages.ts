@@ -2227,4 +2227,185 @@ export const messages = {
       },
     },
   },
+
+  /**
+   * Hesap yönetimi ve veri hakları (PRD §5.11 · ADR-017 · adım 17b).
+   *
+   * ⛔ SİLME METİNLERİNDE "ANONİMLEŞTİRME" KELİMESİ GEÇMİYOR ve bu bir üslup
+   * tercihi değil. KVKK Yönetmeliği m.10 anlamında anonimleştirme GERİ
+   * DÖNDÜRÜLEMEZ olmak zorunda; bizim yaptığımız, kişisel alanları silip mali
+   * kayıtları kişiselleştirmeden saklamak. Yanlış kelime, kullanıcıya
+   * yapmadığımız bir şeyi yaptığımızı söylemek olurdu
+   * (`14-privacy-and-compliance.md` → "Hesap silme").
+   *
+   * ⛔ "NE SAKLANIYOR" LİSTESİ EKRANDAN ÇIKARILAMAZ. Yönetmelik m.12/1-c,
+   * kısmen karşılanan silme talebinin GEREKÇESİYLE bildirilmesini istiyor;
+   * bu liste o bildirimin kendisi.
+   */
+  account: {
+    errors: {
+      passwordMismatch: "Şifreniz doğrulanamadı. Tekrar deneyin.",
+      passwordRequired: "Devam etmek için hesabınızın şifresini yazın.",
+      alreadyDeleted: "Bu hesap artık kullanılamıyor. Sayfayı yenileyin.",
+      identityNotLinked: "Hesabınıza bağlı bir kimlik bulunmuyor.",
+      identityUnlinkWouldLock:
+        "Kimlik bağınızı çözemeyiz: hesabınıza girmenin başka bir yolu kalmıyor. " +
+        "Önce Google hesabınızı bağlayın, sonra tekrar deneyin.",
+      invalidRequest: "Gönderdiğiniz bilgiler geçerli değil. Alanları kontrol edin.",
+      tooManyAttempts: "Çok fazla deneme yaptınız. Bir süre sonra tekrar deneyin.",
+    },
+
+    /** `/hesabim` üzerindeki kart — kullanıcı buradan giriyor. */
+    entry: {
+      title: "Verilerim ve hesap yönetimi",
+      description: "Verinizi indirin, kimlik bağınızı çözün veya hesabınızı silin.",
+    },
+
+    page: {
+      pageTitle: "Verilerim ve hesap yönetimi",
+      title: "Verilerim ve hesap yönetimi",
+      description:
+        "Bu sayfa, hakkınızda tuttuğumuz veriler üzerindeki haklarınızı kullandığınız yerdir.",
+      backToAccount: "Hesabıma dön",
+    },
+
+    /** Verimi indir (KVKK m.11 → taşınabilirlik). */
+    export: {
+      heading: "Verimi indir",
+      description:
+        "Hesabınıza bağlı olarak tuttuğumuz her şeyi tek bir dosyada indirin: profiliniz, " +
+        "adresleriniz, siparişleriniz, randevularınız, biletleriniz, üyeliğiniz, destek " +
+        "talepleriniz ve rıza kayıtlarınız.",
+      /** ⛔ Bu cümle çıkarılmaz — dosyanın içinde ne OLMADIĞI da bir taahhüt. */
+      safety:
+        "Dosyada şifreniz, oturum bilgileriniz ve kimlik numaranızın açık hâli yer almaz; " +
+        "kimlik numaranız yalnızca maskeli görünür.",
+      warning: "İndirdiğiniz dosya kişisel verilerinizi içerir. Paylaşırken dikkatli olun.",
+      action: "Verilerimi indir (JSON)",
+      pending: "Dosya hazırlanıyor…",
+      failed: "Dosya hazırlanamadı. Biraz sonra tekrar deneyin.",
+    },
+
+    /** Kimlik bağını çözme (ADR-017). */
+    identity: {
+      heading: "Kimlik bağlantım",
+      linked: "Kimliğiniz nüfus kayıtlarıyla doğrulanmış durumda.",
+      notLinked: "Hesabınıza bağlı bir kimlik yok.",
+      notLinkedHint: "Hizmetlerin çoğu kimlik doğrulaması istiyor.",
+      goVerify: "Kimlik doğrulamasına git",
+      description:
+        "Kimlik bağınızı çözerseniz kimlik numaranız serbest kalır ve başka bir hesaba " +
+        "bağlanabilir. Bu işlem geri alınamaz; kimliğinizi yeniden doğrulamanız gerekir.",
+      consequences: {
+        heading: "Çözdüğünüzde ne oluyor",
+        items: [
+          "Kimlik numaranız, doğum tarihiniz ve nüfus il/ilçe bilginiz silinir.",
+          "Adınız Google hesabınızdan gelen ada döner.",
+          "Kurum personeli yetkiniz varsa kalkar; hastane ve spor salonu ekranları kapanır.",
+          "Şifreyle giriş kapanır — bu sitede giriş kimlik numaranızla yapılıyor. " +
+            "Google ile girmeye devam edersiniz.",
+        ],
+      },
+      /** Google bağlantısı olmayan hesapta kart bu hâliyle çiziliyor. */
+      blocked: {
+        title: "Şu an çözülemiyor",
+        body:
+          "Kimlik bağınızı çözerseniz hesabınıza girecek hiçbir yolunuz kalmaz, çünkü giriş " +
+          "kimlik numaranızla yapılıyor. Önce “Giriş yöntemleri” bölümünden Google " +
+          "hesabınızı bağlayın.",
+        cta: "Giriş yöntemlerine git",
+      },
+      action: "Kimlik bağlantımı çöz",
+      confirmTitle: "Kimlik bağlantınız çözülsün mü?",
+      confirmBody:
+        "Bu işlem geri alınamaz. Kimlik numaranız serbest kalır ve hizmetlere erişiminiz kapanır.",
+      confirmAction: "Evet, bağlantıyı çöz",
+      confirmDismiss: "Vazgeç",
+      pending: "Çözülüyor…",
+      success: "Kimlik bağlantınız çözüldü. Dilediğiniz zaman yeniden doğrulayabilirsiniz.",
+    },
+
+    /** Hesabımı sil (KVKK Yönetmeliği m.12). */
+    deletion: {
+      heading: "Hesabımı sil",
+      description:
+        "Hesabınızı silmek geri alınamaz. Aşağıda neyin silindiğini ve neyin yasal " +
+        "zorunluluk gereği saklandığını görüyorsunuz.",
+      erased: {
+        heading: "Silinenler",
+        items: [
+          "Ad soyad, e-posta, cep telefonu, doğum tarihi",
+          "Kimlik numaranız (şifreli, özetli ve maskeli hâlleriyle birlikte)",
+          "Teslimat adresleriniz ve kayıtlı kartlarınızın sahip bilgisi",
+          "Şifreniz, tüm oturumlarınız ve Google bağlantınız",
+          "Bildirimleriniz, sepetiniz ve destek talepleriniz (ekleriyle birlikte)",
+        ],
+      },
+      retained: {
+        heading: "Saklananlar ve sebebi",
+        /** ⛔ Bu liste yasal bir bildirimdir (m.12/1-c), süsleme değil. */
+        items: [
+          "Sipariş, ödeme, iade ve üyelik tahsilat kayıtlarınız tutar ve tarih olarak " +
+            "10 yıl saklanır. Sebebi Türk Ticaret Kanunu m.82: ticari belgeleri bu süre " +
+            "boyunca saklamak zorundayız. Bu kayıtlar artık size bağlanamaz.",
+          "Rıza kayıtlarınız ve işlem denetim kayıtlarınız silinmez. İkisi de bir " +
+            "yükümlülüğün kanıtı: hangi metne ne zaman onay verdiğinizi ve hesabınızda " +
+            "hangi işlemin ne zaman yapıldığını başka türlü gösteremeyiz.",
+          "Randevu ve bilet kayıtlarınız, artık kime ait olduğu okunamayacak hâlde kalır.",
+        ],
+      },
+      membershipWarning:
+        "Spor salonu üyeliğiniz devam ediyor. Hesabınızı silerseniz üyeliğiniz otomatik " +
+        "yenilenmez ve mevcut döneminizin sonunda biter.",
+      commitmentWarning:
+        "Üyeliğinizde süren bir taahhüt var. Hesap silme erken çıkış farkını TAHSİL ETMEZ; " +
+        "üyeliğiniz dönem sonuna kadar sürer. Erken çıkmak istiyorsanız önce üyelik " +
+        "ekranından iptal edin.",
+      reRegisterNotice:
+        "Silme sonrası aynı kimlik numarası ve e-posta adresiyle yeniden kayıt olabilirsiniz.",
+      passwordLabel: "Hesap şifreniz",
+      passwordHint: "Geri alınamaz bir işlem olduğu için şifrenizi bir kez daha soruyoruz.",
+      action: "Hesabımı sil",
+      confirmTitle: "Hesabınız silinsin mi?",
+      confirmBody:
+        "Bu işlem geri alınamaz. Onayladığınızda tüm cihazlardaki oturumlarınız kapanır.",
+      confirmAction: "Evet, hesabımı sil",
+      confirmDismiss: "Vazgeç",
+      pending: "Hesap siliniyor…",
+    },
+
+    /** Telefon güncelleme (teknik borç #80). */
+    phone: {
+      heading: "Cep telefonum",
+      description: "Siparişlerinizle ilgili size ulaşmamız gerekirse bu numarayı kullanırız.",
+      current: "Kayıtlı numaranız",
+      none: "Kayıtlı numaranız yok",
+      label: "Cep telefonu",
+      hint: "05XXXXXXXXX biçiminde yazın.",
+      /**
+       * ⛔ BU UYARI KALDIRILAMAZ. Numarayı doğrulanmış gibi göstermek,
+       * üretmediğimiz bir kanıtı varmış gibi sunmak olurdu (ADR-017'nin
+       * "güvenlik tiyatrosu" gerekçesi).
+       */
+      unverifiedNotice:
+        "Yazdığınız numara doğrulanmaz. Bu gösterim uygulamasında SMS gönderen gerçek bir " +
+        "servis yok, bu yüzden numaranın size ait olduğunu kanıtlayamıyoruz.",
+      verifiedBadge: "Doğrulandı",
+      unverifiedBadge: "Doğrulanmadı",
+      action: "Numarayı kaydet",
+      pending: "Kaydediliyor…",
+      success: "Cep telefonunuz güncellendi.",
+    },
+
+    /** Silme sonrası açılan herkese açık sayfa. */
+    farewell: {
+      pageTitle: "Hesabınız silindi",
+      title: "Hesabınız silindi",
+      description:
+        "Kişisel verilerinizi sildik. Aşağıda neyin saklandığını ve sebebini bir kez daha " +
+        "görebilirsiniz — bu bilgiyi vermek yasal bir yükümlülüğümüz.",
+      home: "Ana sayfaya dön",
+      register: "Yeni hesap aç",
+    },
+  },
 } as const;

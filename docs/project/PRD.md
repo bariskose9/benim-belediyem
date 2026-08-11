@@ -548,12 +548,24 @@ bulunur; footer'dan erişilir. Zorunlu olmayan çerez rıza alınmadan çalışt
   (profil, adresler, siparişler, randevular, rezervasyonlar, üyelikler, destek
   talepleri, rıza kayıtları). Hazırlama uzun sürerse istek kuyruğa alınır ve
   hazır olduğunda bildirim düşer
-- **Hesabımı sil:** kullanıcı hesabını kendisi silebilir. Silme **anonimleştirmedir**:
-  ad, e-posta, telefon, kimlik numarası, adresler ve kart bilgileri silinir veya
-  anonimleştirilir; **mali kayıtlar** (sipariş, ödeme, üyelik tahsilatı) tutar ve
-  tarih olarak yasal süre boyunca kişiselleştirilmeden korunur
-- Silme **onay ister** ve geri alınamaz olduğu açıkça yazılır; işlem denetim
-  kaydına düşer, tüm oturumlar kapatılır
+- **Hesabımı sil:** kullanıcı hesabını kendisi silebilir. Silme **kişisel
+  verilerin silinmesi + mali kayıtların kişiselleştirilmeden saklanmasıdır**
+  (`14-standards → Hesap silme`):
+  - **Silinir:** ad, e-posta, telefon, doğum tarihi, kimlik numarasının üç hâli
+    de (şifreli/özetli/maskeli), adresler, kart bilgileri, şifre, tüm oturumlar,
+    Google bağlantısı, bildirimler, sepetler, personel bağı
+  - **Saklanır ama kişiselleştirilmez:** mali kayıtlar (sipariş, ödeme, iade,
+    üyelik tahsilatı) tutar ve tarih olarak **10 yıl** (TTK m.82), kişi bağı
+    okunamaz hâlde. Rıza ve denetim kayıtları da silinmez — ikisi de bir
+    yükümlülüğün kanıtıdır
+  - ⛔ **"Anonimleştirme" DENMEZ.** Satır bir kullanıcı kimliği üzerinden mali
+    kayda bağlı kaldığı sürece yapılan şey takma adlaştırmadır; Yönetmelik m.10
+    anlamında anonimleştirme geri döndürülemez olmak zorundadır
+- Silme **onay ister** ve geri alınamaz olduğu açıkça yazılır; **neyin silindiği
+  ve neyin hangi kanun gereği ne kadar saklandığı ekranda yazar** (Yönetmelik
+  m.12/1-c: kısmen reddedilen talep gerekçesiyle bildirilir). İşlem denetim
+  kaydına düşer ve **o kayıt hesapla birlikte silinmez** (m.7/3), tüm oturumlar
+  kapatılır
 - Aktif taahhütlü üyeliği olan kullanıcı silmeden önce uyarılır: erken çıkış farkı
   tahsil edilir veya üyelik dönem sonuna kadar sürer
 - **Kabul kriteri:** silinen hesabın kimlik numarasıyla yeniden kayıt olunabilir;

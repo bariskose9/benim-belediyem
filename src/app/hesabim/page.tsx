@@ -37,6 +37,7 @@ export const dynamic = "force-dynamic";
 
 const copy = messages.auth.account;
 const profileCopy = messages.profile;
+const accountCopy = messages.account;
 
 export const metadata: Metadata = {
   title: copy.pageTitle,
@@ -206,6 +207,17 @@ export default async function AccountPage({
                 ? profileCopy.settings.cards.none
                 : profileCopy.settings.cards.count(cards.length)
             }
+          />
+
+          {/*
+            Veri hakları kartı (adım 17b · KVKK m.11). Bu bağlantı hesabın en
+            yıkıcı işlemine (silme) giden yol, ama GİZLENMİYOR: bir hakkı
+            kullanmayı zorlaştırmak, o hakkı vermemenin yumuşak hâlidir.
+          */}
+          <RecordLinkCard
+            href="/hesabim/verilerim"
+            title={accountCopy.entry.title}
+            description={accountCopy.entry.description}
           />
         </div>
       </section>

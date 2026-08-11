@@ -9,7 +9,44 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-10 · roadmap adım 15c-2 sonrası
+**Son güncelleme:** 2026-08-10 · roadmap adım 17b sonrası
+
+> ## Adım 17b — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ, PANEL İŞİ DE YOK
+>
+> Hesap yönetimi tamamen kendi verimizle çalışıyor: yeni hesap, yeni servis,
+> **yeni ortam değişkeni YOK** ve yeni bağımlılık YOK (`npm audit`: 0 açık).
+>
+> **Yeni bir migration VAR** (`20260810230000_add_account_management_audit_actions`)
+> ama elle çalıştırılacak bir şey değil: Vercel derleme komutu
+> `prisma migrate deploy` ile başlıyor. Migration **yalnızca iki enum DEĞERİ
+> ekliyor** (`identity_unlink`, `contact_update`) — tablo, kolon ve satır
+> değişmiyor, eski sürüm kod bu değerleri hiç bilmeden çalışmaya devam ediyor.
+> ⚠️ Tek yönlü (PostgreSQL'de `DROP VALUE` yok).
+>
+> ⛔ **TURNSTILE SATIRI GEREKMEDİ.** Yeni ekran (`/hesabim/verilerim`) giriş
+> gerektiriyor ama **bot kutusu TAŞIMIYOR** — Turnstile yalnızca kayıt, giriş
+> ve kimlik doğrulama ekranlarında var. Yani dal adresini listeye eklemeden de
+> preview'da denenebilirdi. **Liste bu adımda da BÜYÜMEDİ, hâlâ 10 sınırında.**
+> Sonraki oturum "eksik kalmış" sanmasın — bu bir karar, unutma değil.
+>
+> ⚠️ **PREVIEW'DA HİÇ DENENMEDİ** — proje sahibinin alışkanlığı gereği
+> doğrudan production'a çıkılıyor. Local'de tarayıcıda uçtan uca doğrulandı
+> ve Playwright `desktop-chrome` + `mobile-375` projelerinde 8 test geçti.
+>
+> ✅ **TOHUM BU ADIMDA DEĞİŞMEDİ.** Uzak ortamlardaki eksik altı demo hesap
+> (#11-#16) aynen duruyor: E2E kendi kullanıcısını kurup sonunda siliyor.
+>
+> ⛔ **DURAN TEK PANEL İŞİ HÂLÂ ADIM 17'DEN:** `LEGAL_CONTROLLER_NAME` ve
+> `LEGAL_CONTACT_EMAIL` production'da **girilmedi**. `/gizlilik` şu an veri
+> sorumlusu yerine "bu gösterim uygulamasını işleten gerçek kişi" yazıyor.
+>
+> ⚠️ **ADIM 17b BU EKSİĞİ BÜYÜTTÜ.** Artık kullanıcı hesabını silebiliyor ve
+> ekranda "hangi kayıtlar hangi kanun gereği saklanıyor" yazıyor — yani
+> KVKK Yönetmeliği m.12/1-c anlamında bir **bildirim** yapılıyor. Bu bildirimi
+> yapan tarafın kim olduğunun (`veri sorumlusu`) belli olması gerekiyor.
+> Değişkenler boşken bildirim var ama muhatabı yok.
+>
+> **Son güncelleme (önceki):** 2026-08-10 · roadmap adım 15c-2 sonrası
 
 > ✅ **Adım 15c-2 CANLIDA** (2026-08-10, commit `65fc6e1`, PR #42). Sağlık ucu
 > `db: ok`; girişsiz `/kimlik-dogrulama` 307, girişsiz
@@ -484,7 +521,7 @@ Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
 | `AUTH_SECRET` · `AUTH_URL` | ✘ | ✘ | ✘ | **Hiç kullanılmıyor ve gerekmiyor.** Auth.js kurulmadı (ADR-005 güncelleme notu); OAuth işlem çerezi `httpOnly` olduğu için imzalanmıyor. `.env.example`'da duruyor ama boş kalabilir |
 | `CRON_SECRET` | ✔ | ✘ | ✔ | **Planlı görevler HİÇ çalışmaz** — `/api/cron/daily` her isteğe 401 döner (fail-closed, adım 16). Uygulama açılır, ekranlar etkilenmez; yalnızca temizlik, aidat tahsilatı ve doktor takvimi durur. Preview'da bilerek yok: cron yalnızca **production dağıtımında** çalışıyor (Vercel) |
 | `OWNER_*` | ✘ | ✘ | ✘ | Tohumlama proje sahibi hesabını **atlar** (kasıtlı: gerçek kişisel veri uzak ortama gitmiyor) |
-| `LEGAL_CONTROLLER_NAME` · `LEGAL_CONTACT_EMAIL` | ✘ | ✘ | ⚠️ **girilmeli** | Yasal sayfalar açılır ama veri sorumlusu adı yerine "bu gösterim uygulamasını işleten gerçek kişi" yazar ve KVKK başvuru kanalı olarak yalnızca GitHub deposu gösterilir. Uygulama açılır (adım 17) |
+| `LEGAL_CONTROLLER_NAME` · `LEGAL_CONTACT_EMAIL` | ✘ | ✘ | ⚠️ **girilmeli** | Yasal sayfalar açılır ama veri sorumlusu adı yerine "bu gösterim uygulamasını işleten gerçek kişi" yazar ve KVKK başvuru kanalı olarak yalnızca GitHub deposu gösterilir. Uygulama açılır (adım 17). ⚠️ **Adım 17b bunu daha önemli hâle getirdi**: hesap silme ekranı artık m.12/1-c bildirimi yapıyor ve bildirimin muhatabı belirsiz kalıyor |
 
 > 🔧 **PANEL İŞİ — adım 17'nin TEK dış dünya işi.** `LEGAL_CONTROLLER_NAME` ve
 > `LEGAL_CONTACT_EMAIL` **production'da girilmeli**: KVKK aydınlatma metni,

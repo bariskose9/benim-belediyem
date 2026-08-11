@@ -107,7 +107,13 @@ test("giriş → hesabım → çıkış", async ({ page }) => {
   await signIn(page, CITIZEN.nationalId);
 
   await expect(page).toHaveURL(/\/hesabim$/, { timeout: POST_LOGIN_TIMEOUT_MS });
-  await expect(page.getByRole("heading", { name: "Hesabım" })).toBeVisible();
+  /**
+   * ⚠️ `exact: true` ŞART ve bedeli yaşandı: adım 17b sayfaya "Verilerim ve
+   * hesap yönetimi" başlıklı bir kart ekledi. Eşleşme ÖNCEDEN substring
+   * olduğu için o kart da "Hesabım" ile eşleşti ve test strict mode ihlaliyle
+   * düştü. Gevşek bir seçici, ilgisiz bir eklemede kırılır.
+   */
+  await expect(page.getByRole("heading", { name: "Hesabım", exact: true })).toBeVisible();
   await expect(page.getByText(CITIZEN.fullName)).toBeVisible();
 
   // Kimlik numarası ekranda MASKELİ olmalı, tam hâli hiçbir yerde geçmemeli.
