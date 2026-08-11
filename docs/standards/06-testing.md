@@ -61,6 +61,29 @@ Böyle bir testte iddiayı zayıflatmak (beklentiyi silmek, `retry` artırmak,
   bir yerde yine düşüyorsa sorun senin değişikliğinde değil, koşum ortamındadır.
   Bu tek deney "benim yüzümden mi" sorusunu kesin cevaplar.
 
+## Yeşil test yanlış şeyi ölçüyor olabilir
+
+Bir testin yeşil olması, ölçmek istediğin şeyi ölçtüğünü **kanıtlamaz**. En
+tehlikeli test kırmızı olan değil, kendi verisiyle tutarlı olduğu için hep
+yeşil kalan testtir.
+
+- ⛔ **HER YENİ KAPI, MUTASYONLA KIRMIZIYA DÖNDÜRÜLEREK KANITLANIR.** Kapının
+  yakalaması gereken hatayı bilerek üret (eşiği düşür, korumayı kaldır, ihlali
+  ekle) ve testin **düştüğünü GÖR**. Dönmüyorsa kapı yoktur — yalnızca kapı
+  görüntüsü vardır. Kanıtı gördükten sonra mutasyonu geri al.
+- ⛔ **"AÇILDI" İLE "DOĞRU SAYFA AÇILDI" AYNI ŞEY DEĞİL.** Bir durum kodu
+  kontrolü sayfanın kimliğini doğrulamaz: sunucu tarafında korunan bir sayfa
+  `200` döndürüp yönlendirmeyi **hidrasyondan sonra** uygulayabilir. Ölçüm veya
+  denetim yapan test, işi bitmeden **hangi adreste olduğunu** doğrulamak
+  zorundadır — yoksa sessizce giriş sayfasını ölçer ve yeşil kalır.
+- ⛔ **BİR ÖLÇÜM YAPTIYSAN SAYIYA BAK, "GEÇTİ"YE DEĞİL.** Beklenmedik biçimde
+  *iyi* çıkan bir sonuç, iyi haber değil şüphe sebebidir; genellikle ölçülen
+  şeyin yanlış olduğunu söyler.
+- ⛔ **DEVRALDIĞIN BİR KAYDIN SEBEBİ DE BİR İDDİADIR.** Teknik borç, ADR veya
+  devir notundaki "şu yüzden oluyor" cümlesi doğrulanmadan devralınmaz; ilk iş
+  o sebebi ölçmektir. Yanlış sebep, doğru ölçülmüş bir soruna yanlış çözüm
+  yazdırır.
+
 ## Mobil doğrulama — üç ayrı şey, karıştırılmaz
 
 | Ne | Nasıl test edilir | Hangi aşamada |

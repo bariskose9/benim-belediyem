@@ -199,6 +199,24 @@ Yeni bir oturum bunu okuyup **soru sormadan** çalışmaya başlayabilmeli:
 Adım bitince bu dosya **yeniden yazılır**, üstüne eklenmez. Eski talimat
 kalırsa yeni oturum yanlış işi yapar.
 
+### ⛔ DEVİR DOSYASININ "DURUM"U DAİMA MERGE'DEN ÖNCEKİ DÜNYAYI ANLATIR
+
+Dosya, commit kapısında **beklerken** yazılır — yani "PR açıldı, onay
+bekliyor" cümlesi yazıldığı an doğrudur. Sonra iş onaylanır ve merge edilir,
+ama dosyayı güncelleyecek oturum çoktan kapanmıştır. Bu bir dikkatsizlik
+değil, **sıranın kaçınılmaz sonucudur.**
+
+Bu yüzden:
+
+- **Yazan taraf:** "henüz merge edilmedi", "push edilmedi", "`main` şu
+  commit'te" gibi cümlelerin yanına **kontrol komutunu** yaz, iddiayı tek
+  başına bırakma. Cümle bir emir değil, doğrulanacak bir hipotezdir.
+- **Okuyan taraf:** ⛔ **DEVİR DOSYASININ DURUM BÖLÜMÜNE İNANMA, ÖNCE ÖLÇ.**
+  İlk iş `git log --oneline -5`, `git status` ve `gh pr list`. Depoda ve
+  panelde görülen gerçek, dosyada yazandan üstündür.
+- Çelişki bulunduğunda sessizce düzeltilmez: **kullanıcıya söylenir**, çünkü
+  aynı yanlış bilgi başka dosyalara da yazılmış olabilir.
+
 ## Neden kalıcı ajan hafızası yeterli değil
 
 Ajanın kendi hafızası makineye bağlıdır: başka bilgisayarda, başka araçta veya

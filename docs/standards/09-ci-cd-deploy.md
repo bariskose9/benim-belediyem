@@ -36,6 +36,39 @@ değil, CI'da fiilen ölçülür:
 Bu adımlar olmadan "performans bütçesi aşılırsa merge edilmez" kuralı
 uygulanamaz — ölçüm yoksa kapı da yoktur.
 
+### Bütçe zaten aşılmışken kapı nasıl kurulur — "cırcır" (ratchet)
+
+Bir kapı çoğu zaman, ihlal **çoktan olmuşken** kurulur. O anda üç seçenek var
+ve ikisi yanlıştır:
+
+| Seçenek | Neden yanlış |
+|---|---|
+| Kapıyı hiç kurmamak | Bütçe yazılı bir dilek olarak kalır, durum sessizce kötüleşir |
+| Kapıyı kurup "şimdilik" devre dışı bırakmak | Devre dışı bırakılabilen kapı, kapı değildir |
+| **Kapıyı BUGÜNKÜ ÖLÇÜLEN değere kilitlemek** | ✅ doğrusu |
+
+**Cırcır kuralı:**
+
+1. Kapı, hedefe değil **bugün ölçülen değere** kurulur (küçük bir ölçüm payıyla).
+   Bugünden kötüye gidiş merge edilemez.
+2. Ölçülen değer ile hedef arasındaki fark **teknik borç olarak yazılır**:
+   ne kadar, neden, hangi adımda ödenecek. Yazılmayan fark ödenmez.
+3. Eşik yalnızca **SIKILIR**. Bir iyileştirme ölçüldüğünde eşik düşürülür;
+   yeni değer sığmadığı için eşiği yükseltmek **yasaktır** — o, kapıyı
+   kaldırmanın kibar hâlidir.
+4. Hedef ve bugünkü değer **yan yana** durur (`current` / `target`), ki kapının
+   geçmesi "bütçeyi tutuyoruz" sanılmasın.
+
+⛔ Cırcır bir gevşetme değildir: öncesinde kapı **yoktur**. Ama "sıkılaştırma
+sözü" olmadan cırcır, ihlali kalıcılaştırmanın adıdır — 2. madde şart.
+
+### Kapı neyi ölçtüğünü söylemek zorundadır
+
+Ölçüm ortamı hedef ortam değilse, kapının **ne söylemediği** dosyanın içine
+yazılır. CI genelde localhost'ta ölçer; oradaki bir zaman değeri gerçek
+kullanıcının gördüğü değer değildir. Böyle bir kapı bir **regresyon teli**
+olarak değerlidir ama "bütçeyi tutuyoruz" kanıtı değildir ve öyle sunulmaz.
+
 ## Yayına alma akışı
 1. PR açılır → preview URL otomatik oluşur
 2. Preview üzerinde manuel doğrulama yapılır

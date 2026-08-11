@@ -95,6 +95,19 @@ jobs:
       - name: E2E testleri
         run: npm run test:e2e
 
+      # Performans bütçesi + WCAG 2.1 AA kapısı (adım 18c).
+      # Eşikler ve neden o eşikler oldukları: tests/quality/budget.ts.
+      #
+      # AYRI ADIM, çünkü "davranış bozuldu" ile "bütçe aşıldı" bakılacak yeri
+      # farklı iki sorun; tek adımda toplanınca hangisinin kırıldığı ancak
+      # kütüğü açıp okuyarak anlaşılıyor.
+      #
+      # `!cancelled()`: E2E kırmızıysa da koşar. Bütçe sonucu o koşuda da
+      # bilgi; iki turda öğrenilecek şeyi bir turda öğrenmek için.
+      - name: Performans ve erişilebilirlik bütçesi
+        if: ${{ !cancelled() }}
+        run: npm run test:quality
+
       - name: Rapor (başarısızsa incelemek için)
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
