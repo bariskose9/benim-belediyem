@@ -9,7 +9,70 @@
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
-**Son güncelleme:** 2026-08-11 · roadmap adım 17c sonrası
+**Son güncelleme:** 2026-08-11 · roadmap adım 18a sonrası
+
+> ## 🔧 ADIM 18a — YENİ BİR DIŞ HESAP GEREKİYOR (Sentry) · İKİ PANEL İŞİ
+>
+> Bu, ADR-016'dan beri ilk kez proje sahibinden **yeni bir hesap** isteyen
+> adım. Gerekçe tartışıldı ve kabul edildi: canlıda bir hata olduğunda bugün
+> kimsenin haberi olmuyor ve `12-operations-and-scaling.md` "üretimdeki her
+> istisna yakalanır" diyor. Anahtarsız bir alternatifi yok.
+>
+> ### 🔧 PANEL İŞİ 1 — Sentry (YENİ)
+>
+> **Vercel paneli → benim-belediyem → Integrations → Sentry → Add / Install**
+>
+> Bu yol bilerek seçildi: hesabı Vercel açıyor ve **dört ortam değişkenini
+> projeye KENDİSİ enjekte ediyor**, yani elle değer girmen gerekmiyor:
+>
+> | Değişken | Ne işe yarar |
+> |---|---|
+> | `NEXT_PUBLIC_SENTRY_DSN` | Hataların gönderileceği adres. **Gizli değil** — tarayıcıya gitmek zorunda, kimseye yazma yetkisi vermez |
+> | `SENTRY_ORG` · `SENTRY_PROJECT` | Kaynak haritası yüklenirken hangi projeye ait olduğu |
+> | `SENTRY_AUTH_TOKEN` | Kaynak haritası yükleme yetkisi. **Gizli** |
+>
+> ⛔ **KURULUMDAN SONRA YENİDEN DAĞITIM ŞART.** `NEXT_PUBLIC_*` değerleri
+> **derleme anında** koda gömülüyor; değişken panelde tanımlansa bile eski
+> dağıtım onu göremez ve tarayıcı tarafı DSN'siz kalır:
+> `npx vercel redeploy <dagitim-url> --scope barisss`
+>
+> ✅ **Ajan doğrulayabilir** (ezberden değil ölçerek): `npx vercel env ls
+> production --scope barisss` çıktısında dört değişken görünmeli.
+>
+> **Ücretsiz katman (2026-08-11'de resmî fiyat sayfasından okundu):** ayda
+> 5.000 hata · 1 kullanıcı · 30 gün saklama. Gerçek kullanıcı 0 olan bu proje
+> için fazlasıyla yeterli.
+>
+> ### 🔧 PANEL İŞİ 2 — `LEGAL_*` (adım 17'den DEVREDİYOR, hâlâ girilmedi)
+>
+> ⛔ **2026-08-11'de PANELDEN ÖLÇÜLDÜ:** production'da 16 değişken var ve
+> `LEGAL_CONTROLLER_NAME` ile `LEGAL_CONTACT_EMAIL` **ikisi de listede YOK.**
+> Ayrıntı aşağıda (adım 17b bölümü).
+>
+> ### Adım 18a'da kodda ne değişti (dış dünyayı ilgilendiren kısmı)
+>
+> - **Yeni bağımlılık VAR:** `@sentry/nextjs@10.70.0` (+103 alt paket).
+>   `npm audit`: **0 açık**
+> - **Yeni migration YOK**, veritabanı şeması değişmedi, tohum değişmedi
+> - **CSP'YE DOKUNULMADI** ve bu bir karar: Sentry olayları `tunnelRoute` ile
+>   kendi alan adımızdan (`/sentry-tunnel`) geçiyor, doğrudan `sentry.io`'ya
+>   değil. Böylece `connect-src 'self'` satırı olduğu gibi kaldı ve reklam
+>   engelleyiciler olayları düşüremiyor. ✅ Tünelin gerçekten kurulduğu
+>   `.next/routes-manifest.json` içindeki rewrite kaydından **ölçülerek**
+>   doğrulandı — route listesinde görünmüyor, çünkü route değil rewrite
+> - ⛔ **OTURUM TEKRARI (Session Replay) KURULMADI ve bu bilinçli.** Sentry'nin
+>   en çok öne çıkardığı özellik kullanıcının ekranını kaydediyor; bu projedeki
+>   ekranlarda T.C. kimlik numarası, doğum tarihi ve kart numarası alanları var.
+>   Açmak KVKK m.6 anlamında yeni bir işleme faaliyeti olurdu ve aydınlatma
+>   metnimizde böyle bir işleme yazmıyor. Açılacaksa önce ADR + aydınlatma
+>   metni, sonra kod
+> - ⛔ **SENTRY'NİN VERİ TOPLAMA VARSAYILANLARI KAPATILDI.** SDK varsayılanda
+>   istek gövdesini, çerezleri, başlıkları, veritabanı sorgu parametrelerini ve
+>   yığındaki yerel değişkenleri topluyor — yani kayıt formunun tamamı (şifre +
+>   kimlik numarası) üçüncü bir servise giderdi. Altısı da kapatıldı ve
+>   `tests/unit/sentry-options.test.ts` bunu bir gerileme kapısı olarak koruyor
+> - ⚠️ **PREVIEW'DA HİÇ DENENMEDİ** (proje sahibinin alışkanlığı). Local'de
+>   derleme, lint, typecheck, 756 birim + 344 veritabanı testi yeşil
 
 > ## Adım 17c — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ, PANEL İŞİ DE YOK
 >
@@ -412,6 +475,7 @@
 | **Cloudflare** | Turnstile widget `benim-belediyem` | 1M çözüm/ay | Bot koruması (ADR-004) |
 | **Resend** | — | 3.000 e-posta/ay | Doğrulama kodu e-postası |
 | **Google Cloud** | proje `benim-belediyem` · OAuth istemcisi `benim-belediyem-web` | ücretsiz | Google ile giriş (adım 4c) |
+| **Sentry** | ⚠️ **HENÜZ AÇILMADI** — Vercel → Integrations → Sentry ile açılacak | Developer: 5.000 hata/ay · 1 kullanıcı · 30 gün | Hata takibi (adım 18a). Kurulunca bu satır güncellenir |
 
 ### PostgreSQL eklentileri
 
@@ -607,6 +671,8 @@ Değerler Vercel panelinde ve local `.env` içinde. Buraya **yalnızca adlar**.
 | `AUTH_SECRET` · `AUTH_URL` | ✘ | ✘ | ✘ | **Hiç kullanılmıyor ve gerekmiyor.** Auth.js kurulmadı (ADR-005 güncelleme notu); OAuth işlem çerezi `httpOnly` olduğu için imzalanmıyor. `.env.example`'da duruyor ama boş kalabilir |
 | `CRON_SECRET` | ✔ | ✘ | ✔ | **Planlı görevler HİÇ çalışmaz** — `/api/cron/daily` her isteğe 401 döner (fail-closed, adım 16). Uygulama açılır, ekranlar etkilenmez; yalnızca temizlik, aidat tahsilatı ve doktor takvimi durur. Preview'da bilerek yok: cron yalnızca **production dağıtımında** çalışıyor (Vercel) |
 | `OWNER_*` | ✘ | ✘ | ✘ | Tohumlama proje sahibi hesabını **atlar** (kasıtlı: gerçek kişisel veri uzak ortama gitmiyor) |
+| `NEXT_PUBLIC_SENTRY_DSN` | ✘ | ✘ | ⚠️ **girilmeli** (Vercel entegrasyonu ekler) | Sentry sessizce devre dışı kalır — uygulama normal çalışır, yalnızca canlıdaki hatalar hiçbir yere düşmez. Local ve preview'da boş kalması NORMAL. ⚠️ `NEXT_PUBLIC_*` derleme anında gömülür: eklendikten sonra yeniden dağıtım şart (adım 18a) |
+| `SENTRY_ORG` · `SENTRY_PROJECT` · `SENTRY_AUTH_TOKEN` | ✘ | ✘ | ⚠️ **girilmeli** (Vercel entegrasyonu ekler) | Yalnızca DERLEME sırasında okunur. Yoksa kaynak haritası yüklenmez ve Sentry'deki yığın izi küçültülmüş görünür; hata yine yakalanır (adım 18a) |
 | `LEGAL_CONTROLLER_NAME` · `LEGAL_CONTACT_EMAIL` | ✘ | ✘ | ⚠️ **girilmeli** | Yasal sayfalar açılır ama veri sorumlusu adı yerine "bu gösterim uygulamasını işleten gerçek kişi" yazar ve KVKK başvuru kanalı olarak yalnızca GitHub deposu gösterilir. Uygulama açılır (adım 17). ⚠️ **Adım 17b bunu daha önemli hâle getirdi**: hesap silme ekranı artık m.12/1-c bildirimi yapıyor ve bildirimin muhatabı belirsiz kalıyor |
 
 > 🔧 **PANEL İŞİ — adım 17'nin TEK dış dünya işi.** `LEGAL_CONTROLLER_NAME` ve

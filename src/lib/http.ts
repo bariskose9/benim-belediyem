@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { type AppError, toAppError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 
 /**
  * Tek tip API yanıt formatı (docs/standards/03-api-guidelines.md).
@@ -65,8 +66,24 @@ export function fail(error: unknown, details?: unknown): NextResponse<ApiFailure
   const appError: AppError = toAppError(error);
 
   if (appError.status >= 500) {
-    // Sunucu tarafı kayıt: Sentry adım 18'de bağlanacak (roadmap teknik borç).
-    console.error(`[${appError.code}]`, appError.cause ?? appError);
+    /**
+     * ⭐ TEKNİK BORÇ #79 BURADA KAPANDI.
+     *
+     * Önceki hâl `appError.cause`'u olduğu gibi yazıyordu. Prisma bir
+     * doğrulama hatası fırlattığında argüman nesnesinin TAMAMINI hata
+     * metnine koyuyor — ad soyad, doğum tarihi ve maskeli kimlik numarası
+     * dahil. Yani "iç detay istemciye sızmıyor" doğruydu ama **sunucu
+     * log'una sızıyordu** ve Sentry bağlandığında aynı veri üçüncü bir
+     * servise gidecekti.
+     *
+     * `logger` her bağlamı `redact()`ten geçiriyor; teşhis için gereken
+     * hata kodu, sınıf adı ve stack duruyor.
+     */
+    logger.error("api_request_failed", {
+      code: appError.code,
+      status: appError.status,
+      error: appError.cause ?? appError,
+    });
   }
 
   return NextResponse.json(

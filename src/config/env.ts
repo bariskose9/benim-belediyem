@@ -39,6 +39,25 @@ const publicEnvSchema = z.object({
 
   // adım 4b'de zorunlu olur (Cloudflare Turnstile — ADR-004)
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: optionalSecret,
+
+  /**
+   * Sentry hata takibi (adım 18a).
+   *
+   * ⛔ ZORUNLU DEĞİL ve bu bilinçli: DSN yoksa Sentry sessizce devre dışı
+   * kalır, uygulama normal çalışır. Zorunlu olsaydı local ve preview hiç
+   * açılmazdı — `EMAIL_API_KEY` ile aynı gerekçe (CLAUDE.md §6.1: `main` her
+   * zaman deploy edilebilir kalmalı).
+   *
+   * ⚠️ ADI `NEXT_PUBLIC_` ÖNEKLİ VE BU SEÇİM DEĞİL, ZORUNLULUK: Vercel'in
+   * Sentry entegrasyonu değişkeni tam olarak bu adla enjekte ediyor
+   * (`SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` ile birlikte).
+   * DSN gizli bir anahtar DEĞİLDİR — tarayıcıya gitmek zorunda, çünkü istemci
+   * tarafı hataları da oraya gönderiyor. Kimseye yazma yetkisi vermiyor.
+   *
+   * ⚠️ `NEXT_PUBLIC_*` değeri DERLEME ANINDA gömülür: panelde tanımlandıktan
+   * sonra YENİDEN DAĞITIM gerekir, yoksa tarayıcı tarafı DSN'siz kalır.
+   */
+  NEXT_PUBLIC_SENTRY_DSN: optionalSecret,
 });
 
 /**
@@ -127,8 +146,21 @@ const serverEnvBaseSchema = z.object({
   // adım 13'te zorunlu olur (dosya yükleme)
   BLOB_READ_WRITE_TOKEN: optionalSecret,
 
-  // adım 18'de zorunlu olur (hata takibi)
-  SENTRY_DSN: optionalSecret,
+  /**
+   * Sentry kaynak haritası yüklemesi (adım 18a) — Vercel entegrasyonu
+   * enjekte ediyor, elle girilmiyor.
+   *
+   * ⛔ ESKİ `SENTRY_DSN` SATIRI SİLİNDİ: DSN artık `NEXT_PUBLIC_SENTRY_DSN`
+   * adıyla PUBLIC şemada. Aynı değer için iki ad bırakmak, hangisinin
+   * okunduğunu belirsizleştiren bir tuzaktı.
+   *
+   * Üçü de yalnızca DERLEME sırasında okunuyor; çalışma anında kullanılmıyor.
+   * Yoksa kaynak haritası yüklenmez ve Sentry'de yığın izi küçültülmüş
+   * (minified) görünür — hata yine yakalanır.
+   */
+  SENTRY_ORG: optionalSecret,
+  SENTRY_PROJECT: optionalSecret,
+  SENTRY_AUTH_TOKEN: optionalSecret,
 
   // adım 16'da zorunlu olur (planlı görevler)
   CRON_SECRET: optionalSecret,

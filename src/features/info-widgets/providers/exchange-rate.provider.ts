@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { EXCHANGE_RATE_API_URL, EXCHANGE_RATE_SYMBOLS } from "@/config/constants";
 import { type ExternalFetchResult, fetchExternalJson } from "@/lib/external-fetch";
+import { logger } from "@/lib/logger";
 
 import type { ExchangeRateSnapshot } from "../schemas/snapshots";
 
@@ -36,7 +37,7 @@ export async function fetchExchangeRates(): Promise<ExternalFetchResult<Exchange
   // Tek bir kur bile çıkarılamadıysa bu bir başarı değil: boş bir kart
   // göstermektense bayat veriye veya hata durumuna düşmek daha doğru.
   if (snapshot.rates.length === 0) {
-    console.error("[EXTERNAL:frankfurter] beklenen kurların hiçbiri yanıtta yok");
+    logger.error("external_payload_unusable", { provider: "frankfurter" });
 
     return { ok: false };
   }

@@ -29,6 +29,7 @@ import {
 import type { CreateSupportTicketInput } from "@/features/support/schemas/support-ticket.schema";
 import { recordAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { getFileStorage } from "@/lib/file-storage";
 import { consumeRateLimit, hashActorIp, rateLimitKey } from "@/lib/rate-limit";
 import { verifyTurnstileToken } from "@/lib/turnstile";
@@ -222,7 +223,7 @@ export async function readAttachment(input: {
      * İstemci 404 görür, sunucu log'u gerçek sebebi görür. `fail()` bunu
      * kendiliğinden yazmaz çünkü 404 bir sunucu hatası değildir.
      */
-    console.error("[SUPPORT_ATTACHMENT_READ]", error);
+    logger.error("support_attachment_unreadable", { error });
 
     throw new AttachmentNotFoundError({ cause: error });
   }

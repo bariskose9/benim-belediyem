@@ -1,5 +1,6 @@
 import { TURNSTILE_TIMEOUT_MS, TURNSTILE_VERIFY_URL } from "@/config/constants";
 import { envLabel, serverEnv } from "@/config/env";
+import { logger } from "@/lib/logger";
 
 /**
  * Cloudflare Turnstile jeton doğrulaması (ADR-004 · integrations.md).
@@ -50,7 +51,7 @@ export async function verifyTurnstileToken({
 
   if (!secret) {
     // Preview/production'da anahtar yok. Kapıyı atlamak yerine akışı durduruyoruz.
-    console.error("[TURNSTILE] TURNSTILE_SECRET_KEY tanımlı değil — bot koruması çalışamıyor.");
+    logger.error("turnstile_secret_missing");
 
     return "unavailable";
   }
@@ -73,9 +74,7 @@ export async function verifyTurnstileToken({
     });
 
     if (!response.ok) {
-      console.error("[TURNSTILE] doğrulama ucu beklenmedik durum kodu döndü", {
-        status: response.status,
-      });
+      logger.error("turnstile_unexpected_status", { status: response.status });
 
       return "unavailable";
     }
@@ -85,7 +84,7 @@ export async function verifyTurnstileToken({
     return isSuccessfulVerification(result) ? "success" : "failed";
   } catch (error) {
     // Ağ hatası ve zaman aşımı buraya düşer. Jetonun kendisi log'a YAZILMAZ.
-    console.error("[TURNSTILE] doğrulama ucuna ulaşılamadı", {
+    logger.error("turnstile_unreachable", {
       reason: error instanceof Error ? error.name : "unknown",
     });
 

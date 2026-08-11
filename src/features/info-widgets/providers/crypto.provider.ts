@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { CRYPTO_API_URL, CRYPTO_COIN_IDS } from "@/config/constants";
 import { type ExternalFetchResult, fetchExternalJson } from "@/lib/external-fetch";
+import { logger } from "@/lib/logger";
 
 import type { CryptoSnapshot } from "../schemas/snapshots";
 
@@ -54,7 +55,7 @@ export async function fetchCryptoPrices(): Promise<ExternalFetchResult<CryptoSna
   }
 
   if (coins.length === 0) {
-    console.error("[EXTERNAL:coingecko] beklenen jetonların hiçbiri yanıtta yok");
+    logger.error("external_payload_unusable", { provider: "coingecko" });
 
     return { ok: false };
   }

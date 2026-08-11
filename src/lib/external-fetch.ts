@@ -9,6 +9,7 @@ import {
   INFO_WIDGET_TIMEOUT_MS,
 } from "@/config/constants";
 import { isCircuitOpen, recordCircuitFailure, recordCircuitSuccess } from "@/lib/circuit-breaker";
+import { logger } from "@/lib/logger";
 import { sleep } from "@/lib/utils";
 
 /**
@@ -62,7 +63,10 @@ export async function fetchExternalJson<T>(
     if (!parsed.success) {
       // Sessizce yutulmuyor (CLAUDE.md §5.9): sağlayıcının sözleşmesi değişmişse
       // bu görünmeli. Gövdenin kendisi loglanmıyor — gereksiz gürültü.
-      console.error(`[EXTERNAL:${options.name}] yanıt şemaya uymadı`, parsed.error.issues);
+      logger.error("external_fetch_schema_mismatch", {
+        provider: options.name,
+        issues: parsed.error.issues,
+      });
 
       return { outcome: "failed" };
     }
@@ -82,7 +86,7 @@ export async function fetchExternalText(
     const body = await response.text();
 
     if (body.trim().length === 0) {
-      console.error(`[EXTERNAL:${options.name}] boş gövde döndü`);
+      logger.error("external_fetch_empty_body", { provider: options.name });
 
       return { outcome: "failed" };
     }
@@ -159,13 +163,16 @@ async function attemptOnce<T>(
     });
   } catch (error) {
     // Zaman aşımı ve ağ hatası aynı sınıfta: cevap alınamadı → tekrar denenir.
-    console.error(`[EXTERNAL:${options.name}] istek başarısız`, error);
+    logger.error("external_fetch_request_failed", { provider: options.name, error });
 
     return { outcome: "retryable" };
   }
 
   if (response.status >= 500) {
-    console.error(`[EXTERNAL:${options.name}] sunucu hatası`, { status: response.status });
+    logger.error("external_fetch_server_error", {
+      provider: options.name,
+      status: response.status,
+    });
 
     return { outcome: "retryable" };
   }
@@ -179,13 +186,14 @@ async function attemptOnce<T>(
    * bir durum, istisna değil (ADR-015).
    */
   if (response.status === 429) {
-    console.error(`[EXTERNAL:${options.name}] hız sınırına takıldı`);
+    logger.error("external_fetch_rate_limited", { provider: options.name });
 
     return { outcome: "failed" };
   }
 
   if (!response.ok) {
-    console.error(`[EXTERNAL:${options.name}] beklenmeyen durum kodu`, {
+    logger.error("external_fetch_unexpected_status", {
+      provider: options.name,
       status: response.status,
     });
 
@@ -196,7 +204,7 @@ async function attemptOnce<T>(
     return await readBody(response);
   } catch (error) {
     // Gövde okunamadı (bozuk JSON, yarıda kesilen aktarım).
-    console.error(`[EXTERNAL:${options.name}] gövde okunamadı`, error);
+    logger.error("external_fetch_body_unreadable", { provider: options.name, error });
 
     return { outcome: "failed" };
   }

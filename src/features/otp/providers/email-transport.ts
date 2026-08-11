@@ -1,5 +1,6 @@
 import { EMAIL_SEND_TIMEOUT_MS } from "@/config/constants";
 import { serverEnv } from "@/config/env";
+import { logger } from "@/lib/logger";
 
 /**
  * E-posta gönderimi — Resend'in HTTP API'si (integrations.md).
@@ -30,7 +31,7 @@ export async function sendEmail({ to, subject, text }: SendEmailInput): Promise<
   if (!apiKey || !from) {
     // Anahtar yoksa uygulama açılmaya devam eder (bkz. src/config/env.ts
     // gerekçesi), yalnızca gönderim yapılamaz ve akış dürüstçe durur.
-    console.error("[EMAIL] EMAIL_API_KEY veya EMAIL_FROM tanımlı değil — gönderim yapılamıyor.");
+    logger.error("email_config_missing");
 
     return "unavailable";
   }
@@ -48,7 +49,7 @@ export async function sendEmail({ to, subject, text }: SendEmailInput): Promise<
     });
 
     if (!response.ok) {
-      console.error("[EMAIL] sağlayıcı gönderimi reddetti", {
+      logger.error("email_provider_rejected", {
         status: response.status,
         to: maskEmail(to),
       });
@@ -58,7 +59,7 @@ export async function sendEmail({ to, subject, text }: SendEmailInput): Promise<
 
     return "sent";
   } catch (error) {
-    console.error("[EMAIL] sağlayıcıya ulaşılamadı", {
+    logger.error("email_provider_unreachable", {
       reason: error instanceof Error ? error.name : "unknown",
       to: maskEmail(to),
     });

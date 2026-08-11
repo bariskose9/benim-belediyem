@@ -6,6 +6,7 @@ import type {
   ScheduledTaskOutcome,
 } from "@/features/scheduled-tasks/types";
 import { recordAuditLog } from "@/lib/audit";
+import { logger } from "@/lib/logger";
 
 /**
  * Günlük planlı görev koşusunu yürüten katman (ADR-007 · adım 16).
@@ -46,7 +47,7 @@ async function runSingleTask(task: ScheduledTask, now: Date): Promise<ScheduledT
 
     return { name: task.name, status: "ok", affected, durationMs: Date.now() - startedAt };
   } catch (error) {
-    console.error(`[CRON] görev başarısız: ${task.name}`, error);
+    logger.error("cron_task_failed", { task: task.name, error });
 
     return { name: task.name, status: "failed", affected: 0, durationMs: Date.now() - startedAt };
   }
@@ -61,7 +62,7 @@ async function auditOutcome(outcome: ScheduledTaskOutcome, ipHash: string): Prom
       ipHash,
     });
   } catch (error) {
-    console.error(`[CRON] denetim kaydı yazılamadı: ${outcome.name}`, error);
+    logger.error("cron_audit_write_failed", { task: outcome.name, error });
   }
 }
 

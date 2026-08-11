@@ -7,6 +7,7 @@ import { mergeGuestCartIntoUserCart } from "@/features/cart/services/cart.servic
 import { linkVisitorConsentsToUser } from "@/features/legal/services/consent.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { created, fail } from "@/lib/http";
+import { logger } from "@/lib/logger";
 import { readActorIp } from "@/lib/rate-limit";
 
 /**
@@ -116,6 +117,6 @@ async function mergeGuestCart(input: { userId: string; anonymousId: string }): P
   try {
     await mergeGuestCartIntoUserCart({ ...input, now: new Date() });
   } catch (error) {
-    console.error("[CART_MERGE] ziyaretçi sepeti taşınamadı", error);
+    logger.error("guest_cart_merge_failed", { error });
   }
 }

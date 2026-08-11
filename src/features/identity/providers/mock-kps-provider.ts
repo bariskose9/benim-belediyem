@@ -9,6 +9,7 @@ import {
 } from "@/config/constants";
 import { publicEnv, serverEnv } from "@/config/env";
 import { isCircuitOpen, recordCircuitFailure, recordCircuitSuccess } from "@/lib/circuit-breaker";
+import { logger } from "@/lib/logger";
 import { sleep } from "@/lib/utils";
 
 import type { MockKpsResponseBody } from "@/app/api/mock-kps/contract";
@@ -92,7 +93,7 @@ export class MockKpsProvider implements IdentityProvider {
     } catch (error) {
       // Zaman aşımı ve ağ hatası aynı sınıfta: cevap alınamadı → tekrar denenir.
       // Hata mesajına kimlik numarası GİRMEZ, sadece hatanın kendisi loglanır.
-      console.error("[MOCK_KPS] istek başarısız", error);
+      logger.error("mock_kps_request_failed", { error });
 
       return { outcome: "retryable" };
     }
@@ -101,7 +102,7 @@ export class MockKpsProvider implements IdentityProvider {
       // Sessizce yutulmuyor (CLAUDE.md §5.9 "sessiz hata kabul edilmez"):
       // yeniden deneme başarılı olsa bile dış servisin hata verdiği görünmeli,
       // yoksa bozulmaya giden bir servis fark edilmeden idare edilir.
-      console.error("[MOCK_KPS] sunucu hatası", { status: response.status });
+      logger.error("mock_kps_server_error", { status: response.status });
 
       return { outcome: "retryable" };
     }
@@ -109,9 +110,9 @@ export class MockKpsProvider implements IdentityProvider {
     // 401 buraya düşerse anahtar yanlış yapılandırılmıştır — tekrar denemek
     // düzeltmez. Sesli loglanıyor ki sessizce "servis kapalı" gibi görünmesin.
     if (response.status === 401) {
-      console.error(
-        "[MOCK_KPS] anahtar reddedildi — MOCK_KPS_API_KEY yapılandırmasını kontrol edin",
-      );
+      logger.error("mock_kps_key_rejected", {
+        hint: "MOCK_KPS_API_KEY yapılandırmasını kontrol edin",
+      });
 
       return { outcome: "unavailable" };
     }
@@ -128,7 +129,7 @@ export class MockKpsProvider implements IdentityProvider {
       default:
         // `invalid_request` veya tanınmayan biçim: bizim gönderdiğimiz istek
         // hatalı demektir. Kullanıcının düzeltebileceği bir şey değil.
-        console.error("[MOCK_KPS] beklenmeyen yanıt", { status: response.status });
+        logger.error("mock_kps_unexpected_response", { status: response.status });
 
         return { outcome: "unavailable" };
     }
