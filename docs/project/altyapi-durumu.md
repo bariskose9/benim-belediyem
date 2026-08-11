@@ -11,6 +11,13 @@
 
 **Son güncelleme:** 2026-08-10 · roadmap adım 17b sonrası
 
+> ✅ **Adım 17b CANLIDA** (2026-08-11, commit `1b853cf`, PR #47). Sağlık ucu
+> `db: ok`; `/hesap-silindi` 200, girişsiz `/hesabim/verilerim` 307, girişsiz
+> `GET /api/account/export` · `POST /api/account/deletions` ·
+> `POST /api/account/identity-unlinks` · `PUT /api/account/phone` hepsi 401.
+> `feature/hesap-yonetimi` dalı merge edilip **silindi** — panellerde hiç satırı
+> yoktu, silinecek bir şey de yok.
+>
 > ## Adım 17b — DIŞ DÜNYADA HİÇBİR ŞEY DEĞİŞMEDİ, PANEL İŞİ DE YOK
 >
 > Hesap yönetimi tamamen kendi verimizle çalışıyor: yeni hesap, yeni servis,
