@@ -4,7 +4,8 @@ const isCI = Boolean(process.env.CI);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 
 export default defineConfig({
-  testDir: "./tests/e2e",
+  // Her projenin kendi `testDir`i var (aşağıda); ortak bir varsayılan yok ki
+  // yeni bir spec yanlışlıkla iki kapıya birden düşmesin.
   fullyParallel: true,
   // CI'da yanlışlıkla bırakılmış .only merge'i engellemesin diye kırmızı olur.
   forbidOnly: isCI,
@@ -28,11 +29,30 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [
-    { name: "desktop-chrome", use: { ...devices["Desktop Chrome"] } },
+    { name: "desktop-chrome", testDir: "./tests/e2e", use: { ...devices["Desktop Chrome"] } },
     {
       // docs/standards/06-testing.md: her modül 375px'te de doğrulanır.
       name: "mobile-375",
+      testDir: "./tests/e2e",
       use: { ...devices["Pixel 5"], viewport: { width: 375, height: 667 } },
+    },
+    /**
+     * Performans ve erişilebilirlik bütçesi kapıları (adım 18c).
+     *
+     * ⛔ AYRI PROJE, çünkü ölçüm koşum ortamına duyarlı: davranış testleriyle
+     * aynı projede koşsalardı iki maliyeti olurdu — (1) her ölçüm iki kez
+     * (masaüstü + 375px) koşar ve CI süresi ölçtüğü değerden fazla artardı,
+     * (2) `mobile-375` cihaz profilinin kendi CPU/ekran ayarları ölçüme
+     * karışırdı. Ayrıca `--project=quality` ile tek başına koşturulabiliyor.
+     *
+     * Mobil genişlikteki düzen kayması `desktop-chrome`/`mobile-375`
+     * projelerindeki davranış testlerinin işi; burada ölçülen şey sayfanın
+     * AĞIRLIĞI ve ihlalleri, ki ikisi de genişlikten bağımsız.
+     */
+    {
+      name: "quality",
+      testDir: "./tests/quality",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
   webServer: {

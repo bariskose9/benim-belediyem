@@ -94,6 +94,27 @@ Bu üçü **deponun ilk saatinde** halledilir. Sonraya bırakılırsa hatırlanm
 - ⛔ **Karar kod yazanın değil, işin SAHİBİNİN kararıdır.** Ajan lisans
   uydurmaz; seçenekleri ve sonuçlarını anlatır, sahibi seçer.
 
+**⛔ SEÇİM YAPILDIKTAN SONRA BİR MEKANİZMA KURULUR — kural yetmez.**
+
+Bu kural yazılıydı ve yine de ihlal edildi: bir projede `package.json`
+`"license": "MIT"` derken kökte `LICENSE` dosyası yoktu (aylar sonra fark
+edildi). Depo kendi kendisiyle çelişiyordu — paket yöneticisi "MIT" okuyor,
+hukuken geçerli olansa dosyanın yokluğu, yani **"her hakkı saklı"**.
+
+Bu yüzden lisans seçimi bir **teste** bağlanır. Test üç şeyi birden ölçer:
+
+1. `package.json` bir lisans **beyan ediyor** mu
+2. Beyan edilen lisansın **dosyası** kökte duruyor mu
+3. Dosyanın **içeriği** beyanla aynı mı (MIT denip Apache metni konamaz) ve
+   telif satırı gerçek bir **yıl + sahip** taşıyor mu
+
+Yalnızca "dosya var mı" diye bakan bir test, yanlış lisans metnini yeşil
+geçirir — yani kuralı değil, kuralın görüntüsünü korur.
+
+⛔ Aynı ilke lisansa özel değildir: **bir kural, mekanizması olmadan
+niyettir.** Bir kuralı yazdıktan sonra "bunu ne ihlal edildiğinde yakalar?"
+sorusunun cevabı yoksa, kural henüz yürürlükte değildir.
+
 **Depo private ise ne değişir:**
 
 Güvenlik ayarlarının **gerekçesi** değişmez, yalnızca aciliyeti değişir. Private

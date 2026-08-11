@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:db": "vitest run --config vitest.db.config.ts",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=desktop-chrome --project=mobile-375",
+    "test:quality": "playwright test --project=quality",
     "setup": "npm ci && docker compose up -d --wait && prisma migrate dev && prisma db seed",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
@@ -61,6 +62,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/jest-dom": "7.0.0",
@@ -70,6 +72,7 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.5",
+    "axe-core": "4.13.0",
     "dotenv": "17.2.4",
     "eslint": "9.39.5",
     "eslint-config-next": "16.2.12",

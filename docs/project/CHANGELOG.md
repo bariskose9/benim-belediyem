@@ -4,6 +4,94 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — adım 18c: Performans bütçesi ve erişilebilirlik kapıları (teknik borç #11, #84)
+
+- **Üç bütçe artık CI'da FİİLEN ÖLÇÜLÜYOR.** `09-ci-cd-deploy.md` bunları
+  yazılı olarak istiyordu ama ölçen hiçbir şey yoktu — ölçüm yoksa kapı da
+  yoktur. Yeni `tests/quality/` klasörü ve ayrı bir `quality` Playwright
+  projesi geldi; eşikler tek bir dosyada (`budget.ts`) ve her biri neden o
+  değerde olduğunu yazıyor
+- **`bundle-size`**: sayfanın ilk yükünde inen JS, **gzip hâliyle telden**
+  ölçülüyor (`encodedBodySize`). `loadEventEnd`'den sonra gelen istekler
+  sayılmıyor — onlar Next'in önden indirdiği BAŞKA sayfaların yükü
+- **`lighthouse` yerine Playwright + Chrome protokolü**: LCP ve CLS gerçek
+  Chrome'da, Lighthouse'un mobil laboratuvar profiliyle (4 kat CPU kısıtı +
+  Yavaş 4G) ölçülüyor. ⭐ **Yeni paket GEREKMEDİ** — devir notu bir paket
+  gerekeceğini varsayıyordu, ölçüldü ve gerekmedi
+- **`axe`**: WCAG 2.1 AA denetimi 13 genel sayfada
+  (`@axe-core/playwright` — **tek yeni bağımlılık, yalnızca geliştirmede**,
+  kullanıcıya giden pakete girmiyor; `npm audit`: 0 açık). Kritik ve `serious`
+  ihlaller merge'i engelliyor; bugün ikisinden de sıfır tane var
+- ⛔ **KAPILAR MUTASYONLA KANITLANDI.** Bütçe 100 KB'a indirildi → altı sayfa
+  da kırmızıya döndü. `/iletisim` sayfasına `alt` metni olmayan bir görsel
+  eklendi → yalnızca o sayfa `critical: image-alt` ile düştü. Kırmızıya
+  dönmeyen kapı, kapı değildir
+
+### Düzeltildi — lisans metni ve onu koruyan mekanizma
+
+- ⛔ **ÖNCE BİR YANLIŞ TESPİTİ DÜZELTELİM: `LICENSE` DOSYASI ZATEN VARDI.**
+  Devir notu "depoda `LICENSE` dosyası yok" diyordu, ajan bunu **doğrulamadan
+  devraldı** ve proje sahibine yanlış bilgiyle soru sordu. Dosya `git`
+  geçmişinde duruyordu. Hata `git status`'ün dosyayı "yeni" değil
+  "değişti" göstermesiyle yakalandı
+- **MIT metnindeki bir bozukluk düzeltildi**: son cümle `OUT OF, IN CONNECTION
+  WITH…` diyordu, kanonik metin `OUT OF OR IN CONNECTION WITH…`. Tek kelimelik
+  bir fark ama lisans metni **birebir** olmak zorundadır — değiştirilmiş bir
+  MIT metni artık MIT değildir ve otomatik lisans tarayıcıları tanımaz
+- **Lisans artık bir teste bağlı** (`tests/unit/license.test.ts`): beyan var mı ·
+  dosya var mı · **içerik beyanla aynı mı** · telif satırı gerçek bir yıl ve
+  sahip taşıyor mu. Teknik borç #100'ün dersi burada da geçerli: **bir kural,
+  mekanizması olmadan niyettir**
+- Yalnızca "dosya var mı" diye bakan bir test yanlış lisans metnini yeşil
+  geçirirdi. İki mutasyonla kanıtlandı: dosya silindi → 3 test kırmızı;
+  "MIT License" başlığı "Apache License" yapıldı → 1 test kırmızı
+- ⚠️ **Testin BUGÜN yakalayamadığı şey:** kanonik metinden sapma. Başlık ve
+  telif satırı doğru olduğu sürece gövdedeki bir kelime değişikliği geçiyor —
+  bu bozukluk da o yüzden aylarca durabildi (teknik borç #111)
+
+### Düzeltildi — devralınan iki yanlış tespit
+
+- ⛔ **TEKNİK BORÇ #84'ÜN SEBEBİ YANLIŞMIŞ.** Kayıt "çerez bandı tüm sayfaları
+  dinamik yaptı" diyordu. Mutasyonla ölçüldü: bandı tek başına kaldırmak
+  hiçbir sayfayı statikleştirmiyor, `SiteHeader`'ı tek başına kaldırmak da
+  öyle. Başlık oturum çerezini **adım 4a'dan beri** okuyor (commit `49f965c`),
+  yani sayfalar adım 17'den çok önce zaten dinamikti. İkisi birden
+  kaldırıldığında yalnızca 6 sayfa statikleşiyor. Bedel ölçüldü ve kabul
+  edilebilir çıktı (o sayfaların canlı LCP'si 720 ms, hedef 2500 ms) —
+  §5.10 gereği borç KAPATILDI, optimizasyon yapılmadı
+- ⛔ **İLK YAZILAN BÜTÇE LİSTESİ SESSİZCE GİRİŞ SAYFASINI ÖLÇÜYORDU.**
+  Listede `/spor-salonu` ve `/hastane` vardı; ikisi de **personele özel**.
+  `page.goto` bu sayfalarda `200` döndürüyor çünkü `guardPage()`'in
+  yönlendirmesi hidrasyondan SONRA uygulanıyor. `/spor-salonu` bu yüzden 240 ms
+  ile "en hızlı sayfa" görünüyordu. Artık her ölçüm `expectRoute` ile hangi
+  adreste olduğunu doğruluyor
+
+### Bilinen açık — cırcır (ratchet) ile kapatıldı, HEDEF TUTULMUYOR
+
+- ⛔ **İlk yük JS bütçesi AŞILIYOR: 281,7 KB gzip, hedef 200 KB** (canlıda
+  288,8 KB). Ağırlığın ~150 KB'ı **Sentry'nin tarayıcı SDK'sı** — oturum
+  tekrarı ve izleme kapalı olduğu hâlde paketten atılamayan ölü kod. En olası
+  sebep borç #96 (Turbopack). **Emin değilim, doğrulanmadı** → teknik borç #108
+- ⛔ **LCP kapısı gerçek ağı ölçmüyor**: CI localhost'a bakıyor ve Chrome'un ağ
+  kısıtı ana belgeye uygulanmıyor (ölçüldü). Aynı sayfa local'de 588 ms,
+  canlıda **2844 ms** — yani canlı anasayfa bugün hedefin üstünde ve CI bunu
+  göremiyor → teknik borç #109
+- Kapılar bu yüzden hedefe değil **bugün ölçülen değere** kuruldu: bugünden
+  kötüye gidiş merge edilemiyor, hedefe olan fark yazılı borç. Gerekçesi
+  `09-ci-cd-deploy.md` → "Bütçe zaten aşılmışken kapı nasıl kurulur"
+
+### Değişti
+
+- `npm run test:e2e` artık yalnızca davranış projelerini koşuyor
+  (`desktop-chrome` + `mobile-375`); bütçe kapıları `npm run test:quality`
+  altında ve CI'da **ayrı bir adım** — "davranış bozuldu" ile "bütçe aşıldı"
+  bakılacak yeri farklı iki sorun
+- `docs/standards/09-ci-cd-deploy.md` — cırcır ilkesi ve "kapı neyi ölçtüğünü
+  söylemek zorundadır" bölümleri eklendi
+- `docs/standards/06-testing.md` — "yeşil test yanlış şeyi ölçüyor olabilir"
+  bölümü eklendi (mutasyon zorunluluğu · `200` ≠ doğru sayfa · devralınan
+  sebebin de doğrulanması)
+
 ### Eklendi — adım 17b: Hesap yönetimi ve veri hakları (teknik borç #80)
 
 - **`/hesabim/verilerim` ekranı geldi**: verimi indir · telefon güncelleme ·
