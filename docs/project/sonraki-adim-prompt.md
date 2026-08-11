@@ -16,6 +16,31 @@ benim-belediyem projesinde roadmap adım **17c**'ye geçiyoruz. Başlamadan önc
 
 ## DURUM
 
+> ### 📌 ÖNCEKİ OTURUMUN KAPANIŞ NOTLARI (2026-08-11, TR 03:20)
+>
+> **Adım 17b canlıya çıktı ve duman testi geçti.** Kapanışta yarım kalan
+> yalnızca şunlar:
+>
+> | İş | Durum | Kim yapacak |
+> |---|---|---|
+> | PR #47 (adım 17b) | ✅ merge edildi, dal silindi, canlıda | bitti |
+> | PR #48 (belge notu) | ⏳ **açık bırakıldı** — Playwright ve Docker kontrolleri hâlâ koşuyordu | **sen: `gh pr checks 48` → yeşilse merge et** |
+> | 17b elle testi (B6) | ⛔ hiç yapılmadı | proje sahibi |
+> | Cron ilk koşusu (B4) | ⏳ bakılmadı — sebebi aşağıda | proje sahibi |
+> | `LEGAL_*` panel işi | ⛔ hâlâ girilmedi | proje sahibi |
+>
+> **Canlıda fiilen doğrulananlar** (2026-08-11, commit `1b853cf`):
+> `/hesap-silindi` 200 · girişsiz `/hesabim/verilerim` 307 · girişsiz
+> `GET /api/account/export` 401 · `POST /api/account/deletions` 401 ·
+> `POST /api/account/identity-unlinks` 401 · `PUT /api/account/phone` 401 ·
+> sağlık ucu `db: ok`.
+>
+> ⏰ **CRON NEDEN KONTROL EDİLMEDİ — bu bir atlama değil, zamanlama kararı:**
+> oturum UTC 00:20'de kapandı ve cron penceresi **00:00–00:59 UTC** arası.
+> Yani koşu ya birkaç dakika önce olmuştu ya da henüz olmamıştı. O anda bakıp
+> "log yok" görmek **yanıltıcı bir negatif** üretirdi ve "cron çalışmıyor"
+> sanılabilirdi. Doğrusu pencere kapandıktan sonra bakmak.
+
 Roadmap adım **0 → 17b bitti** (15, 15b, 15c-1, 15c-2, 16, 17, 17b dahil).
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
@@ -164,6 +189,13 @@ spor salonu ekranları yalnızca personele açık.
 > 📌 **PROJE SAHİBİNİN NOTU (2026-08-10 gecesi): "cron'un ilk canlı koşusu bu
 > gece; YARIN bakılacak."** Yani bu madde **2026-08-11 sabahından itibaren**
 > yapılabilir durumda — sonraki oturum bunu ilk gündem maddesi yapsın.
+> ⚠️ **UTC 01:00'DEN ÖNCE BAKMA.** Pencere 00:00–00:59 UTC; içindeyken "log
+> yok" görmek koşunun hiç olmayacağı anlamına GELMEZ. 2026-08-11 00:20'de tam
+> bu sebeple bakılmadı.
+> ⛔ **VERCEL LOGLARI TEK KANIT DEĞİL.** Ücretsiz planda kaçırılan koşu log
+> bile üretmiyor; "bu iş bugün çalıştı mı" sorusunun güvenilir cevabı
+> `audit_logs` tablosundaki `scheduled_task_run` satırları. Panelde log
+> göremezsen production veritabanına bakmadan "çalışmadı" deme.
 
 1. Vercel → proje → **Settings → Cron Jobs** → `/api/cron/daily` satırı
    görünüyor mu, zamanlaması `0 0 * * *` mi
