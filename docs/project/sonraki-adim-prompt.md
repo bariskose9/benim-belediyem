@@ -26,22 +26,29 @@ Roadmap adım **0 → 18a bitti**.
   uçtan uca doğrulandı (ayrıntı aşağıda §1). Yani "18a canlıda" ile "hata
   görünürlüğü var" bu tarihten itibaren AYNI şey
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
+- **`main` şu an `9698755`** — 18a'dan sonra yalnızca belge commit'leri geldi
+  (son ikisi PR #57 ve #58). Kod ve şema 18a'dan beri değişmedi
 
-> ### 📌 KAPANIŞ NOTLARI (2026-08-11, TR ~18:00 — GÜNCEL)
+> ### 📌 KAPANIŞ NOTLARI (2026-08-11, TR ~18:30 — GÜNCEL)
 >
 > | İş | Durum | Kim yapacak |
 > |---|---|---|
 > | Adım 18a kodu | ✅ **CANLIDA** (`6712d32`, PR #52 merge edildi, duman testi geçti) | bitti |
 > | **Sentry hesabı** | ✅ **AÇILDI ve CANLIDA DOĞRULANDI** (bkz. §1) | bitti |
 > | `LEGAL_*` panel işi | ✅ **GİRİLDİ ve doğrulandı** (bkz. §2) | bitti |
-> | Toplu elle test | ⛔ **ONUNCU kez ertelendi** | proje sahibi |
+> | Belge tutarlılığı | ✅ **CANLIDA** (`9698755`, PR #58) — bayat durum satırları düzeltildi, kapı 8 kaçağı kapatıldı | bitti |
+> | Toplu elle test | ⛔ **ONUNCU kez ertelendi** (kapanışta bir kez daha teyit edildi) | proje sahibi |
 > | Cron ilk koşusu | ⏳ 12 Ağustos 00:00 UTC penceresi bekleniyor | aşağıya bak |
-> | Kit sürüm **1.9.0** | ✅ push edildi | proje sahibi `/plugin`'den GÜNCELLESİN (ertelendi, acelesi yok) |
+> | Kit sürüm **1.9.0** | ✅ push edildi | proje sahibi `/plugin`'den GÜNCELLESİN (**ertelendi**, acelesi yok) |
 >
-> ⛔ **PANEL İŞİ KALMADI.** Adım 18b'ye temiz başlanabilir; proje sahibinden
-> beklenen tek şey elle test listesi ve kit kurulumu — ikisi de bilinçli ertelendi.
+> ⛔ **PANEL İŞİ KALMADI.** Adım 18b'ye temiz başlanabilir.
+>
+> ⛔ **PROJE SAHİBİNDEN BEKLENEN İKİ İŞ DE BİLİNÇLİ ERTELENDİ** (elle test listesi
+> ve kit kurulumu). **Oturumun başında bunları hatırlatma, iş listesine koyma ve
+> "önce şunu yap" deme.** İkisi de 18b'nin önünde engel DEĞİL. Elle test için
+> yalnızca aşağıdaki bölümdeki tek karar sorusu sorulur — o da adımın SONUNDA.
 
-## 🔧 PANEL İŞİ — BİRİ BİTTİ, BİRİ DURUYOR
+## ✅ PANEL İŞİ — İKİSİ DE BİTTİ
 
 ### 1. ✅ Sentry — **YAPILDI ve CANLIDA DOĞRULANDI** (2026-08-11)
 
@@ -128,15 +135,24 @@ yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya doku
 >
 > **2026-08-11 kapanışında (TR ~18:00) onuncu kez ertelendi** — bu kez liste
 > hiç sunulmadı bile; proje sahibi kendiliğinden "benlik işlerin hepsini
-> erteleyelim" dedi. Aynı kapanışta **kit 1.8.0 kurulumu da** ertelendi
-> (sorun değil, `/yeni-proje` veya `/kit-senkron` gününe kadar beklet).
+> erteleyelim" dedi ve kapanışta bunu **bir kez daha teyit etti**. Aynı kapanışta
+> **kit kurulumu da** ertelendi (sorun değil, `/yeni-proje` veya `/kit-senkron`
+> gününe kadar beklet).
 >
 > ⚠️ **DESEN ARTIK ÇOK NET — İKİ KEZ DENENDİ, İKİSİ DE TUTMADI** (tam liste,
-> sonra bölünmüş liste). Sonraki oturum listeyi **yeniden sunmasın** ve tek
-> madde önerisini de tekrarlamasın; bunun yerine **doğrudan kararı sorsun:**
-> "bu liste hiç yapılmayacaksa roadmap'ten silelim mi, yoksa 'yapılmadı' etiketiyle
-> teknik borç olarak mı bırakalım?" Sürekli büyüyen ve hiç yapılmayan bir liste,
-> yapılmış gibi görünen bir borçtur.
+> sonra bölünmüş liste). Kural:
+>
+> 1. ⛔ **Oturumun BAŞINDA bu listeyi açma.** Hatırlatma, iş listesine koyma,
+>    "önce şunu yap" deme. 18b'nin önünde engel değil
+> 2. ⛔ Listeyi **yeniden sunma** ve tek madde önerisini de **tekrarlama** —
+>    ikisi de denendi, ikisi de tutmadı
+> 3. ✅ **Adım 18b BİTTİKTEN sonra**, tek seferlik ve tek cümlelik şu kararı sor:
+>    "bu liste hiç yapılmayacaksa roadmap'ten silelim mi, yoksa 'yapılmadı'
+>    etiketiyle teknik borç olarak mı bırakalım?" Cevap yine "sonra" olursa
+>    **ısrar etme**, sayacı bir artır ve geç
+>
+> Sürekli büyüyen ve hiç yapılmayan bir liste, yapılmış gibi görünen bir borçtur —
+> ama bunu **her oturumda tekrarlamak** da proje sahibinin vaktini çalar.
 >
 > ⛔ **SEKİZ ADIMIN gerçek cihaz doğrulaması birikmiş durumda.** Otomatik
 > testler ve `mobile-375` ölçümü hepsinde yeşil — BİLİNEN bir arıza yok.
