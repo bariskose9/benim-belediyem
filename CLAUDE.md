@@ -67,9 +67,32 @@ Hiçbir skill uygun değilse `[SKILL: yok]` yaz. Birden fazla kullandıysan heps
 | 5 | `code-review-and-quality` çalıştır | Her commit öncesi |
 | 6 | `docs/standards/10-definition-of-done.md` kapılarını geç | "Tamamlandı" demeden önce |
 | 7 | `docs/standards/15-oturum-devri.md` protokolünü uygula | Her adım bitiminde, oturum kapanmadan |
+| 8 | Öğrenilen kalıcı kuralı **İKİ kopyaya da** yaz ve **diff ile kanıtla** | Bir ders, tuzak veya kural öğrenildiğinde — oturum kapanmadan |
 
 Bu kapılardan birini atlamak için gerekçe üretme. Zaman baskısı, "küçük değişiklik",
 "zaten çalışıyor" geçerli mazeret değildir.
+
+### Kapı 8 neden var
+
+Mühendislik kuralları **iki ayrı yerde** yaşıyor ve biri diğerini güncellemiyor:
+
+| Nerede | Ne işe yarar |
+|---|---|
+| `docs/standards/` (bu depo) | **Bu projenin bağlayıcı kuralları.** §1 hiyerarşisinde 1. sırada; her oturum bunu okur |
+| `proje-kiti` plugin'i | **Yeni proje kurulurken kopyalanan şablon.** Mevcut projelere kendiliğinden ulaşmaz |
+
+Yalnızca kite yazmak, **bu projeyi güncellemez** — yeni oturum kuralı görmez.
+Yalnızca projeye yazmak, **sonraki projeye taşınmaz** — aynı hataya yeniden düşülür.
+
+**Sıra ve kanıt:**
+1. Projenin `docs/standards/` dosyasına yaz
+2. Kitin `skills/yeni-proje/dosyalar/docs/standards/` kopyasına yaz
+3. ⛔ **KANIT:** `diff` ile ikisinin aynı olduğunu göster. Bu adım olmadan kapı geçilmiş sayılmaz
+
+⚠️ **Kurulu plugin sürümünü güncellemek bu kapının parçası DEĞİLDİR.** Kurulu
+sürüm yalnızca `/yeni-proje` ve `/kit-senkron` çalıştırılırken önemlidir;
+o ikisinden hemen **önce** güncellenir, kural yazıldıktan sonra değil.
+Detay: `docs/standards/15-oturum-devri.md`.
 
 ---
 
