@@ -600,14 +600,28 @@ Dal: `feature/uretime-hazirlik` (öneri)
 
 ## PROJE KİTİ (`proje-kiti` plugin)
 
+> ⛔ **KİTE KURAL YAZMAK BU PROJEYİ GÜNCELLEMİYOR — İKİ AYRI KOPYA VAR.**
+>
+> | Nerede | Ne işe yarar |
+> |---|---|
+> | `benim-belediyem/docs/standards/` | **Bu projenin bağlayıcı kuralları.** `CLAUDE.md` §1 hiyerarşisinde 1. sırada; oturum bunu okur |
+> | `proje-kiti` plugin'i | **Yeni proje kurulurken kopyalanan şablon.** Mevcut projelere kendiliğinden ulaşmaz |
+>
+> Bir ders öğrenildiğinde **İKİSİNE DE** yazılmalı. Kitte `kit-senkron` skill'i
+> bu iş için var ama **elle çağrılması gerekiyor** — otomatik değil.
+> Adım 17c'de bu atlandı ve proje sahibi fark etti: kurallar yalnızca kite
+> yazılmıştı, yani `/clear` sonrası yeni oturum onları görmeyecekti.
+
+- **Sürüm 1.5.0 GitHub'a yayınlandı** (2026-08-11) — adım 17c'nin üç dersi:
+  çakışan PR'ın CI'ı sessizce durdurması (`08-git-workflow`), kimlik≠yetki
+  ilkesi (`05-auth-security`), testi koda yormadan önce koşum sayısına bakmak
+  (`06-testing`). ✅ **Aynı üçü bu projenin `docs/standards/` klasörüne de
+  senkronlandı** (commit `d95c223`).
 - **Sürüm 1.4.0 GitHub'a yayınlandı** (2026-08-10)
 - ⚠️ **Proje sahibinin kurulu sürümü 1.2.0'dı**; güncellemesi gerekiyordu.
   Sonraki oturum, kite bir kural yazacaksa **sürümü yine artırıp push etmeli**
   ve kullanıcıya `/plugin` ekranından güncellemesini hatırlatmalı.
-  ⚠️ **Adım 17c'de kite yazılmaya değer iki kural doğdu:**
-  (1) "kimlik doğrulaması yetki vermez — kim olduğun ile neye yetkili olduğun
-  ayrı sorulardır", (2) "bir testin düşmesini koda yormadan önce kaç kez
-  koştuğuna bak"
+  ✅ **Adım 17c'nin üç kuralı 1.5.0 ile yazıldı ve projeye de senkronlandı.**
 
 ## KOMUTLAR
 
