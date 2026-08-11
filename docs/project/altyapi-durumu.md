@@ -18,11 +18,23 @@
 > Tarayıcıda konsol hatası ve başarısız istek YOK.
 > `feature/gozlemlenebilirlik` dalı merge edilip **silindi**.
 >
-> ⚠️ **`/sentry-tunnel` şu an 404 DÖNÜYOR ve bu DOĞRU DAVRANIŞ.** Tünel yolu
-> yalnızca DSN tanımlıyken kuruluyor (bir route değil, `rewrite`). Sentry
-> entegrasyonu yapıldıktan ve yeniden dağıtım koştuktan sonra bu adres 404
-> dönmeyi bırakmalı — **entegrasyonun gerçekten devreye girdiğinin en hızlı
-> kanıtı budur.**
+> ⚠️ **SENTRY DEVREDE Mİ — TEK KOMUTLUK KONTROL (adres parametresi ŞART):**
+>
+> ```
+> curl -o /dev/null -w '%{http_code}\n' \
+>   'https://benim-belediyem.vercel.app/sentry-tunnel?o=1&p=2'
+> ```
+>
+> | Sonuç | Anlamı |
+> |---|---|
+> | **404** | Sentry KURULU DEĞİL (bugünkü durum) |
+> | 404 dışında bir kod | Tünel kurulu, Sentry devrede |
+>
+> ⛔ **`?o=1&p=2` KISMI ATLANAMAZ.** İlk yazılan sürüm çıplak `/sentry-tunnel`
+> diyordu ve **YANLIŞTI** — 2026-08-11'de ölçüldü: tünel bir route değil bir
+> `rewrite` ve `routes-manifest.json`'daki iki kaydın İKİSİ de `o` ve `p`
+> parametrelerini şart koşuyor. Parametresiz istek hiçbir kurala eşleşmediği
+> için Sentry KURULUYKEN DE 404 döner, yani kontrol hiçbir şey ayırt etmez.
 >
 > ⛔ **KOD CANLIDA AMA HATA TAKİBİ HÂLÂ SESSİZ.** DSN girilmediği için Sentry
 > devre dışı. "Adım 18a canlıda" ile "canlıda hata görünürlüğü var" AYNI ŞEY
