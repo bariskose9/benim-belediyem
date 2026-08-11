@@ -171,6 +171,26 @@ Kim, ne zaman, hangi kayıtta, ne yaptı — ayrı `audit_logs` tablosunda tutul
 - Hata takip aracına gönderilen veriler maskelenir.
 - Üçüncü parti bir servise veri gönderiliyorsa bu listelenir ve gerekçelendirilir.
 
+### ⛔ BİR "ÇALIŞIYOR MU" KONTROLÜ, İKİ DURUMDA DA DENENMEDEN YAZILMAZ
+
+Bir teşhis komutu ("şu adres 404 dönüyorsa kurulu değildir") belgeye
+yazılmadan önce **hem ÇALIŞIR hem ÇALIŞMAZ durumda** ölçülmelidir. Yalnızca
+başarısız durumda denenen bir kontrol, iki durumu da aynı cevapla geçiştirip
+**yanlış güven** üretir.
+
+Bir projede aynı kontrol üç kez yanlış yazıldı: adres parametresi eksikti,
+sonra sahte kimlikler kullanıldı, sonunda gerçek kimliklerle bile yanlış
+çıktı — çünkü hedef uç yalnızca `POST` kabul ediyordu ve `GET`'e 404
+dönüyordu. Üçünde de "kurulu değil" cevabı doğru görünüyordu, ama kontrol
+kurulu durumda da aynı cevabı veriyordu.
+
+⚠️ Ayrıca: bir bileşenin **varlığı** onun **çalıştığını göstermez.** Aynı
+projede tünel yolu, hata takibi hiç yapılandırılmamışken de kuruluyordu —
+kaynak kodundan okundu. "Var mı" ile "çalışıyor mu" ayrı sorulardır.
+
+**Kural:** teşhis komutu yerine **uçtan uca ölçüm** yaz — gerçek bir olay
+üret ve sonucunu (yanıt kodu, dönen kimlik, giden gövde) oku.
+
 ### ⛔ ÜÇÜNCÜ TARAF SDK'SININ VARSAYILANLARI DENETLENİR VE TESTLE KİLİTLENİR
 
 Hata takibi ve analitik SDK'larının varsayılan ayarı genellikle **"elinden
