@@ -27,6 +27,19 @@ Hatalı:
 `code` makine için sabit ve İngilizce, `message` kullanıcı için Türkçe.
 Stack trace, SQL, dosya yolu **asla** yanıta konmaz.
 
+### Hata yanıtı izlenebilir bir kimlik taşır
+
+Her hata yanıtında, o isteği sunucu log'undaki satıra bağlayan bir **istek
+kimliği** bulunur (`error.requestId` veya `X-Request-Id` başlığı).
+
+**Neden:** Kullanıcı "hata aldım" der; elinde ekran görüntüsünden başka bir şey
+yoktur. İstek kimliği olmadan doğru log satırını bulmanın yolu, zaman
+aralığından tahmin etmektir — ve üretimde bu, dakikalar değil saatler demektir.
+
+⛔ Bu kimlik **rastgele ve anlamsız** olur: kullanıcı kimliği, e-posta veya
+kayıt numarası buraya konmaz. İstemciye giden her değer, saldırgana da giden
+bir değerdir.
+
 ## Doğrulama
 - Her endpoint girişi (body, query, params) **Zod ile** doğrulanır. İstisna yok.
 - İstemciye güvenilmez: fiyat, indirim, kullanıcı kimliği, rol **sunucuda** belirlenir.
@@ -38,11 +51,106 @@ Stack trace, SQL, dosya yolu **asla** yanıta konmaz.
   2. Bu kayıt bu kişiye mi ait / bu işlemi yapma yetkisi var mı? (403)
 - Kayıt sahipliği kontrolü atlanırsa IDOR açığı oluşur — bu bir hata değil, güvenlik ihlalidir.
 
-## Diğer
+## İstek sınırları
+
+- **Gövde boyutu üst sınırı vardır ve sunucuda uygulanır.** Sınırsız bir JSON
+  gövdesi, kimlik doğrulaması bile gerektirmeyen ucuz bir hizmet dışı bırakma
+  yoludur: tek bir istek belleği doldurabilir. Sınır aşılırsa `413` döner.
+- Zod'un `max()` kuralları bu sınırın yerine geçmez — Zod ancak gövde **okunup
+  ayrıştırıldıktan sonra** çalışır, yani maliyet zaten ödenmiştir.
+- `429` yanıtı **`Retry-After` başlığı olmadan dönülmez.** Ne zaman
+  deneyeceğini bilmeyen istemci ya hemen tekrar dener (sınırı büyütür) ya da
+  gereğinden uzun bekler. Süreyi tahmin ettirmek istemcinin işi değildir.
+
+## CORS
+
+Varsayılan: **hiç CORS başlığı yok.** Bu API tarayıcıdaki kendi arayüzümüz
+tarafından, oturum çerezi ile çağrılır — yani aynı kaynaktan (same-origin).
+Başlık yokluğu bir eksik değil, **kararın kendisidir**: çerezle çalışan bir API'ye
+çapraz kaynak izni vermek, CSRF yüzeyini bilerek açmaktır.
+
+Çapraz kaynaktan çağıran gerçek bir tüketici çıkarsa (üçüncü taraf entegrasyon):
+ADR yazılır, izin verilen kaynaklar **beyaz liste** olur (`*` asla) ve o yol
+çerezle değil **taşıyıcı jetonla** çalışır.
+
+## Sayfalama
+
 - Liste dönen tüm endpoint'ler sayfalanır. Sınırsız liste dönülmez.
+- `limit` için bir **üst tavan** vardır ve istemcinin gönderdiği değer bu tavanla
+  kırpılır. Tavansız `limit`, sayfalamayı olmamış sayar.
+- Büyüyen veya sık değişen listelerde **imleç (cursor/keyset)** tabanlı sayfalama
+  kullanılır, `offset` değil. `offset` ile ilerlerken araya yeni kayıt girerse
+  kullanıcı bir kaydı iki kez görür ya da hiç görmez; ayrıca büyük `offset`
+  değerleri veritabanına atlanan satırların hepsini saydırır.
+- Kısa ve durağan listelerde `offset` yeterlidir — seçim gerekçesiyle yazılır.
+
+## Sözleşme ömrü — sürüm, kırıcı değişiklik, emeklilik
+
+Bir uç yayına girdiği anda **sözleşmeye** dönüşür. Sözleşmeyi tek taraflı bozmanın
+bedelini kullanıcı öder.
+
+**Kırıcı (breaking) değişiklik sayılanlar:** alan silmek · alan adını değiştirmek ·
+bir alanı isteğe bağlıdan zorunluya çevirmek · tipini değiştirmek · dönen hata
+`code` değerini değiştirmek · durum kodunu değiştirmek · doğrulama kuralını
+**daraltmak**.
+
+**Kırıcı olmayanlar:** yeni bir isteğe bağlı alan eklemek · yanıta yeni alan
+eklemek · doğrulama kuralını gevşetmek · yeni bir uç eklemek.
+*(Bu ayrım, istemcinin tanımadığı alanları yok saydığı varsayımına dayanır —
+istemci tarafında "bilinmeyen alan varsa hata ver" davranışı kullanılmaz.)*
+
+**Kırıcı değişiklik gerekiyorsa sıra:**
+1. Yeni davranış **yeni bir sürüm veya yeni bir alan** olarak eklenir; eskisi çalışmaya devam eder
+2. Eski uç `Deprecation` ve `Sunset` yanıt başlıklarıyla işaretlenir
+   ([RFC 9745](https://www.rfc-editor.org/rfc/rfc9745.html) ve
+   [RFC 8594](https://www.rfc-editor.org/rfc/rfc8594.html); `Sunset` tarihi
+   `Deprecation` tarihinden **önce olamaz**)
+3. Kullanım ölçülür — trafiği sıfırlanmadan uç kapatılmaz
+4. Sunset tarihinden sonra kaldırılır ve belgeden düşer
+
+⛔ **Mobil uygulama geldiği gün bu bölüm zorunlu hâle gelir.** Web istemcisini
+tek deploy'la güncellersin; **kullanıcının telefonundaki eski sürümü
+güncelleyemezsin.** Kaldırılan bir uç, güncellemeyi almamış herkes için
+uygulamanın çökmesi demektir.
+
+## Belgeleme (OpenAPI)
+
+- **Tüm endpoint'ler OpenAPI ile belgelenir.** Belge elle yazılmaz; uçların
+  fiilen kullandığı doğrulama şemalarından **türetilir**. Elle yazılan belge
+  ikinci bir doğruluk kaynağıdır ve kaçınılmaz olarak eskir.
+- Belge ile gerçek uçlar arasındaki sapma **CI'da testle yakalanır**: belgelenmemiş
+  bir uç eklenirse yapı kırmızıya döner. Kapısı olmayan belge, birkaç ay içinde
+  yanlış belgeye dönüşür — ve **yanlış belge, belgesizlikten kötüdür**.
+- Belgeye **örnek değer olarak gerçek veya gerçeğe benzer kişisel veri konmaz**
+  (kimlik numarası, kart numarası, gerçek e-posta). Örnekler açıkça sahte olur.
+
+### ⛔ Belgeyi yayınlamak ile üretmek AYRI kararlardır
+
+Belgenin **üretilmesi** her zaman zorunludur. **Herkese açık yayınlanması**
+değildir ve varsayılan olarak yapılmaz.
+
+| API'nin türü | Belge nerede açık |
+|---|---|
+| Kendi arayüzümüzün çağırdığı iç API (BFF) | local + preview açık · **production'da kapalı** |
+| Üçüncü tarafların kullanması için sunulan **ürün** API | her yerde açık — belge ürünün parçasıdır |
+
+**Neden:** İç bir API'nin belgesi hiçbir dış tüketiciye hizmet etmez; buna
+karşılık tüm uçları, kabul edilen alanları, doğrulama kurallarını ve hata
+kodlarını tek sayfada, taranabilir biçimde saldırgana sunar. Kazanç sıfır,
+bedel gerçektir.
+
+⚠️ **Bu bir "gizlilikle güvenlik" (security by obscurity) argümanı değildir** ve
+öyle savunulmaz: depo açıksa aynı bilgi zaten okunabilir. Argüman **saldırı
+yüzeyi hijyenidir** — kimseye faydası olmayan bir yüzeyi açık tutmamak. Güvenlik
+her zaman yetkilendirmeden gelir, belgenin kapalı olmasından değil.
+
+Production'da açılması istenirse: ortam değişkeniyle açılır (varsayılan kapalı),
+`noindex` verilir ve karar ADR'ye yazılır.
+
+**Tek belgeleme istisnası:** taklit edilen dış servis uçları (`/api/mock-kps/*`)
+belgelenmez — gerekçe ADR-009. Bu istisna yalnızca dış kurum taklidi için
+geçerlidir; uygulamanın kendi uçlarına genişletilemez.
+
+## Diğer
 - Ödeme/sipariş gibi tekrarlanmaması gereken işlemlerde idempotency anahtarı kullanılır.
 - Uzun işlemler senkron beklemez.
-- Tüm endpoint'ler OpenAPI (Swagger) ile belgelenir; `/api/docs` altında yayınlanır.
-  **Tek istisna:** taklit edilen dış servis uçları (`/api/mock-kps/*`) belgelenmez —
-  gerekçe ADR-009. Bu istisna yalnızca dış kurum taklidi için geçerlidir;
-  uygulamanın kendi uçlarına genişletilemez.

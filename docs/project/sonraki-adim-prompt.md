@@ -1,94 +1,136 @@
-# Sonraki oturum için hazır prompt — adım 18b
+# Sonraki oturum için hazır prompt — adım 18c
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Adım 18b bitince **yeniden yazılır** (üstüne eklenmez).
+> Adım 18c bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde roadmap adım **18b**'ye geçiyoruz. Başlamadan önce
+benim-belediyem projesinde roadmap adım **18c**'ye geçiyoruz. Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku
-- `docs/project/roadmap.md` — adım 18b satırı ve teknik borç listesi (#96-#98 YENİ)
-- `docs/project/decisions/ADR-018-*.md` — hata takibinin altı kararı
+- `docs/project/roadmap.md` — adım 18c satırı ve teknik borç listesi (#99-#107 YENİ)
+- `docs/standards/11-agent-workflow.md` — ⭐ **"GERÇEK PROJE VARSAYILANI" bölümü YENİ**
 - `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
+
+## ⭐ EN ÖNEMLİ YENİ KURAL — önce bunu oku
+
+Proje sahibi 2026-08-11'de şunu söyledi ve bu **standarda yazıldı**
+(`11-agent-workflow.md` → "Gerçek proje varsayılanı"):
+
+> "Best practice neyse onu yap, **gerçek hayat projesi** örneği yapıyoruz,
+> hep öyle düşün."
+
+Yani ölçüt "hangisi daha hızlı biter" veya "portföyde iyi görünür" değil,
+**"gerçek kullanıcısı ve gerçek nöbetçisi olan bir üründe hangisi doğru
+olurdu"**. Sapılacaksa sapma yazılır: yerleşik pratik ne, biz ne yapıyoruz,
+neden, ne zaman gerçeğine geçilir.
+
+⛔ **"Portföy projesi" bir sapma gerekçesi DEĞİLDİR.** Sahte olması gereken tek
+şey veridir; mühendislik sahte olmaz.
 
 ## DURUM
 
-Roadmap adım **0 → 18a bitti**.
+Roadmap adım **0 → 18b bitti**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- Tüm hizmetler çalışıyor, **hizmet ızgarasında kapalı hizmet kalmadı**
-- **Adım 18a (gözlemlenebilirlik) CANLIDA** (`6712d32`) — 285 E2E + 756 birim +
-  344 veritabanı testi yeşil, CI 5/5, duman testi geçti
-- ✅ **HATA TAKİBİ ARTIK AÇIK:** Sentry DSN'i 2026-08-11'de girildi ve canlıda
-  uçtan uca doğrulandı (ayrıntı aşağıda §1). Yani "18a canlıda" ile "hata
-  görünürlüğü var" bu tarihten itibaren AYNI şey
+- **Adım 18b (API belgeleri) tamamlandı ama HENÜZ MERGE EDİLMEDİ** —
+  commit onayı bekliyor. `main` hâlâ `ab3c627`
+- Hata takibi (Sentry) canlıda ve uçtan uca doğrulandı (2026-08-11)
 - Preview ve production veritabanları dolu; gerçek kullanıcı 0
-- **`main` şu an `9698755`** — 18a'dan sonra yalnızca belge commit'leri geldi
-  (son ikisi PR #57 ve #58). Kod ve şema 18a'dan beri değişmedi
 
-> ### 📌 KAPANIŞ NOTLARI (2026-08-11, TR ~18:30 — GÜNCEL)
+## 📌 ADIM 18b'DE NE YAPILDI
+
+`/api/docs` — **46 ucun tamamı** OpenAPI 3.1 ile belgelendi (ADR-019).
+
+- ⭐ **YENİ PAKET EKLENMEDİ.** Devir notu bir paket gerekeceğini yazıyordu;
+  ölçüldü ve gerekmedi: Zod 4.4.3'ün `z.toJSONSchema`'sı **42/42 şemayı**
+  dönüştürdü (katı modda da). Belge gerçek doğrulama şemalarından türetiliyor
+- **Sapma CI kapısı:** uç · hayalet uç · **erişim seviyesi** · hata kataloğu
+- **Belge production'da varsayılan KAPALI** (`404`), `API_DOCS_PUBLIC=true` ile açılır
+- Bağımsız doğrulayıcıyla (`npx @redocly/cli lint`) ölçüldü: **0 hata**, 9 uyarı
+  (8'i doğru davranış: yönlendirme uçları ve hata üretemeyen uçlar)
+
+### ⭐ ADIM 18b'NİN EN ÖNEMLİ DERSİ — MUTASYON GERÇEK BİR ZAAF BULDU
+
+Erişim testleri önce yalnızca "kütükte korumalı yazan uç belgede de korumalı mı"
+ölçüyordu. `/api/addresses` POST'unun erişimi deneme amaçlı
+`authenticated` → `public` yapıldı ve **testlerin HEPSİ yeşil kaldı.**
+
+Testler kütükle tutarlıydı ama **gerçekle bağı yoktu** — yani yanlış etiketlenmiş
+bir uç belgede "giriş gerekmez" diye görünebilirdi. Test artık etiketi route
+dosyasındaki gerçek `requireAccess` çağrısına bağlıyor ve aynı mutasyonda
+kırmızıya dönüyor.
+
+⛔ **DERS: Bir testin ölçtüğü şeyi, ölçtüğünü sandığın şeyle karıştırma.
+Kendi verinle tutarlı bir test, hiçbir şey ölçmüyor olabilir.**
+
+## 🔎 BELGELEME ÜÇ GERÇEK KUSUR ORTAYA ÇIKARDI (borç #105-#107)
+
+Belge yazmak, kodu okumanın kendisiydi ve şunlar bulundu:
+
+- **#105 — aynı hata kodu iki farklı HTTP durumu dönüyor:** `BOT_CHECK_FAILED`
+  (403/400), `PAYMENT_DECLINED` (409/402), `INSUFFICIENT_FUNDS` (409/402).
+  ⭐ Sayının BÜYÜMESİ testle engellendi; dördüncüsü CI'ı kırar
+- **#106 — iki uçta yol parametresi Zod'dan geçmiyor** (sepet kalemi, üyelik)
+- **#107 — yanıt gövdelerinin şeması belgelenmedi** (yalnızca zarf + tarif)
+
+Üçü de belgede **gizlenmedi**, açıkça yazıldı.
+
+## ⚠️ STANDARTLAR GÜNCELLENDİ — YENİ BORÇLAR DOĞDU (#99-#104)
+
+"Best practice" talimatı üzerine dört standart dosyası güncellendi ve bu, **bu
+projede duran ihlalleri görünür yaptı**. Hepsi ölçülerek yazıldı:
+
+| # | Ne | Nerede ödenir |
+|---|---|---|
+| 99 | CI action'ları etiketle sabitlenmiş, **tam commit SHA'sıyla değil** (11/11) | adım 18d |
+| 100 | ⛔ **Depo public ama sır taraması ve push koruması KAPALI** | **tek tık panel işi** |
+| 101 | `429` yanıtları `Retry-After` taşımıyor | hız sınırına dokunulan ilk adım |
+| 102 | Hata yanıtı istek kimliği taşımıyor (#97'nin istemci bacağı) | ara katman işi |
+| 103 | API sürümlenmemiş, `Deprecation`/`Sunset` yok | ⛔ **adım 19'dan ÖNCE** |
+| 104 | Uygulama düzeyinde gövde boyutu sınırı yok (platform 4,5 MB'de kesiyor) | ara katman işi |
+
+⛔ **#103 ve #107 adım 19 (mobil uygulama) başlamadan ÖNCE ödenmeli.** O günden
+sonra kullanıcının telefonundaki eski sürüm güncellenemez; kaldırılan bir uç
+veya değişen bir yanıt, güncellemeyi almamış herkes için çökme demektir.
+
+## ❓ PROJE SAHİBİNE SORULACAK TEK ŞEY (18c'nin SONUNDA)
+
+**Depoda `LICENSE` dosyası yok.** Public bir depo lisanssızken hukuken "her hakkı
+saklı"dır — kimse kullanamaz, katkı veremez. Portföy için genelde MIT tercih
+edilir. Bu proje sahibinin kararı, ajanın değil. Tek cümleyle sor, cevap
+"sonra" olursa ısrar etme.
+
+## 📱 TOPLU ELLE TEST — ON BİRİNCİ KEZ ERTELENDİ
+
+> ⛔ **Oturumun BAŞINDA bu listeyi AÇMA.** Hatırlatma, iş listesine koyma,
+> "önce şunu yap" deme. 18c'nin önünde engel değil.
 >
-> | İş | Durum | Kim yapacak |
-> |---|---|---|
-> | Adım 18a kodu | ✅ **CANLIDA** (`6712d32`, PR #52 merge edildi, duman testi geçti) | bitti |
-> | **Sentry hesabı** | ✅ **AÇILDI ve CANLIDA DOĞRULANDI** (bkz. §1) | bitti |
-> | `LEGAL_*` panel işi | ✅ **GİRİLDİ ve doğrulandı** (bkz. §2) | bitti |
-> | Belge tutarlılığı | ✅ **CANLIDA** (`9698755`, PR #58) — bayat durum satırları düzeltildi, kapı 8 kaçağı kapatıldı | bitti |
-> | Toplu elle test | ⛔ **ONUNCU kez ertelendi** (kapanışta bir kez daha teyit edildi) | proje sahibi |
-> | Cron ilk koşusu | ⏳ 12 Ağustos 00:00 UTC penceresi bekleniyor | aşağıya bak |
-> | Kit sürüm **1.9.0** | ✅ push edildi | proje sahibi `/plugin`'den GÜNCELLESİN (**ertelendi**, acelesi yok) |
+> ⛔ Listeyi **yeniden sunma** ve tek madde önerisini de **tekrarlama** —
+> ikisi de denendi, ikisi de tutmadı.
 >
-> ⛔ **PANEL İŞİ KALMADI.** Adım 18b'ye temiz başlanabilir.
->
-> ⛔ **PROJE SAHİBİNDEN BEKLENEN İKİ İŞ DE BİLİNÇLİ ERTELENDİ** (elle test listesi
-> ve kit kurulumu). **Oturumun başında bunları hatırlatma, iş listesine koyma ve
-> "önce şunu yap" deme.** İkisi de 18b'nin önünde engel DEĞİL. Elle test için
-> yalnızca aşağıdaki bölümdeki tek karar sorusu sorulur — o da adımın SONUNDA.
+> ✅ **Adım 18c BİTTİKTEN sonra**, tek seferlik ve tek cümlelik şu kararı sor:
+> "bu liste hiç yapılmayacaksa roadmap'ten silelim mi, yoksa 'yapılmadı'
+> etiketiyle teknik borç olarak mı bırakalım?" Cevap yine "sonra" olursa
+> **ısrar etme**, sayacı bir artır ve geç.
 
-## ✅ PANEL İŞİ — İKİSİ DE BİTTİ
+Listenin tamamı git geçmişinde duruyor (`sonraki-adim-prompt.md`, commit `ab3c627`).
+Kapsanan borçlar: **#50 · #62 · #73 · #83** + adım 15c-1 · 15c-2 · 16 · 17 ·
+17b · 17c · 18a.
 
-### 1. ✅ Sentry — **YAPILDI ve CANLIDA DOĞRULANDI** (2026-08-11)
-
-Kaynak `sentry-amber-lamp` · plan **Developer** (ücretsiz) · **yalnızca
-production**'a bağlı · veri bölgesi **EU (Frankfurt)**.
-
-Uçtan uca ölçüldü: canlı sayfada bilerek fırlatılan hata
-`POST /sentry-tunnel` ile **200** aldı, Sentry olay kimliği döndü, giden
-gövdede kart/kimlik/e-posta **sıfır kez** geçti (üçü de `[gizlendi]`) ve
-yığın izi bozulmadı. Ayrıntı: `altyapi-durumu.md`.
-
-### 2. ✅ `LEGAL_CONTROLLER_NAME` + `LEGAL_CONTACT_EMAIL` — **GİRİLDİ**
-
-2026-08-11'de girildi (Production, **Non-sensitive**) ve canlıda doğrulandı:
-`/gizlilik` sayfasındaki "Veri sorumlusu" kutusu artık gerçek adı ve tıklanabilir
-başvuru e-postasını gösteriyor, yer tutucu metin kayboldu.
-
-⛔ **PANEL İŞİ KALMADI. Adım 18b'ye temiz başlanabilir.**
-
-⚠️ **Bilinen kabul:** başvuru adresi proje sahibinin ANA kişisel Gmail'i. Herkese
-açık bir sayfada duruyor, yani spam toplayıcılara açık. Uyarı yapıldı, tercih
-bilinçli. Değiştirmek isterse değişken `Non-sensitive` olduğu için tek adımlık iş.
-
-⚠️ Teknik borç **#91 canlıda görüldü:** çerez bandı `/gizlilik` sayfasında "Veri
-sorumlusu" kutusunu örtüyor; bant kapatılınca görünüyor. Aynı desen
-`/hesap-silindi` sayfasında da var.
+**Nerede:** https://benim-belediyem.vercel.app · **telefondan**
+**Hesap:** `docs/project/test-hesaplari.md` → şifre `Test1234!`,
+**personel olan** bir hesap seç. ⛔ #11-#16 arası hesaplar production'da YOK.
 
 ## ⏰ CRON — SONRAKİ PENCERE 12 AĞUSTOS 00:00 UTC
 
-Bu oturumda **yeni bir ölçüm yapılmadı ve yapılamazdı**: 11 Ağustos penceresi
-(00:00–00:59 UTC) bir önceki oturumda 01:06'da zaten ölçülmüştü → **0 kayıt**.
+11 Ağustos penceresi ölçüldü → **0 kayıt**. `CRON_SECRET` 10 Ağustos ~14:54
+UTC'de girilmiş, yani o günün penceresi geçtikten SONRA.
 
-**Bu oturumda bulunan yeni bilgi:** `CRON_SECRET` production'a
-**10 Ağustos ~14:54 UTC'de** girilmiş — yani o günün cron penceresi geçtikten
-SONRA. 10 Ağustos'un sessizliğinin sebebi bu (uç 401 dönmüş olmalı).
-11 Ağustos penceresinde değişken vardı; oradaki şüpheli hâlâ 00:31'deki
-PR #48 dağıtımı.
-
-**Sonraki oturum:** 12 Ağustos 01:00 UTC'den sonra sorguyu tekrarla.
-Yine 0 çıkarsa Vercel → Settings → Cron Jobs → View Logs incelenmeli.
+**Sonraki oturum:** 12 Ağustos 01:00 UTC'den sonra sorguyu tekrarla. Yine 0
+çıkarsa Vercel → Settings → Cron Jobs → View Logs incelenmeli.
 
 ⛔ **DERS: UTC 00:00–00:59 arasında production'a dağıtım tetikleyen merge YAPMA.**
 
@@ -102,259 +144,97 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **yalnızca
 okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT SÜRÜM 1.9.0 — YAYINLANDI
+## 📦 KİT SÜRÜM 1.10.0 — kapı 8 geçildi
 
-Adım 18a'nın dört dersi `docs/standards/` ve kit kopyasına **ikisine birden**
-yazıldı; `diff` ile 17/18 dosyanın birebir aynı olduğu kanıtlandı (kapı 8).
-Kit deposunda sürüm 1.7.0 → **1.8.0** yapıldı ve GitHub'a **push edildi**
-(`bariskose9/bariskose-skills`, commit `8ae8067`).
+18b'nin dört standart güncellemesi (`03-api-guidelines`, `04-database`,
+`09-ci-cd-deploy`, `11-agent-workflow`) **hem projeye hem kite** yazıldı.
+✅ `diff` kanıtı: **18 standart dosyasından 17'si birebir aynı**; tek fark
+`00-stack.md` (bilinen/beklenen).
 
-⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ HÂLÂ ESKİ.** `/plugin` ekranından
-güncellemesi gerekiyor. Bu, kapı 8'in parçası DEĞİL — yalnızca `/yeni-proje`
-veya `/kit-senkron` çalıştırılmadan hemen önce önemli.
-**2026-08-11 kapanışında proje sahibi bunu bilerek erteledi** — sonraki oturum
-kendiliğinden hatırlatmasın; yalnızca o iki komuttan biri çalıştırılacağı gün
-"önce kiti güncelle" desin.
+⛔ **Kit deposu HENÜZ PUSH EDİLMEDİ** — commit onayı bekliyor
+(`/Users/bariskose/baris_projects/bariskose-skills`, sürüm 1.9.0 → 1.10.0).
 
-⚠️ **KİT DEPOSU 5 COMMIT GERİDEYDİ ve bu oturumda `git pull` yapıldı.**
-Karşılaştırmadan önce daima `git fetch` + `git pull` yap; bayat bir kopyayla
-karşılaştırmak sahte fark üretir.
+⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ ESKİ.** Bu kapı 8'in parçası DEĞİL — yalnızca
+`/yeni-proje` veya `/kit-senkron` çalıştırılacağı gün "önce kiti güncelle" de.
+**Bilinçli olarak ertelendi; kendiliğinden hatırlatma.**
 
-⛔ **`00-stack.md` HÂLÂ FARKLI ve bu bir AÇIK SORU, çözülmedi.**
-Sürüm 1.7.0 istisnayı dosya değil **bölüm** seviyesine indirdi
-(`<!-- ⛔ SENKRON SINIRI -->`). Ama projedeki fark **sınırın ÜSTÜNDE** kalıyor
-(satır 19-68): oradaki Auth.js metni tamamen bu projeye özel. Ya sınır yanlış
-yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya dokunmadı
-(CLAUDE.md §7: aynı anda tek modül)** — sonraki oturum karar versin.
+⛔ **`00-stack.md` HÂLÂ FARKLI ve bu AÇIK BİR SORU.** Sürüm 1.7.0 istisnayı
+bölüm seviyesine indirdi (`<!-- ⛔ SENKRON SINIRI -->`) ama projedeki fark
+**sınırın ÜSTÜNDE** kalıyor (satır 19-68): oradaki Auth.js metni bu projeye
+özel. Ya sınır yanlış yerde ya da o metin sınırın altına taşınmalı.
+Adım 18b bu dosyaya dokunmadı (§7: aynı anda tek modül) — **karar hâlâ bekliyor**.
 
-## 📱 TOPLU ELLE TEST — ONUNCU KEZ ERTELENDİ
+⚠️ Kit deposunu karşılaştırmadan önce daima `git fetch` + `git pull` yap.
 
-> Proje sahibine bir önceki oturumda liste **ikiye bölünmüş hâlde** sunuldu
-> ("bu oturum yalnızca B5+B6+B7, kalanı sonraki") ve yine "sonraya bırak"
-> dendi. Yani bölme önerisi de sorunu çözmedi.
->
-> **2026-08-11 kapanışında (TR ~18:00) onuncu kez ertelendi** — bu kez liste
-> hiç sunulmadı bile; proje sahibi kendiliğinden "benlik işlerin hepsini
-> erteleyelim" dedi ve kapanışta bunu **bir kez daha teyit etti**. Aynı kapanışta
-> **kit kurulumu da** ertelendi (sorun değil, `/yeni-proje` veya `/kit-senkron`
-> gününe kadar beklet).
->
-> ⚠️ **DESEN ARTIK ÇOK NET — İKİ KEZ DENENDİ, İKİSİ DE TUTMADI** (tam liste,
-> sonra bölünmüş liste). Kural:
->
-> 1. ⛔ **Oturumun BAŞINDA bu listeyi açma.** Hatırlatma, iş listesine koyma,
->    "önce şunu yap" deme. 18b'nin önünde engel değil
-> 2. ⛔ Listeyi **yeniden sunma** ve tek madde önerisini de **tekrarlama** —
->    ikisi de denendi, ikisi de tutmadı
-> 3. ✅ **Adım 18b BİTTİKTEN sonra**, tek seferlik ve tek cümlelik şu kararı sor:
->    "bu liste hiç yapılmayacaksa roadmap'ten silelim mi, yoksa 'yapılmadı'
->    etiketiyle teknik borç olarak mı bırakalım?" Cevap yine "sonra" olursa
->    **ısrar etme**, sayacı bir artır ve geç
->
-> Sürekli büyüyen ve hiç yapılmayan bir liste, yapılmış gibi görünen bir borçtur —
-> ama bunu **her oturumda tekrarlamak** da proje sahibinin vaktini çalar.
->
-> ⛔ **SEKİZ ADIMIN gerçek cihaz doğrulaması birikmiş durumda.** Otomatik
-> testler ve `mobile-375` ölçümü hepsinde yeşil — BİLİNEN bir arıza yok.
->
-> Kapsanan teknik borçlar: **#50 · #62 · #73 · #83** + adım 15c-1 · 15c-2 ·
-> 16 · 17 · 17b · 17c. Tamamlananları bu listeden ve roadmap'ten SİL.
+## YAPILACAK — roadmap adım 18c
 
-**Nerede:** https://benim-belediyem.vercel.app (production) · **telefondan**
-**Hesap:** `docs/project/test-hesaplari.md` → "Örnek üye hesapları", şifre
-`Test1234!`. **Personel olan bir hesap seç** (tabloda "✔ evet").
-⛔ **#11-#16 arası hesaplar production'da YOK** (tohum 2026-08-01).
+"Performans bütçesi ölçümü (borç #84 ölçülür) + axe erişilebilirlik kapısı
+(borç #11)" — `09-ci-cd-deploy.md` bu iki kapıyı zaten yazılı olarak istiyor
+ama **CI'da fiilen ölçülmüyorlar**; ölçüm yoksa kapı da yoktur.
 
-### ⏱️ ADIM 0 — ÖNCE SAYAÇLARI BAŞLAT
+Dal: `feature/performans-ve-erisilebilirlik-kapilari` (öneri)
 
-1. **Sipariş oluştur** (borç #50): **RESTORAN'dan** (eşik 10 dk; markette 20 dk).
-   Sepet → Öde → adres → sahte kart **`4111 1111 1111 1111`** (`…0002` ve
-   `…9995` bilerek BAŞARISIZ döner) → **saati not et**. Sipariş `Alındı` olmalı
-2. **Destek talebi oluştur** (borç #62): Destek → yeni talep → **saati not et**
+### Bu adımda özellikle dikkat
+- **Borç #84:** kök yerleşimde `cookies()` okumak TÜM sayfaları dinamik yapıyor.
+  Önce ÖLÇ, sonra düzelt, sonra tekrar ölç (§5.10) — tahminle optimizasyon yok
+- `09-ci-cd-deploy.md` üç kapı sayıyor: `bundle-size` (>200KB gzip),
+  `lighthouse` (LCP >2.5s · CLS >0.1), `axe` (kritik ihlal)
+- ⛔ **Yeni bir paket gerekiyorsa proje sahibine SOR** (CLAUDE.md §7). Ama önce
+  18b'deki gibi **gerçekten gerekli mi diye ÖLÇ** — devir notunun "paket gerekir"
+  demesi yetmiyor
+- ⛔ **CI iş akışına dokunulacaksa borç #99 da aynı işte ödenebilir** (action'ları
+  SHA'ya sabitleme + `permissions:` blokları). İkisi aynı dosyalar
 
-### A) ADIM 15 — PROFİL EKRANLARI (borç #73)
-1. **Hesabım** → "Kayıtlarım" ve "Hesap ayarları" görünüyor mu
-2. **Teslimat adreslerim** → ekle → **Düzenle** ile başlığı değiştir
-3. Aynı adreste **Sil** → onay → liste güncelleniyor mu
-4. **Kayıtlı kartlarım** → adım 0'daki kart burada mı, **tam numara hiçbir
-   yerde görünmüyor mu** (yalnızca son 4 hane)
-5. Kartı kaldırmayı dene → onay metni çıkıyor mu
+## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
-### B) ADIM 15b — HAKKIMIZDA (borç #73)
-1. `/hakkimizda` → şemadaki oklara dokun, birimler açılıp kapanıyor mu
-2. **"Bilgi İşlem Dairesi Başkanlığı personelini listele"** → 100 kişi
-3. **"İtfaiye Dairesi Başkanlığı"** → "henüz yayınlanmadı" çıkıyor mu
-4. Arama kutusuna bir adı **BÜYÜK HARFLE** yaz → yine buluyor mu
-5. Sayfa **yana kayıyor mu** (kaymamalı)
-
-### B2) ADIM 15c-1 — GİRİŞ YÖNTEMLERİ
-1. **Hesabım** → "Giriş yöntemleri" kartı (Şifre: Tanımlı, Google: Bağlı değil)
-2. "Google'a git" → **şifresiz** bas → şifre alanı zorunlu mu
-3. **Yanlış şifreyle** → "Şifreniz doğrulanamadı" diyor mu
-4. Doğru şifreyle → Google'a gidiyor mu (⚠️ Google "Testing" modunda)
-5. Bağladıysan: **Bağlantıyı kaldır** → onay → "Bağlı değil"e dönüyor mu
-
-### B3) ADIM 15c-2 — KİMLİK DOĞRULAMA
-> ⚠️ **Google ile açılmış, kimliği doğrulanmamış** bir hesap gerekiyor.
-1. **Google ile gir** → `/hesabim` → "Kimliğiniz henüz doğrulanmadı" kartı
-2. **Hastane** → "Kimlik doğrulamasına git" bağlantısı (⛔ KAYIT ekranına
-   GİTMEMELİ)
-3. Bağlantıya bas → bot kutusu **çiziliyor mu**
-4. **Yanlış doğum yılıyla** → "Girdiğiniz bilgiler doğrulanamadı" tek tip mesaj
-5. **Kendi T.C. numaran ÇALIŞMAZ** — `test-hesaplari.md` içindeki **sahte
-   vatandaş** numaralarından hiçbir hesaba bağlı olmayan birini kullan
-6. Doğru bilgilerle → "Kimliğiniz doğrulandı" + gerçek ad soyad
-7. ⚠️ Başarı panelinde "kurum personeli olarak tanındınız" **ÇIKMAMALI**;
-   yerine "kurumsal e-postanızı da doğrulamanız gerekiyor" + **"Kurum personeli
-   doğrulaması"** düğmesi olmalı
-8. **"Devam et"** hastaneye götürüyor ve mesaj **"yalnızca kurum personeline
-   açıktır"**a DEĞİŞİYOR mu
-9. `/hesabim` → kimlik numarası **maskeli** (`912******32`) mi
-10. `/kimlik-dogrulama` tekrar → form YOK, "Kimliğiniz doğrulanmış" mı
-
-### B4) ADIM 16 — PLANLI GÖREV (borç #83) — **BİLGİSAYARDAN**
-1. Vercel → **Settings → Cron Jobs** → `/api/cron/daily`, zamanlama `0 0 * * *`
-2. **View Logs** → gece bir çağrı düşmüş mü, yanıt **200** mü (401 = `CRON_SECRET` yok)
-3. **Hastane** → gün şeridinde **14 gün** görünüyor mu
-
-### B5) ADIM 17 — YASAL SAYFALAR VE ÇEREZ BANDI
-1. **Gizli sekmede** aç → altta **"yalnızca zorunlu çerezler"** bandı çıkıyor mu
-2. Bantta **yalnızca TEK düğme** ("Anladım") + "Ayrıntılar" — ⛔ "Reddet" YOK
-3. **"Anladım"** → bant kayboluyor, **aynı sayfada mı kalıyorsun** → yenile,
-   geri gelmemeli
-4. Alt bilgide **dört yasal bağlantı** → dördünde de **yürürlük tarihi** ve
-   "bu gerçek bir belediye değildir" uyarısı var mı
-5. `/gizlilik` → en altta **veri sorumlusu**. ⚠️ Panel işini yaptıysan **adın**
-6. `/cerez-politikasi` → tablo **8 satır** · "Ölçüm ve istatistik" ile
-   "Pazarlama" **boş** diyor mu · **"Tercihimi geri al"** → bant yeniden çıkıyor mu
-7. Telefonda: çerez tablosu **kendi içinde** yana kayıyor, **sayfa kaymıyor** mu
-8. Kayıt akışının **son adımında** Kullanım Şartları ve KVKK bağlantıları var mı
-
-### B6) ADIM 17b — HESAP YÖNETİMİ VE VERİ HAKLARI
-> ⛔ **SON MADDEYİ (hesap silme) EN SONA BIRAK ve ayrı bir hesapla yap.**
-1. **Hesabım** → "Verilerim ve hesap yönetimi" → `/hesabim/verilerim` açılıyor mu
-2. **"Verilerimi indir (JSON)"** → dosya iniyor mu, adı
-   `benim-belediyem-verilerim-<tarih>.json` mi
-3. Dosyayı aç: **profil, siparişler, rıza kayıtları** var mı · kimlik numarası
-   **maskeli** mi · ⛔ **şifre veya oturum bilgisi GEÇMEMELİ**
-4. **Cep telefonum** → numarayı değiştir → rozet **"Doğrulanmadı"**a dönüyor mu
-   (arıza DEĞİL — borç #80)
-5. Hatalı numara (`12345`) → "Geçerli bir cep telefonu numarası girin"
-6. **Kimlik bağlantım** → tohum hesabında **"Şu an çözülemiyor"** çıkmalı;
-   ⛔ "Kimlik bağlantımı çöz" düğmesi ÇIKMAMALI
-7. **Hesabımı sil** kartında **iki liste** yan yana · ikincisinde **"Türk
-   Ticaret Kanunu m.82"** geçiyor mu
-8. **"Hesabımı sil"** → **yanlış şifre** → "Şifreniz doğrulanamadı" ve hesap
-   **duruyor** mu → **Vazgeç**
-9. ⏱️ **(İSTEĞE BAĞLI, GERİ ALINAMAZ)** doğru şifreyle sil → `/hesap-silindi` →
-   **aynı kimlik numarasıyla yeniden kayıt olabiliyor musun**
-10. ⚠️ **Bilinen sorun (borç #91):** bandı hiç kapatmadıysan `/hesap-silindi`
-    sayfasında bant "Saklananlar" başlığını örtüyor
-
-### B7) ADIM 17c — PERSONEL YETKİSİ
-> ⛔ **CANLIDA BU AKIŞ TAMAMLANAMAZ — BİLİNEN sınır (borç #92):** tohum
-> adresleri `@ornek.test`, oraya posta teslim edilemez. "Kod gelmedi" **arıza
-> değil.** Test edilecek şey ekranın bunu DÜRÜSTÇE söyleyip söylemediği.
-1. **Kimliği doğrulanmış ama personel OLMAYAN** hesapla → **Hesabım** →
-   "Kurum personeli doğrulaması" kartı görünüyor mu
-2. **Personel olan** tohum hesabıyla → kart **ÇIKMAMALI**, "Personel durumu:
-   Kurum personeli" yazmalı
-3. Karta bas → `/personel-dogrulama` açılıyor mu
-4. ⭐ **"Kimliğinizi doğrulamış olmanız kurum personeli olduğunuzu göstermez…"**
-   cümlesi var mı
-5. ⭐ **"@ornek.test… canlı ortamda teslim edilemez"** uyarısı var mı
-6. `/hakkimizda`'dan bir kurumsal adres kopyala → **Kod gönder** → **"Bu adres
-   kurum rehberinde kayıtlıysa…"** çıkıyor mu
-7. **Var olmayan** adres (`hicyok@ornek.test`) → **AYNI cümle** çıkıyor mu
-   (çıkmazsa hesap sayımı koruması bozulmuş — arıza)
-8. Rastgele kod → "Kod doğrulanamadı" tek tip mesajı
-9. 375px'te düzen bozuluyor mu, iki temada da okunuyor mu
-
-### B8) ADIM 18a — HATA TAKİBİ (YENİ) — **PANEL İŞİ YAPILDIKTAN SONRA**
-> ⚠️ Sentry hesabı açılıp yeniden dağıtım yapılmadan bu maddeler ANLAMSIZ.
-1. Sentry panelinde proje görünüyor mu, **"Issues" listesi BOŞ** mu
-2. Siteyi gez (5-6 sayfa) → Sentry'ye **hiçbir olay düşmemeli**
-   (⭐ oturum izleme bilerek kapatıldı — düşerse bir gerileme var)
-3. Tarayıcı konsolunda hata, network'te başarısız istek var mı
-   (⚠️ `/sentry-tunnel` isteği **görünmemeli**; görünüyorsa bir hata olmuş demektir)
-4. ⛔ **Bir hata düştüğünde:** olayın içinde T.C. kimlik numarası, kart
-   numarası, e-posta veya şifre **GEÇMEMELİ** — hepsi `[gizlendi]` olmalı
-5. Yığın izinde `src/...` dosya adları okunuyor mu (borç #98 — okunmuyorsa
-   kaynak haritası yüklenmemiş)
-
-### C) HER İKİ EKRAN İÇİN ORTAK
-1. Tema düğmesiyle **açık/koyu** geçiş → iki temada da okunuyor mu
-2. Düğmelere parmakla rahat basılıyor mu (hedefler 44px)
-
-### D) ⏱️ SAYAÇLARA GERİ DÖN
-1. **Restoran siparişinden 10 dk sonra** (#50): `/siparislerim` →
-   **`Hazırlanıyor`** ve **iptal düğmesi kaybolmalı**. 25. dk'da: **`Yolda`**
-2. **Talepten 30 dk sonra** (#62): `/destek` → **`İnceleniyor`**
-
-> **Neden bekleme gerekiyor:** durumlar kolonda tutulmuyor, **okuma anında
-> zamandan türetiliyor** (ADR-013).
-
-## ADIM 18a'DAN DEVREDEN NOTLAR — ÖNCE BUNLARI OKU
-
-- **`src/lib/log-redact.ts` YENİ VE MERKEZÎ**: log'a ve Sentry'ye giden HER
-  değerin geçtiği tek süzgeç. İki bağımsız savunması var: **alan adına göre**
-  ve **değerin BİÇİMİNE göre**
-- ⭐ **İKİNCİSİ OLMADAN BORÇ #79 KAPANMAZDI.** Prisma, argüman nesnesinin
-  tamamını hata METNİNİN içine düz yazı koyuyor — değerler bir alan adının
-  arkasında değil, cümlenin ortasında. Alan adına bakan süzgeç orada kör
-- ⛔ **SÜZGECİ SENTRY OLAYININ TAMAMINA UYGULAMA.** `redact` derinliği 5'te
-  kesiyor; olay çok daha derin. Toptan uygulamak **yığın izini yok eder**.
-  `scrubEvent` yalnızca metin taşıyan alanları hedefliyor ve bir test yığın
-  izinin bozulmadığını koruyor — **o testi gevşetme**
-- ⛔ **SENTRY'NİN VERİ TOPLAMA VARSAYILANLARI TEHLİKELİ** ve altısı da
-  kapatıldı: istek gövdesi (= kayıt formunun tamamı), çerezler, başlıklar,
-  veritabanı sorgu parametreleri, yığın değişkenleri, adres parametreleri.
-  `tests/unit/sentry-options.test.ts` bunu **gerileme kapısı** olarak koruyor
-- ⛔ **OTURUM TEKRARI (replay) KURULMADI** — ekranlarda kimlik ve kart alanı var
-- ⛔ **OTURUM İZLEME (`BrowserSession`) DE KAPATILDI.** Tarayıcıda ölçüldü:
-  hatasız sayfa açılışında Sentry'ye iki istek gidiyordu. Kapatma sebebi kota
-  değil **tutarlılık** — `/cerez-politikasi` "ölçüm ve istatistik yok" diyor
-- **`no-console` ARTIK İSTİSNASIZ.** Tek kapı `@/lib/logger`. Muafiyet üç yerde:
-  `src/lib/logger.ts`, `prisma/**`, `tests/**`
-- **`setLogSink()` DESENİ:** logger Sentry'yi doğrudan içe aktarmıyor; kanal
-  `instrumentation` dosyalarından kaydediliyor. Sebep: log katmanı Sentry
-  kurulmamışken de çalışmalı ve testler Sentry kurulumu istememeli
-- ⭐ **YAKALANMIŞ HATALAR DA SENTRY'YE GİDİYOR** (sink üzerinden). SDK
-  kendiliğinden yalnızca yakalanmamışları görür; bu projedeki en önemli
-  arızalar ise bilinçle yakalanıyor (cron, e-posta, sepet taşıma)
-- **`src/app/global-error.tsx` YENİ** — kök yerleşim çökerse boş beyaz ekran
-  yerine Türkçe mesaj. İçinde bilerek düz `<a>` var (`<Link>` DEĞİL): yönlendirici
-  de bozuk olabilir, tam sayfa yükleme isteniyor
+- ⭐ **`src/features/api-docs/`** — YENİ. Kütük + üretici + sapma kapıları.
+  **Yeni bir uç eklersen kütüğe de yaz, yoksa CI kırmızıya döner**
+- **`src/lib/log-redact.ts`** — log, Sentry ve artık API belgesi aynı süzgeçten geçiyor
+- **`src/lib/logger.ts`** · **`src/lib/sentry-options.ts`**
+- **`src/lib/http.ts`** — `ok`/`created`/`noContent`/`fail`, tek tip hata biçimi
+- **`src/features/staff-verification/`** — iki adımlı doğrulama deseni
+- **`src/features/account/`** — geri alınamaz işlem deseni
+- **`src/lib/same-origin.ts`** — `Origin` kapısı
+- **`src/features/legal/`** — rıza kaydı, çerez kataloğu, yasal sayfa deseni
+- **`src/features/scheduled-tasks/`** · **`src/features/profile/`**
+- **`src/features/auth/`** — oturum, Google OAuth (PKCE + `state` + `nonce`)
+- **`src/features/identity/`** · **`src/features/otp/`** · **`src/features/catalog/`**
+- **`src/lib/external-fetch.ts`** — **yeni dış servis buradan geçer**
+- **`src/lib/money.ts`** — para TAM SAYI KURUŞ
+- **`src/features/events/`** — **YARIŞ KORUMASI DESENİ**
+- **`src/features/notifications/`** — tembel senkronizasyon
+- **`recordAuditLog()`** · **`requireAccess()`** · **`guardPage()`**
+- `messages.ts` (tek istisna `messages-legal.ts`) · tasarım token'ları
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
 
-**Adım 18a'da yeni öğrenilenler**
-- ⛔ **DERLEME TURBOPACK İLE YAPILIYOR** (`Next.js 16.2.12 (Turbopack)`).
-  Sentry'nin `webpack.*` altındaki seçenekleri (örn. `automaticVercelMonitors`)
-  **SESSİZCE ETKİSİZ** kalır. Yapılandırmaya böyle bir seçenek yazıp "çalışıyor"
-  sanma — borç #96
-- ⚠️ **`tunnelRoute` ROUTE LİSTESİNDE GÖRÜNMEZ** — bir route değil, `rewrite`.
-  Varlığını `.next/routes-manifest.json` içinden doğrula. Ayrıca **yalnızca DSN
-  tanımlıyken** kuruluyor; DSN'siz derlemede hiç aranmasın
-- ⚠️ **SAHTE DSN İLE TEST EDERKEN `/sentry-tunnel` 500 DÖNER** ve bu bir arıza
-  DEĞİL: proxy var olmayan `oXXX.ingest.sentry.io` adresine ulaşamıyor.
-  Tünelin çalıştığının kanıtı isteğin GİTMESİ, yanıtın 200 olması değil
-- ⚠️ **`as const` SENTRY'NİN `dataCollection` TİPİNE UYMUYOR** (`readonly []`
-  kabul edilmiyor) ve `DataCollection` tipi paketten dışa aktarılmıyor
-- ⚠️ **`vi.resetModules()` KULLANAN TESTLERDE LOG SATIRINI METİN OLARAK
-  KARŞILAŞTIRMA** — satır artık JSON; `JSON.parse` edip ALANLARINA bak
-- ⭐ **BİR "NEDEN" YORUMU YAZMADAN ÖNCE İDDİAYI MUTASYONLA ÖLÇ.** Bu oturumda
-  "desen sırası önemli" yazıldı, sıra ters çevrildi ve testler YEŞİL kaldı —
-  gerekçe yanlıştı. Gerçek koruma lookaround'lardı. Yanlış bir gerekçe,
-  yorumsuz bırakmaktan kötüdür
+**Adım 18b'de yeni öğrenilenler**
+- ⛔ **SÜZGECİ BÜYÜK BİR NESNENİN TAMAMINA SERİLEŞTİRİP UYGULAMA.**
+  `redactString` 512 karakterde kırpıyor; 80.000 karakterlik belgeyi tek metin
+  olarak geçirince çıktı her hâlükârda farklı döndü ve test "kişisel veri var"
+  diye YANLIŞ ALARM verdi. Doğrusu: yaprak metinlere tek tek uygula.
+  (Aynı tuzak adım 18a'da Sentry olayında da yaşandı)
+- ⛔ **BİR TEST DOSYASINDA HEM `vi.mock("@/config/env")` HEM GERÇEK `__testing`
+  KULLANILAMAZ** — mock modülün tamamını değiştiriyor. Şema testleri
+  `env.test.ts`'e, kapı testleri kendi dosyasına ayrıldı
+- ⚠️ **`NEXT_PUBLIC_ENV_LABEL`'i "production" yapmak env.ts'in TÜM tutarlılık
+  kurallarını tetikliyor** (sahte OTP kanalı yasağı gibi) — test ölçmek
+  istediği şey yerine ilgisiz bir doğrulamada düşer. Modülü mock'la
+- ⚠️ **`z.coerce.boolean()` ORTAM DEĞİŞKENİNDE KULLANILMAZ:** `"false"` dizesini
+  `true` sayar ("boş olmayan metin"). `z.enum(["true","false"])` + `transform`
+- ⚠️ **Zod'un `z.toJSONSchema`'sı `io: "input"` almalı** — `.transform()` taşıyan
+  şemada çıktı biçimini belgelemek istemciyi yanlış yönlendirir
+- ⭐ **OpenAPI'de genel uç `security: []` YAZAR, alanı ATLAMAZ.** Alanı yazmamak
+  "kök güvenliği devral" demek; boş dizi "bilerek korumasız" demek
+- ⚠️ **`npx @redocly/cli lint` ile belgeyi DOĞRULA** — ilk üretimde 19 hata verdi.
+  Paket KURULMAZ, `npx` ile bir kez koşulur
 
 **E2E koşarken**
 - **`npm run start` ile KENDİ sunucunu açıp sonra `npx playwright test` KOŞMA.**
   Doğrusu: portu boşalt (`lsof -ti:3000 | xargs kill -9`), sonra tek başına
   `npx playwright test` — sunucuyu Playwright kendi kurar
 - ⚠️ **PLAYWRIGHT SONRASI `npm run start` YANLIŞ YAPIYI SERVİS EDİYOR**:
-  `NEXT_PUBLIC_*` değerleri DERLEME ANINDA gömülüyor. Elle tarayıcı testinden
-  önce **`npm run build`'i yeniden koş**
+  `NEXT_PUBLIC_*` değerleri DERLEME ANINDA gömülüyor → önce `npm run build`
 - **Sunucu ayaktayken `.next`'i silme**
 - **YÜK 3'ÜN ÜZERİNDEYKEN TAM SET KOŞMA.** `uptime` bak (< 2.5)
 - ⚠️ **E2E'Yİ 15 DAKİKA İÇİNDE ÜST ÜSTE KOŞTURMA** (hız sınırı). Çözüm:
@@ -363,7 +243,7 @@ yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya doku
 - **Adres kontrolünde `toHaveURL` DEĞİL `waitForURL` kullan**
 - **`npm run test:db` `docs/project/test-hesaplari.md` dosyasını YENİDEN
   ÜRETİYOR** (tarihler kayıyor). Commit öncesi `git status`'a bak ve geri al —
-  adım 18a'da yine yaşandı
+  **adım 18b'de YİNE yaşandı**
 - **HER PLAYWRIGHT PROJESİNE AYRI PAYLAŞILAN KAYNAK VER**
 - ⚠️ **E2E KENDİ KULLANICISINI KURABİLİR**: oturum satırını yazıp çereze ham
   jetonu koymak yeterli (`sessionToken` = SHA-256 özeti, çerez `bb_session`)
@@ -381,6 +261,8 @@ yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya doku
 **Vitest**
 - ⚠️ **`vi.resetModules()` + dinamik `import` ile `instanceof` ÇALIŞMAZ** —
   hata KODUNA bak
+- ⚠️ **`vi.resetModules()` KULLANAN TESTLERDE LOG SATIRINI METİN OLARAK
+  KARŞILAŞTIRMA** — satır artık JSON; `JSON.parse` edip ALANLARINA bak
 
 **Playwright seçicileri**
 - **`getByRole("button", { name: "Ara" })` ÇOK EŞLEŞİR** → `exact: true` şart
@@ -391,7 +273,6 @@ yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya doku
 - ⚠️ **AYNI METNİ İKİ BAŞLIKTA VEYA İKİ ERİŞİLEBİLİR ADDA KULLANMA**
 - **Kapalı `<details>` içindeki öğe GÖRÜNMEZ sayılır**
 - ⚠️ **Yasal belgeler BİRBİRİNE de bağlantı veriyor** → `getByRole("navigation")`
-  ile sınırla
 
 **Chrome DevTools MCP ile elle test**
 - ⚠️ **`click` ARAÇ ÇAĞRISI BAZEN SESSİZCE İŞLEMİYOR** → `evaluate_script`
@@ -405,7 +286,7 @@ yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya doku
   Playwright projesiyle ölç
 - ⚠️ **`fullPage` ekran görüntüsü `sticky`/`fixed` öğeleri YANILTICI gösteriyor**
   → `document.elementFromPoint` ile ölç
-- ⚠️ **YENİ: `get_network_request` dosya yolu ÇALIŞMA ALANI İÇİNDE olmalı** —
+- ⚠️ **`get_network_request` dosya yolu ÇALIŞMA ALANI İÇİNDE olmalı** —
   scratchpad'e yazamıyor. Depo köküne yaz ve **hemen sil**
 
 **Next.js**
@@ -420,6 +301,8 @@ yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya doku
 - **Kendi kimlik üretme, `useId()` kullan**
 - ⚠️ **SUNUCU BİLEŞENİ SAYFANIN ADRESİNİ OKUYAMAZ** → `Referer` (ama aynı alan
   adı kontrolünden ve `sanitizeRedirectPath`'ten geçir)
+- ⛔ **DERLEME TURBOPACK İLE YAPILIYOR** — `webpack.*` altındaki SDK seçenekleri
+  SESSİZCE ETKİSİZ kalır (borç #96)
 
 **Dosya indirme**
 - ⛔ **DÜZ `<a download>` KULLANMA** · **`revokeObjectURL` ŞART** ·
@@ -438,8 +321,7 @@ yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya doku
 - **`next/image` YETKİLİ uçtan görsel çekerken `unoptimized` ŞART**
 
 **Türkçe metin**
-- **Prisma'nın `contains` + `mode: "insensitive"` KULLANMA** →
-  `findIdsMatchingQuery`
+- **Prisma'nın `contains` + `mode: "insensitive"` KULLANMA** → `findIdsMatchingQuery`
 - **`LIKE` deseni ŞART olarak `toLikePattern`'den geçer**
 
 **Para**
@@ -509,81 +391,18 @@ yerde ya da o metin sınırın altına taşınmalı. **Adım 18a bu dosyaya doku
 - Docker Desktop kapalı olabilir → `open -a Docker`, sonra `npm run db:up`
 - **`.ts`/`.tsx` yazdıktan sonra `npm run format` çalıştır**
 - Uzun süren işlerde `caffeinate -dimsu &`; **oturum bitince `pkill caffeinate`**.
-  ⚠️ **Bu oturumda makine uyudu ve caffeinate ÖLDÜ** — uzun beklemeden sonra
-  `pgrep -x caffeinate` ile hâlâ ayakta mı diye BAK
-
-## YAPILACAK — roadmap adım 18b
-
-"Swagger / OpenAPI (`/api/docs`)" — `docs/standards/03-api-guidelines.md`
-"endpoint'ler OpenAPI/Swagger ile belgelenir" diyor.
-
-Dal: `feature/api-belgeleri` (öneri)
-
-### Bu adımda özellikle dikkat
-- **Yeni bir paket gerekecek** (`zod-openapi` / `@asteasolutions/zod-to-openapi`
-  benzeri). ⛔ **Proje sahibine SOR ve gerekçe göster** (CLAUDE.md §7).
-  Şemalar zaten Zod ile yazılı, yani el yazımı bir OpenAPI belgesi ikinci bir
-  gerçek kaynağı olurdu — otomatik türetme tercih edilmeli
-- **`/api/docs` KİMİN ERİŞİMİNE AÇIK?** Depo zaten public ama belge, uçları ve
-  hata kodlarını tek yerde toplar. Ziyaretçiye açık olacaksa bilinçli bir karar
-  olmalı; `noindex` konusu da düşünülmeli
-- ⛔ **BELGE ÜRETİRKEN ÖRNEK DEĞER OLARAK GERÇEK KİŞİSEL VERİ KOYMA** — sahte
-  vatandaş numaraları bile `test-hesaplari.md`'de yaşıyor, belgeye kopyalanmaz
-
-## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
-
-- **`src/lib/logger.ts` + `src/lib/log-redact.ts`** — log ve kişisel veri süzgeci
-- **`src/lib/sentry-options.ts`** — hata takibine giden verinin sınırı
-- **`src/lib/http.ts`** — `ok`/`created`/`noContent`/`fail`, tek tip hata biçimi
-- **`src/features/staff-verification/`** — iki adımlı doğrulama deseni
-- **`src/features/account/`** — geri alınamaz işlem deseni
-- **`src/lib/same-origin.ts`** — `Origin` kapısı
-- **`src/features/legal/`** — rıza kaydı, çerez kataloğu, yasal sayfa deseni
-- **`src/features/scheduled-tasks/`** — günlük iş eklemenin deseni
-- **`src/features/profile/`** — kullanıcıya ait kayıt yönetiminin DESENİ
-- **`src/features/auth/`** — oturum, Google OAuth (PKCE + `state` + `nonce`)
-- **`src/features/identity/`** — KPS sorgusu, ortak şema
-- **`src/features/otp/`** — iki kanallı doğrulama kodu altyapısı
-- **`src/features/catalog/`** — ORTAK arama katmanı, Türkçe `unaccent`
-- **`src/lib/external-fetch.ts`** — dış servis çağrısı (zaman aşımı + deneme +
-  devre kesici + Zod). **Yeni dış servis buradan geçer**
-- **`src/lib/money.ts`** — para TAM SAYI KURUŞ
-- **`src/features/events/`** — **YARIŞ KORUMASI DESENİ**
-- **`src/features/notifications/`** — bildirim yazma ve **tembel senkronizasyon**
-- **`recordAuditLog()`** · **`requireAccess()`** uçlar · **`guardPage()`** sayfalar
-- `messages.ts` — kullanıcıya görünen tüm Türkçe metinler (tek istisna
-  `messages-legal.ts`)
-- Tasarım token'ları (`globals.css`) · `page-shell` · `TextField` · `FormAlert`
-
-## PROJE KİTİ (`proje-kiti` plugin)
-
-> ⛔ **KİTE KURAL YAZMAK BU PROJEYİ GÜNCELLEMİYOR — İKİ AYRI KOPYA VAR.**
-> Bir ders öğrenildiğinde **İKİSİNE DE** yazılır ve `diff` ile kanıtlanır
-> (CLAUDE.md kapı 8).
-
-- **Sürüm 1.9.0** (2026-08-11, kapanış) — iki ders: (1) bir dış dünya durumu
-  değiştiğinde o durumu yazan HER satır güncellenir ve `grep` ile kanıtlanır
-  (`15-oturum-devri`), (2) "belgede öyle yazıyor" ile "ölçtüm" ayrı şeylerdir;
-  "doğrulandı" yalnızca bu oturumda ölçülen için kullanılır (`15-oturum-devri`).
-  ⚠️ Ayrıca **`14-privacy` kite hiç gitmemişti** (kapı 8 kaçağı) — o da senkronlandı.
-  ✅ Kapı 8 kanıtı: `docs/standards` ile kit kopyası arasında **yalnızca
-  `00-stack.md` ve `sablonlar/*` farkı kaldı** (ikisi de bilinen/beklenen)
-- **Sürüm 1.8.0 GitHub'a yayınlandı** (2026-08-11, `8ae8067`) — adım 18a'nın dört
-  dersi: `no-console` istisnasız yasak (`12-operations`), süzgeç değerin
-  biçimine de bakar (`12-operations`), üçüncü taraf SDK varsayılanları
-  denetlenir + replay/oturum izleme kapalı (`14-privacy`), bir "neden" yorumu
-  yazmadan önce iddiayı mutasyonla ölç (`02-coding-standards`).
-  ✅ **Kapı 8 geçildi:** 17/18 standart dosyasının birebir aynı olduğu `diff`
-  ile kanıtlandı. ⛔ Proje sahibinin `/plugin` ekranından güncellemesi gerekiyor
-- **Sürüm 1.7.0** (2026-08-11) — `00-stack.md` istisnası bölüm seviyesine indi
-- **Sürüm 1.6.0** (2026-08-11) — 8. kapı eklendi, `kit-senkron` onarıldı
-- **Sürüm 1.5.0** (2026-08-11) — adım 17c'nin üç dersi
+  ⚠️ Uzun beklemeden sonra `pgrep -x caffeinate` ile hâlâ ayakta mı diye BAK
 
 ## KOMUTLAR
 
 `npm run db:up · db:migrate · db:reset · db:studio`
 `npm run test · test:db · lint · typecheck · format · format:check · build`
 `gh` PATH'te. `vercel` ve `neonctl` için `npx`.
+
+**API belgesini doğrulama:**
+`npm run build && npm run start`, sonra
+`curl -s -o /tmp/docs.json http://localhost:3000/api/docs`, sonra
+`npx --yes @redocly/cli@latest lint /tmp/docs.json`
 
 **Planlı görevi elle tetikleme (local):**
 `npm run build && npm run start`, sonra

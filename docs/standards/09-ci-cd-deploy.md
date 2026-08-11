@@ -63,6 +63,47 @@ klasör yapısı özeti · canlı ve preview bağlantıları.
 Hedef: projeyi ilk kez klonlayan biri 10 dakikada çalıştırabilmeli.
 `npm run setup` komutu: bağımlılık kurar, Docker'ı ayağa kaldırır, migrate eder, seed eder.
 
+## Tedarik zinciri güvenliği (CI'nın kendisi bir saldırı yüzeyidir)
+
+CI iş akışı, deponun **bütün sırlarına** erişen ve depoya yazabilen bir ortamdır.
+Uygulamayı sıkılaştırıp CI'ı açık bırakmak, kapıyı kilitleyip anahtarı kapının
+üstüne bırakmaktır.
+
+### ⛔ Üçüncü taraf action'lar etiketle DEĞİL, tam commit SHA'sıyla sabitlenir
+
+`uses: bir-org/bir-action@v4` yazmak, "o organizasyonun bugün ve **yarın** o
+etikete koyacağı her şeye peşinen güveniyorum" demektir. Etiket **taşınabilir
+bir işaretçidir**: sahibi (veya deposunu ele geçiren kişi) onu başka bir commit'e
+çevirebilir ve senin yapın bir sonraki koşuda farklı kod çalıştırır. Bu teorik
+bir risk değil, yaşanmış bir saldırı sınıfıdır.
+
+GitHub'ın kendi kılavuzu bunu net söylüyor: bir action'ı tam uzunlukta commit
+SHA'sına sabitlemek, onu **değişmez (immutable) bir sürüm** olarak kullanmanın
+tek yoludur; ele geçirilen tek bir action deponun tüm sırlarına ve
+`GITHUB_TOKEN` ile yazma yetkisine erişir
+([GitHub Docs — Secure use reference](https://docs.github.com/en/actions/reference/security/secure-use)).
+
+**Kural:**
+- Üçüncü taraf action'lar **tam uzunlukta commit SHA** ile sabitlenir; yanına
+  okunabilirlik için `# v4.2.1` yorumu yazılır
+- SHA'nın action'ın **kendi deposundan** geldiği doğrulanır (fork'tan değil)
+- Yükseltme, bağımlılık güncellemesi gibi ayrı bir PR'da ve değişiklik notu
+  okunarak yapılır
+- ⚠️ Bu, `actions/*` (GitHub'ın kendi action'ları) için de geçerlidir —
+  GitHub'ın sabitleme zorunluluğu politikası onları da kapsıyor
+- İş akışlarına **en az yetki** verilir: `permissions:` açıkça yazılır,
+  varsayılan geniş jetona güvenilmez
+
+### Sır taraması otomatiktir — "commit etmeyiz" bir mekanizma değildir
+
+`.env` commit etmemek bir **niyettir**; niyeti kural yapan şey onu uygulayan
+otomasyondur. Bu yüzden:
+- Depoda sır taraması (GitHub secret scanning + push protection, ya da CI'da
+  `gitleaks` benzeri bir adım) **açık** olur
+- Bir sır sızdıysa sıra **değişmez**: önce iptal et/yenile, sonra geçmişi temizle.
+  Ters sıra işe yaramaz — geçmiş temizlenene kadar sır çoktan kopyalanmıştır
+- Yapı log'una sır basılmaz; ortam değişkeni `echo`'lanmaz
+
 ## Bağımlılık ve lisans politikası
 - Yeni paket eklerken lisans kontrol edilir; GPL/AGPL paketler onay ister.
 - Dependabot/Renovate ile güvenlik güncellemeleri otomatik PR olarak gelir.

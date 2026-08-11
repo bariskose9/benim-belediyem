@@ -32,8 +32,37 @@ Kullanıcı verisi tutan tablolarda `user_id` + yabancı anahtar kısıtı.
 
 ## Güvenlik
 - Ham SQL yazılacaksa parametreli. String birleştirme ile sorgu kurulmaz.
-- Silme varsayılan olarak soft delete (`deleted_at`); kalıcı silme açık talep ister.
 - Kişisel veri gerekmedikçe saklanmaz; log'a kişisel veri yazılmaz.
+
+### Soft delete VARSAYILAN DEĞİLDİR — tablo tablo karar verilir
+
+⛔ **"Her şeyi soft delete yap" yaygın ama yanlış bir varsayılandır.** İki ayrı
+sorun üretir:
+
+1. **Kişisel veride hukuka aykırıdır.** KVKK/GDPR silme hakkı, satırın yerinde
+   durup yalnızca gizlenmesini değil, verinin **gerçekten yok edilmesini veya
+   geri döndürülemez biçimde anonimleştirilmesini** ister. `deleted_at` dolduran
+   bir "silme", silme değil **saklamaya devam etmedir**
+   (`14-privacy-and-compliance.md`).
+2. **Sessiz veri sızıntısı üretir.** Filtreyi bir sorguda unutmak yeterlidir:
+   hata vermez, çökme olmaz — silinmiş kayıt bir listede, bir sayımda veya bir
+   dışa aktarmada geri belirir.
+
+**Doğrusu — üçe ayır:**
+
+| Ne siliniyor | Davranış |
+|---|---|
+| **Kişisel veri** (hesap, adres, iletişim bilgisi) | Gerçekten silinir ya da **geri döndürülemez** anonimleştirilir |
+| **Ticari/mali kayıt** (sipariş, ödeme, fatura) | Silinmez — yasal saklama süresi boyunca durur, kişiye bağı koparılır |
+| **Kullanıcının geri alabilmesi beklenen kayıt** | Soft delete meşrudur; süresi ve otomatik temizliği **baştan tanımlanır** |
+
+**Soft delete kullanılan her tablo için zorunlu üç şey:**
+- Tablo, gerekçesiyle birlikte `data-model.md` içinde **sayılı olarak** listelenir
+  ("bu 8 tablo") — belirsiz bir "gerektiğinde" listesi denetlenemez
+- Filtre **tek bir noktadan** uygulanır (repository katmanı / Prisma extension).
+  Her sorguya elle `deleted_at IS NULL` yazmak, unutulacak bir şeyi tekrar etmektir
+- `deleted_at` üzerinde index bulunur ve kayıtların **ne zaman kalıcı silineceği**
+  saklama politikasında yazılıdır. Süresiz duran soft delete, gizlenmiş bir sızıntıdır
 
 ## Metin arama
 - **Veritabanının "büyük/küçük harf duyarsız" araması kullanıcının dilini bilmez.**

@@ -165,6 +165,25 @@ const serverEnvBaseSchema = z.object({
   // adım 16'da zorunlu olur (planlı görevler)
   CRON_SECRET: optionalSecret,
 
+  /**
+   * API BELGESİNİ PRODUCTION'DA YAYINLAMA BAYRAĞI (adım 18b · ADR-019).
+   *
+   * ⛔ VARSAYILAN KAPALI. Bu API kendi arayüzümüzün arka ucu (BFF), üçüncü
+   * taraflara sunulan bir ürün değil — belgesi kimseye hizmet etmezken tüm
+   * uçları, doğrulama kurallarını ve hata kodlarını taranabilir biçimde
+   * sunar (03-api-guidelines.md).
+   *
+   * Local ve preview'da bayrak OKUNMAZ, belge her hâlükârda açıktır.
+   *
+   * ⚠️ `z.coerce.boolean()` KULLANILMADI: o, `"false"` dizesini de `true`
+   * sayardı ("boş olmayan metin"). Ortam değişkenleri her zaman metindir,
+   * yani bu hata sessizce belgeyi canlıda açardı.
+   */
+  API_DOCS_PUBLIC: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+
   // adım 4b'de zorunlu olur (doğrulama kodu kanalları)
   OTP_EMAIL_CHANNEL: z.enum(["mock", "email"]).default("mock"),
   OTP_PHONE_CHANNEL: z.enum(["mock", "email_sim", "sms"]).default("mock"),

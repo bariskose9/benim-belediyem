@@ -81,6 +81,18 @@ export const messages = {
     databaseUnavailable: "Veritabanına şu an ulaşılamıyor. Lütfen biraz sonra tekrar deneyin.",
   },
 
+  /** API belgesi ucu (adım 18b). */
+  apiDocs: {
+    /**
+     * Belge production'da kapalıyken dönen metin.
+     *
+     * ⛔ "Belge kapalı" DEMİYOR ve bu bilinçli: mesajın kendisi ucun var
+     * olduğunu doğrulardı. Kapalıyken uç hiç yokmuş gibi davranmalı — bu
+     * yüzden hem durum kodu (404) hem metin, olmayan bir adresle aynı.
+     */
+    notPublished: "Aradığınız sayfa bulunamadı.",
+  },
+
   identity: {
     /**
      * TEK TİP MESAJ — hem "böyle bir kayıt yok" hem "doğum yılı tutmadı" hem de

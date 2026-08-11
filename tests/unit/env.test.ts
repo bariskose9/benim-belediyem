@@ -100,6 +100,45 @@ const validServerEnv = {
   NATIONAL_ID_ENCRYPTION_KEY: "bG9jYWwtZGV2LW9ubHkta2V5LTMyLWJ5dGVzLXh4eHg=",
 };
 
+/**
+ * API belgesinin yayın bayrağı (adım 18b · ADR-019).
+ *
+ * ⭐ NEDEN ŞEMA SEVİYESİNDE TEST EDİLİYOR: bayrağın yanlış OKUNMASI, kapının
+ * yanlış tarafa düşmesiyle aynı sonucu verir — tüm uçların ve doğrulama
+ * kurallarının haritası canlıda herkese açılır.
+ */
+describe("API_DOCS_PUBLIC bayrağı", () => {
+  const parse = (value?: string) =>
+    parseEnv(
+      serverEnvSchema,
+      { ...validServerEnv, ...(value === undefined ? {} : { API_DOCS_PUBLIC: value }) },
+      "test",
+    );
+
+  it("tanımlı değilse varsayılan KAPALI", () => {
+    expect(parse().API_DOCS_PUBLIC).toBe(false);
+  });
+
+  it('"true" değerini açık okur', () => {
+    expect(parse("true").API_DOCS_PUBLIC).toBe(true);
+  });
+
+  it('⭐ "false" DİZESİNİ kapalı okur — gerileme kapısı', () => {
+    /**
+     * `z.coerce.boolean()` kullanılsaydı `"false"` dizesi `true` sayılırdı
+     * ("boş olmayan metin"). Ortam değişkenleri HER ZAMAN metin olduğu için bu
+     * teorik değil çok yakın bir hata: belge canlıda sessizce açılırdı.
+     */
+    expect(parse("false").API_DOCS_PUBLIC).toBe(false);
+  });
+
+  it("tanınmayan bir değeri REDDEDER", () => {
+    // "1", "yes", "evet" sessizce yorumlanmaz — yanlış yapılandırılmış bir
+    // dağıtım açılışta durur, canlıda sürpriz yapmaz.
+    expect(() => parse("1")).toThrowError(/API_DOCS_PUBLIC/);
+  });
+});
+
 describe("sunucu ortam değişkenleri", () => {
   it("henüz kullanılmayan anahtarlar olmadan da geçerlidir", () => {
     // Veritabanı dışındaki gizli anahtarlar sonraki adımlarda zorunlu olur;
