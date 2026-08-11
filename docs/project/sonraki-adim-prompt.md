@@ -52,10 +52,17 @@ Dört ortam değişkenini Vercel **kendisi** enjekte eder:
 
 ✅ **Ajan bunu İKİ YOLDAN ÖLÇEBİLİR** — ezberden "yapıldı" deme:
 1. `npx vercel env ls production --scope barisss` → dört değişken görünmeli
-2. ⭐ **EN HIZLI KANIT:** `curl -o /dev/null -w '%{http_code}'
-   https://benim-belediyem.vercel.app/sentry-tunnel` →
-   **bugün 404** (tünel yalnızca DSN varken kuruluyor). Entegrasyon devreye
-   girip yeniden dağıtım koştuğunda **404 dönmeyi bırakmalı.**
+2. ⭐ **EN HIZLI KANIT** — ⛔ **`?o=1&p=2` ŞART, atlanırsa kontrol yanlış olur:**
+   ```
+   curl -o /dev/null -w '%{http_code}\n' \
+     'https://benim-belediyem.vercel.app/sentry-tunnel?o=1&p=2'
+   ```
+   **404 → Sentry kurulu değil** · **404 dışında → tünel kurulu, devrede.**
+
+   ⚠️ **ÇIPLAK `/sentry-tunnel` KULLANMA.** İlk yazılan sürüm öyleydi ve
+   YANLIŞTI (2026-08-11'de ölçüldü): tünel bir route değil `rewrite` ve
+   `routes-manifest.json`'daki iki kaydın İKİSİ de `o` ve `p` parametrelerini
+   şart koşuyor. Parametresiz istek Sentry KURULUYKEN DE 404 döner.
 
 Ücretsiz katman: 5.000 hata/ay · 1 kullanıcı · 30 gün saklama.
 
