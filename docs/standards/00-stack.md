@@ -72,6 +72,13 @@ verilecek. Şu an bir bağımlılık kurulu değil.
 - MongoDB — ilişkisel veri modeli kullanıyoruz
 - jQuery, Bootstrap, Material UI — Tailwind + shadcn ile çakışır
 - `moment.js` — yerine `date-fns`
+
+<!-- ⛔ SENKRON SINIRI — bu satırın ÜSTÜ kitle ortaktır ve kit-senkron tarafından
+     eşitlenir. Projeye özel "kullanmıyoruz" maddeleri AŞAĞIYA yazılır.
+     Gerekçesiz madde yazılmaz; sonraki oturum gerekçesiz yasağı anlamaz ve
+     delmeye çalışır. Sınırı SİLME — silinirse genel yasaklar da senkrondan
+     düşer ve kite yazılan yeni bir yasak bu projeye hiç ulaşmaz. -->
+
 - Ödeme sağlayıcısı (Stripe/iyzico) — bu projede **fake ödeme** kullanılır
 
 ## Sürüm politikası

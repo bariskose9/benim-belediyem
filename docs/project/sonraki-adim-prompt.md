@@ -612,6 +612,12 @@ Dal: `feature/uretime-hazirlik` (öneri)
 > Adım 17c'de bu atlandı ve proje sahibi fark etti: kurallar yalnızca kite
 > yazılmıştı, yani `/clear` sonrası yeni oturum onları görmeyecekti.
 
+- **Sürüm 1.7.0 GitHub'a yayınlandı** (2026-08-11) — `00-stack.md` istisnası
+  **dosya değil BÖLÜM seviyesine** indirildi. Eski kural ("bu dosya hiç
+  senkronlanmaz") ders kaybettiriyordu: yedi bölümden yalnızca biri gerçekten
+  projeye özeldi. Karışık bölümler için `<!-- ⛔ SENKRON SINIRI -->`
+  işaretleyicisi geldi — üstü ortak, altı projeye ait. ⛔ **Sınır silinirse o
+  bölümün tamamı senkron dışı kalır**; onarılır, yok sayılmaz.
 - **Sürüm 1.6.0 GitHub'a yayınlandı** (2026-08-11) — "iki kopya" sorununun
   KALICI çözümü: `CLAUDE.md`'ye **8. kapı** eklendi (öğrenilen kuralı iki
   kopyaya da yaz + `diff` ile kanıtla), `15-oturum-devri.md`'ye gerekçesi ve
