@@ -38,39 +38,25 @@ Roadmap adım **0 → 18a bitti**.
 > | Cron ilk koşusu | ⏳ 12 Ağustos 00:00 UTC penceresi bekleniyor | aşağıya bak |
 > | Kit sürüm 1.8.0 | ✅ push edildi (`8ae8067`) | proje sahibi `/plugin`'den GÜNCELLESİN |
 
-## 🔧 PANEL İŞİ — İKİ TANE, İKİSİ DE ZORUNLU
+## 🔧 PANEL İŞİ — BİRİ BİTTİ, BİRİ DURUYOR
 
-### 1. Sentry (YENİ — adım 18a'nın tek dış dünya işi)
+### 1. ✅ Sentry — **YAPILDI ve CANLIDA DOĞRULANDI** (2026-08-11)
 
-**Vercel paneli → benim-belediyem → Settings → Integrations → Sentry → Add**
+Kaynak `sentry-amber-lamp` · plan **Developer** (ücretsiz) · **yalnızca
+production**'a bağlı · veri bölgesi **EU (Frankfurt)**.
 
-Dört ortam değişkenini Vercel **kendisi** enjekte eder:
-`NEXT_PUBLIC_SENTRY_DSN` · `SENTRY_ORG` · `SENTRY_PROJECT` · `SENTRY_AUTH_TOKEN`
+Uçtan uca ölçüldü: canlı sayfada bilerek fırlatılan hata
+`POST /sentry-tunnel` ile **200** aldı, Sentry olay kimliği döndü, giden
+gövdede kart/kimlik/e-posta **sıfır kez** geçti (üçü de `[gizlendi]`) ve
+yığın izi bozulmadı. Ayrıntı: `altyapi-durumu.md`.
 
-⛔ **SONRA YENİDEN DAĞITIM ŞART.** `NEXT_PUBLIC_*` derleme anında gömülüyor:
-`npx vercel redeploy <dagitim-url> --scope barisss`
+### 2. ⛔ `LEGAL_CONTROLLER_NAME` + `LEGAL_CONTACT_EMAIL` — HÂLÂ GİRİLMEDİ
 
-✅ **Ajan bunu İKİ YOLDAN ÖLÇEBİLİR** — ezberden "yapıldı" deme:
-1. `npx vercel env ls production --scope barisss` → dört değişken görünmeli
-2. ⭐ **EN HIZLI KANIT** — ⛔ **`?o=1&p=2` ŞART, atlanırsa kontrol yanlış olur:**
-   ```
-   curl -o /dev/null -w '%{http_code}\n' \
-     'https://benim-belediyem.vercel.app/sentry-tunnel?o=1&p=2'
-   ```
-   **404 → Sentry kurulu değil** · **404 dışında → tünel kurulu, devrede.**
+Adım 17'den devrediyor. **2026-08-11'de panelden ölçüldü: production'da 23
+değişken var, bu ikisi YOK.** Hesap silme ekranı KVKK m.12/1-c bildirimi
+yapıyor ve bildirimin muhatabı belirsiz kalıyor.
 
-   ⚠️ **ÇIPLAK `/sentry-tunnel` KULLANMA.** İlk yazılan sürüm öyleydi ve
-   YANLIŞTI (2026-08-11'de ölçüldü): tünel bir route değil `rewrite` ve
-   `routes-manifest.json`'daki iki kaydın İKİSİ de `o` ve `p` parametrelerini
-   şart koşuyor. Parametresiz istek Sentry KURULUYKEN DE 404 döner.
-
-Ücretsiz katman: 5.000 hata/ay · 1 kullanıcı · 30 gün saklama.
-
-### 2. `LEGAL_CONTROLLER_NAME` + `LEGAL_CONTACT_EMAIL` (adım 17'den DEVREDİYOR)
-
-**2026-08-11'de panelden ÖLÇÜLDÜ: production'da 16 değişken var, bu ikisi YOK.**
-Gerekçe `altyapi-durumu.md` içinde: hesap silme ekranı KVKK m.12/1-c bildirimi
-yapıyor ve bildirimin muhatabı belirsiz.
+⛔ **Bu, adım 18b'ye geçmeden önce sorulacak İLK ŞEY.**
 
 ## ⏰ CRON — SONRAKİ PENCERE 12 AĞUSTOS 00:00 UTC
 

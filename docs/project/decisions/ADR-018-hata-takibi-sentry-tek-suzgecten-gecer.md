@@ -44,7 +44,16 @@ değişkenini (`NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`,
 `SENTRY_AUTH_TOKEN`) projeye kendisi enjekte ediyor, yani proje sahibinin elle
 değer taşıması gerekmiyor.
 
-**Bedeli kabul edildi:** üçüncü bir işleyici (Sentry, ABD merkezli) ve ücretsiz
+**Veri bölgesi: AVRUPA BİRLİĞİ (Frankfurt).** Kurulumda sorulan "Data Storage
+Location" **EU** seçildi ve bu geri alınamaz (Sentry belgesi: değiştirmenin tek
+yolu yeni bir organizasyon açmak). Gerekçe: veritabanımız zaten Frankfurt'ta
+(`eu-central-1`), yani hata verisi ve uygulama verisi aynı yerde kalıyor;
+ayrıca yurt dışına aktarım KVKK açısından ABD'ye göre daha savunulabilir.
+⚠️ Hangi bölge seçilirse seçilsin **hesap bilgileri (e-posta, bildirim ayarı,
+2FA) her hâlükârda ABD'de** tutuluyor — bu Sentry'nin belgesinde yazılı.
+Canlıdan ölçüldü: olaylar `ingest.de.sentry.io` adresine gidiyor.
+
+**Bedeli kabul edildi:** üçüncü bir işleyici (Sentry) ve ücretsiz
 katmanın sınırları (5.000 hata/ay · 1 kullanıcı · 30 gün saklama).
 
 ## Karar 2 — Log'a ve Sentry'ye giden her şey AYNI süzgeçten geçer
@@ -149,6 +158,27 @@ olmasaydı tam da izlemek istediğimiz şeyler görünmezdi.
 Sink `setLogSink()` ile kaydediliyor, logger Sentry'yi doğrudan içe aktarmıyor:
 log katmanı Sentry hiç kurulmamışken de çalışmalı ve testler Sentry kurulumu
 gerektirmemeli.
+
+## Canlıda nasıl doğrulanır (ve nasıl doğrulanmaz)
+
+⛔ **TEK KOMUTLUK BİR `curl` KONTROLÜ YOKTUR.** Bu oturumda üç kez denendi ve
+üçü de yanlış çıktı; sonuncusu gerçek organizasyon kimlikleriyle bile 404
+döndü, çünkü Sentry'nin ingest ucu o yolda **yalnızca POST** kabul ediyor ve
+Vercel'in vekil sunucusu bunu 404 olarak yansıtıyor.
+
+Ayrıca tünel kuralının **DSN ile hiçbir ilgisi yok** — SDK kaynağından okundu
+(`getFinalConfigObjectUtils.js`): tek koşul `tunnelRoute` ayarının dolu olması.
+Yani "tünel var mı" sorusu "Sentry çalışıyor mu" sorusunu cevaplamıyor.
+
+**GEÇERLİ TEK YÖNTEM — uçtan uca tarayıcı testi:**
+
+1. Canlı sayfayı aç, konsoldan bilerek bir hata fırlat
+2. Ağ sekmesinde `POST /sentry-tunnel?o=…&p=…` isteği çıkmalı ve **200** dönmeli
+3. Yanıt gövdesinde bir olay kimliği olmalı (`{"id":"…"}`) — olay Sentry'ye yazıldı demektir
+4. ⭐ **İstek gövdesini OKU:** kimlik numarası, kart numarası ve e-posta
+   `[gizlendi]` olmalı; yığın izi ise BOZULMAMIŞ olmalı
+
+2026-08-11'de bu dört adım canlıda uygulandı ve geçti.
 
 ## Sonuçlar
 

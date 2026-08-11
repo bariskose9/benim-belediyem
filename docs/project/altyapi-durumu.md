@@ -18,28 +18,52 @@
 > Tarayıcıda konsol hatası ve başarısız istek YOK.
 > `feature/gozlemlenebilirlik` dalı merge edilip **silindi**.
 >
-> ⚠️ **SENTRY DEVREDE Mİ — TEK KOMUTLUK KONTROL (adres parametresi ŞART):**
+> ## ✅ SENTRY CANLIDA DOĞRULANDI (2026-08-11, commit `80847c6`)
 >
-> ```
-> curl -o /dev/null -w '%{http_code}\n' \
->   'https://benim-belediyem.vercel.app/sentry-tunnel?o=1&p=2'
-> ```
+> Uçtan uca ölçüldü, varsayılmadı. Canlı sayfada bilerek bir hata fırlatıldı:
 >
-> | Sonuç | Anlamı |
+> | Ölçüm | Sonuç |
 > |---|---|
-> | **404** | Sentry KURULU DEĞİL (bugünkü durum) |
-> | 404 dışında bir kod | Tünel kurulu, Sentry devrede |
+> | `POST /sentry-tunnel?o=…&p=…&r=de` | **200** |
+> | Yanıt gövdesi | `{"id":"1ebfd9d9…"}` → olay Sentry'ye YAZILDI |
+> | Hedef | `ingest.**de**.sentry.io` → **Frankfurt / EU** |
+> | Kart numarası · kimlik numarası · e-posta | gövdede **0 kez** — üçü de `[gizlendi]` |
+> | Çerez · oturum jetonu · `Authorization` · yığın değişkenleri | gövdede **YOK** |
+> | Yığın izi | **korunmuş** (çerçeveler yerinde) |
 >
-> ⛔ **`?o=1&p=2` KISMI ATLANAMAZ.** İlk yazılan sürüm çıplak `/sentry-tunnel`
-> diyordu ve **YANLIŞTI** — 2026-08-11'de ölçüldü: tünel bir route değil bir
-> `rewrite` ve `routes-manifest.json`'daki iki kaydın İKİSİ de `o` ve `p`
-> parametrelerini şart koşuyor. Parametresiz istek hiçbir kurala eşleşmediği
-> için Sentry KURULUYKEN DE 404 döner, yani kontrol hiçbir şey ayırt etmez.
+> **Veri bölgesi EU (Frankfurt) seçildi ve GERİ ALINAMAZ.** Veritabanı zaten
+> `eu-central-1`'de, yani uygulama verisi ve hata verisi aynı yerde.
+> ⚠️ Hesap bilgileri (e-posta, bildirim, 2FA) bölgeden bağımsız olarak ABD'de.
 >
-> ⛔ **KOD CANLIDA AMA HATA TAKİBİ HÂLÂ SESSİZ.** DSN girilmediği için Sentry
-> devre dışı. "Adım 18a canlıda" ile "canlıda hata görünürlüğü var" AYNI ŞEY
-> DEĞİL; ikincisi aşağıdaki panel işine bağlı. Bugün kazanılan tek şey sunucu
-> log'larının JSON olması ve kişisel verinin süzülmesi.
+> ### ⛔ "SENTRY ÇALIŞIYOR MU" SORUSU `curl` İLE CEVAPLANAMAZ
+>
+> Bu oturumda üç ayrı `curl` kontrolü yazıldı ve **üçü de yanlış çıktı.**
+> Sebepleri kayda değer:
+>
+> 1. Çıplak `/sentry-tunnel` → adres parametresi olmadan hiçbir kurala
+>    eşleşmiyor, her durumda 404
+> 2. `?o=1&p=2` → sahte organizasyon; Vercel vekili hedefe ulaşamayıp 404
+> 3. **Gerçek kimliklerle bile 404** → Sentry'nin ingest ucu o yolda yalnızca
+>    **POST** kabul ediyor, GET'e 404 dönüyor
+>
+> Üstelik tünel kuralının **DSN ile ilgisi yok**: SDK kaynağından okundu
+> (`getFinalConfigObjectUtils.js`), tek koşul `tunnelRoute` ayarının dolu
+> olması. Yani tünelin varlığı Sentry'nin çalıştığını göstermez.
+>
+> **GEÇERLİ TEK YÖNTEM:** tarayıcıda sayfayı aç → konsoldan bilerek hata
+> fırlat → ağ sekmesinde `POST /sentry-tunnel` **200** dönüyor mu ve yanıtta
+> olay kimliği var mı diye bak → **istek gövdesini oku**, kişisel veri
+> `[gizlendi]` mi.
+>
+> ### ⛔ `vercel redeploy` YENİ ORTAM DEĞİŞKENİNİ YÜRÜRLÜĞE SOKMUYOR
+>
+> Ölçüldü: değişkenler girildikten sonra `redeploy` çalıştırıldı, Sentry
+> devreye girmedi **ve canlı commit geriye gitti** (`f722442` → `6712d32`).
+> `redeploy` var olan bir dağıtımı yeniden kuruyor ve o dağıtımın commit'ine
+> bağlı kalıyor. **Doğru yol: `main`'e yeni bir commit göndermek.**
+>
+> ✅ **HATA TAKİBİ ARTIK ÇALIŞIYOR.** Canlıdaki bir istisna Sentry'ye düşüyor
+> ve kişisel veri taşımıyor. Adım 18a'nın asıl faydası devrede.
 
 > ## 🔧 ADIM 18a — YENİ BİR DIŞ HESAP GEREKİYOR (Sentry) · İKİ PANEL İŞİ
 >
