@@ -50,9 +50,64 @@ koda dağıtılmaz. Değiştirilecekse ADR yazılır.
 - [ ] Kişisel veri log'a yazılıyor mu?
 
 ## Secret yönetimi
-- `.env` **asla** commit edilmez (`.gitignore`'da). `.env.example` anahtar adlarıyla commit edilir.
-- Anahtar koda gömülmez. İstemci tarafına sadece `NEXT_PUBLIC_` ile açıkça işaretlenenler geçer.
-- Anahtar sızarsa: önce iptal/yenile, sonra git geçmişini temizle.
+
+### Sırlar depoda DEĞİL — o hâlde nerede?
+
+Bu ayrım her yeni geliştiricinin sorduğu ilk sorudur ve cevabı yazılı olmazsa
+herkes kendi yolunu uydurur:
+
+| Ne | Nerede yaşar | Depoda mı |
+|---|---|---|
+| **Kod, şema, migration, doküman** | Depo | ✅ evet |
+| **Anahtarın ADI ve ne işe yaradığı** | `.env.example` | ✅ evet |
+| **Anahtarın DEĞERİ (local)** | Geliştiricinin kendi `.env` dosyası | ⛔ hayır |
+| **Anahtarın DEĞERİ (preview/production)** | Barındırma sağlayıcısının ortam değişkeni ekranı | ⛔ hayır |
+
+**Kural:** `.env` **asla** commit edilmez (`.gitignore`'da). `.env.example`
+**her zaman güncel** tutulur ve şunları içerir: değişkenin adı · bir cümlelik
+"ne işe yarar" · zorunlu mu · yerel ortamda hangi değerin kullanılacağı.
+
+⭐ **`.env.example` bir liste değil, KURULUM TALİMATIDIR.** Depoyu ilk kez
+klonlayan biri (veya sen, altı ay sonra başka bir bilgisayarda) yalnızca ona
+bakarak çalışan bir ortam kurabilmeli:
+
+- **Uydurulabilir değerler** (local veritabanı adresi, test tuzu, sahte
+  sağlayıcı anahtarı) örnek değeriyle **birlikte** yazılır — kimse tahmin
+  etmek zorunda kalmaz
+- **Uydurulamayan değerler** (gerçek sağlayıcı anahtarı) boş bırakılır ve
+  **nereden alınacağı** yazılır: "X panelinden üret"
+- Bir değişken **eksikken uygulama açılıyorsa** bu bilinçli bir karardır ve
+  gerekçesi yazılır; açılmıyorsa hata mesajı **hangi değişkenin** eksik
+  olduğunu ve ne yapılacağını söyler
+
+⛔ **"Anahtarı bana özelden gönderirim" bir sistem değildir.** Ekip
+büyüdüğünde paylaşılan sırlar bir **parola yöneticisinde** (1Password, Bitwarden,
+Vault) veya sağlayıcının kendi sır deposunda tutulur; sohbet uygulamasında,
+e-postada veya ekran görüntüsünde asla.
+
+### Kural yetmez, MEKANİZMA gerekir
+
+⛔ **".env commit etmeyiz" bir NİYETTİR.** Niyeti kural yapan şey onu uygulayan
+otomasyondur — insanlar yorulur, acele eder ve `git add -A` yazar.
+
+Zorunlu olanlar:
+- **Sır taraması** ve **push koruması** depoda **açık** olur. Push koruması,
+  anahtarı depoya girmeden önce durdurur; tarama, girmiş olanı bulur
+- **Bağımlılık güvenlik uyarıları** ve otomatik düzeltme PR'ları açık olur
+- Bunlar **her yeni depoda kurulum adımıdır**, sonradan hatırlanacak bir iş değil
+
+### Sır sızarsa — SIRA DEĞİŞMEZ
+
+1. **Önce iptal et / yenile.** Sızan anahtar artık geçersiz olmalı
+2. **Sonra** git geçmişini temizle
+
+⛔ Ters sıra işe yaramaz: geçmiş temizlenene kadar anahtar çoktan kopyalanmıştır.
+Depo public ise dakikalar, private ise de erişimi olan herkes kadar risk vardır.
+
+### Diğer
+- Anahtar koda gömülmez. İstemci tarafına sadece `NEXT_PUBLIC_` ile açıkça
+  işaretlenenler geçer — ve o değerler **gizli değildir**, tarayıcıda görünür.
+- Her ortamın kendi anahtarı vardır. Canlı anahtar local'de kullanılmaz.
 
 ## Ağ ve başlıklar
 - Sadece HTTPS. HSTS açık.
