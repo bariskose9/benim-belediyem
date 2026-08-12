@@ -92,6 +92,31 @@ yeşil kalan testtir.
   varlığını değil. Bir kez ölçülmüş örnek: nonce'lu bir politika 45 görseli ve
   14 KB'lık bir stil sayfasını öldürdü, konsol boştu.
 
+## ⛔ ÖNCE ARACIN O İŞİ ÖLÇEBİLDİĞİNİ DOĞRULA
+
+Bir ölçüm "hata var" diyorsa iki ihtimal vardır: **ürün bozuktur** ya da
+**araç o işi ölçemiyordur.** İkincisi akla gelmediğinde saatler, var olmayan
+bir hatanın peşinde geçer.
+
+- ⛔ **BOT KORUMASI OTOMATİK TARAYICIYLA TEST EDİLEMEZ.** İşi zaten otomasyonu
+  ayırt etmek olan bir bileşen (Turnstile, reCAPTCHA, cihaz parmak izi,
+  anti-fraud) `navigator.webdriver === true` gördüğünde sessizce hiçbir şey
+  yapmaz. Ölçülmüş örnek: sıkı CSP'nin bulmacayı bozduğu sanıldı; dört hipotez
+  (alan adı yetkisi, nonce, `unsafe-eval`, CSP'nin tamamen kaldırılması)
+  elendikten sonra sebep aracın kendisi çıktı. **Bu bileşenler gerçek bir
+  tarayıcıda, gerçek bir insan tarafından doğrulanır.**
+- ⚠️ **AYIRT EDİCİ İŞARET:** aracın bazı yolları çalışıp bazıları sessizce
+  ölüyorsa şüphelen. Yukarıdaki örnekte sahte jeton dönen test anahtarları
+  çalışıyor, gerçek doğrulama çalıştıran her anahtar ölüyordu — hata callback'i
+  bile tetiklenmiyordu. Ürün hatası genelde **hata üretir**; araç engeli
+  genelde **sessizdir**.
+- ⛔ **İNSANIN GÖZLEMİNİ KENDİ ARACININ ÇIKTISIYLA ÇÜRÜTME.** "Ben görüyorum"
+  diyen birine "muhtemelen başka bir şey gördün" demeden önce, aracının o şeyi
+  görebildiğini kanıtla. Aynı örnekte proje sahibi haklıydı, ölçüm yanlıştı.
+- **Aynı sınıftan diğer tuzaklar:** ödeme sağlayıcılarının 3D Secure ekranları,
+  cihaz izni isteyen API'ler (kamera, bildirim), reklam engelleyiciyle bozulan
+  akışlar ve e-posta teslimi. Bunlar CI'da yeşil görünüp gerçekte kırık olabilir.
+
 ## Mobil doğrulama — üç ayrı şey, karıştırılmaz
 
 | Ne | Nasıl test edilir | Hangi aşamada |
