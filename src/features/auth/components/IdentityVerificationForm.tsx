@@ -48,13 +48,25 @@ export function IdentityVerificationForm({
   const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  /*
+   * ⛔ BULMACA ÖLDÜĞÜNDE GÖNDERİM KİLİTLENİR — sadece hata YAZMAK yetmez.
+   * Bu bayrak olmadan ekranda "servise ulaşılamıyor" yazarken düğme
+   * tıklanabilir kalıyordu: kullanıcı basıyor, jeton boş gidiyor, sunucu
+   * reddediyor ve ikinci bir hata görüyordu (teknik borç #115).
+   * Bulmaca kendini toparlar da jeton gelirse kilit AÇILIR.
+   */
+  const [botCheckUnavailable, setBotCheckUnavailable] = useState(false);
   const [success, setSuccess] = useState<SuccessState | null>(null);
 
-  const handleToken = useCallback((token: string) => setTurnstileToken(token), []);
-  const handleUnavailable = useCallback(
-    () => setError(messages.auth.register.errors.botCheckUnavailable),
-    [],
-  );
+  const handleToken = useCallback((token: string) => {
+    setTurnstileToken(token);
+    // Jeton geldiyse bulmaca yeniden ayaktadır; kilidi açık tutmanın anlamı yok.
+    if (token) setBotCheckUnavailable(false);
+  }, []);
+  const handleUnavailable = useCallback(() => {
+    setBotCheckUnavailable(true);
+    setError(messages.auth.register.errors.botCheckUnavailable);
+  }, []);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -154,7 +166,11 @@ export function IdentityVerificationForm({
         onUnavailable={handleUnavailable}
       />
 
-      <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+      <Button
+        type="submit"
+        disabled={isSubmitting || botCheckUnavailable}
+        className="w-full sm:w-auto"
+      >
         {isSubmitting ? copy.submitting : copy.submit}
       </Button>
     </form>
