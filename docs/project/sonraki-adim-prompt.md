@@ -103,7 +103,17 @@ değil, **ölçüm aracındaydı**.
 ⛔ **Ajan ayrıca proje sahibinin "kutu görünüyor" gözlemini kendi ölçümüne
 dayanarak çürütmeye çalıştı. Gözlem doğruydu.** Kural artık
 `06-testing.md` → "Önce aracın o işi ölçebildiğini doğrula" bölümünde ve
-kite de yazıldı (sürüm 1.14.0).
+kite de yazıldı (1.14.0).
+
+⭐ **İKİNCİ DERS — BORÇ #115'TEN (kit 1.15.0).** `02-coding-standards.md` zaten
+"bir 'neden' yazmadan önce iddiayı ölç" diyordu, ama o kural bunu yakalayamazdı:
+`TurnstileWidget`'ın `onUnavailable` prop yorumu **çağıranın** yapacağı bir işi
+("form gönderimi kilitlensin diye") anlatıyordu ve **beş çağıranın hiçbiri**
+yapmıyordu. Kendi dosyanda mutasyon edilecek bir şey olmadığı için testle de
+yakalanmıyordu. Yeni kural: böyle bir yorum yazarken çağıranları `grep` ile bul,
+her birinde işin yapıldığını gör, testle kilitle.
+⛔ **Bunu kod okuyarak değil, proje sahibinin gönderdiği EKRAN GÖRÜNTÜSÜ
+buldurdu** — hata metni ile aktif düğme aynı karedeydi.
 
 ⚠️ **Ayırt edici işaret:** ürün hatası genelde HATA ÜRETİR, araç engeli genelde
 SESSİZDİR. Burada sahte jeton dönen test anahtarları çalışıyor, gerçek
@@ -187,14 +197,14 @@ yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı (`/tmp`'de `node_modules` çözümlenmiyor), **yalnızca
 okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — sürüm 1.14.0 yayınlandı, kurulu sürüm 1.11.0
+## 📦 KİT — sürüm 1.15.0 yayınlandı, kurulu sürüm 1.11.0
 
 ✅ **KAPI 8 GEÇİLDİ.** Adım 18d'nin iki dersi hem projeye hem kite yazıldı:
 `06-testing.md` ("konsol temiz bir kanıt değildir") ve `11-agent-workflow.md`
 ("devralınan kaydın ÖNERDİĞİ ÇÖZÜM de bir iddiadır").
 ⭐ **diff KANITI: 18 standart dosyasından 17'si birebir AYNI**; tek fark
 `00-stack.md` ve o bilinen/beklenen (aşağıdaki açık soru).
-Kit commit'leri: `79292c9` (1.13.0) ve `f17d6b8` (**1.14.0** — "önce aracın ölçebildiğini kanıtla").
+Kit commit'leri: `79292c9` (1.13.0), `f17d6b8` (1.14.0 — "önce aracın ölçebildiğini kanıtla") ve `f7c8053` (**1.15.0** — "başkasına devrettiğin sorumluluğun yapıldığını doğrula").
 
 ⚠️ **Bu adımda kit deposunda bir engel çıktı ve çözüldü** — not olarak dursun:
 yerel klon uzaktan 4 commit gerideydi ve içinde commit edilmemiş 20 satırlık
