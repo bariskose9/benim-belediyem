@@ -42,6 +42,9 @@ Roadmap adım **0 → 18d bitti**. Roadmap'te yazılı olarak **tek adım kaldı
   hepsinde nonce'lu CSP var, `script-src`'de `unsafe-inline` YOK.
   `vercel.live` production'a sızmadı (0). Yine de körü körüne güvenme:
   `git log --oneline -3` ve `curl -s .../api/health` ile teyit et
+- ✅ **BORÇ #115 ÖDENDİ ve CANLIDA** (PR #66 → `main` = `d281935`, `/api/health`
+  ile doğrulandı): bot doğrulaması ulaşılamazken gönder düğmesi artık
+  kilitleniyor. Beş form, 7 bileşen testi, mutasyonla kanıtlandı
 - ✅ **BORÇ #113 KAPANDI (2026-08-12): sorun yokmuş.** Proje sahibi canlıda
   `/kayit` sayfasına gerçek tarayıcıyla baktı — bulmaca kutusu **"Başarılı"**
   diyor. Sıkı CSP Turnstile'ı bozmuyor
@@ -147,53 +150,51 @@ kullanıcının telefonundaki eski sürüm güncellenemez:
 - **#114** — Turnstile önizleme ortamında çalışmıyor (yukarıdaki `110200`).
   ⚠️ **İSTEĞE BAĞLI panel işi**, zorunlu değil — production etkilenmiyor
 
-## ❓ PROJE SAHİBİNE SORULACAK — TEK CÜMLEYLE
+## ⛔ PROJE SAHİBİNE İŞ VERME — HEPSİ BİLİNÇLİ ERTELENDİ
 
-**Toplu elle test listesi** — 2026-08-12de proje sahibi "yapacağım ama şu anlık öteliyorum" dedi (sayaç: **14**). ⛔ Bilinçli erteleme; ISRAR ETME.
+2026-08-12'de proje sahibi açıkça şunu söyledi: **"benim yapmam gerekenleri
+yine sonraya bırak."** Aşağıdakilerin hiçbirini oturumun başında açma,
+hatırlatma, iş listesine koyma.
 
-> ⛔ **Oturumun BAŞINDA bu konuyu AÇMA.** Listeyi yeniden sunma, tek madde
-> önerisini de tekrarlama — ikisi de denendi, ikisi de tutmadı.
->
-> ✅ Sıradaki adım BİTTİKTEN sonra tek cümleyle sor: "bu liste hiç
-> yapılmayacaksa roadmap'ten silelim mi, yoksa 'yapılmadı' etiketiyle teknik
-> borç olarak mı bırakalım?" Cevap yine "sonra" olursa **ısrar etme**, sayacı
-> bir artır ve geç.
+| Ne | Durum |
+|---|---|
+| Telefondan toplu elle test | 14. kez ertelendi. ⛔ Listeyi yeniden sunma, tek madde önerisini de tekrarlama — ikisi de denendi, tutmadı |
+| `proje-kiti`'nin Windows makineye kurulumu | Ertelendi. Gerektiğinde: `/plugin marketplace add bariskose9/bariskose-skills` → `/plugin install proje-kiti@bariskose-skills` (market adı **bariskose-skills**, plugin adı **proje-kiti**, güncel sürüm **1.14.0**) |
+| Cloudflare panelinde preview alan adı yetkilendirme (#114) | ⚠️ İSTEĞE BAĞLI, zorunlu değil — production etkilenmiyor |
+| #23 (sızmış şifre listesi) ve #89 (Google'da ikinci kanıt) | Kararı bekliyor, acelesi yok |
 
-**Nerede:** https://benim-belediyem.vercel.app · **telefondan**
-**Hesap:** `docs/project/test-hesaplari.md` → şifre `Test1234!`,
-**personel olan** bir hesap seç. ⛔ #11-#16 arası hesaplar production'da YOK.
+✅ **Bir işi bitirdiğinde tek cümleyle sorabileceğin TEK şey:** telefon testi
+listesinin roadmap'te kalıp kalmayacağı. Cevap yine "sonra" olursa **ısrar
+etme**, sayacı bir artır ve geç.
 
-## ⏰ CRON — 12 AĞUSTOS PENCERESİ HÂLÂ KONTROL EDİLMEDİ
+## ✅ CRON ÇALIŞIYOR — KANITLANDI, BİR DAHA SORGULAMA
 
-⛔ **Adım 18d oturumu bu pencereye YETİŞEMEDİ.** Oturum UTC 11 Ağustos
-20:27'de başladı, 12 Ağustos penceresi UTC **12 Ağustos 00:00–00:59**'da
-açılıyor — yani oturum bittiğinde pencere henüz gelmemişti. Bu bir atlama
-değil, zamanlama.
+12 Ağustos penceresi ölçüldü: production `audit_logs` tablosunda
+**00:40:53–00:40:59 UTC arasında 9 adet `scheduled_task_run`** kaydı var —
+tam da cron penceresinin (UTC 00:00–00:59) içinde. Aylardır süren "cron
+gerçekten koşuyor mu" belirsizliği kapandı.
 
-**Sonraki oturum:** 12 Ağustos penceresini sorgula. 0 çıkarsa Vercel →
-Settings → Cron Jobs → View Logs incelenmeli (11 Ağustos penceresi de 0'dı,
-ama o gün `CRON_SECRET` penceresi geçtikten sonra girilmişti).
+⛔ **UTC 00:00–00:59 arasında production'a dağıtım tetikleyen merge YAPMA** —
+o pencere cron'un penceresi.
 
-⛔ **UTC 00:00–00:59 arasında production'a dağıtım tetikleyen merge YAPMA.**
-
-**Production veritabanına okuma erişimi:**
+**Production veritabanına okuma erişimi (gerekirse):**
 ```
 npx neonctl connection-string production --project-id lively-night-99128871 \
   --org-id org-still-water-86075112 --pooled false
 ```
-Çıkan adresi `PROD_DATABASE_URL` verip **proje kökünde `.mts`** betik koştur.
 ⚠️ Prisma 7'de istemci `@prisma/client`'tan DEĞİL `./src/generated/prisma/client`
-yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **yalnızca
+yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
+kökünde** `.mts` olmalı (`/tmp`'de `node_modules` çözümlenmiyor), **yalnızca
 okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — sürüm 1.13.0 yayınlandı, kurulu sürüm 1.11.0
+## 📦 KİT — sürüm 1.14.0 yayınlandı, kurulu sürüm 1.11.0
 
 ✅ **KAPI 8 GEÇİLDİ.** Adım 18d'nin iki dersi hem projeye hem kite yazıldı:
 `06-testing.md` ("konsol temiz bir kanıt değildir") ve `11-agent-workflow.md`
 ("devralınan kaydın ÖNERDİĞİ ÇÖZÜM de bir iddiadır").
 ⭐ **diff KANITI: 18 standart dosyasından 17'si birebir AYNI**; tek fark
 `00-stack.md` ve o bilinen/beklenen (aşağıdaki açık soru).
-Kit commit'i: `79292c9`, sürüm 1.12.0 → **1.13.0**.
+Kit commit'leri: `79292c9` (1.13.0) ve `f17d6b8` (**1.14.0** — "önce aracın ölçebildiğini kanıtla").
 
 ⚠️ **Bu adımda kit deposunda bir engel çıktı ve çözüldü** — not olarak dursun:
 yerel klon uzaktan 4 commit gerideydi ve içinde commit edilmemiş 20 satırlık
@@ -217,12 +218,26 @@ bölüm seviyesine indirdi (`<!-- ⛔ SENKRON SINIRI -->`) ama projedeki fark
 
 ⚠️ Kit deposunu karşılaştırmadan önce daima `git fetch` + `git pull` yap.
 
-## YAPILACAK — roadmap adım 19 (veya önce #103 + #107)
+## YAPILACAK — ÖNCE #103, SONRA #107, EN SON adım 19
 
-"Expo mobil uygulama (aynı API)"
+⛔ **Adım 19 (Expo mobil) DOĞRUDAN BAŞLAMAZ.** İki borç önce ödenmeli, çünkü o
+günden itibaren kullanıcının telefonundaki eski sürüm güncellenemez ve
+kaldırılan her uç, güncellemeyi almamış herkes için çökme demektir:
 
-⚠️ **Adım 19 tek satır ama devasa.** 17 ve 18 nasıl a/b/c/d'ye bölündüyse 19 da
-bölünmeli. Kod yazmadan önce **plan sun** ve bölünmeyi öner.
+1. **#103 — API sürümlenmemiş, kırıcı değişiklik politikası uygulanmıyor.**
+   Uçlar `/api/<kaynak>` biçiminde, sürüm segmenti yok; `Deprecation`/`Sunset`
+   başlıkları hiç kullanılmıyor. **ADR gerektiriyor.**
+   ⚠️ Bugün API'nin tek tüketicisi kendi arayüzümüz ve sunucuyla AYNI deploy'da
+   güncelleniyor — yani sözleşmeyi bozmanın bedeli şu an sıfır. Bu yüzden karar
+   "sürüm segmenti mi, yoksa başlık tabanlı sürümleme mi" olarak sorulmalı,
+   ezberden `/v1/` eklenmemeli.
+2. **#107 — yanıt gövdelerinin şeması belgelenmedi.** `/api/docs` istek tarafını
+   gerçek Zod şemalarından türetiyor ama yanıt tarafında yalnızca zarfı
+   belgeliyor. ~40 route'a dokunmayı gerektirir; `ok<T>()` jenerik olduğu için
+   `T` çalışma anında okunamıyor.
+
+**Sonra adım 19.** ⚠️ Tek satır ama devasa — 17 ve 18 nasıl a/b/c/d'ye
+bölündüyse 19 da bölünmeli. Kod yazmadan önce **plan sun** ve bölünmeyi öner.
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
