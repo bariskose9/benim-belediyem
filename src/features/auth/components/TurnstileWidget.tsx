@@ -43,7 +43,16 @@ const SCRIPT_SRC = `${TURNSTILE_SCRIPT_ORIGIN}/turnstile/v0/api.js?render=explic
 export type TurnstileWidgetProps = {
   siteKey: string | undefined;
   onToken: (token: string) => void;
-  /** Bulmaca yüklenemezse form gönderimi kilitlensin diye. */
+  /**
+   * Bulmaca hiç yüklenemediğinde veya hata verdiğinde çağrılır.
+   *
+   * ⛔ ÇAĞIRANIN SORUMLULUĞU: hem kullanıcıya sebebi yazmak HEM gönderim
+   * düğmesini kilitlemek. Bu yorum bir dönem yalnızca "kilitlensin diye"
+   * diyordu ama hiçbir form kilitlemiyordu (teknik borç #115): ekranda
+   * "servise ulaşılamıyor" yazarken düğme tıklanabilir kalıyor, jeton boş
+   * gidiyor ve kullanıcı sunucudan ikinci bir hata alıyordu.
+   * Kilit `tests/unit/bot-dogrulama-kilidi.test.tsx` ile korunuyor.
+   */
   onUnavailable?: () => void;
 };
 

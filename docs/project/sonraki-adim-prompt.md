@@ -1,4 +1,4 @@
-# Sonraki oturum için hazır prompt — adım 19 öncesi
+# Sonraki oturum için hazır prompt — adım 19 (Expo mobil)
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
 > Sonraki adım bitince **yeniden yazılır** (üstüne eklenmez).
@@ -42,8 +42,12 @@ Roadmap adım **0 → 18d bitti**. Roadmap'te yazılı olarak **tek adım kaldı
   hepsinde nonce'lu CSP var, `script-src`'de `unsafe-inline` YOK.
   `vercel.live` production'a sızmadı (0). Yine de körü körüne güvenme:
   `git log --oneline -3` ve `curl -s .../api/health` ile teyit et
-- ⛔ **AMA BİR SORUN AÇIK: canlıda Turnstile bulmacası çizilmiyor (borç #113).**
-  Aşağıda ayrıntısı var ve **sonraki oturumun ilk işi**
+- ✅ **BORÇ #113 KAPANDI (2026-08-12): sorun yokmuş.** Proje sahibi canlıda
+  `/kayit` sayfasına gerçek tarayıcıyla baktı — bulmaca kutusu **"Başarılı"**
+  diyor. Sıkı CSP Turnstile'ı bozmuyor
+- ✅ **CRON'UN ÇALIŞTIĞI KANITLANDI:** production denetim kaydında 12 Ağustos
+  00:40:53–00:40:59 UTC arasında **9 adet `scheduled_task_run`** ölçüldü — tam
+  cron penceresinin içinde. Aylardır süren belirsizlik kapandı
 - Gerçek kullanıcı 0
 - Hata takibi (Sentry) canlıda ve uçtan uca doğrulanmış
 
@@ -82,26 +86,25 @@ ve üç borç ödendi. **Bilinen kritik/yüksek açık: 0.**
    çizilmeyince bunu CSP'ye yormak çok kolaydı. Proxy tamamen kaldırıldı,
    yeniden derlendi, ölçüm tekrarlandı — **iframe CSP olmadan da çizilmiyordu.**
 
-## ⛔ İLK İŞ — BORÇ #113: CANLIDA TURNSTILE ÇİZİLMİYOR
+## ⭐ 2026-08-12'DE ÖĞRENİLEN DERS — ARACIN ÖLÇEBİLDİĞİNİ ÖNCE KANITLA
 
-`/kayit` sayfasında bulmaca konteyneri var (71,5 px) ama içi boş — yalnızca
-`<input type="hidden" name="cf-turnstile-response">`, **iframe yok**.
+Borç #113 "canlıda bulmaca çizilmiyor" diyordu. Ajan bunu otomatik tarayıcıyla
+(Chrome DevTools MCP) ölçtü ve **dört hipotezi eledi**: alan adı yetkisi, nonce
+eksikliği, `unsafe-eval`, hatta CSP'nin **tamamen kaldırılması**. Hiçbiri
+değişiklik yaratmadı.
 
-⭐ **CSP KAYNAKLI DEĞİL, ÖLÇÜLEREK ELENDİ.** Sıkı CSP altında, production'da,
-Cloudflare'ın resmî test anahtarıyla `window.turnstile.render()` çağrıldı:
-**`callback` tetiklendi ve jeton üretildi.** Belge de doğruluyor — gereken tek
-şey `script-src` + `frame-src` (ikisi de var) ve "Turnstile works with
-strict-dynamic". Production'da `110200` hatası da YOK, yani alan adı yetkili.
-Geriye kalan tek fark **gerçek site anahtarı**.
+Sebep sonunda ölçüldü: **`navigator.webdriver === true`**. Turnstile bir BOT
+KORUMASIDIR ve otomasyon tarayıcısını tanıyıp bulmacayı hiç açmaz. Sorun üründe
+değil, **ölçüm aracındaydı**.
 
-**Sıra (panelden bakılacak):**
-1. Turnstile panelinde site anahtarının **widget modu** ne? "Invisible" veya
-   "Managed" ise kutu zaten çizilmez ve davranış DOĞRU olabilir
-2. Vercel'deki `NEXT_PUBLIC_TURNSTILE_SITE_KEY` panel değeriyle aynı mı
-3. Hostname Management'ta `benim-belediyem.vercel.app` yazılı mı
+⛔ **Ajan ayrıca proje sahibinin "kutu görünüyor" gözlemini kendi ölçümüne
+dayanarak çürütmeye çalıştı. Gözlem doğruydu.** Kural artık
+`06-testing.md` → "Önce aracın o işi ölçebildiğini doğrula" bölümünde ve
+kite de yazıldı (sürüm 1.14.0).
 
-⚠️ **Bu çözülene kadar kayıt akışının canlıda uçtan uca çalıştığı
-VARSAYILMAMALI** — sunucu boş jetonu reddediyor.
+⚠️ **Ayırt edici işaret:** ürün hatası genelde HATA ÜRETİR, araç engeli genelde
+SESSİZDİR. Burada sahte jeton dönen test anahtarları çalışıyor, gerçek
+doğrulama çalıştıran her anahtar hata callback'i bile tetiklemeden ölüyordu.
 
 ## ⚠️ İKİ KONU PROJE SAHİBİNİN KARARINI BEKLİYOR
 
@@ -146,7 +149,7 @@ kullanıcının telefonundaki eski sürüm güncellenemez:
 
 ## ❓ PROJE SAHİBİNE SORULACAK — TEK CÜMLEYLE
 
-**Toplu elle test listesi** — on ikinci kez ertelendi (sayaç: **13**).
+**Toplu elle test listesi** — 2026-08-12de proje sahibi "yapacağım ama şu anlık öteliyorum" dedi (sayaç: **14**). ⛔ Bilinçli erteleme; ISRAR ETME.
 
 > ⛔ **Oturumun BAŞINDA bu konuyu AÇMA.** Listeyi yeniden sunma, tek madde
 > önerisini de tekrarlama — ikisi de denendi, ikisi de tutmadı.
