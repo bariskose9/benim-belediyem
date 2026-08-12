@@ -41,6 +41,25 @@
   **Yanlış bir gerekçe, yorumsuz bırakmaktan kötüdür:** sonraki geliştirici onu
   doğru sanıp üzerine karar kurar ve gerçek korumayı fark etmeden kaldırabilir.
 
+- ⛔ **BAŞKASINA DEVRETTİĞİN SORUMLULUĞUN YAPILDIĞINI DOĞRULA.** Yukarıdaki
+  kural kendi dosyandaki iddiayı ölçmeni söylüyor. Bir adım ötesi: bir
+  parametrenin, callback'in veya arayüzün yorumu **çağıranın** yapacağı bir şeyi
+  anlatıyorsa ("bununla form kilitlenir", "bunu alan tarafın yetkiyi kontrol
+  etmesi gerekir"), o iş **hiçbir çağıranda yapılmıyor olabilir** — ve senin
+  dosyanda ölçülecek bir şey olmadığı için mutasyon testi bunu YAKALAMAZ.
+
+  Bir projede yaşandı: bir bot doğrulama bileşeninin `onUnavailable` prop'u
+  *"form gönderimi kilitlensin diye"* diyordu; onu kullanan **beş formun
+  hiçbiri** düğmeyi kilitlemiyordu. Ekranda "servise ulaşılamıyor" yazarken
+  düğme tıklanabilir kalıyor, kullanıcı basıyor ve ikinci bir hata alıyordu.
+  ⚠️ **Kod okunarak değil, EKRAN GÖRÜNTÜSÜNE bakılarak fark edildi** — hata
+  metni ile aktif düğme aynı karedeydi.
+
+  **Kural:** böyle bir yorum yazarken üç şeyi birden yap — (1) çağıranların
+  hepsini `grep` ile bul, (2) her birinde o işin fiilen yapıldığını gör,
+  (3) yapılmasını bir testle kilitle. Aksi hâlde yorum, var olmayan bir
+  korumayı belgelemiş olur.
+
 ## Sihirli değerler
 Sayı ve metin sabitleri koda gömülmez; `src/config/` altında adlandırılır.
 
