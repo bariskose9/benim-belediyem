@@ -5,7 +5,8 @@
 
 ---
 
-benim-belediyem projesinde **borç #103 (API sürümleme) bitti**. Başlamadan önce
+benim-belediyem projesinde **borç #103 (API sürümleme) bitti ve canlıya çıktı**.
+Sıradaki iş **#107**, en son adım 19 (mobil). Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
@@ -53,9 +54,14 @@ Roadmap adım **0 → 18d bitti**. Borç **#103 ödendi.** Kalan: borç **#107**
 sonra **adım 19 (Expo mobil)**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- ⛔ **#103 DALI HENÜZ MERGE EDİLMEDİ.** `feature/api-versioning` dalı commit
-  onayı bekliyor. `git log --oneline -3` ile teyit et — merge edildiyse bu satır
-  eskimiştir
+- ✅ **#103 MERGE EDİLDİ ve CANLIDA** (PR #69 → `main` = `8bb0419`).
+  ⭐ Bu satır merge'den SONRA yazıldı. Dağıtım doğrulandı: `commit: 8bb0419`,
+  `db: ok`. Canlı duman testi temiz — eski adresler (`/api/appointments`,
+  `/api/sessions`, `/api/consents`, `/api/notifications`) **4/4 → 404**;
+  `/api/v1/*` **5/5 ayakta**; `/api/v1/auth/google` **302** (Google'a
+  yönlendiriyor); `/api/cron/daily` **401** (kapı sağlam); beş sayfa **200**.
+  Yine de körü körüne güvenme: `git log --oneline -3` ve
+  `curl -s .../api/health` ile teyit et
 - ✅ Adım 18d canlıda (`a07c99d`), borç #115 ödendi (`d281935`), #113 kapandı
 - ✅ **CRON'UN ÇALIŞTIĞI KANITLANDI** — production denetim kaydında 12 Ağustos
   00:40:53–00:40:59 UTC arasında 9 adet `scheduled_task_run`. Bir daha sorgulama
