@@ -85,6 +85,34 @@ Tek adımda kolon silen deploy yapılmaz.
 - Veritabanı: her production migration öncesi yedek alınır.
 - Her deploy öncesi "bozulursa nasıl geri dönerim" sorusunun cevabı hazır olur.
 
+### ⛔ BİR DAĞITIMI YENİDEN DAĞITMADAN ÖNCE ORTAMINI DOĞRULA
+
+Başarısız bir **preview** derlemesini kurtarmak için kullanılan "yeniden dağıt"
+komutu, hedef yanlış seçilirse **canlıyı geri alır.** Bir production dağıtımını
+yeniden dağıtmak yeni bir production dağıtımı üretir ve onu canlı alan adına
+**alias'lar** — yani site sessizce eski sürüme döner. Komut hata vermez; çıktıda
+yalnızca alias satırı görünür.
+
+Ölçülmüş olay (2026-08-13): preview derlemesi veritabanı uykuda olduğu için
+`P1001` ile düştü. Kurtarmak için listedeki bir dağıtım yeniden dağıtıldı, ama
+o dağıtım **preview değil production**'dı ve canlı ~80 saniye boyunca üç sürüm
+eski bir yapıyı servis etti.
+
+**Kural:**
+
+1. Hedefin ortamını **komuttan önce** doğrula (`vercel ls` çıktısındaki
+   `Preview` / `Production` sütunu). Kimlik veya URL'e bakarak tahmin etme
+2. Listeyi kırparken (`head`/`tail`) hangi ucunu gördüğüne dikkat et — yanlış
+   uç, **en eski** dağıtımı en yenisi sanmana yol açar
+3. Yeniden dağıtımdan **sonra** canlının sürümünü ayrıca ölç
+   (`/api/health` → `commit`), "başarılı" çıktısına güvenme
+4. Geri alma yolu hazır olsun: doğru dağıtımı bul ve **terfi ettir** (`promote`)
+
+⚠️ Asıl arızanın kendisi de yazılı bir tuzaktır: **uyuyan bir veritabanı deploy'u
+düşürür** (`P1001`). Doğru ilk hamle yeniden dağıtmak değil, **önce veritabanını
+uyandırmaktır** — o ortamın çalışan bir dağıtımındaki sağlık ucuna istek atmak
+yeterli.
+
 ## Ortam değişkenleri
 
 `.env.example` her zaman güncel tutulur ve **kurulum talimatı gibi** yazılır

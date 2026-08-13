@@ -1,12 +1,13 @@
-# Sonraki oturum için hazır prompt — borç #107'nin 107b adımı, sonra 107c/d, sonra adım 19
+# Sonraki oturum için hazır prompt — borç #107'nin 107c adımı, sonra 107d, sonra adım 19
 
 > Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
 > Sonraki adım bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde **borç #107'nin mekanizması (107a) yazıldı.**
-Sıradaki iş **107b**, sonra 107c, 107d, en son adım 19 (mobil). Başlamadan önce
+benim-belediyem projesinde **borç #107'nin 107a ve 107b adımları bitti ve
+canlıya çıktı.** Sıradaki iş **107c**, sonra 107d, en son adım 19 (mobil).
+Başlamadan önce
 `CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
@@ -35,91 +36,108 @@ Depoda görülen, dosyada yazandan üstündür. Çelişki bulursan **söyle.**
 
 ## DURUM
 
-Roadmap adım **0 → 18e bitti**. Borç **#103 ödendi**, **#107 kısmen ödendi
-(mekanizma hazır, 26 uç kaldı)**. Kalan: **107b → 107c → 107d**, sonra
+Roadmap adım **0 → 18f bitti**. Borç **#103 ödendi**, **#107 kısmen ödendi
+(mekanizma + 15 uç hazır, 14 uç kaldı)**. Kalan: **107c → 107d**, sonra
 **adım 19 (Expo mobil)**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- ✅ **107a MERGE EDİLDİ ve CANLIDA** (PR #71 → `main` = `2adce12`).
-  ⭐ Bu satır merge'den SONRA yazıldı. Dağıtım doğrulandı: `commit: 2adce12`,
-  `db: ok`, `env: production`. Canlı duman testi temiz — beş sayfa **200**,
-  `/api/cron/daily` **401** (kapı sağlam), `/api/docs` **404** (production'da
-  bilerek kapalı, ADR-019). Yine de körü körüne güvenme:
-  `git log --oneline -3` ve `curl -s .../api/health` ile teyit et
-- ✅ #103 canlıda (PR #69 → `8bb0419`)
+- ✅ **107b MERGE EDİLDİ ve CANLIDA** (PR #73 → `main` = `b4a1398`).
+  ⭐ Bu satır merge'den SONRA yazıldı. Dağıtım doğrulandı: `commit: b4a1398`,
+  `db: ok`, `env: production`. Canlı duman testi temiz — altı sayfa **200**,
+  `/api/cron/daily` **401**. Yine de körü körüne güvenme: `git log --oneline -3`
+  ve `curl -s .../api/health` ile teyit et
+- ✅ 107a canlıda (PR #71 → `2adce12`), #103 canlıda (PR #69 → `8bb0419`)
 - ✅ **CRON'UN ÇALIŞTIĞI KANITLANDI** — production denetim kaydında 9 adet
   `scheduled_task_run`. Bir daha sorgulama
 - Gerçek kullanıcı 0 · Sentry canlıda ve uçtan uca doğrulanmış
 
-## 📌 107a'DA NE YAPILDI
+## ⛔ 2026-08-13 OLAYI — CANLI 80 SANİYE ESKİ SÜRÜME DÜŞTÜ
+
+**Ne oldu:** PR #73'ün preview derlemesi, Neon uykuda olduğu için `P1001` ile
+düştü. Kurtarmak için bir dağıtım yeniden dağıtıldı ama seçilen dağıtım
+**preview değil production**'dı; Vercel onu canlı alan adına alias'ladı ve site
+üç sürüm eski bir yapıya (`490713e`) döndü.
+
+**Nasıl düzeltildi:** doğru dağıtım bulunup `vercel promote` ile terfi ettirildi.
+
+**Kural artık yazılı:** `09-ci-cd-deploy.md` → "BİR DAĞITIMI YENİDEN DAĞITMADAN
+ÖNCE ORTAMINI DOĞRULA". Kite de senkronlandı (1.19.0).
+
+⛔ **Doğru ilk hamle yeniden dağıtmak DEĞİL, önce veritabanını uyandırmaktır:**
+o ortamın çalışan bir dağıtımındaki `/api/health` ucuna istek at. Preview ve
+production AYRI Neon dalları kullanıyor — production'ı uyandırmak preview'ı
+uyandırmaz.
+
+## 📌 107a + 107b'DE NE YAPILDI
 
 **Yanıt gövdesi artık belgede GERÇEK Zod şemasıyla görünüyor.** Şema kütüğe elle
 yazılmıyor: ucun `ok()`/`created()` çağrısında kullandığı şemanın AYNISI kütüğe
 giriyor (ADR-021).
 
-**Ölçüm:** 46 uçtan **29'u gövdeli**, 17'si gövdesiz (204/302/303). 107a'da
-**platform grubu (3 uç)** taşındı; **26 uç kaldı**.
+**Ölçüm:** 46 uçtan **29'u gövdeli**, 17'si gövdesiz (204/302/303).
+107a'da platform grubu (3 uç), 107b'de auth+hesap grubu (12 uç) taşındı.
+**14 uç kaldı.**
 
-### ⭐ 107a'NIN ÜÇ DERSİ
+### ⭐ DÖRT DERS
 
 1. ⛔ **YANIT SÖZLEŞMESİ TİP SİSTEMİYLE BELGELENEMEZ.** Tip JSON'a hayatta
    kalmıyor: `Date` derlemede `Date` telde ISO **metin**, `undefined` alan telde
-   **hiç yok**, `Decimal` telde metin. Bu yüzden çalışma anı kontrolü gövdeyi
-   `JSON.parse(JSON.stringify(...))` ile **telden geçmiş hâline** çevirip öyle
-   doğruluyor
-2. ⛔ **BİR KAPIYI `NODE_ENV`'E BAĞLAMA — ÖLÇÜLDÜ.** `playwright.config.ts`
-   sunucuyu `next build && next start` ile kaldırıyor, yani **E2E production
-   modunda koşuyor**. Bayrak `NODE_ENV !== "production"` olsaydı kapı, gerçek
-   tarayıcıdan geçen her yanıtta SESSİZCE kapalı kalırdı. Bayrak ayrı bir ortam
-   değişkeni (`API_RESPONSE_CONTRACT_CHECK`) ve E2E + vitest yapılandırmalarında
-   açıkça veriliyor
+   **hiç yok**. Kontrol gövdeyi `JSON.parse(JSON.stringify(...))` ile **telden
+   geçmiş hâline** çevirip öyle doğruluyor
+2. ⛔ **BİR KAPIYI `NODE_ENV`'E BAĞLAMA — ÖLÇÜLDÜ.** E2E `next build &&
+   next start` ile **production modunda** koşuyor; kapı en çok gerektiği yerde
+   sessizce kapanırdı. Bayrak ayrı: `API_RESPONSE_CONTRACT_CHECK`
 3. ⚠️ **`serverEnv` HER YERDEN İÇE AKTARILAN BİR MODÜLDE OKUNAMAZ.** Tarayıcıda
-   **bilerek** istisna fırlatıyor (gizli değer koruması); `jsdom` ortamındaki 5
-   entegrasyon testi kırmızıya döndü — teşhis aracının kendisi arıza kaynağı
-   olmuştu. Bayrak artık doğrudan `process.env`'den okunuyor, doğrulaması ve
-   production yasağı merkezî şemada duruyor
+   bilerek istisna fırlatıyor; `jsdom` ortamındaki 5 test kırmızıya döndü
+4. ⭐ **BİR UÇ İKİ FARKLI BAŞARI DÖNDÜREBİLİR ve kütük bunu tutabilmeli.**
+   `POST /api/v1/registrations/current/verifications` hem `200` hem `201`
+   dönüyordu ama `200` HİÇ belgelenmemişti. `alternateSuccess` eklendi
 
-### HAZIR MEKANİZMA — 107b'DE YENİDEN YAZMA, KULLAN
+### HAZIR MEKANİZMA — 107c'DE YENİDEN YAZMA, KULLAN
 
 | Parça | Ne işe yarar |
 |---|---|
 | `src/lib/api-response-contract.ts` | Çalışma anı kontrolü. **Dokunma, sadece şema ver** |
 | `ok(data, { schema })` · `created(data, { schema })` | Derleme anı bağı (`ZodType<T>`) |
 | `success.body` (`api-docs/types.ts`) | Kütükte şema beyanı. `envelope: "raw"` ve `externalContract` seçenekleri var |
-| `RESPONSE_BODY_PENDING` (`registry/index.ts`) | ⏳ **Kalan 26 uç.** 107b'de çözülen uçlar buradan DÜŞÜRÜLÜR |
-| `tests/unit/api-docs-response.test.ts` | 7 kapı: eksik şema, liste hijyeni, gövdesiz uç, dönüştürme yasağı, route↔kütük eşleşmesi |
+| `alternateSuccess` (`api-docs/types.ts`) | İkinci başarı yanıtı (farklı durum kodu) |
+| `RESPONSE_BODY_PENDING` (`registry/index.ts`) | ⏳ **Kalan 14 uç.** Çözülen uçlar buradan DÜŞÜRÜLÜR |
+| `tests/unit/api-docs-response.test.ts` | 8 kapı: eksik şema, liste hijyeni, gövdesiz uç, dönüştürme yasağı, ikinci yanıt, route↔kütük eşleşmesi |
 
-## YAPILACAK — 107b (auth + hesap, 13 uç)
+**Örnek almak için bak:** `src/features/auth/schemas/registration.schema.ts`
+(dosyanın alt yarısı) — beş yanıt şeması, gerekçeleriyle birlikte.
 
-`RESPONSE_BODY_PENDING` listesinin **"107b" başlıklı 13 satırı**:
+## YAPILACAK — 107c (ticaret, 7 uç)
+
+`RESPONSE_BODY_PENDING` listesinin **"107c" başlıklı satırları**:
 
 ```
-GET  /api/v1/account/export          POST /api/v1/registrations
-GET  /api/v1/registrations/current   POST /api/v1/registrations/current/otp-challenges
-PATCH /api/v1/registrations/current  POST /api/v1/registrations/current/verifications
-POST /api/v1/identity-verifications  POST /api/v1/sessions
-POST /api/v1/password-resets         POST /api/v1/staff-verifications
-POST /api/v1/password-resets/current/otp-challenges
-POST /api/v1/staff-verifications/confirmations
-PUT  /api/v1/password-resets/current/password
+POST   /api/v1/carts/current/items            POST   /api/v1/payments
+PATCH  /api/v1/carts/current/items/{itemId}   POST   /api/v1/memberships
+DELETE /api/v1/carts/current/items/{itemId}   PATCH  /api/v1/memberships/{membershipId}
+                                              DELETE /api/v1/memberships/{membershipId}
 ```
 
 **Her uç için sıra:**
-1. Yanıt şemasını ilgili feature'ın `schemas/` klasörüne yaz (`*.schema.ts`)
+1. Yanıt şemasını ilgili feature'ın `schemas/` dosyasına yaz (mevcut şema
+   dosyasının altına ekle — auth'ta böyle yapıldı)
 2. Route'ta `ok`/`created` çağrısına `schema:` ver
 3. Kütükte `success.body: { schema: ... }` yaz
 4. `RESPONSE_BODY_PENDING`'den adını **DÜŞÜR** (düşürmezsen kapı kırmızıya döner)
 
-⚠️ **DİKKAT EDİLECEKLER**
-- `GET /api/v1/account/export` gövdesi **kişisel veri ihracı** — şema yazarken
-  hangi alanların gerçekten döndüğünü koddan oku, tahmin etme
-- Kimlik uçlarında **maskeli** alanlar var; şema maskelenmiş biçimi tarif etmeli
-- ⛔ Şema `.transform()` taşıyamaz (kapı ölçüyor)
-- ⛔ Tarih alanları `z.iso.datetime()` — `z.date()` DEĞİL. Telde metin
+⚠️ **107c'YE ÖZEL DİKKAT**
+- ⛔ **PARA TAM SAYI KURUŞ.** Şema `z.int()` olmalı, `z.number()` DEĞİL — belge
+  "ondalık olabilir" derse mobil istemci kuruşu lira sanar
+- ⚠️ Sepet özeti iç içe (kalemler + ara toplam + toplam) — en büyük şema bu
+- ⚠️ Sipariş/üyelik durumları KOLONDA DEĞİL, okuma anında türetiliyor (ADR-013)
+- ⛔ Şema `.transform()` taşıyamaz · tarihler `z.iso.datetime()`
 
-**Sonra 107c** (ticaret, 7 uç — ⚠️ para TAM SAYI KURUŞ), **sonra 107d**
-(profil+hizmetler, 6 uç — ⚠️ `GET .../attachments/{attachmentId}` **ikili dosya**
-döndürüyor, JSON değil; `externalContract` benzeri bir sınır gerekecek).
+**Sonra 107d** (7 uç: bildirim, talep, randevu, koltuk + **iki ham dosya
+indirmesi**). ⚠️ `GET /api/v1/account/export` ve
+`GET /api/v1/support-tickets/{ticketId}/attachments/{attachmentId}` ikisi de
+`ok()` KULLANMIYOR ve `{ data }` zarfına sarmıyor; `account/export`'un gövdesi
+bugün `Record<string, unknown>` — yani tipi bile yok. İkisi birlikte, kendi
+kararıyla ele alınmalı.
 
 **107d bitince** `RESPONSE_BODY_PENDING` boşalır ve sabit **silinir**.
 
@@ -141,8 +159,8 @@ oturumun başında açma, hatırlatma, iş listesine koyma.
 | Ne | Durum |
 |---|---|
 | **#103'ün preview'da elle kontrolü** | ⏸️ Ertelendi. Yapılmayan tek şey: preview URL'de market → sepete ekle → sepet akışını tıklamak. ⚠️ Otomatik taraf zaten kanıtlı. ⛔ Oturum başında hatırlatma; **yalnızca canlıda sepet/market ile ilgili bir arıza görülürse** hatırlat |
-| Telefondan toplu elle test | 16. kez ertelendi (2026-08-13: *"diğer testlerimi sonraki session'a ötele"*). ⛔ Listeyi yeniden sunma, tek madde önerisini de tekrarlama |
-| **107a'nın elle kontrolü** | ⏸️ **2026-08-13'te bilinçli olarak ertelendi.** Proje sahibi canlıda `/api/health` ve sitenin açıldığını kendisi doğruladı; kalan elle testleri sonraki oturuma bıraktı. ⚠️ Bu adımın ekranda görünen bir karşılığı zaten YOK (arayüz, akış ve veritabanı hiç değişmedi). ⛔ Oturum başında hatırlatma |
+| Telefondan toplu elle test | **17. kez ertelendi** (2026-08-13: *"eski yapacaklarımı yine devret"*). ⛔ Listeyi yeniden sunma, tek madde önerisini de tekrarlama |
+| **107a ve 107b'nin elle kontrolü** | ⏸️ **2026-08-13'te bilinçli olarak ertelendi.** Proje sahibi canlıda `/api/health` ve sitenin açıldığını kendisi doğruladı; kalan elle testleri sonraki oturuma bıraktı. ⚠️ İkisinin de ekranda görünen bir karşılığı zaten YOK (arayüz, akış ve veritabanı hiç değişmedi). ⛔ Oturum başında hatırlatma; **yalnızca canlıda giriş/kayıt/şifre sıfırlama ile ilgili bir arıza görülürse** "şu kontrol hiç yapılmamıştı" diye hatırlat |
 | `proje-kiti`'nin Windows makineye kurulumu | Ertelendi. Gerektiğinde: `/plugin marketplace add bariskose9/bariskose-skills` → `/plugin install proje-kiti@bariskose-skills` |
 | Cloudflare panelinde preview alan adı yetkilendirme (#114) | ⚠️ İSTEĞE BAĞLI, zorunlu değil |
 | #23 ve #89 | Kararı bekliyor, acelesi yok |
@@ -161,13 +179,16 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — sürüm 1.18.0 YAYINLANDI, kurulu sürüm 1.11.0
+## 📦 KİT — sürüm 1.19.0, kurulu sürüm 1.11.0
 
-✅ **KAPI 8 GEÇİLDİ, diff ile kanıtlandı (iki dosyada da çıktı boş).**
+✅ **KAPI 8 GEÇİLDİ, diff ile kanıtlandı (üç dosyada da çıktı boş).**
 
 - **1.18.0** (`0e40146`) — `03-api-guidelines.md`: yanıt gövdesi de belgelenir,
   şema telden doğrulanır, sözleşme borcu yalnızca küçülen listeyle kapatılır ·
   `06-testing.md`: bir kapıyı `NODE_ENV`'e bağlama, açık olduğunu ölç
+- **1.19.0** — `09-ci-cd-deploy.md`: bir dağıtımı yeniden dağıtmadan önce
+  ortamını doğrula (production'ı yeniden dağıtmak canlıyı GERİ ALIR); uyuyan
+  veritabanını önce uyandır
 
 ⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ 1.11.0 — ESKİ (yedi sürüm geride).**
 Yalnızca `/yeni-proje` veya `/kit-senkron` çalıştırılacağı gün "önce `/plugin`
@@ -177,7 +198,7 @@ hatırlatma.**
 ⛔ **`00-stack.md` HÂLÂ FARKLI ve bu AÇIK BİR SORU.** Sürüm 1.7.0 istisnayı bölüm
 seviyesine indirdi (`<!-- ⛔ SENKRON SINIRI -->`) ama projedeki fark **sınırın
 ÜSTÜNDE** kalıyor (satır 19-68). Ya sınır yanlış yerde ya da o metin sınırın
-altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan 16'sı birebir aynı.)
+altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan 15'i birebir aynı.)
 
 ⚠️ Kit deposunu karşılaştırmadan önce daima `git fetch` + `git pull` yap.
 
@@ -216,7 +237,7 @@ altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan 16'sı birebir ayn
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
 
-**107a'da yeni öğrenilenler**
+**107a/107b'de yeni öğrenilenler**
 - ⛔ **KAPIYI `NODE_ENV`'E BAĞLAMA** — E2E production modunda koşuyor
 - ⚠️ **`serverEnv` TARAYICIDA İSTİSNA FIRLATIYOR** — her yerden içe aktarılan
   bir yardımcı modülde okuma; `process.env`'den oku, doğrulamayı şemada bırak
@@ -225,6 +246,18 @@ altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan 16'sı birebir ayn
   kendi uyumluluk kuralıyla ÇELİŞİR. Yanıt da `io: "input"` ile basılır
 - ⚠️ **`npm run test:db` `docs/project/test-hesaplari.md` DOSYASINI YENİDEN
   ÜRETİYOR** — commit öncesi `git checkout` ile geri al (bu oturumda da oldu)
+- ⛔ **`vercel redeploy` HEDEFİN ORTAMINI DOĞRULAMADAN ÇALIŞTIRILMAZ** — bir
+  PRODUCTION dağıtımını yeniden dağıtmak onu canlıya ALIAS'LAR ve sürümü geri
+  alır. Komut hata vermez. 2026-08-13'te canlı 80 saniye eski sürüme düştü.
+  Geri alma: doğru dağıtımı bul, `vercel promote` ile terfi ettir
+- ⚠️ **`vercel ls` ÇIKTISINI `tail` İLE KIRPMA** — en eskileri gösterir ve
+  yanlış dağıtımı "en yeni" sanmana yol açar. `head` kullan, `Preview` /
+  `Production` sütununa BAK
+- ⚠️ **PREVIEW VE PRODUCTION AYRI NEON DALLARI KULLANIYOR** — production'ı
+  uyandırmak preview'ı uyandırmaz. Uyuyan veritabanı deploy'u `P1001` ile
+  düşürüyor; önce O ORTAMIN çalışan bir dağıtımındaki `/api/health`'e istek at
+- ⚠️ **`gh pr merge --delete-branch` ÇALIŞMA AĞACI KİRLİYKEN YARIDA KALIYOR** —
+  merge GitHub'da olur ama yerel dal temizliği "Aborting" der. Önce `git stash`
 
 **#103'te öğrenilenler**
 - ⚠️ **`fish` KABUĞU BASH SÖZDİZİMİNİ SESSİZCE YUTUYOR** — `VAR=$(...)` ve
@@ -391,8 +424,10 @@ altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan 16'sı birebir ayn
 - ⚠️ **`auditLog` modelinde `metadata` ALANI YOK** — `entityType` ve `entityId` var
 
 **Yayın**
-- **Neon uykudayken deploy PATLIYOR** (`P1001`) — çözüm
-  `npx vercel redeploy <dagitim-url> --scope barisss`. Merge sonrası
+- **Neon uykudayken deploy PATLIYOR** (`P1001`). ⛔ **Çözüm ÖNCE veritabanını
+  uyandırmaktır**, yeniden dağıtmak değil: o ortamın çalışan bir dağıtımındaki
+  `/api/health` ucuna istek at. Sonra `npx vercel redeploy <PREVIEW-URL>
+  --scope barisss` — ⛔ **hedefin `Preview` olduğunu ÖNCE doğrula.** Merge sonrası
   `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR**
 - ⚠️ **Ücretsiz planda cron GÜNDE 1 ve saati garanti DEĞİL**
