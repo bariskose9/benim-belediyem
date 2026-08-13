@@ -66,7 +66,7 @@ export function PasswordResetCompleteForm({
     setNotice(null);
     setIsSubmitting(true);
 
-    const result = await apiRequest("/api/password-resets/current/password", {
+    const result = await apiRequest("/api/v1/password-resets/current/password", {
       method: "PUT",
       body: { code, password, passwordConfirm },
     });
@@ -94,7 +94,7 @@ export function PasswordResetCompleteForm({
     setIsResending(true);
 
     const result = await apiRequest<{ simulationCode?: string }>(
-      "/api/password-resets/current/otp-challenges",
+      "/api/v1/password-resets/current/otp-challenges",
       { method: "POST", body: { turnstileToken } },
     );
 

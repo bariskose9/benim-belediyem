@@ -63,7 +63,7 @@ async function addMarketItem(page: Page, quantity = 1): Promise<{ name: string }
 
   if (!product) throw new Error("Stoklu tohumlanmış ürün bulunamadı. Önce seed çalıştırın.");
 
-  const response = await page.request.post("/api/carts/current/items", {
+  const response = await page.request.post("/api/v1/carts/current/items", {
     data: { itemType: "market", refId: product.id, quantity },
   });
 

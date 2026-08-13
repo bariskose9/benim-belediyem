@@ -295,11 +295,11 @@ function jsonRequest(url: string, method: string, body: Row, ip: string) {
 }
 
 async function callRequestReset(body: Row = {}, ip = "203.0.113.9") {
-  const { POST } = await import("@/app/api/password-resets/route");
+  const { POST } = await import("@/app/api/v1/password-resets/route");
 
   return POST(
     jsonRequest(
-      "http://localhost:3000/api/password-resets",
+      "http://localhost:3000/api/v1/password-resets",
       "POST",
       { nationalId: NATIONAL_ID, turnstileToken: "gecerli-jeton", ...body },
       ip,
@@ -308,11 +308,11 @@ async function callRequestReset(body: Row = {}, ip = "203.0.113.9") {
 }
 
 async function callResend(body: Row = {}, ip = "203.0.113.9") {
-  const { POST } = await import("@/app/api/password-resets/current/otp-challenges/route");
+  const { POST } = await import("@/app/api/v1/password-resets/current/otp-challenges/route");
 
   return POST(
     jsonRequest(
-      "http://localhost:3000/api/password-resets/current/otp-challenges",
+      "http://localhost:3000/api/v1/password-resets/current/otp-challenges",
       "POST",
       { turnstileToken: "gecerli-jeton", ...body },
       ip,
@@ -321,11 +321,11 @@ async function callResend(body: Row = {}, ip = "203.0.113.9") {
 }
 
 async function callComplete(body: Row = {}, ip = "203.0.113.9") {
-  const { PUT } = await import("@/app/api/password-resets/current/password/route");
+  const { PUT } = await import("@/app/api/v1/password-resets/current/password/route");
 
   return PUT(
     jsonRequest(
-      "http://localhost:3000/api/password-resets/current/password",
+      "http://localhost:3000/api/v1/password-resets/current/password",
       "PUT",
       { password: NEW_PASSWORD, passwordConfirm: NEW_PASSWORD, ...body },
       ip,
@@ -832,10 +832,10 @@ describe("girdi doğrulama ve akış bütünlüğü", () => {
   });
 
   it("bozuk JSON gövdesi 422 döner ve hiçbir kayıt açılmaz", async () => {
-    const { POST } = await import("@/app/api/password-resets/route");
+    const { POST } = await import("@/app/api/v1/password-resets/route");
 
     const response = await POST(
-      new Request("http://localhost:3000/api/password-resets", {
+      new Request("http://localhost:3000/api/v1/password-resets", {
         method: "POST",
         headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.9" },
         body: "bozuk-json",

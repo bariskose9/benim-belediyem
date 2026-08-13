@@ -78,7 +78,7 @@ test.describe("akışın başlatılması", () => {
   test("Google'a PKCE, state ve nonce ile gidiliyor", async ({ page }) => {
     await assignOwnIp(page);
 
-    const response = await page.request.get("/api/auth/google?donus=%2Fhesabim", {
+    const response = await page.request.get("/api/v1/auth/google?donus=%2Fhesabim", {
       maxRedirects: 0,
     });
 
@@ -99,8 +99,8 @@ test.describe("akışın başlatılması", () => {
   test("her başlatmada yeni state üretiliyor", async ({ page }) => {
     await assignOwnIp(page);
 
-    const first = await page.request.get("/api/auth/google", { maxRedirects: 0 });
-    const second = await page.request.get("/api/auth/google", { maxRedirects: 0 });
+    const first = await page.request.get("/api/v1/auth/google", { maxRedirects: 0 });
+    const second = await page.request.get("/api/v1/auth/google", { maxRedirects: 0 });
 
     const stateOf = (response: { headers: () => Record<string, string> }) =>
       new URL(response.headers().location).searchParams.get("state");
@@ -116,7 +116,7 @@ test.describe("akışın başlatılması", () => {
     await assignOwnIp(page);
 
     const response = await page.request.get(
-      "/api/auth/google?donus=https%3A%2F%2Fsahte-belediye.example",
+      "/api/v1/auth/google?donus=https%3A%2F%2Fsahte-belediye.example",
       { maxRedirects: 0 },
     );
 
@@ -161,7 +161,7 @@ test.describe("dönüş ucunun korumaları", () => {
     await assignOwnIp(page);
 
     // Akışı başlat — işlem çerezi tarayıcıya yazılır.
-    await page.goto("/api/auth/google", { waitUntil: "commit" });
+    await page.goto("/api/v1/auth/google", { waitUntil: "commit" });
 
     const callbackUrl = "/api/auth/google/callback?code=sahte&state=uydurma";
 

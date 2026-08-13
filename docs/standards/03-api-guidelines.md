@@ -108,6 +108,64 @@ istemci tarafında "bilinmeyen alan varsa hata ver" davranışı kullanılmaz.)*
 3. Kullanım ölçülür — trafiği sıfırlanmadan uç kapatılmaz
 4. Sunset tarihinden sonra kaldırılır ve belgeden düşer
 
+### Sürüm YOL SEGMENTİNDE taşınır: `/api/v1/<kaynak>`
+
+Başlık (`Accept-Version`) veya medya tipi tabanlı sürümleme **kullanılmaz.**
+Gerekçe ezberden değil kamu sektörü standardından geliyor —
+[GOV.UK API teknik standardı](https://www.gov.uk/guidance/gds-api-technical-and-data-standards)
+sürümü URI'ye koymayı söylüyor ve diğer iki yöntem için açıkça *"avoid these
+approaches because they can lead to your API being blocked by proxies or
+firewalls"* diyor.
+
+Bu projeye özel dört kazanç:
+
+| | Yol segmenti | Başlık tabanlı |
+|---|---|---|
+| Yanlış sürüme giden eski istemci | `404` — **gürültülü** | `200` + yanlış sürüm — **sessiz** |
+| Yeni sürüm eklemek | Yeni klasör; eski dosyaya dokunulmaz | Her route'a elle dallanma |
+| "Kim hâlâ eski sürümü çağırıyor?" | Erişim log'unda **zaten var** | Başlık ayrıca log'lanmalı |
+| CDN / proxy / güvenlik duvarı | Yolu anlar | Özel başlığı çoğu tanımaz |
+
+**Ne zaman başlık tabanlı meşrudur:** yalnızca tüketicilerinin **hepsini** sen
+güncelleyebiliyorsan (servisten servise dahilî çağrı). Mobil uygulama, üçüncü
+taraf veya tarayıcı önbelleği varsa yol segmenti.
+
+### ⛔ Adresini DIŞARIDA biri sabitlemiş uç sürümlenmez
+
+Sürümleme, istemciyle aramızdaki **sözleşmeyi** korur. Bir ucun adresi bizim
+dışımızda bir yerde kayıtlıysa o adres sözleşme değil **kayıt**tır; taşımak
+sözleşmeyi korumaz, çalışan bir şeyi kırar. Tipik olanlar:
+
+- sağlık / hazırlık ucu (izleme aracı, yük dengeleyici, duman testi)
+- planlı görev ucu (⛔ platform yapılandırmasında sabit — taşımak görevi
+  **sessizce** durdurur, hata bile üretmez)
+- OAuth `redirect_uri` (⛔ sağlayıcının panelinde kayıtlı — düzeltmesi kodda değil)
+- belgenin kendi adresi
+- taklit edilen bir **üçüncü tarafın** API'si (onu kendi sürümünle etiketlemek
+  yanlış bir iddiadır)
+
+İstisna listesi **isim isim yazılır ve testle kilitlenir**; "şimdilik" diye
+eklenmez. ⭐ Test, istisnayı gerekçesine bağlamalıdır: cron yolu platform
+yapılandırma dosyasından, callback adresi `redirect_uri`'yi üreten sabitten
+okunup karşılaştırılır. Yoksa "adresi panelde kayıtlı" cümlesi doğrulanmamış
+bir iddia olarak kalır.
+
+### ⚠️ `Deprecation` bir HTTP-date DEĞİLDİR
+
+RFC 9745 §2 bu başlığı bir **Structured Field Date** olarak tanımlıyor: değeri
+`@<unix-saniye>` biçiminde yazılır. `Sunset` ise sıradan bir HTTP-date'tir.
+
+```
+Deprecation: @1788220799
+Sunset: Sun, 01 Mar 2026 23:59:59 GMT
+Link: </api/v2/appointments>; rel="successor-version"
+```
+
+İkisini karıştırmak **hiçbir yerde yakalanmayan** bir hatadır: başlık yazılır,
+yanıt 200 döner, istemci değeri okuyamaz. Bu yüzden emeklilik başlıklarını üreten
+kod ilk emeklilikten **önce** yazılır ve biçimi testle kilitlenir — ilk emeklilik
+günü RFC okumak için doğru an değildir.
+
 ⛔ **Mobil uygulama geldiği gün bu bölüm zorunlu hâle gelir.** Web istemcisini
 tek deploy'la güncellersin; **kullanıcının telefonundaki eski sürümü
 güncelleyemezsin.** Kaldırılan bir uç, güncellemeyi almamış herkes için

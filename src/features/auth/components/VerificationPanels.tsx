@@ -133,7 +133,7 @@ function ChannelPanel({
     setIsSubmitting(true);
 
     const result = await apiRequest<{ completed: boolean }>(
-      "/api/registrations/current/verifications",
+      "/api/v1/registrations/current/verifications",
       { method: "POST", body: { channel, code } },
     );
 
@@ -162,7 +162,7 @@ function ChannelPanel({
     setIsResending(true);
 
     const result = await apiRequest<{ simulationCode?: string }>(
-      "/api/registrations/current/otp-challenges",
+      "/api/v1/registrations/current/otp-challenges",
       { method: "POST", body: { channel, turnstileToken } },
     );
 

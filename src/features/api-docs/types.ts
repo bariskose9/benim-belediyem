@@ -36,7 +36,7 @@ export type OperationParam = {
 };
 
 export type ApiOperation = {
-  /** Next.js yol biçimi değil, OpenAPI biçimi: `/api/addresses/{addressId}`. */
+  /** Next.js yol biçimi değil, OpenAPI biçimi: `/api/v1/addresses/{addressId}`. */
   path: string;
   method: HttpMethod;
   /** Belgede gruplama başlığı — Türkçe, kullanıcıya görünür. */

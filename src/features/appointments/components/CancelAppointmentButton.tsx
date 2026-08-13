@@ -34,7 +34,7 @@ export function CancelAppointmentButton({ appointmentId }: { appointmentId: stri
     setError(null);
     setIsPending(true);
 
-    const result = await apiRequest<undefined>(`/api/appointments/${appointmentId}`, {
+    const result = await apiRequest<undefined>(`/api/v1/appointments/${appointmentId}`, {
       method: "DELETE",
     });
 

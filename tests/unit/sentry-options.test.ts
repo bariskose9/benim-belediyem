@@ -78,7 +78,7 @@ describe("scrubEvent", () => {
             stacktrace: {
               frames: [
                 { filename: "src/features/orders/services/order.service.ts", lineno: 42 },
-                { filename: "src/app/api/orders/route.ts", lineno: 17 },
+                { filename: "src/app/api/v1/orders/route.ts", lineno: 17 },
               ],
             },
           },
@@ -96,7 +96,7 @@ describe("scrubEvent", () => {
   it("istek gövdesini, çerezleri ve başlıkları olaydan siler", () => {
     const event = eventWith({
       request: {
-        url: "https://benim-belediyem.vercel.app/api/sessions",
+        url: "https://benim-belediyem.vercel.app/api/v1/sessions",
         data: { email: "ayse@ornek.test", password: "Test1234!" },
         cookies: { bb_session: "ham-jeton" },
         headers: { authorization: "Bearer abc123def456" },
@@ -111,7 +111,7 @@ describe("scrubEvent", () => {
     expect(request.headers).toBeUndefined();
     expect(request.query_string).toBeUndefined();
     // Hangi ucun patladığı teşhis için şart, adres kalmalı.
-    expect(request.url).toContain("/api/sessions");
+    expect(request.url).toContain("/api/v1/sessions");
   });
 
   it("kullanıcıdan yalnızca kimliği bırakır", () => {

@@ -4,8 +4,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * `POST /api/events/{eventId}/seat-holds` ve
- * `DELETE /api/events/{eventId}/seat-holds/{reservationId}` — UCUN KENDİ İŞİ.
+ * `POST /api/v1/events/{eventId}/seat-holds` ve
+ * `DELETE /api/v1/events/{eventId}/seat-holds/{reservationId}` — UCUN KENDİ İŞİ.
  *
  * BU DOSYA İŞ KURALLARINI TEST ETMEZ ve bu bilinçli bir ayrım. "10 dakikalık
  * kilit", "süresi dolmuş kilidi devralma" ve "iki kullanıcı aynı anda talip
@@ -43,8 +43,8 @@ const releaseSeat = vi.hoisted(() => vi.fn());
 
 vi.mock("@/features/events/services/seat-hold.service", () => ({ holdSeat, releaseSeat }));
 
-const { POST } = await import("@/app/api/events/[eventId]/seat-holds/route");
-const { DELETE } = await import("@/app/api/events/[eventId]/seat-holds/[reservationId]/route");
+const { POST } = await import("@/app/api/v1/events/[eventId]/seat-holds/route");
+const { DELETE } = await import("@/app/api/v1/events/[eventId]/seat-holds/[reservationId]/route");
 
 /**
  * Hata sınıfları BURADA, uç modülleriyle AYNI AŞAMADA içe aktarılıyor.
@@ -94,7 +94,7 @@ beforeEach(() => {
 });
 
 function postRequest(body: unknown): Request {
-  return new Request(`http://localhost:3000/api/events/${EVENT_ID}/seat-holds`, {
+  return new Request(`http://localhost:3000/api/v1/events/${EVENT_ID}/seat-holds`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.9" },
     body: JSON.stringify(body),
@@ -106,9 +106,12 @@ function eventParams() {
 }
 
 function deleteRequest(): Request {
-  return new Request(`http://localhost:3000/api/events/${EVENT_ID}/seat-holds/${RESERVATION_ID}`, {
-    method: "DELETE",
-  });
+  return new Request(
+    `http://localhost:3000/api/v1/events/${EVENT_ID}/seat-holds/${RESERVATION_ID}`,
+    {
+      method: "DELETE",
+    },
+  );
 }
 
 function reservationParams(reservationId = RESERVATION_ID) {
@@ -174,7 +177,7 @@ describe("POST seat-holds — girdi", () => {
   });
 
   it("gövde bozuk JSON ise 422 döner, ayrıştırma hatası sızmaz", async () => {
-    const request = new Request(`http://localhost:3000/api/events/${EVENT_ID}/seat-holds`, {
+    const request = new Request(`http://localhost:3000/api/v1/events/${EVENT_ID}/seat-holds`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: "{bozuk",

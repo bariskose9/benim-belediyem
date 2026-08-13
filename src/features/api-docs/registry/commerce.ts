@@ -40,7 +40,7 @@ const TAG_MEMBERSHIP = "Spor salonu üyeliği";
  */
 export const commerceOperations: ApiOperation[] = [
   {
-    path: "/api/carts/current/items",
+    path: "/api/v1/carts/current/items",
     method: "post",
     tag: TAG_CART,
     summary: "Sepete ürün ekler.",
@@ -58,7 +58,7 @@ export const commerceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/carts/current/items/{itemId}",
+    path: "/api/v1/carts/current/items/{itemId}",
     method: "patch",
     tag: TAG_CART,
     summary: "Sepet kaleminin adedini değiştirir.",
@@ -70,7 +70,7 @@ export const commerceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/carts/current/items/{itemId}",
+    path: "/api/v1/carts/current/items/{itemId}",
     method: "delete",
     tag: TAG_CART,
     summary: "Sepet kalemini çıkarır.",
@@ -82,7 +82,7 @@ export const commerceOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/payments",
+    path: "/api/v1/payments",
     method: "post",
     tag: TAG_PAYMENT,
     summary: "Sepeti siparişe çevirir ve sahte ödemeyi alır.",
@@ -111,7 +111,7 @@ export const commerceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/orders/{id}",
+    path: "/api/v1/orders/{id}",
     method: "delete",
     tag: TAG_PAYMENT,
     summary: "Siparişi iptal eder.",
@@ -126,7 +126,7 @@ export const commerceOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/memberships",
+    path: "/api/v1/memberships",
     method: "post",
     tag: TAG_MEMBERSHIP,
     summary: "Yeni üyelik başlatır.",
@@ -147,7 +147,7 @@ export const commerceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/memberships/{membershipId}",
+    path: "/api/v1/memberships/{membershipId}",
     method: "patch",
     tag: TAG_MEMBERSHIP,
     summary: "Üyelik planını değiştirir.",
@@ -166,7 +166,7 @@ export const commerceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/memberships/{membershipId}",
+    path: "/api/v1/memberships/{membershipId}",
     method: "delete",
     tag: TAG_MEMBERSHIP,
     summary: "Üyeliği sonlandırır.",

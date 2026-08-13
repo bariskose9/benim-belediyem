@@ -61,7 +61,7 @@ export function LoginForm({
     setError(null);
     setIsSubmitting(true);
 
-    const result = await apiRequest("/api/sessions", {
+    const result = await apiRequest("/api/v1/sessions", {
       method: "POST",
       body: { nationalId, password, turnstileToken },
     });

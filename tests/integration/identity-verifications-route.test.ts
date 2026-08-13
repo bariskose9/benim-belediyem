@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * `POST /api/identity-verifications` — UCUN KENDİ İŞİ (adım 15c-2).
+ * `POST /api/v1/identity-verifications` — UCUN KENDİ İŞİ (adım 15c-2).
  *
  * BU DOSYA İŞ KURALLARINI TEST ETMEZ ve bu bilinçli bir ayrım. "Numara başka
  * hesapta", "18 yaş", "personel eşleşmesi" ve "koşullu yazma" gerçek
@@ -49,7 +49,7 @@ vi.mock("@/lib/rate-limit", async (importOriginal) => {
   return { ...actual, consumeRateLimit };
 });
 
-const { POST } = await import("@/app/api/identity-verifications/route");
+const { POST } = await import("@/app/api/v1/identity-verifications/route");
 const { messages } = await import("@/config/messages");
 
 const SESSION: SessionShape = {
@@ -65,7 +65,7 @@ const SESSION: SessionShape = {
 const VALID_NATIONAL_ID = "10000000146";
 
 function request(body: unknown): Request {
-  return new Request("http://localhost:3000/api/identity-verifications", {
+  return new Request("http://localhost:3000/api/v1/identity-verifications", {
     method: "POST",
     headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.5" },
     body: JSON.stringify(body),
@@ -85,7 +85,7 @@ beforeEach(() => {
   }));
 });
 
-describe("POST /api/identity-verifications — yetki kapısı", () => {
+describe("POST /api/v1/identity-verifications — yetki kapısı", () => {
   it("girişsiz istek 401 döner ve servis hiç çağrılmaz", async () => {
     state.session = null;
 
@@ -108,7 +108,7 @@ describe("POST /api/identity-verifications — yetki kapısı", () => {
   });
 });
 
-describe("POST /api/identity-verifications — girdi doğrulama", () => {
+describe("POST /api/v1/identity-verifications — girdi doğrulama", () => {
   /**
    * Kontrol basamağı hatalı numara 400 `IDENTITY_CHECK_FAILED` döner, 422
    * DEĞİL: 422 dönseydi durum kodunun kendisi "numaran bozuk" ile "numara
@@ -132,7 +132,7 @@ describe("POST /api/identity-verifications — girdi doğrulama", () => {
   });
 
   it("gövdesi bozuk istek iç hata sızdırmadan 400 döner", async () => {
-    const broken = new Request("http://localhost:3000/api/identity-verifications", {
+    const broken = new Request("http://localhost:3000/api/v1/identity-verifications", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: "{bozuk",
@@ -146,7 +146,7 @@ describe("POST /api/identity-verifications — girdi doğrulama", () => {
   });
 });
 
-describe("POST /api/identity-verifications — kimlik oturumdan gelir", () => {
+describe("POST /api/v1/identity-verifications — kimlik oturumdan gelir", () => {
   /**
    * ⭐ IDOR KORUMASI TASARIM GEREĞİ: gövdeye `userId` yazılsa bile servise
    * OTURUMDAKİ kullanıcı gidiyor. Uç, başkasının hesabına kimlik bağlamanın
@@ -194,7 +194,7 @@ describe("POST /api/identity-verifications — kimlik oturumdan gelir", () => {
   });
 });
 
-describe("POST /api/identity-verifications — deneme bütçesi", () => {
+describe("POST /api/v1/identity-verifications — deneme bütçesi", () => {
   /**
    * ⭐ BÜTÇE SERVİSTEN ÖNCE: sayaç dolduğunda KPS'e hiç gidilmiyor. Bütçe
    * KULLANICI bazlı, çünkü oturum kimliği yeniden girişle, IP ise şebeke

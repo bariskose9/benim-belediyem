@@ -23,7 +23,7 @@ const TAG_GOOGLE = "Google ile giriş";
 
 export const authOperations: ApiOperation[] = [
   {
-    path: "/api/sessions",
+    path: "/api/v1/sessions",
     method: "post",
     tag: TAG_SESSION,
     summary: "Giriş yapar ve oturum çerezini kurar.",
@@ -38,7 +38,7 @@ export const authOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/sessions/current",
+    path: "/api/v1/sessions/current",
     method: "delete",
     tag: TAG_SESSION,
     summary: "Çıkış yapar; oturumu sunucuda geçersizleştirir.",
@@ -49,7 +49,7 @@ export const authOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/registrations",
+    path: "/api/v1/registrations",
     method: "post",
     tag: TAG_REGISTRATION,
     summary: "Kayıt akışını başlatır; kimlik bilgilerini doğrular.",
@@ -72,7 +72,7 @@ export const authOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/registrations/current",
+    path: "/api/v1/registrations/current",
     method: "get",
     tag: TAG_REGISTRATION,
     summary: "Devam eden kayıt taslağının durumunu döner.",
@@ -84,7 +84,7 @@ export const authOperations: ApiOperation[] = [
     errors: ["REGISTRATION_EXPIRED"],
   },
   {
-    path: "/api/registrations/current",
+    path: "/api/v1/registrations/current",
     method: "patch",
     tag: TAG_REGISTRATION,
     summary: "Taslağa iletişim bilgisi ve şifre yazar, doğrulama kodu gönderir.",
@@ -103,7 +103,7 @@ export const authOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/registrations/current",
+    path: "/api/v1/registrations/current",
     method: "delete",
     tag: TAG_REGISTRATION,
     summary: "Kayıt taslağını iptal eder.",
@@ -112,7 +112,7 @@ export const authOperations: ApiOperation[] = [
     errors: ["REGISTRATION_EXPIRED"],
   },
   {
-    path: "/api/registrations/current/otp-challenges",
+    path: "/api/v1/registrations/current/otp-challenges",
     method: "post",
     tag: TAG_REGISTRATION,
     summary: "Doğrulama kodunu yeniden gönderir.",
@@ -123,7 +123,7 @@ export const authOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/registrations/current/verifications",
+    path: "/api/v1/registrations/current/verifications",
     method: "post",
     tag: TAG_REGISTRATION,
     summary: "Doğrulama kodunu kontrol eder ve kaydı tamamlar.",
@@ -138,7 +138,7 @@ export const authOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/password-resets",
+    path: "/api/v1/password-resets",
     method: "post",
     tag: TAG_PASSWORD_RESET,
     summary: "Şifre sıfırlama akışını başlatır.",
@@ -156,7 +156,7 @@ export const authOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/password-resets/current/otp-challenges",
+    path: "/api/v1/password-resets/current/otp-challenges",
     method: "post",
     tag: TAG_PASSWORD_RESET,
     summary: "Sıfırlama kodunu yeniden gönderir.",
@@ -171,7 +171,7 @@ export const authOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/password-resets/current/password",
+    path: "/api/v1/password-resets/current/password",
     method: "put",
     tag: TAG_PASSWORD_RESET,
     summary: "Kodu doğrular ve yeni şifreyi yazar.",
@@ -191,7 +191,7 @@ export const authOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/auth/google",
+    path: "/api/v1/auth/google",
     method: "get",
     tag: TAG_GOOGLE,
     summary: "Google yetkilendirme adresine yönlendirir.",
@@ -214,7 +214,7 @@ export const authOperations: ApiOperation[] = [
     errors: ["GOOGLE_LINKED_TO_OTHER_ACCOUNT", "GOOGLE_ALREADY_LINKED"],
   },
   {
-    path: "/api/auth/google/connections",
+    path: "/api/v1/auth/google/connections",
     method: "post",
     tag: TAG_GOOGLE,
     summary: "Mevcut hesaba Google hesabı bağlamayı başlatır.",
@@ -234,7 +234,7 @@ export const authOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/auth/google/connections",
+    path: "/api/v1/auth/google/connections",
     method: "delete",
     tag: TAG_GOOGLE,
     summary: "Google bağlantısını kaldırır.",

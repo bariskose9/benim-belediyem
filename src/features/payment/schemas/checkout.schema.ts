@@ -105,7 +105,7 @@ export type CheckoutCardPayload = z.infer<typeof checkoutCardSchema>;
  * Sepete ekleme ucunun şeması.
  *
  * ⛔ `event` TÜRÜ BİLEREK KABUL EDİLMİYOR (adım 11). Bilet sepete bu uçtan
- * değil, koltuk kilidi ucundan giriyor (`/api/events/[eventId]/seat-holds`) ve
+ * değil, koltuk kilidi ucundan giriyor (`/api/v1/events/[eventId]/seat-holds`) ve
  * `ref_id` değerini SUNUCU üretiyor.
  *
  * Sebep güvenlik: bilet satırı artık bir `seat_reservations` kaydını gösteriyor

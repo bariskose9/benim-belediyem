@@ -44,7 +44,7 @@ export function PhoneForm({
     setSaved(false);
     setPending(true);
 
-    const result = await apiRequest<undefined>("/api/account/phone", {
+    const result = await apiRequest<undefined>("/api/v1/account/phone", {
       method: "PUT",
       body: { phone },
     });

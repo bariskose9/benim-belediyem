@@ -35,7 +35,7 @@ const nationalIdSchema = z
 /**
  * ⚠️ BURADAKİ MESAJLAR KULLANICIYA ULAŞMIYOR ve bu BİLİNÇLİ.
  *
- * İki uç da (`/api/registrations`, `/api/identity-verifications`) şema hatasını
+ * İki uç da (`/api/v1/registrations`, `/api/v1/identity-verifications`) şema hatasını
  * yakalayıp TEK TİP `IDENTITY_CHECK_FAILED` döndürüyor; `parsed.error` hiç
  * okunmuyor. Gerekçe 05-auth-security.md: "hangi alanın tutmadığı söylenmez" —
  * "doğum yılın bozuk" demek, numara taraması yapan birine hangi alanı

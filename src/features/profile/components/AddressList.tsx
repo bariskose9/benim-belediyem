@@ -57,7 +57,7 @@ export function AddressList({ addresses }: { addresses: readonly AddressRow[] })
     setError(null);
     setPending({ kind: "create" });
 
-    const result = await apiRequest<{ id: string }>("/api/addresses", {
+    const result = await apiRequest<{ id: string }>("/api/v1/addresses", {
       method: "POST",
       body: values,
     });
@@ -83,7 +83,7 @@ export function AddressList({ addresses }: { addresses: readonly AddressRow[] })
     setError(null);
     setPending({ kind: "update", addressId });
 
-    const result = await apiRequest<undefined>(`/api/addresses/${addressId}`, {
+    const result = await apiRequest<undefined>(`/api/v1/addresses/${addressId}`, {
       method: "PATCH",
       body: values,
     });
@@ -104,7 +104,7 @@ export function AddressList({ addresses }: { addresses: readonly AddressRow[] })
     setError(null);
     setPending({ kind: "delete", addressId });
 
-    const result = await apiRequest<undefined>(`/api/addresses/${addressId}`, {
+    const result = await apiRequest<undefined>(`/api/v1/addresses/${addressId}`, {
       method: "DELETE",
     });
 

@@ -102,7 +102,7 @@ export default async function CookiePolicyPage({
           AÇIKÇA veriliyor çünkü sayfa kendi adresini biliyor; bantta bilmiyordu
           ve orada `Referer` başlığına düşülüyor.
         */}
-        <form action="/api/consents" method="post">
+        <form action="/api/v1/consents" method="post">
           <input type="hidden" name="consentType" value={ConsentType.necessary_cookies} />
           <input type="hidden" name="isGranted" value={isAcknowledged ? "0" : "1"} />
           <input type="hidden" name="returnTo" value="/cerez-politikasi" />

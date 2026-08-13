@@ -35,7 +35,7 @@ function walkRouteFiles(dir: string): string[] {
   return found;
 }
 
-/** Dosya yolundan uç adresini çıkarır: `.../api/addresses/[addressId]/route.ts` → `/api/addresses/{addressId}`. */
+/** Dosya yolundan uç adresini çıkarır: `.../api/v1/addresses/[addressId]/route.ts` → `/api/v1/addresses/{addressId}`. */
 function toApiPath(routeFile: string): string {
   const relative = routeFile.slice(routeFile.indexOf("/src/app/api")).replace("/src/app", "");
 
@@ -137,7 +137,7 @@ describe("API belgesi kütüğü gerçek uçlarla örtüşüyor", () => {
    * ⭐ BU TEST BİR MUTASYON DENEYİNDEN DOĞDU.
    *
    * Önce yalnızca "kütükte korumalı yazan uç, belgede de korumalı görünüyor mu"
-   * ölçülüyordu. `/api/addresses` POST'unun erişim seviyesi deneme amaçlı
+   * ölçülüyordu. `/api/v1/addresses` POST'unun erişim seviyesi deneme amaçlı
    * `authenticated` → `public` yapıldı ve **testlerin hepsi yeşil kaldı**:
    * testler kütüğün kendisiyle tutarlıydı ama GERÇEKLE bağı yoktu. Yani
    * yanlış etiketlenmiş bir uç, belgede "giriş gerekmez" diye görünebilirdi.

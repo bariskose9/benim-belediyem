@@ -44,7 +44,7 @@ export function StaffVerificationForm() {
     setError(null);
     setPending(true);
 
-    const result = await apiRequest<{ revealedCode?: string }>("/api/staff-verifications", {
+    const result = await apiRequest<{ revealedCode?: string }>("/api/v1/staff-verifications", {
       method: "POST",
       body: { workEmail },
     });
@@ -67,7 +67,7 @@ export function StaffVerificationForm() {
     setPending(true);
 
     const result = await apiRequest<{ isStaff: boolean }>(
-      "/api/staff-verifications/confirmations",
+      "/api/v1/staff-verifications/confirmations",
       { method: "POST", body: { workEmail, code } },
     );
 

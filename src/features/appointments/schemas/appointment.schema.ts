@@ -24,14 +24,14 @@ import { z } from "zod";
  */
 const recordId = z.string().trim().min(1).max(128);
 
-/** `POST /api/appointments` gövdesi. */
+/** `POST /api/v1/appointments` gövdesi. */
 export const createAppointmentSchema = z.object({
   slotId: recordId,
 });
 
 export type CreateAppointmentPayload = z.infer<typeof createAppointmentSchema>;
 
-/** `DELETE /api/appointments/{id}` yol parametresi. */
+/** `DELETE /api/v1/appointments/{id}` yol parametresi. */
 export const appointmentIdSchema = z.object({
   id: recordId,
 });

@@ -25,7 +25,7 @@ export function LogoutButton() {
   async function handleClick() {
     setIsSubmitting(true);
 
-    await apiRequest("/api/sessions/current", { method: "DELETE" });
+    await apiRequest("/api/v1/sessions/current", { method: "DELETE" });
 
     // Ana sayfaya dön ve sunucu bileşenlerini tazele — menü ve korumalı
     // sayfalar oturum durumunu sunucuda okuyor.

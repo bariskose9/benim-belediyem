@@ -208,7 +208,7 @@ async function seedUser(overrides: Row = {}): Promise<Row & { id: string }> {
 }
 
 function loginRequest(body: Row, headers: Record<string, string> = {}) {
-  return new Request("http://localhost:3000/api/sessions", {
+  return new Request("http://localhost:3000/api/v1/sessions", {
     method: "POST",
     headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.9", ...headers },
     body: JSON.stringify(body),
@@ -216,16 +216,16 @@ function loginRequest(body: Row, headers: Record<string, string> = {}) {
 }
 
 async function callLogin(body: Row = {}, headers: Record<string, string> = {}) {
-  const { POST } = await import("@/app/api/sessions/route");
+  const { POST } = await import("@/app/api/v1/sessions/route");
 
   return POST(loginRequest({ nationalId: NATIONAL_ID, password: PASSWORD, ...body }, headers));
 }
 
 async function callLogout(headers: Record<string, string> = {}) {
-  const { DELETE } = await import("@/app/api/sessions/current/route");
+  const { DELETE } = await import("@/app/api/v1/sessions/current/route");
 
   return DELETE(
-    new Request("http://localhost:3000/api/sessions/current", {
+    new Request("http://localhost:3000/api/v1/sessions/current", {
       method: "DELETE",
       headers: { "x-forwarded-for": "203.0.113.9", ...headers },
     }),
@@ -383,10 +383,10 @@ describe("hesap sayımı koruması", () => {
   });
 
   it("boş gövdede de aynı yanıtı verir", async () => {
-    const { POST } = await import("@/app/api/sessions/route");
+    const { POST } = await import("@/app/api/v1/sessions/route");
 
     const response = await POST(
-      new Request("http://localhost:3000/api/sessions", {
+      new Request("http://localhost:3000/api/v1/sessions", {
         method: "POST",
         headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.9" },
         body: "bozuk-json",

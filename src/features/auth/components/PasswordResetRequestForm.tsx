@@ -62,7 +62,7 @@ export function PasswordResetRequestForm({
     setError(null);
     setIsSubmitting(true);
 
-    const result = await apiRequest("/api/password-resets", {
+    const result = await apiRequest("/api/v1/password-resets", {
       method: "POST",
       body: { nationalId, turnstileToken },
     });

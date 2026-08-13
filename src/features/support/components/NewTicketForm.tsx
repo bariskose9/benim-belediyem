@@ -105,7 +105,7 @@ export function NewTicketForm({ turnstileSiteKey }: NewTicketFormProps) {
     body.set("turnstileToken", turnstileToken);
     files.forEach((file) => body.append("attachments", file));
 
-    const result = await apiRequest<{ id: string }>("/api/support-tickets", {
+    const result = await apiRequest<{ id: string }>("/api/v1/support-tickets", {
       method: "POST",
       body,
     });

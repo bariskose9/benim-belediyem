@@ -41,7 +41,7 @@ export function AccountDeletionCard({ state }: { state: AccountDeletionState }) 
     setError(null);
     setPending(true);
 
-    const result = await apiRequest<undefined>("/api/account/deletions", {
+    const result = await apiRequest<undefined>("/api/v1/account/deletions", {
       method: "POST",
       body: state.requiresPassword ? { password } : {},
     });

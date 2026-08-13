@@ -51,7 +51,7 @@ export function shortTicketCode(ticketId: string): string {
 
 /** Ekin yetkili adresi. Sürücü değişse bile bu adres değişmez (ADR-014). */
 export function attachmentUrl(ticketId: string, attachmentId: string): string {
-  return `/api/support-tickets/${ticketId}/attachments/${attachmentId}`;
+  return `/api/v1/support-tickets/${ticketId}/attachments/${attachmentId}`;
 }
 
 export function toTicketView(row: SupportTicketRow, now: Date): SupportTicketView {

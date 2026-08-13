@@ -33,7 +33,7 @@ export function CloseTicketButton({ ticketId }: { ticketId: string }) {
     setError(null);
     setIsPending(true);
 
-    const result = await apiRequest<undefined>(`/api/support-tickets/${ticketId}`, {
+    const result = await apiRequest<undefined>(`/api/v1/support-tickets/${ticketId}`, {
       method: "DELETE",
     });
 

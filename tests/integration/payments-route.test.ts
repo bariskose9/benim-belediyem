@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * `POST /api/payments` — UCUN KENDİ İŞİ.
+ * `POST /api/v1/payments` — UCUN KENDİ İŞİ.
  *
  * İş kuralları (üç sipariş, başarısızlıkta geri alma, idempotency, stok
  * yarışı) gerçek PostgreSQL'e karşı `tests/db/checkout.test.ts` içinde
@@ -35,7 +35,7 @@ const checkout = vi.hoisted(() => vi.fn());
 
 vi.mock("@/features/payment/services/checkout.service", () => ({ checkout }));
 
-const { POST } = await import("@/app/api/payments/route");
+const { POST } = await import("@/app/api/v1/payments/route");
 const { messages } = await import("@/config/messages");
 
 /** Hata sınıfları uç modülüyle AYNI aşamada içe aktarılıyor — `instanceof` tutsun diye. */
@@ -72,7 +72,7 @@ function validBody() {
 }
 
 function request(body: unknown): Request {
-  return new Request("http://localhost:3000/api/payments", {
+  return new Request("http://localhost:3000/api/v1/payments", {
     method: "POST",
     headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.9" },
     body: JSON.stringify(body),

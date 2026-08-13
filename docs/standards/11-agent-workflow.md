@@ -140,6 +140,37 @@ Bir kararı savunurken şu cümlelerden birini kuruyorsan dur ve yeniden düşü
 - "Zaten depo herkese açık" → açık kaynak olmak, saldırı yüzeyini genişletmek
   için gerekçe değildir. İkisi ayrı sorulardır
 
+### ⛔ MÜHENDİSLİK SEÇİMİ KULLANICIYA DEVREDİLMEZ
+
+"Belirsizlikte sor" kuralı **iş gereksinimi** içindir, mühendislik tercihi için
+değil. İkisi farklı sorulardır ve karıştırılması kullanıcıya cevaplayamayacağı
+bir soru sormak demektir:
+
+| Soru tipi | Örnek | Kim cevaplar |
+|---|---|---|
+| **İş gereksinimi** | "Randevu iptali kaç saat öncesine kadar serbest?" · "Bu alan zorunlu mu?" | **Kullanıcı** — cevabı yalnızca o bilir |
+| **Dış dünya** | "Bu panelde hangi anahtar tanımlı?" · "Bu maliyeti ödemek ister misin?" | **Kullanıcı** — sonucunu o üstlenir |
+| **Mühendislik tercihi** | "Yol segmenti mi, başlık tabanlı sürümleme mi?" · "Hangi index?" · "Cursor mı offset mi?" | ⛔ **AJAN** — yerleşik pratikten türetilir |
+
+**Kural:** Bir mühendislik sorusunda seçenekleri kullanıcıya menü olarak sunup
+kararı ona bırakma. **Kararı sen ver**, ölçüt şudur:
+
+> *Bu ürünü gerçekten kullanan bir kurum (bu projede: bir büyükşehir belediyesi)
+> ve onun nöbetçi ekibi için, sektörde yerleşik pratik hangisini söylüyor?*
+
+Sonra kararı **bildir** — gerekçesi, elenen alternatifi ve kaynağıyla. Bildirmek
+onay istemek değildir; kullanıcı itiraz ederse karar değişir, itiraz etmezse
+karar zaten yürürlüktedir.
+
+⛔ **"ADR gerektirir" = "kullanıcıya sor" DEĞİLDİR.** ADR, kararın **yazıya
+dökülmesini** şart koşar; kimin verdiğini değil. Bir kararı ADR'ye yazmak için
+önce o kararı vermiş olman gerekir.
+
+⚠️ **Ayırt edici test:** Soruyu cevaplamak için kullanıcının **kod okuması veya
+sektör pratiğini bilmesi** gerekiyorsa, o soru ona sorulmamalıydı. Kullanıcı
+"hangisi doğruysa o" diyorsa bu bir cevap değil, **sorunun yanlış sorulduğunun
+kanıtıdır.**
+
 ## Kapsam kontrolü
 İstenmeyen iyileştirme yapma. "Bu arada şunu da düzelttim" yasak —
 gördüğün sorunu **bildir**, ayrı iş olarak planla.

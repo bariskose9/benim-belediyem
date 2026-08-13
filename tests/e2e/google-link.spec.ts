@@ -138,7 +138,7 @@ test("giriş yöntemleri kartı bağlı olmayan hesapta bağlama formunu göster
 test("doğru şifre Google'a yönlendirme üretiyor", async ({ page }, testInfo) => {
   await signIn(page, account(testInfo.project.name).nationalId);
 
-  const response = await page.request.post("/api/auth/google/connections", {
+  const response = await page.request.post("/api/v1/auth/google/connections", {
     form: { sifre: PASSWORD },
     maxRedirects: 0,
   });
@@ -150,7 +150,7 @@ test("doğru şifre Google'a yönlendirme üretiyor", async ({ page }, testInfo)
 test("yanlış şifre bağlama akışını başlatmıyor", async ({ page }, testInfo) => {
   await signIn(page, account(testInfo.project.name).nationalId);
 
-  const response = await page.request.post("/api/auth/google/connections", {
+  const response = await page.request.post("/api/v1/auth/google/connections", {
     form: { sifre: "YanlisSifre1!" },
     maxRedirects: 0,
   });
@@ -159,7 +159,7 @@ test("yanlış şifre bağlama akışını başlatmıyor", async ({ page }, test
 });
 
 test("giriş yapmamış ziyaretçi bağlama akışını başlatamıyor", async ({ page }) => {
-  const response = await page.request.post("/api/auth/google/connections", {
+  const response = await page.request.post("/api/v1/auth/google/connections", {
     form: { sifre: PASSWORD },
     maxRedirects: 0,
   });

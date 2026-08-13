@@ -5,7 +5,7 @@ import { messages } from "@/config/messages";
  * "Google ile devam et" düğmesi (PRD §5.0 · adım 4c).
  *
  * BU BİR BAĞLANTI, DÜĞME DEĞİL — ve bu bilinçli. Akış bir sayfa yönlendirmesi
- * (`GET /api/auth/google`); JavaScript ile `fetch` atılsaydı Google'ın giriş
+ * (`GET /api/v1/auth/google`); JavaScript ile `fetch` atılsaydı Google'ın giriş
  * ekranı bir yönlendirmenin ucunda kalırdı. Bağlantı olması ayrıca şunu
  * kazandırıyor: JavaScript çalışmasa bile giriş çalışır ve klavye ile
  * gezinme kendiliğinden doğru olur (WCAG 2.1 AA).
@@ -14,7 +14,7 @@ import { messages } from "@/config/messages";
  */
 export function GoogleLoginButton({ redirectTo }: { redirectTo: string }) {
   const copy = messages.auth.login.google;
-  const href = `/api/auth/google?donus=${encodeURIComponent(redirectTo)}`;
+  const href = `/api/v1/auth/google?donus=${encodeURIComponent(redirectTo)}`;
 
   return (
     <div className="flex flex-col gap-3">

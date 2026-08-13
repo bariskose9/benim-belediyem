@@ -41,7 +41,7 @@ export function IdentityUnlinkCard({ state }: { state: IdentityUnlinkState }) {
     setError(null);
     setPending(true);
 
-    const result = await apiRequest<undefined>("/api/account/identity-unlinks", {
+    const result = await apiRequest<undefined>("/api/v1/account/identity-unlinks", {
       method: "POST",
       // Şifresi olmayan hesapta alan hiç çizilmiyor ve gövdeye de girmiyor;
       // sunucu "gerekiyor mu" kararını kendi veriyor.
