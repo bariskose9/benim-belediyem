@@ -40,11 +40,13 @@ Roadmap adım **0 → 18e bitti**. Borç **#103 ödendi**, **#107 kısmen ödend
 **adım 19 (Expo mobil)**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- ⚠️ **107a HENÜZ MERGE EDİLMEDİ.** Bu dosya commit kapısında yazıldı; proje
-  sahibi onaylamadan commit/push yapılmadı. `git status` ile teyit et —
-  değişiklikler çalışma ağacında duruyorsa onay hâlâ bekliyor demektir
-- ✅ #103 canlıda (PR #69 → `8bb0419`), belge commit'i `0f27c08` de dağıtıldı
-  (`/api/health` → `commit: 0f27c08`, `db: ok` ile doğrulandı)
+- ✅ **107a MERGE EDİLDİ ve CANLIDA** (PR #71 → `main` = `2adce12`).
+  ⭐ Bu satır merge'den SONRA yazıldı. Dağıtım doğrulandı: `commit: 2adce12`,
+  `db: ok`, `env: production`. Canlı duman testi temiz — beş sayfa **200**,
+  `/api/cron/daily` **401** (kapı sağlam), `/api/docs` **404** (production'da
+  bilerek kapalı, ADR-019). Yine de körü körüne güvenme:
+  `git log --oneline -3` ve `curl -s .../api/health` ile teyit et
+- ✅ #103 canlıda (PR #69 → `8bb0419`)
 - ✅ **CRON'UN ÇALIŞTIĞI KANITLANDI** — production denetim kaydında 9 adet
   `scheduled_task_run`. Bir daha sorgulama
 - Gerçek kullanıcı 0 · Sentry canlıda ve uçtan uca doğrulanmış
@@ -139,7 +141,8 @@ oturumun başında açma, hatırlatma, iş listesine koyma.
 | Ne | Durum |
 |---|---|
 | **#103'ün preview'da elle kontrolü** | ⏸️ Ertelendi. Yapılmayan tek şey: preview URL'de market → sepete ekle → sepet akışını tıklamak. ⚠️ Otomatik taraf zaten kanıtlı. ⛔ Oturum başında hatırlatma; **yalnızca canlıda sepet/market ile ilgili bir arıza görülürse** hatırlat |
-| Telefondan toplu elle test | 16. kez ertelendi. ⛔ Listeyi yeniden sunma, tek madde önerisini de tekrarlama |
+| Telefondan toplu elle test | 16. kez ertelendi (2026-08-13: *"diğer testlerimi sonraki session'a ötele"*). ⛔ Listeyi yeniden sunma, tek madde önerisini de tekrarlama |
+| **107a'nın elle kontrolü** | ⏸️ **2026-08-13'te bilinçli olarak ertelendi.** Proje sahibi canlıda `/api/health` ve sitenin açıldığını kendisi doğruladı; kalan elle testleri sonraki oturuma bıraktı. ⚠️ Bu adımın ekranda görünen bir karşılığı zaten YOK (arayüz, akış ve veritabanı hiç değişmedi). ⛔ Oturum başında hatırlatma |
 | `proje-kiti`'nin Windows makineye kurulumu | Ertelendi. Gerektiğinde: `/plugin marketplace add bariskose9/bariskose-skills` → `/plugin install proje-kiti@bariskose-skills` |
 | Cloudflare panelinde preview alan adı yetkilendirme (#114) | ⚠️ İSTEĞE BAĞLI, zorunlu değil |
 | #23 ve #89 | Kararı bekliyor, acelesi yok |
@@ -158,15 +161,13 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — sürüm 1.18.0 hazır (COMMIT EDİLMEDİ), kurulu sürüm 1.11.0
+## 📦 KİT — sürüm 1.18.0 YAYINLANDI, kurulu sürüm 1.11.0
 
 ✅ **KAPI 8 GEÇİLDİ, diff ile kanıtlandı (iki dosyada da çıktı boş).**
 
-- **1.18.0** — `03-api-guidelines.md`: yanıt gövdesi de belgelenir, şema telden
-  doğrulanır, sözleşme borcu yalnızca küçülen listeyle kapatılır ·
+- **1.18.0** (`0e40146`) — `03-api-guidelines.md`: yanıt gövdesi de belgelenir,
+  şema telden doğrulanır, sözleşme borcu yalnızca küçülen listeyle kapatılır ·
   `06-testing.md`: bir kapıyı `NODE_ENV`'e bağlama, açık olduğunu ölç
-- ⚠️ **Kit deposundaki değişiklikler de COMMIT EDİLMEDİ** — proje deposuyla
-  birlikte onay bekliyor (`/Users/bariskose/baris_projects/bariskose-skills`)
 
 ⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ 1.11.0 — ESKİ (yedi sürüm geride).**
 Yalnızca `/yeni-proje` veya `/kit-senkron` çalıştırılacağı gün "önce `/plugin`
