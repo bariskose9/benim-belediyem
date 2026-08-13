@@ -224,7 +224,7 @@ hatırlatma.**
 ⛔ **`00-stack.md` HÂLÂ FARKLI ve bu AÇIK BİR SORU.** Sürüm 1.7.0 istisnayı bölüm
 seviyesine indirdi (`<!-- ⛔ SENKRON SINIRI -->`) ama projedeki fark **sınırın
 ÜSTÜNDE** kalıyor (satır 19-68). Ya sınır yanlış yerde ya da o metin sınırın
-altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan 15'i birebir aynı.)
+altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan **17'si** birebir aynı — 2026-08-14'te ölçüldü.)
 
 ⚠️ Kit deposunu karşılaştırmadan önce daima `git fetch` + `git pull` yap.
 
