@@ -4,6 +4,83 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Eklendi — yanıt gövdeleri gerçek Zod şemalarıyla belgeleniyor (teknik borç #107 · ADR-021)
+
+- **Belge artık `data`'nın İÇİNİ de gösteriyor.** Önceki hâl yalnızca zarfı
+  (`{ data }`) ve Türkçe bir cümleyi belgeliyordu; istemci gövdenin ne
+  taşıdığını ancak deneyerek öğrenebilirdi
+- **Neden şimdi:** bugüne kadar tek tüketici web arayüzüydü ve yanıt biçimine
+  **TypeScript tipleriyle derleme anında** bağlıydı. Adım 19'da (Expo mobil) o
+  bağ ortadan kalkıyor ve yanıt sözleşmesinin **tek kaydı belge** olacak.
+  ADR-020 sözleşmenin **adresini** sabitledi; bu iş **içeriğini** sabitliyor
+- ⛔ **Şema kütüğe elle yazılmıyor** — ucun `ok()`/`created()` çağrısında
+  kullandığı şemanın AYNISI kütüğe giriyor. Elle yazılsaydı ADR-019'un
+  yasakladığı şeyi üretirdik: gerçeğe bağlı olmayan, sessizce sapan ikinci kaynak
+- ⭐ **BAĞ ÜÇ KAPIYA BİRDEN KURULDU, ÇÜNKÜ TEK KAPI YETMİYOR.** Derleme anı
+  (`ZodType<T>` — yanıta alan eklenip şemanın unutulmasını yakalar) · çalışma
+  anı (telden geçen gövde şemadan geçiriliyor) · CI (kütükteki şema ile route'un
+  kullandığı şema karşılaştırılıyor)
+- ⛔ **YANIT SÖZLEŞMESİ TİP SİSTEMİYLE BELGELENEMEZ ve sebebi ölçüldü:** tip
+  JSON'a hayatta kalmıyor. `Date` alanı derlemede `Date`, telde ISO **metin**;
+  değeri `undefined` olan alan telde **hiç yok**. Yalnızca tip bağına
+  güvenilseydi belge tam da bu alanlarda yanlış olurdu ve hiçbir derleme bunu
+  göremezdi. Bu yüzden gövde `JSON.parse(JSON.stringify(...))` ile telden
+  geçmiş hâline çevrilip öyle doğrulanıyor
+- ⛔ **KONTROL `NODE_ENV`'E BAĞLANMADI — ÖLÇÜLEREK.** `playwright.config.ts`
+  sunucuyu `next build && next start` ile kaldırıyor, yani **E2E production
+  modunda koşuyor**; `NODE_ENV !== "production"` koşulu kapıyı tam da en çok
+  işe yarayacağı yerde SESSİZCE kapatırdı. Bayrak ayrı ve açık:
+  `API_RESPONSE_CONTRACT_CHECK`. Kazanç büyük — mevcut **843 birim + 325 E2E**
+  testi, tek satır test yazılmadan yanıt sözleşmesi denetleyicisine dönüştü
+- ⛔ **Bayrak production'da AÇILAMIYOR** (`env.ts` tutarlılık kuralı): şema
+  uyuşmazlığı **belgenin** hatasıdır, kullanıcının değil. Canlıda açık olsaydı
+  yanlış yazılmış tek bir şema çalışan bir ucu `500`'e çevirirdi
+- ⚠️ **Belge `io: "input"` ile basılıyor, `io: "output"` ile değil:** çıktı modu
+  JSON Schema'ya `additionalProperties: false` ekliyor, yani belge "yanıta
+  fazladan alan konamaz" derdi — oysa `03-api-guidelines.md` yanıta alan
+  eklemeyi açıkça **kırıcı olmayan** değişiklik sayıyor. Çıktı biçimi projenin
+  kendi uyumluluk kuralıyla çelişen bir belge üretirdi
+- ⚠️ Kontrol bayrağı önce `serverEnv`'den okunuyordu; `serverEnv` tarayıcıda
+  **bilerek** istisna fırlattığı için `jsdom` ortamındaki 5 entegrasyon testi
+  kırmızıya döndü — teşhis aracının kendisi arıza kaynağı olmuştu. Bayrak artık
+  doğrudan `process.env`'den okunuyor, doğrulaması merkezî şemada duruyor
+- **`/api/docs` dürüst bir sınırla işaretlendi:** gövdesi bir OpenAPI 3.1
+  belgesi ve sözleşmesi bu projede değil, standardın kendisinde. Ona Zod şeması
+  yazmak standardın sapan bir kopyasını üretirdi; bağ zaten daha güçlü —
+  belge her doğrulamada `@redocly/cli lint`'ten geçiyor
+
+### Eklendi — kimlik doğrulama ve hesap uçlarının yanıt sözleşmeleri (borç #107 · 107b)
+
+- **12 uç şemasını beyan ediyor:** oturum açma, kayıt akışının tamamı, şifre
+  sıfırlama, kimlik ve personel doğrulaması
+- ⭐ **BELGELEME BOŞLUĞU BULUNDU.** `POST /api/v1/registrations/current/verifications`
+  iki farklı başarı döndürüyor: ilk kanal doğrulandığında `200` (hangisi tamam),
+  ikincisi de bitince `201` (hesap açıldı). Kütük tek durum kodu tutabildiği
+  için **`200` dalı bugüne kadar hiç belgelenmemişti** — istemci onu ancak
+  deneyerek öğrenebilirdi. Kütüğe `alternateSuccess` eklendi; kaçış kapısı
+  değil, çünkü oradaki her yanıt da şema beyan etmek zorunda ve durum kodları
+  benzersiz olmalı (ikisi de test edildi)
+- ⭐ **Şemalar gizlilik sınırını da belgeliyor** ve bu bir kazanç: kimlik
+  özetinde `nationalIdMasked` **var**, `nationalId` **yok** · kimlik doğrulama
+  yanıtı yalnızca ad soyad döndürüyor · şifre sıfırlama yanıtı hesabın var olup
+  olmadığını **sızdırmıyor**, yani oraya bir alan eklemek artık görünür bir
+  sözleşme değişikliği · `simulationCode` alanları "production'da HİÇ
+  gönderilmez" notuyla belgede
+- ⚠️ **`GET /api/v1/account/export` bilinçli olarak ertelendi.** Sebep klasörü
+  değil sözleşmesinin türü: uç `ok()` kullanmıyor, `{ data }` zarfına sarmıyor
+  ve gövdesi bugün `Record<string, unknown>` — tipi bile yok. Muhatabı bir API
+  istemcisi değil, **tarayıcı indirmesi.** Aynı sınırı paylaşan destek eki
+  ucuyla birlikte, kendi kararıyla ele alınacak
+- **Kalan iş gizlenmiyor:** şeması yazılmamış 14 uç `RESPONSE_BODY_PENDING`
+  listesinde ve liste **yalnızca küçülebiliyor** (yeni uç eklenemez, çözülen uç
+  listede kalamaz). Bu uçların yanıtı belgede "şeması henüz belgelenmedi"
+  uyarısı taşıyor — eksiklik belgeyi okuyan herkese görünür
+- **10 mutasyon kırmızıya döndürüldü** (107a'da 6, 107b'de 4): yanlış gövde ·
+  kütükten şema silme · route'ta farklı şema · çözülmüş ucu listeye ekleme ·
+  olmayan ucu listeye yazma · şema tipini değiştirme (derleme kırıldı) · yanlış
+  tip döndürme · ikinci yanıtın durum kodunu çakıştırma · ikinci yanıtın
+  şemasını silme
+
 ### Değişti — API sürümleme: uçlar `/api/v1/` altına taşındı (teknik borç #103 · ADR-020)
 
 - ⛔ **KIRICI DEĞİŞİKLİK — 36 iş ucunun adresi değişti.** `/api/<kaynak>` artık

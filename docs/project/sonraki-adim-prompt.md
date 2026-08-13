@@ -41,8 +41,9 @@ Roadmap adım **0 → 18f bitti**. Borç **#103 ödendi**, **#107 kısmen ödend
 **adım 19 (Expo mobil)**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- ✅ **107b MERGE EDİLDİ ve CANLIDA** (PR #73 → `main` = `b4a1398`).
-  ⭐ Bu satır merge'den SONRA yazıldı. Dağıtım doğrulandı: `commit: b4a1398`,
+- ✅ **107b MERGE EDİLDİ ve CANLIDA** (PR #73 → `b4a1398`; devir + CHANGELOG
+  commit'leri de merge edildi, `main` = en son `docs(handoff)` commit'i).
+  ⭐ Bu satır merge'den SONRA yazıldı. Dağıtım doğrulandı: `commit: 6d13e1c`,
   `db: ok`, `env: production`. Canlı duman testi temiz — altı sayfa **200**,
   `/api/cron/daily` **401**. Yine de körü körüne güvenme: `git log --oneline -3`
   ve `curl -s .../api/health` ile teyit et
@@ -150,20 +151,45 @@ kullanıcı deneyimi/maliyet takası (#89). Bu yüzden hâlâ ona sorulur.
 - **#89 Google hesabında ikinci kanıt:** (a) "yeniden kimlik doğrula" OAuth modu,
   (b) bırak
 
-## ⛔ PROJE SAHİBİNE İŞ VERME — HEPSİ BİLİNÇLİ ERTELENDİ
+## 📋 PROJE SAHİBİNİN BEKLEYEN İŞLERİ — ⭐ BU OTURUMDA **KISACA HATIRLAT**
 
-2026-08-12'de proje sahibi açıkça şunu söyledi: **"benim yapmam gerekenleri
-yine sonraya bırak."** 2026-08-13'te tekrarladı. Aşağıdakilerin hiçbirini
-oturumun başında açma, hatırlatma, iş listesine koyma.
+⭐ **KURAL 2026-08-14'TE DEĞİŞTİ.** Proje sahibi bugüne kadar "sonraya bırak,
+açma" diyordu; **2026-08-14'te açıkça şunu istedi: "benim yapacaklarımı yine
+sonraki session'da hatırlat."**
 
-| Ne | Durum |
-|---|---|
-| **#103'ün preview'da elle kontrolü** | ⏸️ Ertelendi. Yapılmayan tek şey: preview URL'de market → sepete ekle → sepet akışını tıklamak. ⚠️ Otomatik taraf zaten kanıtlı. ⛔ Oturum başında hatırlatma; **yalnızca canlıda sepet/market ile ilgili bir arıza görülürse** hatırlat |
-| Telefondan toplu elle test | **17. kez ertelendi** (2026-08-13: *"eski yapacaklarımı yine devret"*). ⛔ Listeyi yeniden sunma, tek madde önerisini de tekrarlama |
-| **107a ve 107b'nin elle kontrolü** | ⏸️ **2026-08-13'te bilinçli olarak ertelendi.** Proje sahibi canlıda `/api/health` ve sitenin açıldığını kendisi doğruladı; kalan elle testleri sonraki oturuma bıraktı. ⚠️ İkisinin de ekranda görünen bir karşılığı zaten YOK (arayüz, akış ve veritabanı hiç değişmedi). ⛔ Oturum başında hatırlatma; **yalnızca canlıda giriş/kayıt/şifre sıfırlama ile ilgili bir arıza görülürse** "şu kontrol hiç yapılmamıştı" diye hatırlat |
-| `proje-kiti`'nin Windows makineye kurulumu | Ertelendi. Gerektiğinde: `/plugin marketplace add bariskose9/bariskose-skills` → `/plugin install proje-kiti@bariskose-skills` |
-| Cloudflare panelinde preview alan adı yetkilendirme (#114) | ⚠️ İSTEĞE BAĞLI, zorunlu değil |
-| #23 ve #89 | Kararı bekliyor, acelesi yok |
+**Nasıl hatırlatılır:**
+
+- ✅ Oturumun başında **tek seferlik, kısa bir liste** olarak sun (madde başına
+  bir satır, aşağıdaki tablodan)
+- ⛔ **Sonra konuyu kapat ve roadmap adımına geç.** Onay bekleme, ısrar etme,
+  aynı oturumda ikinci kez açma
+- ⛔ Maddeleri yeniden GEREKÇELENDİRME, adım adım tıklama listesi ÜRETME,
+  "şunu da yapsan iyi olur" diye genişletme. O davranış ertelenmelerinin sebebiydi
+- ⛔ Hiçbiri **engelleyici değil** — hepsi ertelenebilir ve ertelenmesi normal
+
+| Ne | Adres / komut | Durum |
+|---|---|---|
+| **107a + 107b'nin elle kontrolü** | `/api/health` (commit `6d13e1c` görünmeli) · `/giris` · `/kayit` · `/sifremi-unuttum` | 2026-08-14'te ertelendi. ⚠️ İkisinin de ekranda görünen karşılığı YOK (arayüz, akış ve veritabanı hiç değişmedi); kontrol "bozulmamış mı" diye bakmak için |
+| **#103'ün preview'da elle kontrolü** | preview URL → market → sepete ekle → sepet | Ertelendi. ⚠️ Otomatik taraf zaten kanıtlı (`POST /api/v1/carts/current/items` → `201`, gerçek tarayıcıda) |
+| Telefondan toplu elle test | — | **18. kez ertelendi.** ⛔ Listeyi ÜRETME, tek satırla an ve geç |
+| `proje-kiti`'nin Windows makineye kurulumu | `/plugin marketplace add bariskose9/bariskose-skills` → `/plugin install proje-kiti@bariskose-skills` | Ertelendi |
+| Cloudflare'da preview alan adı yetkilendirme (#114) | Cloudflare paneli | ⚠️ İSTEĞE BAĞLI, zorunlu değil |
+| #23 (sızmış şifre) ve #89 (Google ikinci kanıt) | — | Kararı bekliyor, acelesi yok |
+
+### ⚠️ KURULU KİT SÜRÜMÜ — HATIRLATMA 2026-08-14'TE ZATEN YAPILDI
+
+Kurulu sürüm **1.11.0**, güncel sürüm **1.19.0** (sekiz sürüm geride).
+Proje sahibi ikinci bir proje açmayı planladığını söyleyince **tetik geldi ve
+uyarı verildi:** `/yeni-proje` çalıştırmadan önce `/plugin` ekranından kiti
+güncellemesi gerektiği söylendi.
+
+⛔ **Kendiliğinden TEKRAR hatırlatma.** Yalnızca `/yeni-proje` veya
+`/kit-senkron` fiilen çalıştırılacağı an tekrar söyle.
+
+⚠️ Proje sahibi **aynı anda ikinci bir projede** çalışmayı planlıyor (ayrı VS
+Code penceresi). Bu projede ölçüm yaparken bunu hesaba kat: **E2E yüke duyarlı**
+(`uptime` < 2.5) ve iki projenin build'i aynı anda koşarsa testler kararsızlaşır.
+Port 3000 de çakışabilir.
 
 ## ✅ CRON ÇALIŞIYOR — KANITLANDI, BİR DAHA SORGULAMA
 
@@ -186,7 +212,7 @@ kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR*
 - **1.18.0** (`0e40146`) — `03-api-guidelines.md`: yanıt gövdesi de belgelenir,
   şema telden doğrulanır, sözleşme borcu yalnızca küçülen listeyle kapatılır ·
   `06-testing.md`: bir kapıyı `NODE_ENV`'e bağlama, açık olduğunu ölç
-- **1.19.0** — `09-ci-cd-deploy.md`: bir dağıtımı yeniden dağıtmadan önce
+- **1.19.0** (`926bfc5`) — `09-ci-cd-deploy.md`: bir dağıtımı yeniden dağıtmadan önce
   ortamını doğrula (production'ı yeniden dağıtmak canlıyı GERİ ALIR); uyuyan
   veritabanını önce uyandır
 
