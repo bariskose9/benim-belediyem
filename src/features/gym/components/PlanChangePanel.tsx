@@ -67,7 +67,7 @@ export function PlanChangePanel(props: PlanChangePanelProps) {
     setIsPending(true);
 
     const result = await apiRequest<{ pendingPlanId: string | null }>(
-      `/api/memberships/${props.membershipId}`,
+      `/api/v1/memberships/${props.membershipId}`,
       {
         method: "PATCH",
         body: {

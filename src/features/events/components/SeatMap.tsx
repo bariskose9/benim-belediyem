@@ -58,10 +58,10 @@ export function SeatMap({
 
     const result =
       seat.state === "held_by_me" && seat.reservationId
-        ? await apiRequest(`/api/events/${eventId}/seat-holds/${seat.reservationId}`, {
+        ? await apiRequest(`/api/v1/events/${eventId}/seat-holds/${seat.reservationId}`, {
             method: "DELETE",
           })
-        : await apiRequest(`/api/events/${eventId}/seat-holds`, {
+        : await apiRequest(`/api/v1/events/${eventId}/seat-holds`, {
             method: "POST",
             body: { seatId: seat.id },
           });

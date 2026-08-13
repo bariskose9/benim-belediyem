@@ -8,7 +8,7 @@ import type { AttachmentView } from "@/features/support/services/support-ticket-
  *
  * ═══ NEDEN `unoptimized` ═══
  *
- * Görseller `/api/support-tickets/…` altındaki YETKİLİ uçtan geliyor.
+ * Görseller `/api/v1/support-tickets/…` altındaki YETKİLİ uçtan geliyor.
  * Next.js'in görsel optimizasyoncusu kaynağı kendi sunucusundan çeker ve o
  * istekte kullanıcının oturum çerezi YOKTUR — optimizasyon açık kalsaydı her
  * ek 404 dönerdi. `unoptimized` ile tarayıcı adresi doğrudan ister ve çerez

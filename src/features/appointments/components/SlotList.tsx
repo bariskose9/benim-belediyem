@@ -46,7 +46,7 @@ export function SlotList({
     setError(null);
     setPendingSlotId(slotId);
 
-    const result = await apiRequest<{ id: string }>("/api/appointments", {
+    const result = await apiRequest<{ id: string }>("/api/v1/appointments", {
       method: "POST",
       body: { slotId },
     });

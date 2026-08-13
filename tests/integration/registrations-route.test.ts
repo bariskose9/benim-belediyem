@@ -219,7 +219,7 @@ vi.mock("@/lib/db", () => ({
 // ---------------------------------------------------------------------------
 
 function jsonRequest(body: unknown, headers: Record<string, string> = {}) {
-  return new Request("http://localhost:3000/api/registrations", {
+  return new Request("http://localhost:3000/api/v1/registrations", {
     method: "POST",
     headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.9", ...headers },
     body: JSON.stringify(body),
@@ -227,7 +227,7 @@ function jsonRequest(body: unknown, headers: Record<string, string> = {}) {
 }
 
 async function callStart(body: Record<string, unknown> = {}) {
-  const { POST } = await import("@/app/api/registrations/route");
+  const { POST } = await import("@/app/api/v1/registrations/route");
 
   return POST(
     jsonRequest({
@@ -240,7 +240,7 @@ async function callStart(body: Record<string, unknown> = {}) {
 }
 
 async function callContact(body: Record<string, unknown> = {}) {
-  const { PATCH } = await import("@/app/api/registrations/current/route");
+  const { PATCH } = await import("@/app/api/v1/registrations/current/route");
 
   return PATCH(
     jsonRequest({
@@ -254,7 +254,7 @@ async function callContact(body: Record<string, unknown> = {}) {
 }
 
 async function callVerify(channel: "email" | "phone", code: string) {
-  const { POST } = await import("@/app/api/registrations/current/verifications/route");
+  const { POST } = await import("@/app/api/v1/registrations/current/verifications/route");
 
   return POST(jsonRequest({ channel, code }));
 }
@@ -286,7 +286,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("POST /api/registrations — kimlik adımı", () => {
+describe("POST /api/v1/registrations — kimlik adımı", () => {
   it("geçerli bilgilerle 201 döner ve kimlik alanlarını gösterir", async () => {
     const response = await callStart();
     const body = await readBody(response);
@@ -457,7 +457,7 @@ describe("bot koruması — KPS sorgusundan ÖNCE", () => {
   });
 });
 
-describe("PATCH /api/registrations/current — iletişim adımı", () => {
+describe("PATCH /api/v1/registrations/current — iletişim adımı", () => {
   it("taslak çerezi yoksa 404 döner", async () => {
     expect((await callContact()).status).toBe(404);
   });
@@ -547,7 +547,7 @@ describe("PATCH /api/registrations/current — iletişim adımı", () => {
   });
 });
 
-describe("POST /api/registrations/current/verifications — kod doğrulama", () => {
+describe("POST /api/v1/registrations/current/verifications — kod doğrulama", () => {
   async function startAndSendCodes() {
     await callStart();
     const body = await readBody(await callContact());
@@ -672,7 +672,7 @@ describe("POST /api/registrations/current/verifications — kod doğrulama", () 
     const codes = await startAndSendCodes();
     await callVerify("email", codes.email);
 
-    const { POST } = await import("@/app/api/registrations/current/verifications/route");
+    const { POST } = await import("@/app/api/v1/registrations/current/verifications/route");
     await POST(jsonRequest({ channel: "phone", code: codes.phone, isStaff: true, role: "admin" }));
 
     // Alan yazma girdisinde HİÇ YOK (adım 17c): istemcinin gönderdiği değer
@@ -725,10 +725,10 @@ describe("POST /api/registrations/current/verifications — kod doğrulama", () 
   });
 });
 
-describe("DELETE /api/registrations/current — vazgeçme", () => {
+describe("DELETE /api/v1/registrations/current — vazgeçme", () => {
   it("taslağı hemen siler ve çerezi temizler", async () => {
     await callStart();
-    const { DELETE } = await import("@/app/api/registrations/current/route");
+    const { DELETE } = await import("@/app/api/v1/registrations/current/route");
 
     const response = await DELETE();
 

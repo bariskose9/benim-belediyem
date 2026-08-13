@@ -19,7 +19,7 @@ import { z } from "zod";
  */
 const recordId = z.string().trim().min(1).max(128);
 
-/** `DELETE /api/orders/{id}` yol parametresi. */
+/** `DELETE /api/v1/orders/{id}` yol parametresi. */
 export const orderIdSchema = z.object({
   id: recordId,
 });

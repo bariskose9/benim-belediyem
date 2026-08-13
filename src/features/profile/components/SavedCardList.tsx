@@ -37,7 +37,7 @@ export function SavedCardList({ cards }: { cards: readonly SavedCardView[] }) {
     setError(null);
     setPendingId(savedCardId);
 
-    const result = await apiRequest<undefined>(`/api/saved-cards/${savedCardId}`, {
+    const result = await apiRequest<undefined>(`/api/v1/saved-cards/${savedCardId}`, {
       method: "DELETE",
     });
 

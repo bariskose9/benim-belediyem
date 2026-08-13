@@ -50,7 +50,7 @@ export function CancelMembershipPanel(props: CancelMembershipPanelProps) {
     setIsPending(true);
 
     const result = await apiRequest<{ feeKurus: number }>(
-      `/api/memberships/${props.membershipId}`,
+      `/api/v1/memberships/${props.membershipId}`,
       {
         method: "DELETE",
         body: {

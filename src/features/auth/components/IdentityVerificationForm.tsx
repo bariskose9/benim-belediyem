@@ -73,7 +73,7 @@ export function IdentityVerificationForm({
     setError(null);
     setIsSubmitting(true);
 
-    const result = await apiRequest<SuccessState>("/api/identity-verifications", {
+    const result = await apiRequest<SuccessState>("/api/v1/identity-verifications", {
       method: "POST",
       body: { nationalId, birthYear, turnstileToken },
     });

@@ -126,12 +126,17 @@ function securityFor(access: OperationAccess): unknown[] {
 }
 
 /**
- * `POST /api/addresses/{addressId}` → `postApiAddressesByAddressId`.
+ * `POST /api/v1/addresses/{addressId}` → `postV1AddressesByAddressId`.
  *
  * İstemci üreticileri (`openapi-generator`, `orval`, `kubb`) ürettikleri
  * fonksiyonu bu alandan adlandırıyor. Yazılmazsa üretici kendi uydurduğu,
  * yol değişince sessizce DEĞİŞEN bir ad kullanır — mobil istemci geldiğinde
  * (adım 19) bu, derlemenin bir gün nedensiz kırılması demektir.
+ *
+ * ⚠️ SÜRÜM SEGMENTİ ADIN İÇİNDE KALIR ve bu bilinçli (ADR-020): `v2` geldiğinde
+ * `postV1Addresses` ile `postV2Addresses` AYRI adlar olmak zorunda. Sürümü
+ * ayıklasaydık ikisi çakışır, OpenAPI belgesi geçersiz olurdu — üretilen
+ * istemcide de iki sürümden biri diğerini sessizce ezerdi.
  */
 export function toOperationId({ method, path }: Pick<ApiOperation, "method" | "path">): string {
   const segments = path

@@ -74,7 +74,7 @@ export function CheckoutForm(props: CheckoutFormProps) {
     setError(null);
     setIsPending(true);
 
-    const result = await apiRequest<{ transactionId: string }>("/api/payments", {
+    const result = await apiRequest<{ transactionId: string }>("/api/v1/payments", {
       method: "POST",
       body: {
         idempotencyKey,

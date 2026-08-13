@@ -52,7 +52,7 @@ export function LoginMethodsCard({ methods }: { methods: LoginMethodsView }) {
     setError(null);
     setPending(true);
 
-    const result = await apiRequest<undefined>("/api/auth/google/connections", {
+    const result = await apiRequest<undefined>("/api/v1/auth/google/connections", {
       method: "DELETE",
     });
 
@@ -175,7 +175,7 @@ function LinkSection({ available, accountLabel }: { available: boolean; accountL
 
   return (
     <form
-      action="/api/auth/google/connections"
+      action="/api/v1/auth/google/connections"
       method="post"
       className="flex flex-col gap-3 border-t border-border pt-4"
     >

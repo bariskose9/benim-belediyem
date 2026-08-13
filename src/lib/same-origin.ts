@@ -4,7 +4,7 @@ import { publicEnv } from "@/config/env";
  * İsteğin KENDİ sitemizden gelip gelmediği (CSRF kapısı).
  *
  * ═══ NEDEN VAR ═══
- * 2026-08-10 güvenlik denetiminde `/api/consents` için yazıldı; adım 17b'de
+ * 2026-08-10 güvenlik denetiminde `/api/v1/consents` için yazıldı; adım 17b'de
  * hesap silme ve kimlik çözme uçları da aynı kapıyı isteyince ORTAK bir yere
  * taşındı. İki yerde ayrı yazılsaydı, biri sıkılaştırıldığında diğerinin
  * unutulması an meselesiydi (`profile/services/write-budget.ts` ile aynı

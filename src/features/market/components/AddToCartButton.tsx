@@ -33,7 +33,7 @@ export function AddToCartButton({ productId, name }: { productId: string; name: 
   async function addToCart() {
     setIsPending(true);
 
-    const result = await apiRequest<CartSummary>("/api/carts/current/items", {
+    const result = await apiRequest<CartSummary>("/api/v1/carts/current/items", {
       method: "POST",
       body: { itemType: "market", refId: productId, quantity: 1 },
     });

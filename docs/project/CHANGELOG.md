@@ -4,6 +4,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
 
 ## [Yayınlanmamış]
 
+### Değişti — API sürümleme: uçlar `/api/v1/` altına taşındı (teknik borç #103 · ADR-020)
+
+- ⛔ **KIRICI DEĞİŞİKLİK — 36 iş ucunun adresi değişti.** `/api/<kaynak>` artık
+  `/api/v1/<kaynak>`. Eski adresler takma ad olarak **bırakılmadı**: bugün o
+  adresleri çağıran tek şey kendi arayüzümüz ve o aynı commit'te güncelleniyor,
+  yani takma ad hiç kimseyi korumaz — yalnızca iki adresli bir yüzey üretirdi
+- **Neden şimdi:** adım 19 (Expo mobil) başladığı gün istemcinin bir kısmı
+  kullanıcının telefonunda yaşayacak ve **güncellenmesi bizim elimizde
+  olmayacak.** Bu iş bugün mekanik, yarın kırıcı
+- ⭐ **Karar ezberden `/v1/` eklemek DEĞİLDİ.** Kamu sektörü için yazılmış
+  [GOV.UK API standardı](https://www.gov.uk/guidance/gds-api-technical-and-data-standards)
+  sürümü URI'ye koymayı söylüyor ve başlık/medya tipi tabanlı sürümleme için
+  açıkça *"avoid these approaches"* diyor — proxy ve güvenlik duvarları
+  engelleyebiliyor. Ayrıca başlığı göndermeyi unutan istemci `200` + **yanlış
+  sürüm** alır (sessiz); yanlış yola giden istemci `404` alır (gürültülü)
+- **Beş uç bilinçli olarak sürümsüz kaldı** — ölçüt: *adresini bizim dışımızda
+  biri sabitlemişse sürümlenmez.* `/api/health` (izleme + duman testi),
+  `/api/cron/daily` (⛔ `vercel.json`'da sabit — taşımak görevi **sessizce**
+  durdururdu), `/api/docs`, `/api/auth/google/callback` (⛔ Google Cloud
+  panelinde üç adres kayıtlı; taşımak canlı girişi kırardı ve düzeltmesi kodda
+  değil panelde), `/api/mock-kps/identity-queries` (bir **üçüncü tarafın**
+  API'sini taklit ediyor)
+- ⚠️ **`/api/auth/google` taşındı ama `callback` taşınmadı.** Kural harfiyen
+  uygulandı: Google yalnızca callback adresini biliyor. İstisnayı "auth ile
+  ilgili" diye genişletmek kuralı ölçülemez hâle getirirdi
+
+### Eklendi — emeklilik başlıkları ve sürümleme kapısı
+
+- **`src/lib/api-deprecation.ts`** — `Deprecation` + `Sunset` + `Link` üretir.
+  ⚠️ **`Deprecation` bir HTTP-date DEĞİL:** RFC 9745 §2 onu Structured Field
+  Date olarak tanımlıyor, değeri `@<unix-saniye>`. `Sunset` ise HTTP-date
+  (RFC 8594). İkisini karıştırmak hiçbir yerde yakalanmayan sessiz bir hata
+  olurdu — başlık yazılır, yanıt `200` döner, istemci okuyamaz. Bu yüzden ilk
+  emeklilikten **önce** yazıldı
+- ⚠️ **Bu mekanizmanın bugün üretimde çağıranı YOK** ve bu açıkça yazılı:
+  `v1` tek sürüm, emekliye ayrılan uç yok. Doğruluğu 10 birim testiyle
+  kanıtlanıyor, "kullanılıyor" diye raporlanmıyor
+- **`tests/unit/api-versioning.test.ts`** (5 test) — bir iş ucu `/api/v1/`
+  dışında açılırsa CI kırmızıya döner. ⭐ İstisnalar **gerekçelerine bağlandı:**
+  cron yolu `vercel.json`'dan, callback adresi `GOOGLE_CALLBACK_PATH`'ten
+  okunup karşılaştırılıyor — yoksa "adresi panelde kayıtlı" doğrulanmamış bir
+  iddia olarak kalırdı
+- **Üç mutasyon kırmızıya döndürüldü:** sürümsüz yeni uç eklendi → kırmızı;
+  `Deprecation` HTTP-date'e çevrildi → kırmızı; `vercel.json` cron yolu
+  sürümlendi → kırmızı
+
 ### Eklendi — adım 18d: Güvenlik denetimi raporu ve sıkı CSP (teknik borç #10, #78, #99, #110)
 
 - **Güvenlik denetimi raporu** (`docs/project/guvenlik-denetimi-2026-08.md`):

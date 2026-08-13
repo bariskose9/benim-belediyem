@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * `POST /api/appointments` ve `DELETE /api/appointments/{id}` — UCUN KENDİ İŞİ.
+ * `POST /api/v1/appointments` ve `DELETE /api/v1/appointments/{id}` — UCUN KENDİ İŞİ.
  *
  * BU DOSYA İŞ KURALLARINI TEST ETMEZ ve bu bilinçli bir ayrım. "Dolu saat",
  * "geçmiş tarih", "aynı gün ikinci randevu" ve "2 saat kuralı" gerçek
@@ -46,8 +46,8 @@ vi.mock("@/features/appointments/services/appointment.service", () => ({
   cancelAppointment,
 }));
 
-const { POST } = await import("@/app/api/appointments/route");
-const { DELETE } = await import("@/app/api/appointments/[id]/route");
+const { POST } = await import("@/app/api/v1/appointments/route");
+const { DELETE } = await import("@/app/api/v1/appointments/[id]/route");
 const { messages } = await import("@/config/messages");
 
 /**
@@ -85,7 +85,7 @@ beforeEach(() => {
 });
 
 function postRequest(body: unknown): Request {
-  return new Request("http://localhost:3000/api/appointments", {
+  return new Request("http://localhost:3000/api/v1/appointments", {
     method: "POST",
     headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.5" },
     body: JSON.stringify(body),
@@ -93,13 +93,13 @@ function postRequest(body: unknown): Request {
 }
 
 function deleteRequest(): Request {
-  return new Request("http://localhost:3000/api/appointments/appointment-1", {
+  return new Request("http://localhost:3000/api/v1/appointments/appointment-1", {
     method: "DELETE",
     headers: { "x-forwarded-for": "203.0.113.5" },
   });
 }
 
-describe("POST /api/appointments — yetki kapısı", () => {
+describe("POST /api/v1/appointments — yetki kapısı", () => {
   it("giriş yapılmamışsa 401 döner ve servis HİÇ çağrılmaz", async () => {
     state.session = null;
 
@@ -133,7 +133,7 @@ describe("POST /api/appointments — yetki kapısı", () => {
   });
 });
 
-describe("POST /api/appointments — girdi", () => {
+describe("POST /api/v1/appointments — girdi", () => {
   it("geçerli istekte 201 ve randevu kimliği döner", async () => {
     const response = await POST(postRequest({ slotId: "slot-1" }));
     const body = await response.json();
@@ -170,7 +170,7 @@ describe("POST /api/appointments — girdi", () => {
   });
 
   it("gövde bozuk JSON ise 422 döner, ayrıştırma hatası sızmaz", async () => {
-    const request = new Request("http://localhost:3000/api/appointments", {
+    const request = new Request("http://localhost:3000/api/v1/appointments", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: "{bozuk",
@@ -192,7 +192,7 @@ describe("POST /api/appointments — girdi", () => {
   });
 });
 
-describe("POST /api/appointments — hata zarfı", () => {
+describe("POST /api/v1/appointments — hata zarfı", () => {
   it("iş kuralı hatası durum kodunu ve kodunu KORUYARAK döner", async () => {
     bookAppointment.mockRejectedValue(new SlotTakenError());
 
@@ -238,7 +238,7 @@ describe("POST /api/appointments — hata zarfı", () => {
   });
 });
 
-describe("DELETE /api/appointments/{id}", () => {
+describe("DELETE /api/v1/appointments/{id}", () => {
   const params = { params: Promise.resolve({ id: "appointment-1" }) };
 
   it("giriş yapılmamışsa 401 döner ve servis çağrılmaz", async () => {

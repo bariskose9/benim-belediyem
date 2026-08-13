@@ -58,7 +58,7 @@ export async function CookieNotice() {
           </Link>
 
           {informationalOnly ? (
-            <form action="/api/consents" method="post">
+            <form action="/api/v1/consents" method="post">
               <input type="hidden" name="consentType" value={ConsentType.necessary_cookies} />
               <input type="hidden" name="isGranted" value="1" />
 

@@ -18,8 +18,8 @@ import { DEFAULT_REDIRECT_PATH, sanitizeRedirectPath } from "@/lib/redirect";
 /**
  * Akışın NE İÇİN başlatıldığı.
  *
- * ⛔ MOD İSTEMCİDEN GELMEZ. Değeri, akışı başlatan uç yazar: `/api/auth/google`
- * her zaman `login`, `POST /api/auth/google/connections` her zaman `link`.
+ * ⛔ MOD İSTEMCİDEN GELMEZ. Değeri, akışı başlatan uç yazar: `/api/v1/auth/google`
+ * her zaman `login`, `POST /api/v1/auth/google/connections` her zaman `link`.
  * Adres çubuğundan okunan bir "mod" parametresi olsaydı, giriş ekranından
  * gelen biri kendini bağlama akışına sokabilirdi.
  */

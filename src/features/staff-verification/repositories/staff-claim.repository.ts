@@ -85,7 +85,7 @@ export type LinkStaffMemberOutcome =
  * ═══ `identityStatus` NEDEN BURADA DA ARANIYOR ═══
  * Servis katmanı bunu zaten kontrol ediyor. Yine de `WHERE`'de duruyor çünkü
  * aradaki sürede kullanıcı kimlik bağını ÇÖZMÜŞ olabilir (adım 17b,
- * `/api/account/identity-unlinks`) — o durumda hesap `unverified` kademesine
+ * `/api/v1/account/identity-unlinks`) — o durumda hesap `unverified` kademesine
  * iner ve personel yetkisi almaması gerekir. Kontrolü yalnızca serviste
  * bırakmak, bu yarışı açık bırakırdı.
  *

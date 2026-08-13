@@ -210,7 +210,7 @@ test("sayfada ve ağ yanıtlarında TAM kimlik numarası geçmez", async ({ page
   const bodies: string[] = [];
 
   page.on("response", async (response) => {
-    if (!response.url().includes("/api/registrations")) return;
+    if (!response.url().includes("/api/v1/registrations")) return;
     try {
       bodies.push(await response.text());
     } catch {

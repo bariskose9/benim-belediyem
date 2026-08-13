@@ -65,7 +65,7 @@ export function CartLines({
 
   const changeQuantity = (line: CartLine, quantity: number) =>
     mutate(line.id, async () => {
-      const response = await apiRequest(`/api/carts/current/items/${line.id}`, {
+      const response = await apiRequest(`/api/v1/carts/current/items/${line.id}`, {
         method: "PATCH",
         body: { quantity },
       });
@@ -75,7 +75,7 @@ export function CartLines({
 
   const remove = (line: CartLine) =>
     mutate(line.id, async () => {
-      const response = await apiRequest(`/api/carts/current/items/${line.id}`, {
+      const response = await apiRequest(`/api/v1/carts/current/items/${line.id}`, {
         method: "DELETE",
       });
 
@@ -84,7 +84,7 @@ export function CartLines({
 
   const saveNote = (line: CartLine, note: string) =>
     mutate(line.id, async () => {
-      const response = await apiRequest(`/api/carts/current/items/${line.id}`, {
+      const response = await apiRequest(`/api/v1/carts/current/items/${line.id}`, {
         method: "PATCH",
         // Boş metin `null` gidiyor: "notu sildim" ile "not yazmadım" aynı şey.
         body: { note: note.trim().length > 0 ? note.trim() : null },

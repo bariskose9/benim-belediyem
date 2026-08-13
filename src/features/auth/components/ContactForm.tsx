@@ -32,7 +32,7 @@ export function ContactForm({ isSimulated }: { isSimulated?: boolean }) {
     setError(null);
     setIsSubmitting(true);
 
-    const result = await apiRequest("/api/registrations/current", {
+    const result = await apiRequest("/api/v1/registrations/current", {
       method: "PATCH",
       body: { email, phone, password, passwordConfirm },
     });

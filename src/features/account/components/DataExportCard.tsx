@@ -35,7 +35,7 @@ export function DataExportCard() {
     setPending(true);
 
     try {
-      const response = await fetch("/api/account/export", { cache: "no-store" });
+      const response = await fetch("/api/v1/account/export", { cache: "no-store" });
 
       if (!response.ok) {
         // Hata gövdesi tek tip zarfta (`{ error: { message } }`); ayrıştırma

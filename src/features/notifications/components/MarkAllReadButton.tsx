@@ -29,7 +29,7 @@ export function MarkAllReadButton() {
     setError(null);
     setIsPending(true);
 
-    const result = await apiRequest<{ updated: number }>("/api/notifications", {
+    const result = await apiRequest<{ updated: number }>("/api/v1/notifications", {
       method: "PATCH",
     });
 

@@ -147,7 +147,7 @@ test.describe("yasal sayfalar", () => {
      * GİTMEZ; uç yeni bir kimlik üretip cevapla kurbanın gerçek kimliğini
      * EZERDİ (sepeti ve hız sınırı sayacı sıfırlanırdı).
      */
-    const forged = await page.request.post("/api/consents", {
+    const forged = await page.request.post("/api/v1/consents", {
       form: { consentType: "necessary_cookies", isGranted: "1" },
       headers: { Origin: "https://sahte.example" },
       maxRedirects: 0,
@@ -158,7 +158,7 @@ test.describe("yasal sayfalar", () => {
 
     // Aynı istek KENDİ sitemizden gelince kabul ediliyor: kapı meşru
     // kullanıcıyı dışarıda bırakmıyor.
-    const genuine = await page.request.post("/api/consents", {
+    const genuine = await page.request.post("/api/v1/consents", {
       form: { consentType: "necessary_cookies", isGranted: "1" },
       headers: { Origin: baseURL ?? "http://localhost:3000" },
       maxRedirects: 0,

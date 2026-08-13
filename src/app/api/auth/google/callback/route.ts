@@ -80,7 +80,7 @@ export async function GET(request: Request) {
       return redirectToLogin(`dogrulama_gerekli_${outcome.reason}`);
     }
 
-    // Aynı tarayıcının önceki oturumu kapatılır — `POST /api/sessions` ile
+    // Aynı tarayıcının önceki oturumu kapatılır — `POST /api/v1/sessions` ile
     // aynı gerekçe: kullanıcının artık ulaşamadığı bir jeton 7 gün daha
     // geçerli kalmamalı. Başka cihazlardaki oturumlara dokunulmaz.
     await revokeSession(await readSessionToken());
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
 
     /**
      * Ziyaretçiyken verilen çerez rızası hesaba bağlanır (PRD §5.10 · adım 17).
-     * Şifreyle girişteki (`POST /api/sessions`) davranışın aynısı — kullanıcı
+     * Şifreyle girişteki (`POST /api/v1/sessions`) davranışın aynısı — kullanıcı
      * hangi kapıdan girerse girsin sonuç aynı olmalı.
      */
     await linkVisitorConsentsToUser({ anonymousId, userId: outcome.userId });

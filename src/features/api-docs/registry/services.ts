@@ -22,7 +22,7 @@ const TAG_SUPPORT = "Destek";
 
 export const serviceOperations: ApiOperation[] = [
   {
-    path: "/api/appointments",
+    path: "/api/v1/appointments",
     method: "post",
     tag: TAG_APPOINTMENT,
     summary: "Hastane randevusu oluşturur.",
@@ -37,7 +37,7 @@ export const serviceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/appointments/{id}",
+    path: "/api/v1/appointments/{id}",
     method: "delete",
     tag: TAG_APPOINTMENT,
     summary: "Randevuyu iptal eder.",
@@ -51,7 +51,7 @@ export const serviceOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/events/{eventId}/seat-holds",
+    path: "/api/v1/events/{eventId}/seat-holds",
     method: "post",
     tag: TAG_EVENT,
     summary: "Etkinlik koltuğunu geçici olarak tutar (10 dakika).",
@@ -73,7 +73,7 @@ export const serviceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/events/{eventId}/seat-holds/{reservationId}",
+    path: "/api/v1/events/{eventId}/seat-holds/{reservationId}",
     method: "delete",
     tag: TAG_EVENT,
     summary: "Koltuk kilidini bırakır.",
@@ -88,7 +88,7 @@ export const serviceOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/support-tickets",
+    path: "/api/v1/support-tickets",
     method: "post",
     tag: TAG_SUPPORT,
     summary: "Destek talebi oluşturur (ek dosya yüklenebilir).",
@@ -108,7 +108,7 @@ export const serviceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/support-tickets/{ticketId}",
+    path: "/api/v1/support-tickets/{ticketId}",
     method: "delete",
     tag: TAG_SUPPORT,
     summary: "Destek talebini iptal eder.",
@@ -125,7 +125,7 @@ export const serviceOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/support-tickets/{ticketId}/attachments/{attachmentId}",
+    path: "/api/v1/support-tickets/{ticketId}/attachments/{attachmentId}",
     method: "get",
     tag: TAG_SUPPORT,
     summary: "Destek talebine eklenen dosyayı indirir.",

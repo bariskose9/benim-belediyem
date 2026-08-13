@@ -212,13 +212,13 @@ test("KABUL KRİTERİ: başkasının adresi düzenlenemez ve silinemez (404)", a
   });
 
   try {
-    const patched = await page.request.patch(`/api/addresses/${foreign.id}`, {
+    const patched = await page.request.patch(`/api/v1/addresses/${foreign.id}`, {
       data: { title: "Ele geçirildi", fullAddress: ADDRESS_FULL, district: ADDRESS_DISTRICT },
     });
 
     expect(patched.status()).toBe(404);
 
-    const deleted = await page.request.delete(`/api/addresses/${foreign.id}`);
+    const deleted = await page.request.delete(`/api/v1/addresses/${foreign.id}`);
 
     expect(deleted.status()).toBe(404);
 
@@ -243,7 +243,7 @@ test("KABUL KRİTERİ: başkasının kartı kaldırılamaz (404)", async ({ page
 
   if (!foreign) throw new Error("Tohumlanmış yabancı kart bulunamadı.");
 
-  const response = await page.request.delete(`/api/saved-cards/${foreign.id}`);
+  const response = await page.request.delete(`/api/v1/saved-cards/${foreign.id}`);
 
   expect(response.status()).toBe(404);
 

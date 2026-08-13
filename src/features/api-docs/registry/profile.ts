@@ -20,7 +20,7 @@ const TAG_NOTIFICATIONS = "Bildirimler";
  */
 export const profileOperations: ApiOperation[] = [
   {
-    path: "/api/addresses",
+    path: "/api/v1/addresses",
     method: "post",
     tag: TAG_PROFILE,
     summary: "Teslimat adresi ekler.",
@@ -32,7 +32,7 @@ export const profileOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/addresses/{addressId}",
+    path: "/api/v1/addresses/{addressId}",
     method: "patch",
     tag: TAG_PROFILE,
     summary: "Teslimat adresini günceller.",
@@ -46,7 +46,7 @@ export const profileOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/addresses/{addressId}",
+    path: "/api/v1/addresses/{addressId}",
     method: "delete",
     tag: TAG_PROFILE,
     summary: "Teslimat adresini siler.",
@@ -59,7 +59,7 @@ export const profileOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/saved-cards/{savedCardId}",
+    path: "/api/v1/saved-cards/{savedCardId}",
     method: "delete",
     tag: TAG_PROFILE,
     summary: "Kayıtlı kartı kaldırır.",
@@ -78,7 +78,7 @@ export const profileOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/notifications",
+    path: "/api/v1/notifications",
     method: "patch",
     tag: TAG_NOTIFICATIONS,
     summary: "Kullanıcının okunmamış bildirimlerinin tamamını okundu işaretler.",

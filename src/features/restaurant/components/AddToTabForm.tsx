@@ -51,7 +51,7 @@ export function AddToTabForm({ itemId, name }: { itemId: string; name: string })
     event.preventDefault();
     setIsPending(true);
 
-    const result = await apiRequest<CartSummary>("/api/carts/current/items", {
+    const result = await apiRequest<CartSummary>("/api/v1/carts/current/items", {
       method: "POST",
       body: {
         itemType: "restaurant",

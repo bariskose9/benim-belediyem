@@ -57,7 +57,7 @@ export function MembershipPurchaseForm(props: MembershipPurchaseFormProps) {
     setError(null);
     setIsPending(true);
 
-    const result = await apiRequest<{ id: string }>("/api/memberships", {
+    const result = await apiRequest<{ id: string }>("/api/v1/memberships", {
       method: "POST",
       body: {
         planId: props.plan.id,

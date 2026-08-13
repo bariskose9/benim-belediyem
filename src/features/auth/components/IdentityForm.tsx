@@ -51,7 +51,7 @@ export function IdentityForm({ turnstileSiteKey }: { turnstileSiteKey: string | 
     setError(null);
     setIsSubmitting(true);
 
-    const result = await apiRequest("/api/registrations", {
+    const result = await apiRequest("/api/v1/registrations", {
       method: "POST",
       body: { nationalId, birthYear, turnstileToken },
     });

@@ -34,7 +34,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
     setError(null);
     setIsPending(true);
 
-    const result = await apiRequest<undefined>(`/api/orders/${orderId}`, { method: "DELETE" });
+    const result = await apiRequest<undefined>(`/api/v1/orders/${orderId}`, { method: "DELETE" });
 
     setIsPending(false);
     setIsConfirming(false);

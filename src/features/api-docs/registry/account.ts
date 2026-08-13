@@ -20,7 +20,7 @@ const TAG_LEGAL = "Yasal ve rıza";
 
 export const accountOperations: ApiOperation[] = [
   {
-    path: "/api/account/export",
+    path: "/api/v1/account/export",
     method: "get",
     tag: TAG_ACCOUNT,
     summary: "Kullanıcının kendi verisini JSON dosyası olarak indirir (KVKK m.11).",
@@ -36,7 +36,7 @@ export const accountOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/account/phone",
+    path: "/api/v1/account/phone",
     method: "put",
     tag: TAG_ACCOUNT,
     summary: "Cep telefonu numarasını değiştirir.",
@@ -49,7 +49,7 @@ export const accountOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/account/identity-unlinks",
+    path: "/api/v1/account/identity-unlinks",
     method: "post",
     tag: TAG_ACCOUNT,
     summary: "Hesaba bağlı kimlik kaydını çözer; numarayı serbest bırakır.",
@@ -68,7 +68,7 @@ export const accountOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/account/deletions",
+    path: "/api/v1/account/deletions",
     method: "post",
     tag: TAG_ACCOUNT,
     summary: "Hesabı siler (KVKK m.7 — geri alınamaz).",
@@ -85,7 +85,7 @@ export const accountOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/identity-verifications",
+    path: "/api/v1/identity-verifications",
     method: "post",
     tag: TAG_IDENTITY,
     summary: "Kimlik numarası ve doğum yılıyla kimliği doğrular.",
@@ -111,7 +111,7 @@ export const accountOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/staff-verifications",
+    path: "/api/v1/staff-verifications",
     method: "post",
     tag: TAG_STAFF,
     summary: "Kurumsal e-posta adresine personel doğrulama kodu gönderir.",
@@ -132,7 +132,7 @@ export const accountOperations: ApiOperation[] = [
     rateLimited: true,
   },
   {
-    path: "/api/staff-verifications/confirmations",
+    path: "/api/v1/staff-verifications/confirmations",
     method: "post",
     tag: TAG_STAFF,
     summary: "Personel doğrulama kodunu kontrol eder ve yetkiyi verir.",
@@ -151,7 +151,7 @@ export const accountOperations: ApiOperation[] = [
   },
 
   {
-    path: "/api/consents",
+    path: "/api/v1/consents",
     method: "post",
     tag: TAG_LEGAL,
     summary: "Çerez bildirimi rızasını kaydeder.",
