@@ -1,6 +1,10 @@
 import { APP_VERSION, BUILD_COMMIT, HEALTH_DB_TIMEOUT_MS } from "@/config/constants";
 import { envLabel } from "@/config/env";
 import { messages } from "@/config/messages";
+import {
+  healthResponseSchema,
+  type HealthResponse,
+} from "@/features/platform/schemas/health.schema";
 import { prisma } from "@/lib/db";
 import { ServiceUnavailableError } from "@/lib/errors";
 import { fail, ok } from "@/lib/http";
@@ -16,15 +20,14 @@ import { logger } from "@/lib/logger";
 // Önbelleğe alınırsa "sağlıklı" cevabı donar ve uç anlamını kaybeder.
 export const dynamic = "force-dynamic";
 
-export type HealthPayload = {
-  status: "ok";
-  app: "ok";
-  db: "ok";
-  env: string;
-  version: string;
-  commit: string;
-  timestamp: string;
-};
+/**
+ * ⭐ TİP ARTIK ŞEMADAN GELİYOR (borç #107 · adım 107a).
+ *
+ * Elle yazılmış bir tipti; belge onu okuyamadığı için yanıt gövdesi belgede
+ * yalnızca "şu alanlar var" diye Türkçe anlatılıyordu. Artık tek kaynak
+ * `healthResponseSchema` ve aynı nesne hem burada hem kütükte kullanılıyor.
+ */
+export type HealthPayload = HealthResponse;
 
 /**
  * Veritabanına en basit sorguyu atar.
@@ -77,5 +80,5 @@ export async function GET() {
 
   const payload: HealthPayload = { status: "ok", app: "ok", db: "ok", ...common };
 
-  return ok(payload, { noStore: true });
+  return ok(payload, { noStore: true, schema: healthResponseSchema });
 }

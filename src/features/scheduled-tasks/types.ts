@@ -1,3 +1,11 @@
+import type { z } from "zod";
+
+import type {
+  scheduledRunResponseSchema,
+  scheduledTaskNameSchema,
+  scheduledTaskOutcomeSchema,
+} from "@/features/scheduled-tasks/schemas/scheduled-run.schema";
+
 /**
  * Planlı görev sözleşmesi (ADR-007 · adım 16).
  *
@@ -9,19 +17,12 @@
 /**
  * Görevin SABİT adı — denetim kaydına `entityId` olarak yazılıyor.
  *
- * ⛔ BU DEĞERLER DENETİM KAYDINDA YAŞIYOR. Bir adı değiştirmek geçmiş kayıtları
- * öksüz bırakır; yeniden adlandırmak yerine yeni ad eklenip eskisi kaldırılır.
+ * ⭐ DEĞER LİSTESİ ARTIK ŞEMADA (`schemas/scheduled-run.schema.ts`), tip oradan
+ * türetiliyor. Sebebi borç #107: aynı dokuz ad hem burada bir birleşim hem de
+ * yanıt şemasında bir `z.enum` olarak dursaydı, biri değişip diğeri unutulduğunda
+ * belge sessizce yanlışa düşerdi.
  */
-export type ScheduledTaskName =
-  | "cleanup_sessions"
-  | "cleanup_registration_drafts"
-  | "cleanup_otp_challenges"
-  | "cleanup_rate_limits"
-  | "cleanup_seat_holds"
-  | "cleanup_external_cache"
-  | "extend_doctor_calendar"
-  | "send_renewal_reminders"
-  | "renew_memberships";
+export type ScheduledTaskName = z.infer<typeof scheduledTaskNameSchema>;
 
 export type ScheduledTaskContext = {
   /**
@@ -42,18 +43,12 @@ export type ScheduledTask = {
   run: (context: ScheduledTaskContext) => Promise<number>;
 };
 
-export type ScheduledTaskOutcome = {
-  name: ScheduledTaskName;
-  status: "ok" | "failed";
-  /** Başarısız görevde 0. */
-  affected: number;
-  durationMs: number;
-};
+/**
+ * Koşu sonucu ve özeti — ikisi de yanıt şemasından türetiliyor (borç #107).
+ *
+ * Bu iki tip HTTP yanıtının gövdesi olarak istemciye gidiyor; ayrı ayrı elle
+ * yazılsalardı şemayla aralarındaki fark hiçbir yerde yakalanmazdı.
+ */
+export type ScheduledTaskOutcome = z.infer<typeof scheduledTaskOutcomeSchema>;
 
-export type ScheduledRunSummary = {
-  startedAt: string;
-  durationMs: number;
-  taskCount: number;
-  failedCount: number;
-  tasks: ScheduledTaskOutcome[];
-};
+export type ScheduledRunSummary = z.infer<typeof scheduledRunResponseSchema>;

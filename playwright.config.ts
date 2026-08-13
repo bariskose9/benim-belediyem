@@ -104,6 +104,24 @@ export default defineConfig({
        */
       GOOGLE_CLIENT_ID: "e2e-test-client-id.apps.googleusercontent.com",
       GOOGLE_CLIENT_SECRET: "e2e-test-client-secret",
+
+      /**
+       * YANIT SÖZLEŞMESİ KONTROLÜ E2E'DE AÇIK (borç #107 · adım 107a).
+       *
+       * ⛔ BU SATIR OLMADAN KONTROL HİÇ ÇALIŞMAZDI ve bu ölçülerek bulundu:
+       * yukarıdaki `command` sunucuyu `next build && next start` ile kaldırıyor,
+       * yani E2E **production modunda** koşuyor. Kontrol `NODE_ENV`'e bağlansaydı
+       * tam da en çok işe yarayacağı yerde — gerçek tarayıcıdan geçen her yanıtta
+       * — SESSİZCE kapalı kalırdı.
+       *
+       * Açıkken E2E setinin tamamı, aynı zamanda bir yanıt sözleşmesi
+       * denetleyicisine dönüşüyor: belgede yazandan farklı bir gövde döndüren
+       * uç testi kırmızıya çeviriyor.
+       *
+       * ⚠️ Production'da bu bayrak AÇILAMAZ (`src/config/env.ts` tutarlılık
+       * kuralı) — şema uyuşmazlığı belgenin hatasıdır, kullanıcının değil.
+       */
+      API_RESPONSE_CONTRACT_CHECK: "true",
     },
   },
 });
