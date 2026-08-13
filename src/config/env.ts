@@ -184,6 +184,33 @@ const serverEnvBaseSchema = z.object({
     .default("false")
     .transform((value) => value === "true"),
 
+  /**
+   * YANIT SÖZLEŞMESİ ÇALIŞMA ANI KONTROLÜ (borç #107 · adım 107a).
+   *
+   * Açıkken her başarılı yanıt, belgede yazan şemasından GEÇİRİLİR ve
+   * uyuşmazlık istisna fırlatır. Amaç belgenin yalan söylediğini testte
+   * yakalamak.
+   *
+   * ⛔ NEDEN GEREKLİ — TypeScript BU İŞİ YAPAMAZ: tip bağı JSON'a hayatta
+   * kalmıyor. `Date` alanı derlemede `Date`, telde ISO METİN. Yalnızca tip
+   * bağı kursaydık belge tam da bu alanlarda yanlış olurdu ve hiçbir derleme
+   * bunu göremezdi.
+   *
+   * ⛔ NEDEN `NODE_ENV`'E BAĞLANMADI — ÖLÇÜLDÜ: `playwright.config.ts` sunucuyu
+   * `next build && next start` ile kaldırıyor, yani E2E **production modunda**
+   * koşuyor. `NODE_ENV !== "production"` koşulu, kontrolü en çok işe yarayacağı
+   * yerde — 342 E2E testinin tamamında — SESSİZCE kapatırdı. Bayrak bu yüzden
+   * ayrı ve açıkça veriliyor (12-factor: yapılandırma ortamdan gelir).
+   *
+   * ⛔ PRODUCTION'DA KAPALI OLMALI: uyuşmazlık belgenin hatasıdır, kullanıcının
+   * değil. Canlıda açık olsaydı yanlış yazılmış bir şema, çalışan bir ucu
+   * 500'e çevirirdi.
+   */
+  API_RESPONSE_CONTRACT_CHECK: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+
   // adım 4b'de zorunlu olur (doğrulama kodu kanalları)
   OTP_EMAIL_CHANNEL: z.enum(["mock", "email"]).default("mock"),
   OTP_PHONE_CHANNEL: z.enum(["mock", "email_sim", "sms"]).default("mock"),
@@ -269,6 +296,23 @@ const serverEnvSchema = serverEnvBaseSchema.superRefine((env, ctx) => {
       message:
         "Production'da sahte kanal kullanılamaz — sahte kanal doğrulama kodunu ekranda gösterir " +
         "(docs/standards/05-auth-security.md). Production'da değer 'email_sim' olmalı.",
+    });
+  }
+
+  /**
+   * Yanıt sözleşmesi kontrolü production'da AÇILAMAZ (borç #107).
+   *
+   * Kural yalnızca yorumda kalsaydı bir gün "hata ayıklamak için" açılır ve
+   * yanlış yazılmış tek bir şema, çalışan bir ucu gerçek kullanıcıya 500
+   * döndürürdü. Bayrak yanlış ortamda verilirse dağıtım açılmıyor.
+   */
+  if (env.API_RESPONSE_CONTRACT_CHECK) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["API_RESPONSE_CONTRACT_CHECK"],
+      message:
+        "Yanıt sözleşmesi kontrolü production'da açılamaz — şema uyuşmazlığı belgenin hatasıdır, " +
+        "kullanıcının değil. Bayrak yalnızca local, test ve E2E ortamlarında 'true' olur.",
     });
   }
 });

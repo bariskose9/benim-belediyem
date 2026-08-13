@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import type { ZodType } from "zod";
 
+import { assertResponseContract } from "@/lib/api-response-contract";
 import { type AppError, toAppError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 
@@ -16,8 +18,23 @@ export type ApiFailure = {
   error: { code: string; message: string; details?: unknown };
 };
 
-export type OkOptions = {
+/**
+ * Yanıt gövdesinin belgelenen şeması (borç #107 · adım 107a).
+ *
+ * ⭐ TİPİ `ZodType<T>` — YANİ BU ALAN BİR DERLEME KAPISI. Şemanın ürettiği tip
+ * ile ucun döndürdüğü tip aynı olmak zorunda; ödeme yanıtına yeni bir alan
+ * eklenip şema güncellenmezse `npm run typecheck` KIRILIR. Yorum satırıyla
+ * "şemayı da güncellemeyi unutma" demek yerine, unutmayı imkânsız kılıyor.
+ *
+ * ⚠️ Tek başına YETMEZ: derleme tipi JSON'a hayatta kalmıyor. İkinci kapı
+ * `api-response-contract.ts` içinde, çalışma anında.
+ */
+export type ResponseSchema<T> = ZodType<T>;
+
+export type OkOptions<T = unknown> = {
   meta?: ApiMeta;
+  /** Gövdenin belgelenen şeması — kütükteki `success.body.schema` ile AYNI nesne. */
+  schema?: ResponseSchema<T>;
   /**
    * Yanıtın hiçbir yerde önbelleklenmemesi gerekiyorsa `true`.
    *
@@ -29,7 +46,9 @@ export type OkOptions = {
   noStore?: boolean;
 };
 
-export function ok<T>(data: T, options?: OkOptions): NextResponse<ApiSuccess<T>> {
+export function ok<T>(data: T, options?: OkOptions<T>): NextResponse<ApiSuccess<T>> {
+  assertResponseContract(options?.schema, data);
+
   const body = options?.meta ? { data, meta: options.meta } : { data };
 
   return NextResponse.json(body, {
@@ -45,7 +64,12 @@ export function ok<T>(data: T, options?: OkOptions): NextResponse<ApiSuccess<T>>
  * bilgisi, maskeli iletişim bilgisi veya doğrulama durumu taşıyor ve araya
  * giren bir CDN bunları başka bir kullanıcıya servis edemez.
  */
-export function created<T>(data: T): NextResponse<ApiSuccess<T>> {
+export function created<T>(
+  data: T,
+  options?: Pick<OkOptions<T>, "schema">,
+): NextResponse<ApiSuccess<T>> {
+  assertResponseContract(options?.schema, data);
+
   return NextResponse.json(
     { data },
     { status: 201, headers: { "Cache-Control": "no-store, max-age=0" } },

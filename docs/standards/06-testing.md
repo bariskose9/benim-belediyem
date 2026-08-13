@@ -117,6 +117,36 @@ bir hatanın peşinde geçer.
   cihaz izni isteyen API'ler (kamera, bildirim), reklam engelleyiciyle bozulan
   akışlar ve e-posta teslimi. Bunlar CI'da yeşil görünüp gerçekte kırık olabilir.
 
+## ⛔ BİR KAPIYI `NODE_ENV`'E BAĞLAMA — AÇIK OLDUĞUNU ÖLÇ
+
+Yalnızca geliştirme ve testte çalışması istenen bir doğrulama (yanıt sözleşmesi
+kontrolü, ek iddialar, ağır tutarlılık denetimi) refleksle
+`if (process.env.NODE_ENV !== "production")` içine konur. **Bu çoğu projede
+kapıyı tam da en çok işe yarayacağı yerde kapatır.**
+
+Sebep: E2E setleri genellikle **üretim yapısına karşı** koşar — `next build &&
+next start`, `vite preview`, derlenmiş bir konteyner. Yani E2E sırasında
+`NODE_ENV === "production"`'dur ve kapı, gerçek tarayıcıdan geçen her istekte
+**sessizce** devre dışı kalır. Ölçülmüş örnek: bu projede E2E sunucusu
+`playwright.config.ts` içinde `next build && next start` ile kalkıyor.
+
+**Kural:**
+
+- Kapının anahtarı **kendi ortam değişkeni** olur (12-factor), `NODE_ENV`
+  türevi değil
+- Değişken E2E ve test koşucusunun yapılandırmasında **açıkça** verilir
+- Yanlış ortamda verilmesi mümkünse ortam doğrulaması onu **reddeder** —
+  yorumla uyarmak yetmez
+- ⛔ **Kapının fiilen açık olduğu ölçülür:** kapıyı bozan bir mutasyon yapılır
+  ve testin kırmızıya döndüğü GÖRÜLÜR. Görülmediyse kapı yoktur —
+  "yeşil" yalnızca kapının hiç çalışmadığı anlamına gelebilir
+
+⚠️ Aynı tuzağın ikinci hâli: kontrolü, **tarayıcıda okunduğunda istisna
+fırlatan** bir sunucu-gizli yapılandırma nesnesinden okumak. Her yerden içe
+aktarılabilen bir yardımcı modül bunu okursa, teşhis aracının kendisi arıza
+kaynağına dönüşür. Böyle bir modül yapılandırmayı doğrudan ve yalın biçimde
+okur; doğrulama merkezî şemada zaten yapılmıştır.
+
 ## Mobil doğrulama — üç ayrı şey, karıştırılmaz
 
 | Ne | Nasıl test edilir | Hangi aşamada |

@@ -209,6 +209,51 @@ Production'da açılması istenirse: ortam değişkeniyle açılır (varsayılan
 belgelenmez — gerekçe ADR-009. Bu istisna yalnızca dış kurum taklidi için
 geçerlidir; uygulamanın kendi uçlarına genişletilemez.
 
+### Yanıt gövdesi de belgelenir — ve şema TELDEN doğrulanır
+
+İstek tarafını belgelemek yetmez. Bir uç yayına girdiğinde sözleşmesi iki
+yönlüdür: ne kabul ettiği **ve ne döndürdüğü**. Yanıt tarafı belgelenmezse
+tüketici, gövdenin içini ancak deneyerek öğrenir.
+
+⛔ **YANIT SÖZLEŞMESİ YALNIZCA TİP SİSTEMİYLE BELGELENEMEZ — TİP JSON'A HAYATTA
+KALMAZ.** `Date` alanı derlemede `Date`, telde ISO **metindir**; `Decimal`
+nesnesi telde metin; değeri `undefined` olan alan telde **hiç yoktur**. Yani
+derleme yeşilken belge yanlış olabilir ve bunu hiçbir derleyici göremez.
+
+Bu yüzden yanıt şeması üç ayrı yere bağlanır ve **her biri farklı bir hatayı**
+yakalar:
+
+| Bağ | Nerede | Yakaladığı hata |
+|---|---|---|
+| Derleme anı | Yanıt yardımcısı şemayı `ZodType<T>` olarak alır | Yanıta alan eklenip şemanın unutulması |
+| Çalışma anı | Gövde, **telden geçmiş hâliyle** şemadan geçirilir | Tipin göremediği biçim farkları (`Date`, `Decimal`, `undefined`) |
+| CI | Belgedeki şema ile ucun kullandığı şema karşılaştırılır | Belgenin A'yı gösterip ucun B ile çalışması |
+
+**Çalışma anı kontrolü production'da KAPALIDIR.** Şema uyuşmazlığı belgenin
+hatasıdır, kullanıcının değil — canlıda açık olsaydı yanlış yazılmış bir şema
+çalışan bir ucu `500`'e çevirirdi. Ortam değişkeni yanlış ortamda verilirse
+uygulama açılmaz.
+
+⚠️ **Yanıt şeması `.transform()` taşımaz** ve belgeye **girdi (`io: "input"`)
+biçimiyle basılır. Çıktı biçimi kullanılamaz:** çıktı modu JSON Schema'ya
+`additionalProperties: false` ekler, yani belge "yanıta fazladan alan konamaz"
+der — oysa yanıta alan eklemek yukarıda **kırıcı olmayan** değişiklik sayılıyor.
+Çıktı biçimiyle basılan bir belge, kendi uyumluluk kuralıyla çelişir.
+
+### Sözleşme borcu, CI'ın okuduğu ve yalnızca KÜÇÜLEN bir listeyle kapatılır
+
+Var olan bir API'ye sözleşme kapısı eklemek çoğu zaman onlarca uca dokunmayı
+gerektirir ve tek adıma sığmaz. İş bölünürken kalan uçlar **yorum satırına
+değil, kodda duran ve testin okuduğu bir listeye** yazılır. Liste üç şartı
+sağlamak zorunda:
+
+1. Listede olmayan bir uç sözleşmesini beyan etmek **zorundadır** (CI kapısı)
+2. Liste **yalnızca küçülebilir** — yeni bir uç eklenemez, çözülen uç listede kalamaz
+3. Kalan iş **belgede de görünür** — "bu ucun şeması henüz yazılmadı" uyarısı basılır
+
+⛔ Bu üç şart olmadan liste bir kaçış kapısına dönüşür: şema yazmak yerine adı
+listeye eklemek kolaylaşır ve borç hiç kapanmaz.
+
 ## Diğer
 - Ödeme/sipariş gibi tekrarlanmaması gereken işlemlerde idempotency anahtarı kullanılır.
 - Uzun işlemler senkron beklemez.

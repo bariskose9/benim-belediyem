@@ -37,6 +37,14 @@ export default defineConfig({
       // bu anahtarla şifreleniyor (ADR-012).
       NATIONAL_ID_ENCRYPTION_KEY: "bG9jYWwtZGV2LW9ubHkta2V5LTMyLWJ5dGVzLXh4eHg=",
       MOCK_KPS_API_KEY: "test-only-mock-kps-key-at-least-32-chars",
+      /**
+       * YANIT SÖZLEŞMESİ KONTROLÜ TESTLERDE AÇIK (borç #107 · adım 107a).
+       *
+       * Route çağıran her entegrasyon testi böylece aynı zamanda "belge doğru
+       * mu" sorusunu da yanıtlıyor — ayrı bir test yazmaya gerek kalmadan.
+       * Uyuşmazlık istisna fırlatıyor, yani sessiz kalması mümkün değil.
+       */
+      API_RESPONSE_CONTRACT_CHECK: "true",
     },
     coverage: {
       provider: "v8",

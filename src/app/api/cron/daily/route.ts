@@ -1,3 +1,4 @@
+import { scheduledRunResponseSchema } from "@/features/scheduled-tasks/schemas/scheduled-run.schema";
 import { assertCronRequestAuthorized } from "@/features/scheduled-tasks/services/cron-auth";
 import { runDailyTasks } from "@/features/scheduled-tasks/services/task-runner";
 import { InternalError } from "@/lib/errors";
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
       return fail(new InternalError(), summary);
     }
 
-    return ok(summary, { noStore: true });
+    return ok(summary, { noStore: true, schema: scheduledRunResponseSchema });
   } catch (error) {
     // Buraya yalnızca çalıştırıcının kendisi patlarsa düşülür (örn. veritabanı
     // hiç ayakta değil). İç detay `fail()` içinde log'a yazılır, istemciye gitmez.

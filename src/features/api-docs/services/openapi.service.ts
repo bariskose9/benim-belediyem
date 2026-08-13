@@ -28,6 +28,14 @@ function toSchemaObject(schema: ZodType): Record<string, unknown> {
    * `io: "input"` şart: istemcinin GÖNDERDİĞİ biçim belgeleniyor, sunucunun
    * dönüştürdükten sonraki hâli değil. `.transform()` taşıyan bir şemada ikisi
    * farklıdır ve çıktı biçimini belgelemek istemciyi yanlış yönlendirir.
+   *
+   * ⭐ YANIT ŞEMALARINDA DA AYNISI DOĞRU ve sebebi ilk bakışta ters görünüyor:
+   * yanıt şeması TELDEKİ gövdeyi doğruluyor (`api-response-contract.ts`), yani
+   * istemcinin gördüğü biçim şemanın GİRDİSİ. Her iki yönde de belgelenen şey
+   * "telde ne var" — bu yüzden tek geçiş noktası ikisine de yetiyor.
+   *
+   * ⚠️ Bu, yanıt şemalarının `.transform()` taşımamasını gerektiriyor; kural
+   * `tests/unit/api-docs-response.test.ts` içinde ölçülüyor, yorumda bırakılmadı.
    */
   const json = z.toJSONSchema(schema, { io: "input" }) as Record<string, unknown>;
 
@@ -61,6 +69,56 @@ const ACCESS_LABEL: Record<OperationAccess, string> = {
   cron: "Yalnızca planlı görev — paylaşılan gizli anahtarla (`Authorization: Bearer`).",
 };
 
+/**
+ * Başarılı yanıtın gövde şemasını üretir (borç #107 · adım 107a).
+ *
+ * ⭐ ÖNCEKİ HÂL YALNIZCA ZARFI BELGELİYORDU: `{ data: <Türkçe bir cümle> }`.
+ * İstemci `data`'nın içinde ne olduğunu belgeden ÖĞRENEMİYORDU. Web arayüzü
+ * bunu fark etmiyordu çünkü TypeScript tipleriyle derleme anında bağlıydı —
+ * ama mobil istemci (adım 19) o bağa sahip olmayacak ve yanıt sözleşmesinin
+ * TEK kaydı bu belge olacak.
+ */
+function buildSuccessBodySchema(operation: ApiOperation): Record<string, unknown> | undefined {
+  const { body, description, status } = operation.success;
+
+  // 204 ve yönlendirmelerin gövdesi yoktur; boş bir `content` yazmak belgeyi yanlış yapar.
+  if (status >= 204) return undefined;
+
+  /**
+   * Gövdesi olup şeması henüz yazılmamış uç — eksiklik BELGEDE GÖRÜNÜYOR.
+   *
+   * ⛔ Sessizce eski davranışa düşmek en kötü seçenekti: okuyan kişi zarfın
+   * içinin tarif edilmemiş olmasını "böyle tasarlanmış" sanardı. Uyarı, kalan
+   * işi belgeyi okuyan herkese gösteriyor ve listeyi CI ayrıca kilitliyor.
+   */
+  if (!body) {
+    return {
+      type: "object",
+      required: ["data"],
+      properties: {
+        data: {
+          description: `${description}\n\n⚠️ Bu ucun gövde şeması HENÜZ BELGELENMEDİ (teknik borç #107).`,
+        },
+      },
+    };
+  }
+
+  if ("externalContract" in body) {
+    return { description: body.externalContract };
+  }
+
+  const schema = toSchemaObject(body.schema);
+
+  // `/api/docs` gibi zarfsız uçlarda şema gövdenin TAMAMINI tarif eder.
+  if (body.envelope === "raw") return schema;
+
+  return {
+    type: "object",
+    required: ["data"],
+    properties: { data: { ...schema, description } },
+  };
+}
+
 function buildOperationObject(operation: ApiOperation): Record<string, unknown> {
   const parameters = buildParameters(operation);
 
@@ -68,16 +126,10 @@ function buildOperationObject(operation: ApiOperation): Record<string, unknown> 
     description: operation.success.description,
   };
 
-  // 204 ve yönlendirmelerin gövdesi yoktur; boş bir `content` yazmak belgeyi yanlış yapar.
-  if (operation.success.status < 204) {
-    successResponse.content = {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: { data: { description: operation.success.description } },
-        },
-      },
-    };
+  const bodySchema = buildSuccessBodySchema(operation);
+
+  if (bodySchema) {
+    successResponse.content = { "application/json": { schema: bodySchema } };
   }
 
   return {
