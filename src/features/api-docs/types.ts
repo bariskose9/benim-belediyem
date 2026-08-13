@@ -72,6 +72,16 @@ export type SuccessBody =
       externalContract: string;
     };
 
+export type SuccessResponse = {
+  status: 200 | 201 | 204 | 302 | 303;
+  description: string;
+  /**
+   * Gövdeli yanıtlarda (200/201) ZORUNLU, gövdesizlerde (204/302/303) yasak.
+   * İkisi de `tests/unit/api-docs-response.test.ts` ile kilitli.
+   */
+  body?: SuccessBody;
+};
+
 export type ApiOperation = {
   /** Next.js yol biçimi değil, OpenAPI biçimi: `/api/v1/addresses/{addressId}`. */
   path: string;
@@ -93,15 +103,22 @@ export type ApiOperation = {
     contentType?: "application/json" | "multipart/form-data";
   };
   /** Başarılı yanıtın durum kodu, Türkçe tarifi ve gövdesinin şeması. */
-  success: {
-    status: 200 | 201 | 204 | 302 | 303;
-    description: string;
-    /**
-     * Gövdeli yanıtlarda (200/201) ZORUNLU, gövdesizlerde (204/302/303) yasak.
-     * İkisi de `tests/unit/api-docs-response.test.ts` ile kilitli.
-     */
-    body?: SuccessBody;
-  };
+  success: SuccessResponse;
+  /**
+   * Aynı ucun dönebileceği DİĞER başarı yanıtları.
+   *
+   * ⭐ 107b'DE BİR BELGELEME BOŞLUĞU BULUNDUĞU İÇİN EKLENDİ.
+   * `POST /api/v1/registrations/current/verifications` iki farklı başarı
+   * döndürüyor: kod tamamlanmadıysa `200` (hangi kanalın doğrulandığı),
+   * hesap açıldıysa `201`. Kütük tek durum kodu tutabildiği için `200`
+   * dalı BUGÜNE KADAR HİÇ BELGELENMEMİŞTİ — istemci onu ancak deneyerek
+   * öğrenebilirdi.
+   *
+   * ⚠️ Kolay bir kaçış kapısı değil: buradaki her yanıt da gövde şeması
+   * beyan etmek zorunda ve durum kodları birbirinden farklı olmalı
+   * (`tests/unit/api-docs-response.test.ts`).
+   */
+  alternateSuccess?: SuccessResponse[];
   /**
    * Bu ucun dönebileceği hata kodları.
    *

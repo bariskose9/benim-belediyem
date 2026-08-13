@@ -1,5 +1,5 @@
 import { InvalidCredentialsError } from "@/features/auth/errors";
-import { loginSchema } from "@/features/auth/schemas/login.schema";
+import { loginSchema, sessionCreatedResponseSchema } from "@/features/auth/schemas/login.schema";
 import { login } from "@/features/auth/services/login.service";
 import { readSessionToken, writeSessionCookie } from "@/features/auth/services/session-context";
 import { revokeSession } from "@/features/auth/services/session.service";
@@ -75,7 +75,10 @@ export async function POST(request: Request) {
 
     await writeSessionCookie(result.token);
 
-    return created({ expiresAt: result.expiresAt.toISOString() });
+    return created(
+      { expiresAt: result.expiresAt.toISOString() },
+      { schema: sessionCreatedResponseSchema },
+    );
   } catch (error) {
     return fail(error, botCheckDetails(error));
   }

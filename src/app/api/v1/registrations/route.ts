@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 
 import { REGISTRATION_COOKIE_NAME, REGISTRATION_DRAFT_TTL_MS } from "@/config/constants";
 import { IdentityCheckFailedError } from "@/features/auth/errors";
-import { registrationStartSchema } from "@/features/auth/schemas/registration.schema";
+import {
+  registrationStartResponseSchema,
+  registrationStartSchema,
+} from "@/features/auth/schemas/registration.schema";
 import { startRegistration } from "@/features/auth/services/registration.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { secureCookieDefaults } from "@/lib/cookies";
@@ -55,10 +58,13 @@ export async function POST(request: Request) {
       maxAge: Math.floor(REGISTRATION_DRAFT_TTL_MS / 1000),
     });
 
-    return created({
-      identity: result.identity,
-      expiresAt: result.expiresAt.toISOString(),
-    });
+    return created(
+      {
+        identity: result.identity,
+        expiresAt: result.expiresAt.toISOString(),
+      },
+      { schema: registrationStartResponseSchema },
+    );
   } catch (error) {
     return fail(error);
   }

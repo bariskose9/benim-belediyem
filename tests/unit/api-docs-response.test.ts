@@ -6,7 +6,7 @@ import { z, type ZodType } from "zod";
 
 import { apiOperations, RESPONSE_BODY_PENDING } from "@/features/api-docs/registry";
 import { toOpenApiPath } from "@/features/api-docs/services/openapi.service";
-import type { ApiOperation } from "@/features/api-docs/types";
+import type { ApiOperation, SuccessResponse } from "@/features/api-docs/types";
 
 /**
  * ⭐ YANIT SÖZLEŞMESİNİN KAPISI (borç #107 · adım 107a).
@@ -39,6 +39,12 @@ const key = ({ path, method }: Pick<ApiOperation, "path" | "method">) =>
 
 const withBody = apiOperations.filter((operation) => operation.success.status < 204);
 const withoutBody = apiOperations.filter((operation) => operation.success.status >= 204);
+
+/** Bir ucun TÜM başarı yanıtları — asıl olan ve varsa diğerleri (107b). */
+const allSuccesses = (operation: ApiOperation): SuccessResponse[] => [
+  operation.success,
+  ...(operation.alternateSuccess ?? []),
+];
 
 function walkRouteFiles(dir: string): string[] {
   const found: string[] = [];
@@ -122,13 +128,15 @@ function readRegistrySchemaNames(): Map<string, string> {
   return names;
 }
 
-/** Kütükte `schema` beyan eden uçlar (dış sözleşmeye bırakılanlar hariç). */
+/** Kütükte `schema` beyan eden yanıtlar (dış sözleşmeye bırakılanlar hariç). */
 function declaredSchemas(): { operation: ApiOperation; schema: ZodType }[] {
-  return withBody.flatMap((operation) => {
-    const body = operation.success.body;
+  return apiOperations.flatMap((operation) =>
+    allSuccesses(operation).flatMap((success) => {
+      const body = success.body;
 
-    return body && "schema" in body ? [{ operation, schema: body.schema }] : [];
-  });
+      return body && "schema" in body ? [{ operation, schema: body.schema }] : [];
+    }),
+  );
 }
 
 /**
@@ -205,6 +213,33 @@ describe("yanıt gövdesinin şeması belgeleniyor", () => {
       .sort();
 
     expect(wrong, "gövdesiz yanıt için şema yazılmış — istemciyi yanıltır").toEqual([]);
+  });
+
+  /**
+   * ⛔ `alternateSuccess` KOLAY BİR KAÇIŞ KAPISI OLAMAZ.
+   *
+   * İkinci bir başarı yanıtı eklemek, belgeleme yükümlülüğünü azaltmıyor:
+   * gövdeli her yanıt şema beyan etmek zorunda ve iki yanıt aynı durum kodunu
+   * taşıyamaz — taşısaydı OpenAPI'de biri diğerini sessizce ezerdi.
+   */
+  it("ikinci başarı yanıtları da şema beyan ediyor ve durum kodları benzersiz", () => {
+    const missingSchema: string[] = [];
+    const duplicateStatus: string[] = [];
+
+    for (const operation of apiOperations) {
+      const statuses = allSuccesses(operation).map((success) => success.status);
+
+      if (new Set(statuses).size !== statuses.length) duplicateStatus.push(key(operation));
+
+      for (const success of operation.alternateSuccess ?? []) {
+        if (success.status < 204 && !success.body) {
+          missingSchema.push(`${key(operation)} → ${success.status}`);
+        }
+      }
+    }
+
+    expect(missingSchema, "ikinci başarı yanıtı şemasız bırakılmış").toEqual([]);
+    expect(duplicateStatus, "aynı durum kodu iki kez yazılmış — biri diğerini ezer").toEqual([]);
   });
 
   it("dış sözleşmeye bırakılan gövdenin gerekçesi yazılı", () => {

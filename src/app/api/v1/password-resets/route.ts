@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
 
 import { PASSWORD_RESET_COOKIE_NAME, PASSWORD_RESET_FLOW_TTL_MS } from "@/config/constants";
-import { passwordResetRequestSchema } from "@/features/auth/schemas/password-reset.schema";
+import {
+  passwordResetRequestSchema,
+  passwordResetStartResponseSchema,
+} from "@/features/auth/schemas/password-reset.schema";
 import { requestPasswordReset } from "@/features/auth/services/password-reset.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { secureCookieDefaults } from "@/lib/cookies";
@@ -45,7 +48,10 @@ export async function POST(request: Request) {
       maxAge: Math.floor(PASSWORD_RESET_FLOW_TTL_MS / 1000),
     });
 
-    return created({ expiresAt: result.expiresAt.toISOString() });
+    return created(
+      { expiresAt: result.expiresAt.toISOString() },
+      { schema: passwordResetStartResponseSchema },
+    );
   } catch (error) {
     return fail(error);
   }

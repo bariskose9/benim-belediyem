@@ -88,3 +88,95 @@ export const otpResendSchema = z.object({
 });
 
 export type OtpResendPayload = z.infer<typeof otpResendSchema>;
+
+/**
+ * ═══ YANIT SÖZLEŞMELERİ (borç #107 · adım 107b · ADR-021) ═══
+ *
+ * Buradaki şemalar hem route'un `ok()`/`created()` çağrısında hem API
+ * belgesinde KULLANILIYOR — ikisi aynı nesne. Elle yazılmış bir tarif
+ * olsaydı sessizce sapardı.
+ *
+ * ⛔ TARİHLER `z.iso.datetime()`, `z.date()` DEĞİL: telde metin taşınıyorlar
+ * (`toISOString()`), tip sistemi bunu göremez ama çalışma anı kontrolü görür.
+ */
+
+/**
+ * Kimlik özeti — kayıt akışında kullanıcıya "bu sen misin" diye gösterilir.
+ *
+ * ⛔ `nationalId` YOK, yalnızca `nationalIdMasked` VAR. Tam numara istemciye
+ * hiçbir uçta gitmiyor (ADR-012, 14-privacy-and-compliance.md) ve şemanın
+ * bunu göstermesi belgeyi okuyan için bir güvence.
+ */
+export const registrationIdentityResponseSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  birthDate: z.iso.date(),
+  birthPlace: z.string(),
+  fatherName: z.string(),
+  motherName: z.string(),
+  registeredProvince: z.string(),
+  registeredDistrict: z.string(),
+  gender: z.string(),
+  maritalStatus: z.string(),
+  registeredAddress: z.string(),
+  /** `123******90` — tam numara istemciye hiç gitmez. */
+  nationalIdMasked: z.string(),
+});
+
+/**
+ * Sahte doğrulama kodu — YALNIZCA local ve preview'da dolu.
+ *
+ * ⚠️ Alan belgede GÖRÜNÜYOR ve bu bilinçli: production'da hiç gelmediğini
+ * yazmak, onu gören bir istemcinin "demek ki kodu buradan okuyabilirim"
+ * varsayımını baştan kesiyor (ADR-004).
+ */
+const simulationCodeSchema = z
+  .string()
+  .optional()
+  .describe("Yalnızca local ve preview'da dolu; production'da HİÇ gönderilmez.");
+
+export const registrationStartResponseSchema = z.object({
+  identity: registrationIdentityResponseSchema,
+  expiresAt: z.iso.datetime(),
+});
+
+export const registrationStateResponseSchema = z.object({
+  step: z.enum(["contact", "verify"]),
+  identity: registrationIdentityResponseSchema,
+  /** İletişim adımı tamamlanmadıysa `null`. */
+  emailMasked: z.string().nullable(),
+  phoneMasked: z.string().nullable(),
+  emailVerified: z.boolean(),
+  phoneVerified: z.boolean(),
+  expiresAt: z.iso.datetime(),
+});
+
+export const registrationContactResponseSchema = z.object({
+  expiresAt: z.iso.datetime(),
+  simulationCodes: z
+    .object({ email: z.string().optional(), phone: z.string().optional() })
+    .optional()
+    .describe("Yalnızca local ve preview'da dolu; production'da HİÇ gönderilmez."),
+});
+
+export const otpChallengeResponseSchema = z.object({
+  expiresAt: z.iso.datetime(),
+  simulationCode: simulationCodeSchema,
+});
+
+/**
+ * ⭐ İKİ AYRI BAŞARI YANITI — ve `200` dalı 107b'ye kadar HİÇ BELGELENMEMİŞTİ.
+ *
+ * Kod doğrulandı ama kayıt henüz bitmediyse `200` dönüyor ve hangi kanalın
+ * doğrulandığı bildiriliyor; ikinci kanal da bitince `201` dönüyor ve oturum
+ * kuruluyor. Kütük tek durum kodu tutabildiği için `200` görünmüyordu.
+ */
+export const registrationVerificationPendingResponseSchema = z.object({
+  completed: z.literal(false),
+  emailVerified: z.boolean(),
+  phoneVerified: z.boolean(),
+});
+
+export const registrationVerificationCompletedResponseSchema = z.object({
+  completed: z.literal(true),
+});

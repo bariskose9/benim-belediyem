@@ -8,7 +8,12 @@ import {
   errorResponseSchema,
 } from "@/features/api-docs/services/error-responses";
 import { TAG_DESCRIPTIONS } from "@/features/api-docs/tags";
-import type { ApiOperation, OperationAccess, OperationParam } from "@/features/api-docs/types";
+import type {
+  ApiOperation,
+  OperationAccess,
+  OperationParam,
+  SuccessResponse,
+} from "@/features/api-docs/types";
 
 /**
  * OpenAPI belgesini üretir (adım 18b · ADR-019).
@@ -78,8 +83,8 @@ const ACCESS_LABEL: Record<OperationAccess, string> = {
  * ama mobil istemci (adım 19) o bağa sahip olmayacak ve yanıt sözleşmesinin
  * TEK kaydı bu belge olacak.
  */
-function buildSuccessBodySchema(operation: ApiOperation): Record<string, unknown> | undefined {
-  const { body, description, status } = operation.success;
+function buildSuccessBodySchema(success: SuccessResponse): Record<string, unknown> | undefined {
+  const { body, description, status } = success;
 
   // 204 ve yönlendirmelerin gövdesi yoktur; boş bir `content` yazmak belgeyi yanlış yapar.
   if (status >= 204) return undefined;
@@ -122,15 +127,19 @@ function buildSuccessBodySchema(operation: ApiOperation): Record<string, unknown
 function buildOperationObject(operation: ApiOperation): Record<string, unknown> {
   const parameters = buildParameters(operation);
 
-  const successResponse: Record<string, unknown> = {
-    description: operation.success.description,
+  /** Bir başarı yanıtını OpenAPI `responses` girdisine çevirir. */
+  const toResponseEntry = (success: SuccessResponse): [string, Record<string, unknown>] => {
+    const entry: Record<string, unknown> = { description: success.description };
+    const bodySchema = buildSuccessBodySchema(success);
+
+    if (bodySchema) entry.content = { "application/json": { schema: bodySchema } };
+
+    return [String(success.status), entry];
   };
 
-  const bodySchema = buildSuccessBodySchema(operation);
-
-  if (bodySchema) {
-    successResponse.content = { "application/json": { schema: bodySchema } };
-  }
+  const successResponses = Object.fromEntries(
+    [operation.success, ...(operation.alternateSuccess ?? [])].map(toResponseEntry),
+  );
 
   return {
     operationId: toOperationId(operation),
@@ -154,7 +163,7 @@ function buildOperationObject(operation: ApiOperation): Record<string, unknown> 
         }
       : {}),
     responses: {
-      [String(operation.success.status)]: successResponse,
+      ...successResponses,
       ...buildErrorResponses(operation),
     },
   };

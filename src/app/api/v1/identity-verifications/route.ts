@@ -2,7 +2,10 @@ import { KPS_RATE_LIMIT_MAX_ATTEMPTS, KPS_RATE_LIMIT_WINDOW_MS } from "@/config/
 import { IdentityCheckFailedError, IdentityRateLimitedError } from "@/features/auth/errors";
 import { requireAccess } from "@/features/auth/services/api-guard";
 import { verifyIdentity } from "@/features/auth/services/identity-verification.service";
-import { identityChallengeSchema } from "@/features/identity/schemas/identity-challenge.schema";
+import {
+  identityChallengeSchema,
+  identityVerifiedResponseSchema,
+} from "@/features/identity/schemas/identity-challenge.schema";
 import { created, fail } from "@/lib/http";
 import { consumeRateLimit, rateLimitKey, readActorIp } from "@/lib/rate-limit";
 
@@ -56,7 +59,7 @@ export async function POST(request: Request) {
 
     // ⛔ `isStaff` YANITTAN KALDIRILDI (adım 17c · ADR-017 ilke 2): kimlik
     // doğrulaması artık personel yetkisi vermiyor, söyleyecek bir şeyi yok.
-    return created({ fullName: result.fullName });
+    return created({ fullName: result.fullName }, { schema: identityVerifiedResponseSchema });
   } catch (error) {
     return fail(error);
   }

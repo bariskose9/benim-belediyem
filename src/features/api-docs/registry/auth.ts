@@ -1,16 +1,25 @@
 import { z } from "zod";
 
-import { loginSchema } from "@/features/auth/schemas/login.schema";
+import { loginSchema, sessionCreatedResponseSchema } from "@/features/auth/schemas/login.schema";
 import {
+  passwordResetCompletedResponseSchema,
   passwordResetCompleteSchema,
+  passwordResetOtpResponseSchema,
   passwordResetRequestSchema,
   passwordResetResendSchema,
+  passwordResetStartResponseSchema,
 } from "@/features/auth/schemas/password-reset.schema";
 import {
+  otpChallengeResponseSchema,
   otpResendSchema,
   otpVerifySchema,
+  registrationContactResponseSchema,
   registrationContactSchema,
+  registrationStartResponseSchema,
   registrationStartSchema,
+  registrationStateResponseSchema,
+  registrationVerificationCompletedResponseSchema,
+  registrationVerificationPendingResponseSchema,
 } from "@/features/auth/schemas/registration.schema";
 import type { ApiOperation } from "@/features/api-docs/types";
 
@@ -33,7 +42,11 @@ export const authOperations: ApiOperation[] = [
       "böylece yanıt süresi ipucu vermez.",
     access: "public",
     requestBody: { schema: loginSchema },
-    success: { status: 201, description: "Oturumun bitiş zamanı (`expiresAt`)." },
+    success: {
+      status: 201,
+      description: "Oturumun bitiş zamanı (`expiresAt`).",
+      body: { schema: sessionCreatedResponseSchema },
+    },
     errors: ["INVALID_CREDENTIALS"],
     rateLimited: true,
   },
@@ -58,7 +71,11 @@ export const authOperations: ApiOperation[] = [
       "vermez (05-auth-security.md · ADR-017). Taslak sunucuda şifreli tutulur (ADR-012).",
     access: "public",
     requestBody: { schema: registrationStartSchema },
-    success: { status: 201, description: "Taslak kimliği ve sonraki adım bilgisi." },
+    success: {
+      status: 201,
+      description: "Doğrulanan kimlik özeti ve taslağın son geçerlilik zamanı.",
+      body: { schema: registrationStartResponseSchema },
+    },
     errors: [
       "IDENTITY_CHECK_FAILED",
       "IDENTITY_ALREADY_REGISTERED",
@@ -80,6 +97,7 @@ export const authOperations: ApiOperation[] = [
     success: {
       status: 200,
       description: "Taslağın hangi adımda olduğu ve maskeli iletişim bilgisi.",
+      body: { schema: registrationStateResponseSchema },
     },
     errors: ["REGISTRATION_EXPIRED"],
   },
@@ -90,7 +108,11 @@ export const authOperations: ApiOperation[] = [
     summary: "Taslağa iletişim bilgisi ve şifre yazar, doğrulama kodu gönderir.",
     access: "public",
     requestBody: { schema: registrationContactSchema },
-    success: { status: 200, description: "Kodun gönderildiği kanal ve son geçerlilik zamanı." },
+    success: {
+      status: 200,
+      description: "Kodun son geçerlilik zamanı.",
+      body: { schema: registrationContactResponseSchema },
+    },
     errors: [
       "REGISTRATION_EXPIRED",
       "EMAIL_ALREADY_REGISTERED",
@@ -118,7 +140,11 @@ export const authOperations: ApiOperation[] = [
     summary: "Doğrulama kodunu yeniden gönderir.",
     access: "public",
     requestBody: { schema: otpResendSchema },
-    success: { status: 201, description: "Yeni kodun son geçerlilik zamanı." },
+    success: {
+      status: 201,
+      description: "Yeni kodun son geçerlilik zamanı.",
+      body: { schema: otpChallengeResponseSchema },
+    },
     errors: ["REGISTRATION_EXPIRED", "OTP_SEND_RATE_LIMITED", "OTP_CHANNEL_UNAVAILABLE"],
     rateLimited: true,
   },
@@ -132,7 +158,27 @@ export const authOperations: ApiOperation[] = [
       "`userId` taşımaz — yalnızca `registrationId` üzerinden bulunur.",
     access: "public",
     requestBody: { schema: otpVerifySchema },
-    success: { status: 201, description: "Kayıt tamamlandı; oturum kuruldu." },
+    success: {
+      status: 201,
+      description: "Kayıt tamamlandı; oturum kuruldu.",
+      body: { schema: registrationVerificationCompletedResponseSchema },
+    },
+    /**
+     * ⭐ BU UCUN `200` DALI 107b'YE KADAR HİÇ BELGELENMEMİŞTİ.
+     *
+     * İki kanal (e-posta + telefon) ayrı ayrı doğrulanıyor. Birincisi
+     * doğrulandığında kayıt henüz bitmiyor ve uç `200` ile "hangisi tamam"
+     * bilgisini döndürüyor; ikincisi de bitince `201` dönüyor. Kütük tek
+     * durum kodu tutabildiği için istemci `200` dalını ancak deneyerek
+     * öğrenebilirdi.
+     */
+    alternateSuccess: [
+      {
+        status: 200,
+        description: "Kod doğrulandı ama diğer kanal bekliyor — kayıt HENÜZ bitmedi.",
+        body: { schema: registrationVerificationPendingResponseSchema },
+      },
+    ],
     errors: ["REGISTRATION_EXPIRED", "OTP_INVALID", "OTP_EXPIRED", "OTP_TOO_MANY_ATTEMPTS"],
     rateLimited: true,
   },
@@ -147,7 +193,11 @@ export const authOperations: ApiOperation[] = [
       "cevap döner, böylece uç bir hesap sayımı kanalına dönüşmez.",
     access: "public",
     requestBody: { schema: passwordResetRequestSchema },
-    success: { status: 201, description: "Kodun son geçerlilik zamanı." },
+    success: {
+      status: 201,
+      description: "Kodun son geçerlilik zamanı.",
+      body: { schema: passwordResetStartResponseSchema },
+    },
     errors: [
       "PASSWORD_RESET_SEND_RATE_LIMITED",
       "PASSWORD_RESET_CLOSED",
@@ -162,7 +212,11 @@ export const authOperations: ApiOperation[] = [
     summary: "Sıfırlama kodunu yeniden gönderir.",
     access: "public",
     requestBody: { schema: passwordResetResendSchema },
-    success: { status: 201, description: "Yeni kodun son geçerlilik zamanı." },
+    success: {
+      status: 201,
+      description: "Yeni kodun son geçerlilik zamanı.",
+      body: { schema: passwordResetOtpResponseSchema },
+    },
     errors: [
       "PASSWORD_RESET_EXPIRED",
       "PASSWORD_RESET_SEND_RATE_LIMITED",
@@ -178,7 +232,11 @@ export const authOperations: ApiOperation[] = [
     description: "Şifre değişince kullanıcının TÜM aktif oturumları düşürülür.",
     access: "public",
     requestBody: { schema: passwordResetCompleteSchema },
-    success: { status: 200, description: "Şifre değiştirildi (`completed: true`)." },
+    success: {
+      status: 200,
+      description: "Şifre değiştirildi.",
+      body: { schema: passwordResetCompletedResponseSchema },
+    },
     errors: [
       "PASSWORD_RESET_EXPIRED",
       "OTP_INVALID",

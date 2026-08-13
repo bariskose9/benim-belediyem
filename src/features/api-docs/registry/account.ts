@@ -3,11 +3,16 @@ import {
   accountPhoneSchema,
   identityUnlinkSchema,
 } from "@/features/account/schemas/account.schema";
-import { identityChallengeSchema } from "@/features/identity/schemas/identity-challenge.schema";
+import {
+  identityChallengeSchema,
+  identityVerifiedResponseSchema,
+} from "@/features/identity/schemas/identity-challenge.schema";
 import { consentInputSchema } from "@/features/legal/schemas/consent.schema";
 import {
+  staffVerificationConfirmedResponseSchema,
   staffVerificationConfirmSchema,
   staffVerificationRequestSchema,
+  staffVerificationStartedResponseSchema,
 } from "@/features/staff-verification/schemas/staff-verification.schema";
 import type { ApiOperation } from "@/features/api-docs/types";
 
@@ -96,7 +101,11 @@ export const accountOperations: ApiOperation[] = [
       "saldırısını engellemek için. Sorgu denetim kaydına yazılır, **sorgulanan numara yazılmadan**.",
     access: "authenticated",
     requestBody: { schema: identityChallengeSchema },
-    success: { status: 201, description: "Doğrulanan kişinin ad soyadı." },
+    success: {
+      status: 201,
+      description: "Doğrulanan kişinin ad soyadı.",
+      body: { schema: identityVerifiedResponseSchema },
+    },
     errors: [
       "IDENTITY_CHECK_FAILED",
       "IDENTITY_ALREADY_VERIFIED",
@@ -127,6 +136,7 @@ export const accountOperations: ApiOperation[] = [
     success: {
       status: 201,
       description: "Local/preview'da açığa çıkarılan kod; production'da boş.",
+      body: { schema: staffVerificationStartedResponseSchema },
     },
     errors: ["STAFF_IDENTITY_REQUIRED", "STAFF_ALREADY_VERIFIED", "OTP_SEND_RATE_LIMITED"],
     rateLimited: true,
@@ -140,7 +150,11 @@ export const accountOperations: ApiOperation[] = [
       "Yetki alanına yazan TEK katman burasıdır; kayıt ve kimlik akışlarında o alan hiç bulunmaz.",
     access: "authenticated",
     requestBody: { schema: staffVerificationConfirmSchema },
-    success: { status: 201, description: "Personel yetkisinin son durumu (`isStaff`)." },
+    success: {
+      status: 201,
+      description: "Personel yetkisi verildi.",
+      body: { schema: staffVerificationConfirmedResponseSchema },
+    },
     errors: [
       "STAFF_VERIFICATION_CODE_INVALID",
       "STAFF_VERIFICATION_TOO_MANY_ATTEMPTS",

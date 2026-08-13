@@ -62,3 +62,28 @@ export const passwordResetCompleteSchema = z
   });
 
 export type PasswordResetCompletePayload = z.infer<typeof passwordResetCompleteSchema>;
+
+/**
+ * ═══ YANIT SÖZLEŞMELERİ (borç #107 · adım 107b · ADR-021) ═══
+ *
+ * ⛔ HİÇBİR YANIT "BU E-POSTA KAYITLI MI" BİLGİSİ SIZDIRMIYOR — hesabın var
+ * olup olmadığından bağımsız olarak aynı gövde dönüyor. Şemanın bunu
+ * göstermesi, ileride buraya "kullanıcı bulunamadı" gibi bir alan eklemeyi
+ * gözle görülür bir sözleşme değişikliği hâline getiriyor
+ * (05-auth-security.md → kullanıcı sayımı).
+ */
+export const passwordResetStartResponseSchema = z.object({
+  expiresAt: z.iso.datetime(),
+});
+
+export const passwordResetOtpResponseSchema = z.object({
+  expiresAt: z.iso.datetime(),
+  simulationCode: z
+    .string()
+    .optional()
+    .describe("Yalnızca local ve preview'da dolu; production'da HİÇ gönderilmez."),
+});
+
+export const passwordResetCompletedResponseSchema = z.object({
+  completed: z.literal(true),
+});

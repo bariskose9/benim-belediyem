@@ -63,3 +63,28 @@ export const staffVerificationConfirmSchema = z.object({
 });
 
 export type StaffVerificationConfirmPayload = z.infer<typeof staffVerificationConfirmSchema>;
+
+/**
+ * ═══ YANIT SÖZLEŞMELERİ (borç #107 · adım 107b · ADR-021) ═══
+ *
+ * ⚠️ `revealedCode` YALNIZCA local ve preview'da dolu. Production'da doğrulama
+ * kodu kuruma ait kanaldan gidiyor; ekranda gösterilseydi personel doğrulaması
+ * hiçbir şey doğrulamamış olurdu (ADR-004).
+ */
+export const staffVerificationStartedResponseSchema = z.object({
+  revealedCode: z
+    .string()
+    .optional()
+    .describe("Yalnızca local ve preview'da dolu; production'da HİÇ gönderilmez."),
+});
+
+/**
+ * ⭐ `isStaff` SABİT `true` — ve bu bilinçli.
+ *
+ * Uç yalnızca doğrulama BAŞARIYLA bittiğinde bu gövdeyi döndürüyor;
+ * başarısızlık hata zarfıyla geliyor. `boolean` yazmak, istemciye hiç
+ * gelmeyecek bir `false` dalını ele almasını söylemek olurdu.
+ */
+export const staffVerificationConfirmedResponseSchema = z.object({
+  isStaff: z.literal(true),
+});

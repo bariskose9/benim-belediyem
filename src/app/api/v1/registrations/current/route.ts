@@ -2,7 +2,11 @@ import { cookies } from "next/headers";
 
 import { REGISTRATION_COOKIE_NAME } from "@/config/constants";
 import { RegistrationExpiredError } from "@/features/auth/errors";
-import { registrationContactSchema } from "@/features/auth/schemas/registration.schema";
+import {
+  registrationContactResponseSchema,
+  registrationContactSchema,
+  registrationStateResponseSchema,
+} from "@/features/auth/schemas/registration.schema";
 import {
   cancelRegistration,
   getRegistrationState,
@@ -46,7 +50,7 @@ export async function GET() {
         phoneVerified: state.phoneVerified,
         expiresAt: state.expiresAt.toISOString(),
       },
-      { noStore: true },
+      { noStore: true, schema: registrationStateResponseSchema },
     );
   } catch (error) {
     return fail(error);
@@ -71,7 +75,7 @@ export async function PATCH(request: Request) {
         // bu alanı zaten `undefined` yapıyor.
         simulationCodes: result.simulationCodes,
       },
-      { noStore: true },
+      { noStore: true, schema: registrationContactResponseSchema },
     );
   } catch (error) {
     return fail(error);

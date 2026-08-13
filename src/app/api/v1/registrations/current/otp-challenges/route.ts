@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 
 import { REGISTRATION_COOKIE_NAME } from "@/config/constants";
 import { RegistrationExpiredError } from "@/features/auth/errors";
-import { otpResendSchema } from "@/features/auth/schemas/registration.schema";
+import {
+  otpChallengeResponseSchema,
+  otpResendSchema,
+} from "@/features/auth/schemas/registration.schema";
 import { resendCode } from "@/features/auth/services/registration.service";
 import { ValidationError } from "@/lib/errors";
 import { created, fail } from "@/lib/http";
@@ -37,10 +40,13 @@ export async function POST(request: Request) {
       actorIp: readActorIp(request.headers),
     });
 
-    return created({
-      expiresAt: result.expiresAt.toISOString(),
-      simulationCode: result.simulationCode,
-    });
+    return created(
+      {
+        expiresAt: result.expiresAt.toISOString(),
+        simulationCode: result.simulationCode,
+      },
+      { schema: otpChallengeResponseSchema },
+    );
   } catch (error) {
     return fail(error);
   }
