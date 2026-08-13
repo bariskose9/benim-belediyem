@@ -47,20 +47,7 @@ export const UNDOCUMENTED_PATH_PREFIXES = ["/api/mock-kps"] as const;
  * 107d bittiğinde liste boşalır ve bu sabit tamamen silinir.
  */
 export const RESPONSE_BODY_PENDING: readonly string[] = [
-  // 107b — kimlik doğrulama ve hesap
-  "GET /api/v1/account/export",
-  "GET /api/v1/registrations/current",
-  "PATCH /api/v1/registrations/current",
-  "POST /api/v1/identity-verifications",
-  "POST /api/v1/password-resets",
-  "POST /api/v1/password-resets/current/otp-challenges",
-  "POST /api/v1/registrations",
-  "POST /api/v1/registrations/current/otp-challenges",
-  "POST /api/v1/registrations/current/verifications",
-  "POST /api/v1/sessions",
-  "POST /api/v1/staff-verifications",
-  "POST /api/v1/staff-verifications/confirmations",
-  "PUT /api/v1/password-resets/current/password",
+  // ✅ 107b (kimlik doğrulama ve hesap) BİTTİ — 12 uç bu listeden düştü.
 
   // 107c — sepet, ödeme, üyelik
   "DELETE /api/v1/carts/current/items/{itemId}",
@@ -71,7 +58,18 @@ export const RESPONSE_BODY_PENDING: readonly string[] = [
   "POST /api/v1/memberships",
   "POST /api/v1/payments",
 
-  // 107d — profil ve hizmetler
+  /**
+   * 107d — profil, hizmetler ve GÖVDESİ JSON OLMAYAN uçlar.
+   *
+   * ⚠️ `GET /api/v1/account/export` 107b'de taşınacaktı; ölçüldükten sonra
+   * BİLEREK buraya alındı. Sebebi klasörü değil SÖZLEŞMESİNİN TÜRÜ: uç
+   * `ok()` kullanmıyor, `{ data }` zarfına sarmıyor ve gövdesi bugün
+   * `Record<string, unknown>` — yani bir tipi bile yok. Muhatabı da bir API
+   * istemcisi değil, TARAYICI İNDİRMESİ. Aynı sınırı paylaştığı ek indirme
+   * ucuyla birlikte, tek seferde ve kendi kararıyla ele alınmalı; auth
+   * uçlarının arasına sıkıştırılsaydı 107b iki katına çıkardı (CLAUDE.md §7).
+   */
+  "GET /api/v1/account/export",
   "GET /api/v1/support-tickets/{ticketId}/attachments/{attachmentId}",
   "PATCH /api/v1/notifications",
   "POST /api/v1/addresses",

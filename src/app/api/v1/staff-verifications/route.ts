@@ -1,6 +1,9 @@
 import { requireAccess } from "@/features/auth/services/api-guard";
 import { InvalidStaffVerificationRequestError } from "@/features/staff-verification/errors";
-import { staffVerificationRequestSchema } from "@/features/staff-verification/schemas/staff-verification.schema";
+import {
+  staffVerificationRequestSchema,
+  staffVerificationStartedResponseSchema,
+} from "@/features/staff-verification/schemas/staff-verification.schema";
 import { requestStaffVerification } from "@/features/staff-verification/services/staff-verification.service";
 import { created, fail } from "@/lib/http";
 import { isSameOriginRequest } from "@/lib/same-origin";
@@ -55,7 +58,10 @@ export async function POST(request: Request) {
      * `otp.service.ts` → `revealCodeIfAllowed()` her zaman `undefined` döndürür
      * ve sahte kanal production'da zaten seçilemiyor (`src/config/env.ts`).
      */
-    return created({ revealedCode: result.revealedCode });
+    return created(
+      { revealedCode: result.revealedCode },
+      { schema: staffVerificationStartedResponseSchema },
+    );
   } catch (error) {
     return fail(error);
   }

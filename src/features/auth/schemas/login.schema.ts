@@ -34,3 +34,14 @@ export const loginSchema = z.object({
 });
 
 export type LoginPayload = z.infer<typeof loginSchema>;
+
+/**
+ * ═══ YANIT SÖZLEŞMESİ (borç #107 · adım 107b · ADR-021) ═══
+ *
+ * ⛔ OTURUM JETONU GÖVDEDE DÖNMÜYOR ve şemanın bunu göstermesi bir güvence:
+ * jeton `httpOnly` çerezle taşınıyor (ADR-002, ADR-005). Gövdede yalnızca
+ * oturumun ne zaman biteceği var — arayüz buna göre uyarı gösteriyor.
+ */
+export const sessionCreatedResponseSchema = z.object({
+  expiresAt: z.iso.datetime(),
+});

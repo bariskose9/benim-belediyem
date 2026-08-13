@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 
 import { PASSWORD_RESET_COOKIE_NAME } from "@/config/constants";
 import { PasswordResetExpiredError } from "@/features/auth/errors";
-import { passwordResetCompleteSchema } from "@/features/auth/schemas/password-reset.schema";
+import {
+  passwordResetCompletedResponseSchema,
+  passwordResetCompleteSchema,
+} from "@/features/auth/schemas/password-reset.schema";
 import { completePasswordReset } from "@/features/auth/services/password-reset.service";
 import { clearSessionCookie } from "@/features/auth/services/session-context";
 import { ValidationError } from "@/lib/errors";
@@ -49,7 +52,7 @@ export async function PUT(request: Request) {
      */
     await clearSessionCookie();
 
-    return ok({ completed: true }, { noStore: true });
+    return ok({ completed: true }, { noStore: true, schema: passwordResetCompletedResponseSchema });
   } catch (error) {
     return fail(error);
   }

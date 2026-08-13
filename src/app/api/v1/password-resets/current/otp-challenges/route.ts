@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 
 import { PASSWORD_RESET_COOKIE_NAME } from "@/config/constants";
 import { PasswordResetExpiredError } from "@/features/auth/errors";
-import { passwordResetResendSchema } from "@/features/auth/schemas/password-reset.schema";
+import {
+  passwordResetOtpResponseSchema,
+  passwordResetResendSchema,
+} from "@/features/auth/schemas/password-reset.schema";
 import { resendPasswordResetCode } from "@/features/auth/services/password-reset.service";
 import { ensureAnonymousId } from "@/lib/anonymous-id";
 import { ValidationError } from "@/lib/errors";
@@ -47,10 +50,13 @@ export async function POST(request: Request) {
      * `otp.service.ts` onu her zaman `undefined` yapar. Sahte akışta da boş
      * gelir — gösterilecek bir kod üretilmedi.
      */
-    return created({
-      expiresAt: result.expiresAt.toISOString(),
-      simulationCode: result.simulationCode,
-    });
+    return created(
+      {
+        expiresAt: result.expiresAt.toISOString(),
+        simulationCode: result.simulationCode,
+      },
+      { schema: passwordResetOtpResponseSchema },
+    );
   } catch (error) {
     return fail(error);
   }

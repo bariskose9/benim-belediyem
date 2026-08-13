@@ -1,6 +1,9 @@
 import { requireAccess } from "@/features/auth/services/api-guard";
 import { InvalidStaffVerificationRequestError } from "@/features/staff-verification/errors";
-import { staffVerificationConfirmSchema } from "@/features/staff-verification/schemas/staff-verification.schema";
+import {
+  staffVerificationConfirmedResponseSchema,
+  staffVerificationConfirmSchema,
+} from "@/features/staff-verification/schemas/staff-verification.schema";
 import { confirmStaffVerification } from "@/features/staff-verification/services/staff-verification.service";
 import { created, fail } from "@/lib/http";
 import { readActorIp } from "@/lib/rate-limit";
@@ -41,7 +44,10 @@ export async function POST(request: Request) {
       actorIp: readActorIp(request.headers),
     });
 
-    return created({ isStaff: result.isStaff });
+    return created(
+      { isStaff: result.isStaff },
+      { schema: staffVerificationConfirmedResponseSchema },
+    );
   } catch (error) {
     return fail(error);
   }

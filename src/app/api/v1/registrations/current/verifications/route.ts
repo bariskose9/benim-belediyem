@@ -2,7 +2,11 @@ import { cookies } from "next/headers";
 
 import { REGISTRATION_COOKIE_NAME } from "@/config/constants";
 import { OtpInvalidError, RegistrationExpiredError } from "@/features/auth/errors";
-import { otpVerifySchema } from "@/features/auth/schemas/registration.schema";
+import {
+  otpVerifySchema,
+  registrationVerificationCompletedResponseSchema,
+  registrationVerificationPendingResponseSchema,
+} from "@/features/auth/schemas/registration.schema";
 import { verifyCode } from "@/features/auth/services/registration.service";
 import { ValidationError } from "@/lib/errors";
 import { created, fail, ok } from "@/lib/http";
@@ -38,14 +42,22 @@ export async function POST(request: Request) {
       actorIp: readActorIp(request.headers),
     });
 
+    /**
+     * ⚠️ `as const` GEREKLİ VE SEBEBİ ŞEMA BAĞI (borç #107).
+     *
+     * İki yanıt yalnızca `completed` alanının DEĞERİYLE ayrışıyor; şemalar bu
+     * yüzden `z.literal(false)` ve `z.literal(true)` kullanıyor. `as const`
+     * olmasaydı TypeScript alanı `boolean`a genişletir, iki şema da eşleşir
+     * hâle gelir ve yanlış şemayı vermek derlemeden geçerdi.
+     */
     if (!result.completed) {
       return ok(
         {
-          completed: false,
+          completed: false as const,
           emailVerified: result.emailVerified,
           phoneVerified: result.phoneVerified,
         },
-        { noStore: true },
+        { noStore: true, schema: registrationVerificationPendingResponseSchema },
       );
     }
 
@@ -54,7 +66,10 @@ export async function POST(request: Request) {
 
     // ⛔ `isStaff` YANITTAN KALDIRILDI (adım 17c): yeni açılan hiçbir hesap
     // personel olarak doğmuyor.
-    return created({ completed: true });
+    return created(
+      { completed: true as const },
+      { schema: registrationVerificationCompletedResponseSchema },
+    );
   } catch (error) {
     // Kalan deneme hakkı istemciye ayrıntı olarak veriliyor: kod hakkında ipucu
     // vermez ama kullanıcı kaç hakkı kaldığını görmeli (07-ui-design-system.md).

@@ -71,3 +71,15 @@ export const identityChallengeSchema = z.object({
 });
 
 export type IdentityChallengePayload = z.infer<typeof identityChallengeSchema>;
+
+/**
+ * ═══ YANIT SÖZLEŞMESİ (borç #107 · adım 107b · ADR-021) ═══
+ *
+ * ⛔ YANITTA YALNIZCA AD SOYAD VAR. Kimlik sorgusundan dönen doğum yeri, anne
+ * ve baba adı, nüfus bilgisi gibi alanların hiçbiri istemciye gitmiyor —
+ * kullanıcının "doğru kişiyi doğruladım" diyebilmesi için ad soyad yetiyor
+ * (veri minimizasyonu, 14-privacy-and-compliance.md).
+ */
+export const identityVerifiedResponseSchema = z.object({
+  fullName: z.string(),
+});
