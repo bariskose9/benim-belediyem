@@ -1,52 +1,44 @@
-# Yol Haritası
+# Yol Haritası — yapım planı
 
-<!--
-ŞABLON — `docs/project/roadmap.md` olarak kopyalanır ve doldurulur.
-Bu yorum bloğu doldurduktan sonra silinir.
+<!-- ŞABLON — `docs/project/roadmap.md` olarak kopyalanır ve doldurulur. -->
 
-BU DOSYA NEDEN VAR
-İki soruyu cevaplar: "nerede kaldık" ve "kabul ettiğimiz eksikler neler".
-Yeni bir oturum bu dosyaya bakarak sıradaki işi bulur.
+Bu dosya *"ne yapılacak"* sorusunun tek cevabıdır. Her adım; **ne ürettiğini,
+hangi teknolojiyle, hangi klasöre yazıldığını ve neye bağlandığını** söyler.
 
-NASIL SIRALANIR
-Bağımlılık sırasına göre — her adım bir öncekinin üzerine kurulur, tahmini
-süreye göre DEĞİL. İlk üç adım neredeyse her projede aynıdır:
-  1. Repo + framework + lint/format + docs/
-  2. Hosting + veritabanı bağlantısı + /api/health + CI
-  3. Veri modeli + migration + tohumlama
+**Kutucuklar:** `⬜` yapılmadı · `✅` bitti.
 
-NE ZAMAN GÜNCELLENİR
-· Bir adım bitince → üstü çizilir + **BİTTİ** yazılır (satır SİLİNMEZ)
-· Yeni bir eksik kabul edilince → teknik borç tablosuna satır eklenir
-· Bir borç ödenince → üstü çizilir + **ÖDENDİ (tarih)** + ne yapıldığı yazılır
--->
+⛔ **Bir adım bitmeden kutucuğu işaretlenmez; kutucuk işaretlenmeden oturum
+kapatılmaz.** Projeye ara verilip dönüldüğünde nerede kalındığını hatırlamanın
+tek güvenilir yolu bu liste.
 
-Sıra kasıtlıdır: her adım bir öncekinin üzerine kurulur. Bir adım
-`docs/standards/10-definition-of-done.md` kapılarını geçmeden sonrakine geçilmez.
+---
 
-| # | Adım | Çıktı |
-|---|---|---|
-| 0 | Repo, framework, TypeScript, lint/format, `docs/`, `CLAUDE.md` | Boş proje ayakta |
-| 1 | Hosting + veritabanı bağlantısı, `/api/health`, CI pipeline | **Canlı boş sayfa** |
-| 2 | Local veritabanı (Docker), ORM kurulumu, ilk migration | Local DB çalışıyor |
-| 3 | Veri modeli + tablolar + idempotent tohumlama | Veri var |
-| 4 | <ilk gerçek özellik> | Test + PR + deploy |
+## ⬜ Adım N — <başlık>
 
-<!-- Biten adım şöyle işaretlenir:
-| 3 | ~~Veri modeli + tablolar~~ **BİTTİ** | 37 tablo + idempotent seed |
--->
+**Amaç:** <bu adım bitince ne elde edilmiş olacak — tek cümle>
 
-## Teknik borç
+| | |
+|---|---|
+| **Teknoloji** | <hangi araçlar, bu adımda neden gerekli> |
+| **Nereye** | <klasör/dosya yolu> |
+| **Neye bağlanıyor** | <veri nereden gelip nereye gidiyor; hangi adımı besliyor> |
+| **Bitti sayılır** | <gözle görülebilir somut kontrol — "çalışıyor" yetmez> |
+| **Ayrıntısı** | <hangi dokümanın hangi bölümünde> |
 
-<!--
-BOŞ BIRAKILMAZ, GİZLENMEZ. Buraya sadece BİLİNEN ve KABUL EDİLMİŞ eksikler
-yazılır. "Neden kabul edildi" sütunu gerçek gerekçe ister — "vakit yoktu"
-gerekçe değildir; neyin karşılığında feda edildiği yazılır.
+> Gerekiyorsa buraya **ℹ️ bilgi kutusu**: bu adımın neden bu sırada olduğu,
+> atlanırsa ne bozulacağı.
 
-Bir borç ödendiğinde satır SİLİNMEZ, üstü çizilir. Sebebi: sonraki oturum
-"bu neden böyle yapılmış" diye aynı tartışmayı baştan açmasın.
--->
+---
 
-| # | Borç | Neden kabul edildi | Ne zaman ödenir |
-|---|---|---|---|
-| 1 | | | |
+*(Adımlar bağımlılık sırasına göre yazılır. İlk üç adım hemen her projede
+aynıdır: ortam kurulumu → PRD → boş ama çalışan iskelet.)*
+
+---
+
+## Her adımın sonunda
+
+1. Testler yeşil mi
+2. Bu adımın kararları ilgili dokümana yazıldı mı
+3. Commit atıldı, değişiklik önerisi açıldı mı
+4. **Kutucuk `⬜` → `✅` yapıldı mı**
+5. Sonraki adımı tarif eden not güncellendi mi

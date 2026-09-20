@@ -40,6 +40,30 @@ sessizce büyür.
 
 - <yapılmayacak şey> — <neden: faz 2 / gereksiz / yasal engel / maliyet>
 
+## 2b. Varsayımlar — doğrulanmayı bekleyen kararlar
+
+<!--
+BU BÖLÜM NEDEN VAR
+Gereksinim belgeleri eksik gelir (docs/standards/11-agent-workflow.md →
+"Gereksinim doğru varsayılmaz"). Cevabı beklerken iş durmasın diye bazı
+noktalarda makul bir varsayımla ilerlenir.
+
+⛔ Varsayım YAPILMASI yasak değil; SESSİZCE yapılması yasak. Yazılmayan
+varsayım, altı ay sonra "gereksinim buymuş" sanılır ve kimse sorgulamaz.
+
+⚠️ Yalnızca EKRAN METNİ / GÖRÜNÜM düzeyindeki eksikler varsayımla geçilir.
+Veri modelini veya iş kuralını etkileyen eksikte İŞ DURUR ve sorulur —
+yanlışsa geri dönüş pahalıdır.
+
+Doğrulanan satır buradan silinir ve ilgili bölüme GERÇEK gereksinim olarak
+yazılır. Yanlış çıkan satır ise ADR'ye "şu varsayım yanlıştı, şu değişti"
+diye geçer.
+-->
+
+| # | Varsayım | Neden böyle varsaydık | Yanlışsa ne değişir | Kim onaylayacak | Durum |
+|---|---|---|---|---|---|
+| V1 | <ne varsayıldı> | <belgede yoktu, şu yüzden bu makuldü> | <hangi kod/tablo/ekran etkilenir> | <kişi/kurum> | ⬜ bekliyor |
+
 ## 3. Kullanıcı rolleri
 
 <!-- Her rol için: ne görebilir, ne yapabilir, neyi ASLA yapamaz. Yetki
@@ -68,6 +92,33 @@ Belirsiz bırakılan her cümle sonra yanlış kodlanır. Sayı ver, örnek ver.
 -->
 
 ### 5.0 <ilk modül>
+
+### 5.x Hesap yönetimi ve veri hakları — ZORUNLU, SİLİNMEZ
+
+<!--
+Kullanıcı hesabı olan HER projede bu modül vardır ve kapsam dışı bırakılamaz;
+KVKK m.11 bunu ilgili kişinin hakkı sayıyor. Kuralların tamamı ve gerekçeleri
+`14-privacy-and-compliance.md` → "Hesap silme" bölümünde. Buraya yalnızca bu
+projeye özel cevaplar yazılır.
+
+Doldurulacak üç soru:
+ 1. VERİMİ İNDİR — hangi tablolar dosyaya girer? (⛔ şifre özeti, oturum
+    jetonu, ham/şifreli kimlik numarası GİRMEZ; kimlik numarası maskeli verilir)
+ 2. HESABIMI SİL — hangi alanlar SİLİNİR, hangi kayıtlar hangi KANUN gereği
+    ne kadar süre SAKLANIR? Bu liste ekranda kullanıcıya gösterilir
+    (Yönetmelik m.12/1-c: kısmen reddedilen talep gerekçesiyle bildirilir)
+ 3. KABUL KRİTERİ — silinen hesabın kimlik bilgisiyle yeniden kayıt olunabilir
+    mi, eski kayıtlar kişiye bağlanamaz hâle geldi mi? Test bu cümleyi ölçer
+
+⚠️ Silme ONAY ister, geri alınamaz olduğu yazılır, tüm oturumlar kapanır ve
+işlem denetim kaydına düşer — o kayıt hesapla BİRLİKTE SİLİNMEZ (m.7/3: imha
+işleminin kaydı en az üç yıl saklanır).
+-->
+
+- **Verimi indir:** <kapsam>
+- **Hesabımı sil — silinenler:** <alanlar>
+- **Hesabımı sil — saklananlar:** <kayıt> · <gerekçe: kanun + süre>
+- **Kabul kriteri:** <ölçülebilir cümle>
 
 ## 6. <Uçtan uca kritik akış>
 

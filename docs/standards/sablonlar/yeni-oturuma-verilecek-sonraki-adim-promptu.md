@@ -1,7 +1,11 @@
-# Sonraki oturum için hazır prompt — adım <X>
+# Yeni oturuma verilecek sonraki adım promptu — adım <X>
+
+> ⚠️ **Adı ne anlatıyor:** bu dosya *"yeni oturuma verilecek metin"*dir.
+> Karıştırma: `docs/standards/15-oturum-devri-kurallari.md` **KURALDIR** (devir nasıl
+> yapılır); bu dosya o kuralın **ÜRÜNÜDÜR** (fiilen verilecek metin).
 
 <!--
-ŞABLON — `docs/project/sonraki-adim-prompt.md` olarak kopyalanır.
+ŞABLON — `docs/project/yeni-oturuma-verilecek-sonraki-adim-promptu.md` olarak kopyalanır.
 Bu yorum bloğu doldurduktan sonra silinir.
 
 BU DOSYA NEDEN VAR
@@ -13,7 +17,7 @@ metindir. Doğru yazılırsa yeni oturum SORU SORMADAN çalışmaya başlar.
 Eski talimat kalırsa yeni oturum biten işi tekrar yapar.
 
 KENDİNE SOR: "bunu bilmeyen bir oturum ne yapar?" Cevap "yanlış iş yapar" ise
-o bilgi buraya (veya tablodaki doğru dosyaya) yazılır — `15-oturum-devri.md`.
+o bilgi buraya (veya tablodaki doğru dosyaya) yazılır — `15-oturum-devri-kurallari.md`.
 -->
 
 > Bu dosya bir sonraki oturuma kopyala-yapıştır yapılmak için var.
@@ -27,7 +31,10 @@ o bilgi buraya (veya tablodaki doğru dosyaya) yazılır — `15-oturum-devri.md
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
 - `docs/project/roadmap.md` — nerede kalındı + teknik borç listesi
-- `docs/standards/15-oturum-devri.md` — oturum kapanmadan ne yazacağın
+- `docs/standards/15-oturum-devri-kurallari.md` — oturum kapanmadan ne yazacağın
+- ⭐ `docs/kullanici/calisilacak-konular.md` ve `docs/kullanici/ogrendigim-konular.md`
+  — **bana neyi ne kadar açıklayacağın buradan okunur.** İkincisindeki bir
+  terimi baştan açıklama, doğrudan kullan
 
 ## DURUM
 

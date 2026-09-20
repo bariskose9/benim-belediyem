@@ -21,7 +21,7 @@ Başlamadan önce
 
 ## ⛔ İLK İŞ: DURUM BÖLÜMÜNE İNANMA, ÖLÇ
 
-`15-oturum-devri.md` kuralı: bu dosyanın DURUM bölümü **merge'den önceki
+`15-oturum-devri-kurallari.md` kuralı: bu dosyanın DURUM bölümü **merge'den önceki
 dünyayı** anlatıyor olabilir, çünkü commit kapısında beklerken yazılıyor.
 
 **İlk üç komut:**
@@ -514,9 +514,13 @@ benim_belediyem -c "DELETE FROM rate_limit_counters;"` (kullanıcı `postgres` D
 
 ## BENİMLE İLETİŞİM
 
-Kodu okuyup anlayamıyorum. Her adımı **Türkçe, kod göstermeden, en fazla 5
-maddede** anlat. Sadece "ne" değil **"neden"** de söyle. Emin olmadığın yerde
-**"emin değilim"** de, uydurma. Bir şeyi bozduğunu fark edersen hemen söyle.
+Kodu okuyup anlayamıyorum. ⭐ **Anlatım kuralı 2026-09-20'de değişti** (kit
+3.15.1, `11-agent-workflow.md` → "HER KAVRAM ÖĞRETİLİR"): *"en fazla 5 madde"*
+KALKTI. Artık işe yeni başlamış bir junior'a ders anlatır gibi — sorunla başla,
+tek örneği baştan sona taşı, ilk geçen her terimi geçtiği yerde aç, sonunda
+kararı veren soruyu bırak. **Uzunluk sınırı yok, eksiklik sınırı var.**
+Sadece "ne" değil **"neden"** de söyle. Emin olmadığın yerde **"emin değilim"**
+de, uydurma. Bir şeyi bozduğunu fark edersen hemen söyle.
 Kod yazmadan önce **plan sun**; PC başında değilsem onay bekleme, yalnızca
-commit/merge kapısında dur (CLAUDE.md §3 kapı 2'nin istisnası).
+commit/merge kapısında dur.
 ⛔ **Mühendislik tercihini bana menü olarak sunma — kararı sen ver.**

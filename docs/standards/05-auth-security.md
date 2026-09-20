@@ -18,7 +18,7 @@
 | E-posta doğrulama kodu | 5 dakika | 6 hane, tek kullanımlık |
 | Telefon doğrulama kodu | 5 dakika | 6 hane, tek kullanımlık |
 | Şifre sıfırlama kodu | 5 dakika | 6 hane, tek kullanımlık, kullanılınca iptal |
-| Koltuk rezervasyon kilidi | 10 dakika | Süre dolunca koltuk serbest kalır |
+| Rezervasyon kilidi (koltuk, slot, stok) | 10 dakika | Süre dolunca kaynak serbest kalır |
 
 **Neden bağlantı değil kod:** doğrulama ve sıfırlama akışlarının tamamı tek bir
 mekanizmayla (OTP) yürür. Tek mekanizma = tek hız sınırı, tek denetim kaydı,
@@ -34,6 +34,39 @@ koda dağıtılmaz. Değiştirilecekse ADR yazılır.
 - JWT imza anahtarı (`AUTH_SECRET`) her ortamda farklıdır ve en az 32 bayttır.
 - Algoritma sabittir (HS256); `alg: none` veya istemciden gelen algoritma kabul edilmez.
 
+### ⛔ İPTAL KENDİLİĞİNDEN ÇALIŞMAZ — `tokenVersion` gerekir
+
+Yukarıdaki iki kural (*"çıkışta ve şifre değişiminde tüm oturumlar geçersizleşir"*)
+**kendiliğinden gerçekleşmez.** JWT kendi içinde taşınır: sunucu onu **imzasına**
+bakarak doğrular, veritabanına hiç gitmez. Bu yüzden iptal edilmiş bir token,
+süresi dolana kadar **geçerli görünmeye devam eder.**
+
+**Çözüm:** kullanıcı tablosunda bir `tokenVersion` tamsayısı tutulur ve JWT'ye
+yazılır. Çıkışta, şifre değişiminde ve çalınma şüphesinde bu sayı **artırılır**;
+eski tokenlar artık eşleşmez.
+
+Kontrol **her istekte yapılmaz** — bedeli her istekte veritabanına gitmektir.
+Katmanlı yapılır:
+
+| Ne zaman kontrol edilir | Neden |
+|---|---|
+| ⛔ **Her yazma işleminde** (kayıt, güncelleme, silme) | İptal edilmiş oturum veri değiştirmemeli |
+| ⛔ **Para, kişisel veri ve admin işlemlerinde** | Zararın geri alınamadığı yerler |
+| **Token yenilenirken** — Auth.js `updateAge` **5 dakikaya** çekilir (varsayılanı 24 saat) | Okumada bayatlık penceresi en fazla 5 dakika olur |
+| Sıradan okuma isteğinde | Kontrol yok; imza yeterli |
+
+⚠️ **Bu bir ödünleşmedir ve PRD'ye yazılır:** kabul edilen bayatlık penceresi
+kaç dakika? Anında iptal şartsa (bankacılık düzeyi) her istekte kontrol edilir
+ve gecikme bedeli kabul edilir.
+
+⭐ **"Session caching" (oturum önbellekleme) bu stack'te GEREKSİZDİR.** Oturum
+zaten çerezin içinde taşınıyor, veritabanında değil — önbelleklenecek bir sorgu
+yok. Önbellek gerekiyorsa **`tokenVersion` kontrolü** için gerekir, oturumun
+kendisi için değil. Kurum modunda (NestJS + Redis varsa) `tokenVersion`
+okuması Redis'te 5 dk TTL ile önbelleklenir; Redis yoksa veritabanından —
+"her istekte DB'ye gitmek" kabul edilebilir bir maliyettir, tek satırlık
+birincil anahtar okumasıdır.
+
 ## Yetkilendirme
 - Kontrol **her zaman sunucuda**. UI'da butonu gizlemek yetkilendirme değildir.
 - Rol modeli: `guest` (salt okuma) · `user` (kendi kayıtları) · `admin`.
@@ -46,7 +79,7 @@ koda dağıtılmaz. Değiştirilecekse ADR yazılır.
 - [ ] Yetki + sahiplik kontrolü var mı?
 - [ ] Hata mesajı iç detay sızdırıyor mu?
 - [ ] Yeni secret eklendi mi, `.env`'de mi, `.env.example` güncellendi mi?
-- [ ] Yeni bağımlılık: `npm audit` temiz mi?
+- [ ] Yeni bağımlılık: `pnpm audit` temiz mi?
 - [ ] Kişisel veri log'a yazılıyor mu?
 
 ## Secret yönetimi
@@ -174,11 +207,97 @@ Yetki kaynağı değiştiğinde (örn. personel listesinden çıkma) yeniden de�
 - Dış servisten gelen kimlik verisi kalıcı kopyalanmaz; yalnızca gerekli alanlar
   ve son senkron tarihi tutulur.
 
-## Dosya yükleme
-Tip + boyut + uzantı doğrulanır (sadece istemci tarafında değil).
-Dosya adı sanitize edilir, orijinal ad kullanılmaz. Yüklenen dosya uygulama
-sunucusundan değil ayrı depolamadan (Vercel Blob) servis edilir.
+## Dosya yükleme ve depolama
 
-## Ödeme (bu proje: sahte)
-Gerçek kart verisi **hiçbir koşulda** saklanmaz. Sahte ödeme akışında bile
-kart numarası veritabanına yazılmaz; sadece son 4 hane ve sahte işlem kimliği tutulur.
+### Sorun — kaybolur mu, herkes görebilir mi, iki sunucu olunca ne olur?
+
+Vatandaş dilekçesine PDF ekler, memur panelden görsel yükler. Dosya bir
+yerde durmak zorunda ve o yerin üç sorusu vardır: **kaybolur mu · kim
+görebilir · iki sunucu kopyası olunca ne olur?**
+
+**Konteyner geçicidir.** Uygulama Docker konteynerinde çalışır; konteyner her
+yayına almada **sıfırdan açılan** kutudur — içine sonradan yazılan dosya, kutu
+yeniden açılınca **kaybolur** (ephemeral). *Gerçek hayat:* otel odası — her
+misafirde temizlenir. Yüklenen dosyayı konteynerin içine yazmak, eşyayı otel
+odasına bırakmaktır. **Kalıcı disk / volume** DevOps'un dışarıdan bağladığı
+klasördür (resepsiyondaki kasa); çalışır ama üç derdi vardır:
+
+| Dert | Ne olur |
+|---|---|
+| **İki kopya** (replica — aynı uygulamanın iki sunucuda çalışan örneği) | Dosya A'nın diskine yazıldı, istek B'ye düştü: "dosya yok". Çözüm ortak ağ diski (NFS) — yavaş, kilit dertli |
+| **Yedek** | DB yedeklenir, disk **ayrıca** yedeklenmeli; unutulursa DB "ek var" der, ek yoktur |
+| ⛔ **`public/` tuzağı** | Next.js `public/` altındaki her şeyi **herkese**, yetki sormadan servis eder. Dilekçe eki `public/uploads/x.pdf`'deyse URL'i tahmin eden herkes okur — KVKK ihlali. **Yüklenen dosya asla `public/` altına yazılmaz** |
+
+**Nesne depolama / object storage / blob storage:** dosyaların bir **anahtar**
+(key — `ekler/2026/09/3f2a….pdf`) ile saklandığı, HTTP ile erişilen,
+sunucudan **bağımsız** depo — Amazon S3, Cloudflare R2, Vercel Blob, kurumların
+içeride kurduğu **MinIO** (S3 ile aynı dili konuşan açık kaynak). *Gerçek
+hayat:* kargo deposu — fişle verirsin, fişle alırsın; hangi binada olduğu
+seni ilgilendirmez, iki dükkânın da aynı depoyu kullanır. Üç dert birden
+çözülür.
+
+**Dosyayı veritabanına koymak** (`BYTEA` kolon): küçük hacimde meşrudur —
+yedek DB ile gelir, yetki DB'de, ikinci servis yok. Ama DB şişer, her okuma
+DB'yi yorar. Yalnızca küçük ve az dosya (profil fotoğrafı, ikon); büyüyen
+ekler için değil.
+
+### Karar — uygulama depoyu bilmez: adaptör
+
+Uygulama bir `FileStorage` **arayüzüne** konuşur (`put` · `get` · `delete`);
+hangi sürücünün devrede olduğunu ortam değişkeni (`FILE_STORAGE_DRIVER`)
+seçer. *Gerçek hayat:* priz — cihaz arkasında santral mi jeneratör mü bilmez.
+
+| Sürücü | Nerede | Ne zaman |
+|---|---|---|
+| `s3` (S3-uyumlu: MinIO · R2 · AWS S3) | Kurum ve kendi proje | ⭐ **Varsayılan** — S3 dili taşınabilir: bugün R2, yarın MinIO, aynı kod |
+| `blob` (Vercel Blob) | Kendi proje, Vercel'de | Kabul edilebilir; SDK'sı yalnızca Vercel'de çalışır, taşınmaz |
+| `local` (kalıcı disk) | Kurum, nesne deposu yoksa | Tek kopya şartıyla; volume ve yedek sorumluluğu `altyapi-durumu.md`'de DevOps'a yazılı |
+| `db` (`BYTEA`) | Her ikisi | Küçük/az dosya; local ve CI'da **her zaman** çalışan sürücü — testler bununla koşar |
+
+Kurumda MinIO/nesne deposu var mı, kaç replica çalışacak, yedek kimde —
+`kurumdan-ogrenilecekler.md` → *"BÖLÜM 5"* satır 5.6.
+
+### Yükleme güvenliği — her modda sekiz kural
+
+| # | Kural | Neden |
+|---|---|---|
+| 1 | **Boyut, baytlar okunmadan önce** (`Content-Length` / `File.size`), okununca **ikinci kez** | Sınırsız gövde belleği doldurur; `File.size` da istemcinin beyanıdır |
+| 2 | **Tür baytlardan** — ilk baytlar (**magic bytes / dosya imzası**: PDF `%PDF`, PNG `\x89PNG`) türü söyler; istemcinin MIME'ı ve uzantı **iddiadır** | `.jpg` adlı `.exe` |
+| 3 | Uzantı + MIME + imza **üçü birden** tutarlı | Biri uymuyorsa reddet |
+| 4 | **Dosya adı yeniden üretilir** — UUID + zaman; kullanıcının adı diske hiç yazılmaz, yalnızca gösterim için DB'de | `../../etc/passwd` adlı dosya — **path traversal** (`..` ile klasör dışına çıkma) |
+| 5 | **Hedef klasör beyaz listeden**, istemciden gelmez | Keyfi yol yok |
+| 6 | **Özel dosya yetkili uçtan servis edilir** — `GET /api/attachments/:id` kimlik + sahiplik kontrolü yapar, sonra depodan okur ya da **kısa ömürlü imzalı URL** (signed URL, 5 dk) üretir | Tahmin edilen URL = KVKK ihlali |
+| 7 | **Görseller normalize edilir** (`sharp`): yeniden kodlanır, boyut sınırlanır, **EXIF silinir** | Telefon fotoğrafındaki GPS konumu kişisel veridir; yeniden kodlama gömülü zararlıyı da temizler |
+| 8 | **Virüs taraması** — kurumda ClamAV benzeri varsa yükleme sonrası kuyruğa; yoksa sorulur (5.6) | Vatandaştan gelen PDF |
+
+⭐ **Kararı veren soru — dosya türü başına:** *"Bunu kim görebilmeli, kaç
+sunucu kopyası olacak, kaybolursa ne olur?"* Herkes + yeniden üretilir (site
+logosu) → `public/`; belirli kişi + kaybolamaz (dilekçe eki) → adaptör +
+yetkili uç + nesne deposu.
+
+## Ödeme
+
+Gerçek kart verisi **hiçbir koşulda** saklanmaz: kart numarası, CVV ve son
+kullanma tarihi veritabanına yazılmaz. Tutulan tek şey **son 4 hane** ve
+**sağlayıcının işlem kimliğidir**.
+
+⛔ **Bu kural ödemenin gerçek mi simüle mi olduğuna BAKMAZ.** Simüle akışta da
+aynen uygulanır — sahte akış, gerçeğin yerine takılacağı iskelettir. Simülasyon
+kararı, gerçeğine geçiş yolu ve geçiş kontrol listesi:
+`00-stack.md` → *"SİMÜLE EDİLEN DIŞ SERVİS"*.
+
+- Tutar, indirim ve para birimi **sunucuda** belirlenir; istemcinin gönderdiği
+  tutar reddedilir (`03-api-guidelines.md` → *"Doğrulama"*).
+- Ödeme uçları **idempotency anahtarı** taşır — aynı anahtar iki kez tahsilat
+  üretmez (kural ve istemci politikası `03-api-guidelines.md` → *"İdempotency"*).
+- Kart verisi mümkünse **hiç sunucumuza uğramaz**: sağlayıcının barındırdığı
+  form veya jetonlaştırma (tokenization) kullanılır. Uğramayan veri sızmaz.
+- Simüle akışta ekranda **açıkça** yazar: *"Bu bir test ödemesidir."*
+
+### Bu projede — ödeme SAHTE (ADR-009)
+
+Gerçek ödeme sağlayıcısı yok; akış simüle ediliyor. Yine de yukarıdaki kural aynen
+geçerli: **gerçek kart verisi hiçbir koşulda saklanmaz.** Sahte akışta bile kart
+numarası veritabanına yazılmaz; yalnızca son 4 hane ve sahte işlem kimliği tutulur.
+Gerçeğine geçiş: `00-stack.md` → "SİMÜLE EDİLEN DIŞ SERVİS".
+

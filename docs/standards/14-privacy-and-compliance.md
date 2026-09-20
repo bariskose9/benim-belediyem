@@ -1,16 +1,115 @@
 # 14 — Gizlilik, KVKK ve Denetlenebilirlik
 
 Kamu/vatandaş odaklı uygulamalarda bu bölüm isteğe bağlı değildir.
-Bu proje sahte veriyle çalışsa bile alışkanlık doğru kurulur.
+
+⛔ **Proje sahte veriyle çalışıyor olsa bile kurallar birebir uygulanır.**
+Sahte olan veridir, yükümlülük değil — ve sahte akış gerçeğin yerine takılacak
+iskelettir (`00-stack.md` → *"SİMÜLE EDİLEN DIŞ SERVİS"*). Gevşek kurulan bir
+iskelet, gerçek veri geldiği gün ihlale dönüşür.
 
 ## Veri minimizasyonu
 - Gerekmeyen veri **toplanmaz**. "İleride lazım olur" gerekçesiyle alan eklenmez.
 - Her yeni kişisel veri alanı için cevaplanır: neden gerekli, ne kadar saklanacak,
   kim erişebilir, nasıl silinecek.
 - Sağlık verisi, din, biyometri gibi özel nitelikli veri **hiç toplanmaz**.
-- Kimlik numarası yalnızca kimlik doğrulama zorunluysa toplanır (bkz. sahte KPS akışı);
-  şifrelenerek saklanır, maskelenerek gösterilir, log'a yazılmaz ve
-  başka hiçbir amaçla kullanılmaz.
+- Kimlik numarası yalnızca kimlik doğrulama zorunluysa toplanır — dış kimlik
+  sorgulama servisi (KPS benzeri) **gerçek de olsa simüle de edilse** aynı kural
+  geçerlidir; şifrelenerek saklanır, maskelenerek gösterilir, log'a yazılmaz ve
+  başka hiçbir amaçla kullanılmaz — nasıl: aşağıda *"Kişisel veriyi şifreli
+  saklamak — ve sonra aramak"*.
+
+## ⭐ Kişisel veriyi şifreli saklamak — ve sonra aramak
+
+### Sorun
+
+Kanun (KVKK — 6698 sayılı Kişisel Verilerin Korunması Kanunu) TCKN,
+ad-soyad, telefon, e-posta, adresi **kişisel veri**; sağlık, din, biyometri
+gibi şeyleri **özel nitelikli** kişisel veri sayar. Bunlar veritabanında açık
+duramaz: yedeği alan, sunucuya bakan, DBA — satırı açan herkes TCKN'yi olduğu
+gibi görür. *Gerçek hayat:* evraklar kilitli dolapta; ama anahtarı olan her
+şeyi okur. Kanun "dolabı kilitle" demiyor, "evrakın **kendisini** şifreli
+yaz, anahtarı dolabın **dışında** tut" diyor.
+
+### Şifrelemeyi kim yapar — uygulama katmanında, veritabanında değil
+
+| Nerede | Nasıl | DBA `SELECT` deyince |
+|---|---|---|
+| Veritabanı katmanında (disk şifreleme, `pgcrypto`) | Disk şifreli; PostgreSQL okurken çözer | **Açık** görür — veritabanı çözmüş |
+| ⭐ **Uygulama katmanında** | Uygulama veriyi veritabanına **göndermeden önce** şifreler, okurken çözer; anahtar uygulamanın ortam değişkeninde | Anlamsız baytlar görür; anahtar onda yok |
+
+*Gerçek hayat:* mektubu postaneye vermeden önce şifrelemek — postane taşır,
+okuyamaz.
+
+**AES-256-GCM**, parça parça: **AES** en yaygın simetrik şifreleme (aynı
+anahtar hem kilitler hem açar — kapı anahtarı gibi) · **256** anahtar
+uzunluğu, bugün kırılamaz kabul edilen seviye · **GCM** çalışma kipi:
+şifrelerken bir **bütünlük etiketi** de üretir, veri sonradan bir bayt
+değişse çözerken hata verir · **nonce** (number used once): her şifrelemede
+rastgele 12 bayt — aynı TCKN'yi iki kez şifrelesen iki **farklı** çıktı
+çıkar. Güvenlik için şart; ve tam olarak bu, sonraki sorunu doğurur.
+
+### Asıl tuzak — şifreli kolonda arama yapılamaz
+
+Memur TCKN yazıp "bu vatandaşı getir" diyecek:
+
+```sql
+SELECT * FROM citizens WHERE national_id_encrypted = ?   -- çalışmaz
+```
+
+Nonce rastgele: bugün şifrelenen TCKN'nin çıktısı kayıttakinden **farklı**;
+veritabanı iki anlamsız bayt dizisini karşılaştırır, eşit değil. `LIKE` ile
+kısmi arama da yok — şifreli veride "başı 123 ile başlayan" diye bir şey
+yoktur. "Şifrele" kuralı tek başına uygulanırsa "TCKN ile kayıt bul" ekranı
+**yazılamaz**.
+
+**Çözüm: ikinci kolon — aranabilir özet (hash).** Hash / özet / tek yönlü
+özet fonksiyonu: veriden sabit uzunlukta bir parmak izi üretir; aynı girdi
+**her zaman aynı** çıktı, ama çıktıdan girdiye dönüş yok. *Gerçek hayat:*
+parmak izi kimliği doğrular, parmak izinden yüz çizilemez.
+
+| Kolon | İçerik | Ne işe yarar |
+|---|---|---|
+| `national_id_encrypted BYTEA` | AES-256-GCM ile şifreli TCKN | **Göstermek** — okurken çözülür, maskelenir |
+| `national_id_hash VARCHAR(64)` **unique** | TCKN'nin **tuzlu HMAC-SHA256** özeti | **Aramak ve tekilliği zorlamak** — `WHERE national_id_hash = hmac(girilen)`; aynı TCKN iki kez kayıt olamaz |
+
+Arama akışı: girilen TCKN'nin özetini al → hash kolonunda ara → bulunan
+satırın şifreli kolonunu çöz → maskele → göster.
+
+**Neden düz SHA-256 değil, tuzlu HMAC:** TCKN 11 hane — olası numara sayısı
+~10¹¹. Düz SHA-256'da saldırgan **bütün** olası TCKN'lerin özetini önceden
+hesaplar (modern GPU'da saatler), hash kolonunu ele geçirince tabloya bakıp
+TCKN'yi geri bulur — **rainbow table / önceden hesaplanmış özet tablosu**.
+**HMAC** (hash-based message authentication code) özeti **gizli bir
+anahtarla** üretir; anahtarı bilmeyen önceden hesaplayamaz. *Gerçek hayat:*
+parmak izi kartlarını herkesin bildiği mürekkeple değil, yalnızca senin
+bildiğin mürekkeple basmak.
+
+**Bedel: kısmi arama yok** — ve KVKK mantığında istenmez de: kişisel veriyle
+tarama değil, tam eşleşme yapılır. Kısmi aranması gereken alan (ad-soyad)
+şifrelenirse aranamaz, şifrelenmezse kişisel veri açıkta kalır; uzlaşma:
+arama TCKN / başvuru no gibi tam eşleşen anahtarlarla yapılır, ad-soyad
+şifreli durur. ⛔ Bu yüzden *"hangi alanla arama yapılacak"* PRD'de **baştan**
+sorulur (`kurumdan-ogrenilecekler.md` → *"BÖLÜM 6 — Hedef kitle"*).
+
+### Diğer parçalar
+
+| Konu | Kural | Neden |
+|---|---|---|
+| Kolon tipi | `BYTEA` (ham bayt); base64 metin değil | Base64 %33 yer israfı; metin kolonunda `LIKE` ile arayan geliştirici sessizce boş sonuç alır, `BYTEA` bunu yapısal olarak engeller |
+| Anahtar | `ENCRYPTION_KEY` — 32 bayt, base64; `.env`'de, ortam başına farklı; kodda ve veritabanında **asla**. `src/config/env.ts`'te Zod `refine` ile uzunluğu doğrulanır | Anahtar verinin yanında durursa şifreleme yoktur |
+| **Anahtar döndürme** (rotation) | Şifreli değerin başına anahtar sürümü yazılır (`v1:…`); yeni anahtara geçince eski kayıt hangi anahtarla çözüleceğini bilir, okunurken yeniden şifrelenir | Sürümsüz proje ilk anahtar sızıntısında **bütün veriyi yeniden şifreleyemez** |
+| Maskeleme | Ekranda `12*******67`, telefon `54* *** ** 90`; açık değer yalnızca yetkili ekranda ve **"görüntüledi"** olayı audit'e yazılır | Kişisel veriye bakmak da bir işlemdir |
+| Kapsam | Yalnızca KVKK kapsamındaki alanlar şifrelenir, tüm tablo değil; liste `data-model.md`'de tablo tablo | Her satırda CPU maliyeti; gereksiz şifreleme aramayı da öldürür |
+| Log | Hata mesajına, Sentry'ye, konsola kişisel veri düşmez | Aşağıda *"Log ve hata takibinde gizlilik"* |
+
+⭐ **Kararı veren soru — alan alan:** *"Bu alanı göstermem mi gerekiyor,
+aramam mı, ikisi de mi?"* Göstermek → şifreli kolon · aramak → hash kolonu ·
+ikisi → iki kolon · hiçbiri → **toplama** (veri minimizasyonu).
+
+Kurum modunda kolon adları kurum standardında (`tckn_sifrelenmis`,
+`tckn_ozet`); hangi alanların kapsamda olduğu ve anahtarın nerede duracağı
+DB birimine sorulur (`kurumdan-ogrenilecekler.md` → *"BÖLÜM 4 — Veritabanı
+birimi"* satır 4.8).
 
 ## Saklama ve silme
 - Her tablo için saklama süresi tanımlıdır (örn. destek eki 1 yıl, sipariş kaydı 10 yıl).
@@ -161,10 +260,13 @@ Bu maddeler bir projede öğrenildi ve her projede geçerlidir.
   dağıtılabilir (içerik enjeksiyonu / kimlik avı).
 
 ## Denetim kaydı (audit log)
-Kim, ne zaman, hangi kayıtta, ne yaptı — ayrı `audit_logs` tablosunda tutulur.
+Tablo yapısı, before-image kuralı ve yazan mekanizma `04-database.md` →
+*"Denetim kaydı ve saklama"*; burada yalnızca gizlilik yönü:
 - Kapsam: giriş/çıkış, yetki değişikliği, ödeme, iptal, silme, yönetici işlemleri.
 - Kayıt **değiştirilemez ve silinemez** (append-only).
-- İçeriğe hassas veri yazılmaz; referans kimlik yazılır.
+- `before_image` satırın tamamını taşır — içindeki kişisel veri ana tablodaki
+  ile **aynı** şifreleme/maskeleme ve saklama süresine tabidir; audit, kişisel
+  verinin "arka kapıdan" açık kaldığı yer olamaz.
 
 ## Log ve hata takibinde gizlilik
 - Log'a asla: şifre, token, kart numarası, kimlik numarası, adres, e-posta gövdesi.
