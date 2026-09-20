@@ -42,8 +42,51 @@ bir değerdir.
 
 ## Doğrulama
 - Her endpoint girişi (body, query, params) **Zod ile** doğrulanır. İstisna yok.
+  Server Action'lar da endpoint sayılır (`01-architecture.md` → *"Server Action"*).
 - İstemciye güvenilmez: fiyat, indirim, kullanıcı kimliği, rol **sunucuda** belirlenir.
   İstemcinin gönderdiği `price` veya `userId` alanı reddedilir.
+
+### Zod kuralı seçme sırası — hazır kural → regex → refine
+
+**Zod** bir şema doğrulama kütüphanesidir: "şema" burada veritabanı şeması
+değil, gelen verinin **nasıl görünmesi gerektiğinin tarifi** — başvuru
+formunun kenarındaki kurallar gibi ("TCKN 11 hane, telefon 05 ile başlar").
+**Regex** (düzenli ifade / regular expression / kalıp) ise bir metin kalıbı
+dili — kâğıdın üstüne konan **şablon**: harfler deliklerden geçiyorsa uyar;
+şekle bakar, **anlama** bakmaz. Regex Zod'un alternatifi değil, içindeki
+araçlardan biridir (`.regex()`); Zod'un `.email()` kuralı bile perde arkasında
+Zod ekibinin bakımını yaptığı bir regex'tir.
+
+| Sıra | Araç | Ne zaman | Örnek |
+|---|---|---|---|
+| 1 | **Hazır kural** | Zod'da varsa **hep önce** — test edilmiş, bakımı Zod'da | `.email()` `.url()` `.uuid()` `.min()` `.max()` `.datetime()` `z.enum([...])` `.int().positive()` |
+| 2 | **`.regex()`** | Hazır kural yok, kural **şekilsel** | TCKN 11 rakam `/^[1-9]\d{10}$/`, plaka, posta kodu |
+| 3 | **`.refine()` / `.superRefine()`** | Kural **mantıksal**, şekille anlatılamaz | TCKN kontrol hanesi (10. ve 11. hane ötekilerden hesaplanır) · "bitiş tarihi başlangıçtan sonra" · "iki alandan en az biri dolu" |
+| 4 | **Özel kütüphane** | Kural bir alanın bütün dünyası | Telefon için `libphonenumber-js` — `00-stack.md` yaygınlık ölçütünden geçerse |
+
+*Gerçek hayat:* IBAN'ı gişeye verirsin; gişe önce **uzunluğuna** bakar
+(şablon = regex), sonra **kontrol hanelerini hesaplar** (kural = refine).
+Uzunluk doğru ama hane tutmuyorsa IBAN yanlıştır — şablon bunu göremez.
+
+```ts
+export const TcknSchema = z
+  .string()
+  .max(11)                                                          // önce uzunluk sınırı — regex'ten ÖNCE, aşağıdaki ReDoS notu
+  .regex(/^[1-9]\d{10}$/, "TCKN 11 haneli olmalı, 0 ile başlayamaz")  // şekil
+  .refine(isValidTcknChecksum, "Geçersiz TCKN");                    // mantık: hane hesabı
+```
+
+⛔ **İki regex tuzağı:**
+
+| Tuzak | Ne olur | Kural |
+|---|---|---|
+| **ReDoS** (regular expression denial of service) | Kötü yazılmış regex — iç içe tekrar, `(a+)+$` gibi — özel bir girdiyle saniyeler/dakikalar sürer, sunucuyu kilitler | Regex kısa, **başı ve sonu bağlı** (`^…$`), iç içe `+`/`*` yok. `.max()` **regex'ten önce** — Zod kuralları sırayla çalışır, uzun girdi regex'e hiç ulaşmaz |
+| **Türkçe harf** | `\w` yalnızca ASCII tanır — "Çağla" `\w+` kalıbına **uymaz**, kullanıcı sessizce reddedilir | Harf gerekiyorsa `\p{L}` (Unicode harf sınıfı) + `u` bayrağı: `/^[\p{L} ]+$/u` |
+
+⭐ Şema **tek yerde** yazılır, tarayıcı formu (React Hook Form) ve sunucu aynı
+şemayı kullanır (`01-architecture.md` → *"Klasör yapısı — özellik bazlı"* →
+`features/<özellik>/schemas/`; ayrı backend varsa `packages/contracts`). Tarayıcıdaki doğrulama kullanıcıya anında
+hata göstermek içindir; **güvenlik sunucudakidir** — tarayıcı atlatılabilir.
 
 ## Yetki
 - Her korumalı endpoint'te iki soru cevaplanır:
@@ -78,11 +121,38 @@ ADR yazılır, izin verilen kaynaklar **beyaz liste** olur (`*` asla) ve o yol
 - Liste dönen tüm endpoint'ler sayfalanır. Sınırsız liste dönülmez.
 - `limit` için bir **üst tavan** vardır ve istemcinin gönderdiği değer bu tavanla
   kırpılır. Tavansız `limit`, sayfalamayı olmamış sayar.
-- Büyüyen veya sık değişen listelerde **imleç (cursor/keyset)** tabanlı sayfalama
-  kullanılır, `offset` değil. `offset` ile ilerlerken araya yeni kayıt girerse
-  kullanıcı bir kaydı iki kez görür ya da hiç görmez; ayrıca büyük `offset`
-  değerleri veritabanına atlanan satırların hepsini saydırır.
-- Kısa ve durağan listelerde `offset` yeterlidir — seçim gerekçesiyle yazılır.
+### ⭐ Offset mü cursor mu — KARAR TABLOSU
+
+⛔ **Bu karar her projede yeniden türetilmez.** Tabloya bak, seç, gerekçeyi yaz.
+
+| Durumdan **biri** varsa | Yöntem |
+|---|---|
+| Ekranda **sayfa numarası** var ("Sayfa 7") | **offset** |
+| **Toplam sayı** gösteriliyor ("48 kayıttan 1–20") | **offset** |
+| Kullanıcı filtreleyip daraltıyor, derine inmiyor | **offset** |
+| **Sonsuz kaydırma** (aşağı indikçe yükleniyor) | **cursor** |
+| Liste **sürekli akıyor** (bildirim, olay günlüğü, akış) | ⛔ **cursor** |
+| Tablo büyük **ve** derin sayfalama gerçekten oluyor | **cursor** |
+| Dışa aktarma / toplu okuma (tüm kayıtları gez) | **cursor** |
+
+**Neden böyle — iki teknik sebep:**
+
+1. **Derin sayfa maliyeti.** `OFFSET 99980` demek, veritabanının o 99.980
+   satırı **okuyup atması** demektir. Atlanan satır bedava değildir; 5.000.
+   sayfa saniyelere çıkar. Cursor'da 1. sayfa ile 5.000. sayfa **aynı hızdadır**
+   — ikisi de "şu noktadan sonraki N kayıt" sorusudur.
+2. **Kayma (drift).** Kullanıcı 2. sayfaya bakarken listenin başına yeni kayıt
+   girerse her şey bir sıra kayar: bir kaydı **iki kez** görür, bir kaydı
+   **hiç** görmez. Cursor bir kaydı işaret ettiği için bundan etkilenmez.
+
+**Cursor'ın bedeli:** *"7. sayfaya git"* diyemezsin ve toplam sayfa sayısını
+gösteremezsin. Yalnızca ileri/geri gider.
+
+⚠️ **Offset seçildiyse iki koruma zorunludur:** `limit` tavanı **ve** sayfa
+parametresi doğrulaması. Aksi hâlde `?page=999999` isteği veritabanını
+milyonlarca satır taramaya zorlar.
+
+⭐ Seçim **gerekçesiyle** `docs/api.md` veya ADR'ye yazılır.
 
 ## Sözleşme ömrü — sürüm, kırıcı değişiklik, emeklilik
 
@@ -205,9 +275,12 @@ her zaman yetkilendirmeden gelir, belgenin kapalı olmasından değil.
 Production'da açılması istenirse: ortam değişkeniyle açılır (varsayılan kapalı),
 `noindex` verilir ve karar ADR'ye yazılır.
 
-**Tek belgeleme istisnası:** taklit edilen dış servis uçları (`/api/mock-kps/*`)
-belgelenmez — gerekçe ADR-009. Bu istisna yalnızca dış kurum taklidi için
-geçerlidir; uygulamanın kendi uçlarına genişletilemez.
+**Tek belgeleme istisnası:** taklit edilen dış servis uçları (`/api/mock-*`)
+belgelenmez. *Gerekçe:* o uçların sözleşmesi **bizim değil**, taklit edilen
+kurumundur; belgelemek başkasının API'sini kendi sözleşmemiz gibi ilan etmek
+olur. Ayrıca gerçek servise bağlanıldığı gün o uçlar silinir — belgesi de
+onlarla gider. Bu istisna yalnızca dış kurum taklidi için geçerlidir;
+uygulamanın kendi uçlarına genişletilemez ve karar ADR'ye yazılır.
 
 ### Yanıt gövdesi de belgelenir — ve şema TELDEN doğrulanır
 
@@ -254,6 +327,46 @@ sağlamak zorunda:
 ⛔ Bu üç şart olmadan liste bir kaçış kapısına dönüşür: şema yazmak yerine adı
 listeye eklemek kolaylaşır ve borç hiç kapanmaz.
 
+## İdempotency — tekrar edilemez her yazma için anahtar
+
+**İdempotent / idempotency / tekrar-güvenli:** aynı işlemi iki kez yapmanın
+bir kez yapmakla aynı sonucu vermesi. *Gerçek hayat:* asansör düğmesi — beş
+kez basınca beş asansör gelmez. Dilekçe vermek idempotent **değildir**: iki
+kez verirsen iki dilekçe açılır. Okuma (GET) doğal olarak idempotent; "oluştur"
+(POST) değil.
+
+**Sorun:** cevap ağda kayboldu, kullanıcı tekrar bastı — ya da çift tıkladı.
+Giriş için zararsız; başvuru gönderimi için **ikinci başvuru**, ödeme için
+**ikinci tahsilat**. ⛔ Kural yalnızca ödeme için değil, **tekrar edilemez her
+yazma** için: başvuru, randevu, mesaj, sipariş, ödeme.
+
+**Çözüm — idempotency anahtarı (`Idempotency-Key`):**
+
+| Taraf | Ne yapar |
+|---|---|
+| İstemci | Formu **açtığında** rastgele anahtar üretir (UUID); her göndermede `Idempotency-Key` başlığıyla yollar; başarısız tekrar **aynı anahtarla** gider; form başarıyla bitince yeni anahtar |
+| Sunucu | `idempotency_keys(key, user_id, response_status, response_body, created_at)` tablosu. Anahtar daha önce görüldüyse işlemi **yeniden yapmaz**, kaydedilmiş cevabı aynen döner; görülmediyse işler ve cevabı **aynı transaction'da** kaydeder. 24 saat sonra temizlenir |
+| Yarış | Aynı anahtarla iki istek **aynı anda** gelirse `key` üzerindeki unique index ikincisini durdurur; ikincisi bekler ve ilkinin cevabını döner |
+
+*Gerçek hayat:* evrak kayıt numarası — aynı numarayla ikinci kez gelen
+dilekçe "zaten kayıtlı, işte numaran" diye geri döner; ikinci dosya açılmaz.
+
+**İstemci yeniden deneme politikası** (`07-ui-design-system.md` → yazma
+durumları ile birlikte):
+
+| İstek | Zaman aşımı | Otomatik yeniden deneme |
+|---|---|---|
+| Okuma (GET) | 10 sn | TanStack Query `retry: 3`, üstel bekleme (1 · 2 · 4 sn) |
+| Yazma (POST/PATCH/DELETE) | 10 sn | ⛔ `retry: 0` — kullanıcı düğmeye **kendisi** basar, aynı anahtar gider; sessiz tekrar çift kayıt riskidir |
+| `429` | — | `Retry-After` başlığına uyulur; öncesinde denenmez |
+| `5xx` | — | Okumada yeniden dene; yazmada kullanıcıya "tekrar deneyin" |
+
+Kuyruk işleri de idempotenttir: iş verisinde mesaj kimliği taşınır, worker
+aynı kimlikle ikinci kez göndermez (`00-stack.md` → *"Kuyruğa ne zaman
+atılır"* — outbox işi iki kez gönderebilir).
+
+⭐ **Kararı veren soru:** *"Bu istek iki kez işlenirse dünya değişir mi?"*
+Değişir → anahtar; değişmez → gerek yok.
+
 ## Diğer
-- Ödeme/sipariş gibi tekrarlanmaması gereken işlemlerde idempotency anahtarı kullanılır.
 - Uzun işlemler senkron beklemez.

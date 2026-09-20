@@ -64,6 +64,29 @@ kaynağıdır — sonradan çıkarmak çok pahalıdır.
 
 **Loglara asla yazılmayacaklar:** <!-- şifre, token, kimlik numarası, kart no... -->
 
+## Saklama süreleri ve imha
+
+<!--
+ZORUNLU. Kural ve gerekçeler `14-privacy-and-compliance.md` → "Hesap silme".
+Üç şeyi birden yaz: süre, süre dolunca NE OLACAĞI, ve süreyi ZORUNLU KILAN
+kanun (varsa). "Silinir" ile "anonim hale getirilir" AYNI ŞEY DEĞİLDİR.
+
+⛔ Kişisel alanları boşaltıp satırı bırakmaya "anonimleştirme" DEME — satır bir
+kullanıcı kimliği üzerinden başka kayıtlara bağlı kaldığı sürece yapılan şey
+takma adlaştırmadır. Doğru ad: "kişisel alanlar silinir, mali kayıtlar
+kişiselleştirilmeden saklanır".
+
+Türkiye'de en sık çarpılan iki süre: TTK m.82 → ticari defter/belge 10 yıl ·
+VUK m.253 → defter ve vesikalar 5 yıl. Çakışırsa uzun olan uygulanır.
+-->
+
+| Tablo | Süre | Süre dolunca | Süreyi zorunlu kılan |
+|---|---|---|---|
+| | | <silinir / yok edilir / anonim hale getirilir> | <kanun veya "yok"> |
+
+- **Hesap silinince:** <hangi alanlar silinir · hangi kayıtlar hangi gerekçeyle kalır>
+- **İmha görevi:** <periyodik imha aralığı — Yönetmelik m.11/2 gereği altı ayı geçemez>
+
 ## Tohumlama (seed)
 
 <!-- Tohumlama İDEMPOTENT olmalı: iki kez çalışınca veri ikilenmemeli.

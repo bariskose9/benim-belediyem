@@ -236,7 +236,7 @@ test("personel randevu alır, listede görür ve iptal eder", async ({ page }, t
   /**
    * Mesaj METİNLE aranıyor, `getByRole("alert")` ile DEĞİL: Next.js her
    * sayfaya boş bir `role="alert"` duyurucusu koyuyor ve ikisi karışıyor
-   * (`sonraki-adim-prompt.md` tuzaklar).
+   * (`sonraki-adim-promptu.md` tuzaklar).
    */
   await expect(page.getByText(messages.hospital.booked.success)).toBeVisible();
 

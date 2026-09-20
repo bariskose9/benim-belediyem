@@ -10,6 +10,16 @@ Geri dönmesi pahalı olan her kararda: veritabanı seçimi, oturum stratejisi,
 şifreleme yöntemi, dış servis bağımlılığı, "bu kütüphaneyi kullanmıyoruz".
 Ölçüt: "altı ay sonra biri 'bu neden böyle' diye sorarsa cevabı nerede?"
 
+⛔ HANGI KARAR ADR OLUR, HANGISI OLMAZ — tam tablo:
+docs/standards/00-stack.md -> "KARAR NEREYE YAZILIR"
+Ozeti: dayatma yoktu ve kitin varsayilanindan SAPILDIYSA -> ADR sart.
+Dayatma vardi ve kitle ayniysa -> ADR gerekmez, stack tablosu yeter.
+
+⛔ GEREKCE BURADA YASAR, teknoloji-ve-plan.md'de DEGIL.
+O belge kararin ANLATIMIDIR ve buraya isaret eder; gerekceyi kopyalamaz.
+Kopyalanirsa biri guncellenir, obru bayatlar ve hangisinin dogru oldugu
+anlasilmaz.
+
 NEDEN ÖNEMLİ
 Yapay zekâ oturumu hafızasızdır. Gerekçe yazılmazsa sonraki oturum kararı
 "yanlışlıkla böyle olmuş" sanıp geri alır. CLAUDE.md: bir ADR'ye aykırı kod

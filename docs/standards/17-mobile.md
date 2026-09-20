@@ -3,6 +3,18 @@
 > Bu dosya **her projede aynıdır**. Projede mobil yoksa okunmaz; ama
 > **mobil olup olmayacağı kararı ilk gün verilir** — sebebi hemen aşağıda.
 
+> ⚠️ **BİLİNEN EKSİK — bu standart iskelettir, web tarafı kadar derin DEĞİLDİR
+> (2026-09-14 ölçümü: 122 satır; web tarafı 07+03+05+06 ile 700+).** Kural
+> olarak **hiç** yazılmamış konular: deep link / universal link · push bildirimi
+> (APNs/FCM) · çevrimdışı kuyruk ve çakışma çözümü · zorunlu sürüm güncellemesi ·
+> mağaza inceleme reddi senaryoları · cihaz izin akışları · biyometrik giriş ·
+> mobil e2e (Maestro). Var olanlar (stack, jeton, ağ, izinler, yayın, test)
+> kısa. ⛔ **Bu boşluk tahminle doldurulmaz** — `11-agent-workflow.md` → *"AŞIRI
+> MÜHENDİSLİK KAPISI"* kite de uygulanır: ilk **gerçek** mobil projede, yaşanan
+> ihtiyaçla genişletilir ve `/kit-senkron` ile buraya döner. O güne kadar
+> mobil projede ajan bu listeyi **açıkça riske yazar**, "kural yok, best
+> practice'i araştırıp ADR ile karar verdim" der; kural varmış gibi davranmaz.
+
 ## Kararı neden baştan veriyoruz
 
 Mobil uygulamayı **en sona bırakmak doğrudur** — web bitmeden mobile başlamak

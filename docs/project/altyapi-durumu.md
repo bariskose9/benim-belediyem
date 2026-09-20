@@ -4,7 +4,7 @@
 > panelde ne yapılandırılmış, hangi ortam değişkeni nerede tanımlı.
 >
 > Depo yalnızca kodu görür; üçüncü parti panelleri göremez. Buraya yazılmayan
-> hiçbir şeyi sonraki oturum bilemez (`docs/standards/15-oturum-devri.md`).
+> hiçbir şeyi sonraki oturum bilemez (`docs/standards/15-oturum-devri-kurallari.md`).
 >
 > ⛔ **Gizli anahtar DEĞERİ buraya yazılmaz.** Yalnızca adı, yeri ve ne işe
 > yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.

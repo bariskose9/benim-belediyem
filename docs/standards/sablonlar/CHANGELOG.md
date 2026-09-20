@@ -16,7 +16,7 @@ NASIL YAZILIR
 · Her adım bitiminde yazılır, ay sonunda toplu değil (o zaman hatırlanmıyor)
 
 NE ZAMAN GÜNCELLENİR
-Her adım / PR bitiminde, oturum kapanmadan (`15-oturum-devri.md` madde 3).
+Her adım / PR bitiminde, oturum kapanmadan (`15-oturum-devri-kurallari.md` madde 3).
 -->
 
 Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVer

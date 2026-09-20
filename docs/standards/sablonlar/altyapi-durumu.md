@@ -23,6 +23,35 @@ yaradığı. Değerler `.env` (commit edilmez) ve sağlayıcı panelindedir.
 
 > **Bu dosya "dış dünyada ne var" sorusunun tek cevabıdır.**
 > Kullanıcıya "şu hesabı aç / şunu ayarla" demeden **önce burayı oku**.
+
+## ⛔ HER SATIR ÜÇ ŞEYİ BİRDEN YAZAR: NE · NEREDE · NEDEN
+
+"Neden" olmadan satır bir **kayıt** olur ama **karar** olmaz. Altı ay sonra o
+ayarı değiştirmek isteyen biri neyi bozacağını bilemez.
+
+```
+2026-08-24 · Neon'da "proje-prod" veritabanı açıldı, bölge: Frankfurt
+             Neden: KVKK — kişisel veri AB/Türkiye içinde kalsın. ⛔ Bölge
+             sonradan DEĞİŞTİRİLEMEZ.
+```
+
+⚠️ Özellikle **geri alınamaz** kararlarda (veri bölgesi, alan adı, hesap
+sahipliği) "neden" satırı zorunludur.
+
+## ⭐ Bu dosya iki proje tipinde FARKLI dolar
+
+`CLAUDE.md` §0'daki proje tipine bak:
+
+| | **Kendi projem** | **İşyeri projesi** |
+|---|---|---|
+| Paneli kim açıyor | Kullanıcı — hesap ve ödeme onda | **Kurumun DevOps ekibi** |
+| Dosya ne anlatır | **Yapılanları**: hangi servise üye olundu, hangi bölge seçildi, hangi değişken nereye girildi | **Gerekenleri**: canlıda neyin tanımlı olması gerektiği ve neden |
+| Kim okur | Gelecekteki kullanıcı ve sonraki oturum | Teslimde **DevOps ekibi** |
+| Örnek satır | *"Neon'da prod açıldı, Frankfurt — KVKK"* | *"Uygulama DIRECT_URL bekliyor; migration içindir, havuzsuz adres olmalı"* |
+
+⛔ **İşyeri projesinde bu dosya bir "yapıldı defteri" değil, bir GEREKSİNİM
+LİSTESİDİR.** Kullanıcı paneli açmıyor; açacak kişiye neyin **neden**
+gerektiğini anlatıyor. Teslim paketinin en çok işe yarayan parçası budur.
 > ⛔ Gizli anahtar DEĞERİ buraya yazılmaz.
 
 **Son güncelleme:** <!-- TARİH · hangi adım sonrası -->
