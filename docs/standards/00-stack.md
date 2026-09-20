@@ -185,7 +185,6 @@ veritabanında yalnızca özeti. Ayrıntı: ADR-005'in 2026-08-01 tarihli günce
 ⛔ **Bu projede oturum modeli ADR-005'tir.** Kitin `.claude/rules/guvenlik.md` tetikleyicisi "JWT çerezde + `tokenVersion`" der; kaynak hiyerarşisinde (CLAUDE.md §1) ADR standarttan ÜSTÜNDÜR. Tetikleyici buna uymuyorsa **ADR geçerlidir** — oturum yeniden yazılmaz, tetikleyici bu projede uygulanmaz.
 
 
-
 ## Backend kurgusu — Next tek başına mı, Next + NestJS mi
 
 **Varsayılan: Next.js tek başına** (arayüz + Route Handler API, tek deploy
@@ -803,16 +802,27 @@ yükseltmeye çalışır ve aynı duvara toslar.
 
 ## Sürüm politikası
 - Node.js LTS (>=20). Sürüm `.nvmrc` ile sabitlenir.
-- Bağımlılıklar `package-lock.json` ile kilitlenir; `^` ile geniş aralık bırakılmaz.
+- **Paket yöneticisi `CLAUDE.md` §0'da yazar; kilit dosyası onunkidir.** Kendi
+  projede varsayılan `pnpm` (`pnpm-lock.yaml`); kurum projesinde **kurumun CI
+  hattı hangisini koşturuyorsa o** (`npm` → `package-lock.json`) — *"DAYATILAN
+  SEÇİM"* kuralı; soru `kurumdan-ogrenilecekler.md` → *"BÖLÜM 5 — Ağ, dış servisler ve hat"* satır 5.4). Seçilen yöneticinin
+  kilit dosyası **commit edilir**, diğerininki depoda bulunmaz; iki kilit
+  dosyası = hangisi doğru belirsiz.
+
+  ⭐ *Neden kendi projede `pnpm`:* monorepo `pnpm workspaces` üzerine kurulu
+  (*"DÖRT KURGU"* → [C]), CI `pnpm install --frozen-lockfile` ile koşar
+  (`09-ci-cd-deploy.md`); içerik-adresli depo disk ve süre kazandırır.
+  ⛔ Bu bir **varsayılandır, dayatma değil** — 2026-09-20'de bir projede "npm
+  yasak" gibi okunup kit sapması sanıldı; kural §0'a bağlandı.
   `package.json` içinde sürümler **tam** yazılır (`16.2.12`, `^16.2.12` değil).
+  ⭐ Bunu **araç zorlar**, hafıza değil: `.npmrc` dosyasına `save-exact=true`
+  (npm ve pnpm aynı anahtarı okur) — `npm install x` varsayılan olarak `^`
+  yazar, bu ayar onu tam sürüme çevirir. *Gerçek hayat:* "unutma" notu
+  yerine kapıya otomatik kilit. 2026-09-20'de bir projede yedi paket şapkalı
+  bulundu; hepsi elle eklenmişti — ayar olsaydı hiçbiri olmazdı.
 - Major sürüm yükseltmesi ayrı PR olur, feature PR'ına karıştırılmaz.
 - Bir bağımlılıkta yamalanmış sürüm varsa ama bağımlılık ağacı eskisini çekiyorsa,
   `package.json` → `overrides` ile yükseltilir ve gerekçesi PR'da yazılır.
-
-
-<!-- ⚠️ KİT SAPMASI (2026-09-20): kitin bu bölümü `pnpm` ve monorepo varsayar; bu proje
-     tek paket + npm + `package-lock.json` (CLAUDE.md §0 PAKET YÖNETİCİSİ). Kural §0'a bağlanana
-     kadar projenin metni geçerli. Kit düzeltmesi bekliyor: kit-senkron raporu, 2026-09-20. -->
 
 ## ⛔ STACK KURULURKEN HER TEKNOLOJİNİN GÜNCEL ALTERNATİFİ TARANIR
 
