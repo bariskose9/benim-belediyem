@@ -179,6 +179,7 @@ Boş bırakılan alan seviye 0 sayılır.
 | Bağlam yönetimi · `/clear` | 3 | ⭐ "Senin context window mu doldu" diye sordu; oturum-bellek farkını kavradı | 2026-09 |
 | Ajanın çıktısını denetleme | 3 | ⭐ EN GÜÇLÜ: beni defalarca düzeltti — Adım 0 sıralaması, GitHub'a push, bayat belge, küçük proje istisnası | 2026-09 |
 | Kite kural yazma | 3 | ⭐ Kural/araç ayrımını kendisi kurdu; hangi istisnanın reddedileceğine karar verdi | 2026-09 |
+| Skill ile MCP sunucusu (yetenek) ayrımı | 3 | ⭐ chrome-devtools'un skill değil sunucu olduğunu kendisi ayırt etti | 2026-09 |
 
 ---
 
@@ -226,6 +227,8 @@ Biçim:  - `kelime` — kısa karşılığı (tarih)
 - `lookup table / tanım tablosu` — sabit değer listesinin satır olarak tutulduğu tablo; yeni değer INSERT, DDL yok (2026-09-13)
 - `UUIDv7` — başı zaman damgası olan UUID; tahmin edilemez ama index'e sıralı girer (2026-09-13)
 - `IDENTITY vs SERIAL` — ikisi de artan sayı; SERIAL ayrı sequence açar (yetki tuzağı), IDENTITY kolonun parçası (2026-09-13)
+- `skill` — ajana "bu işi nasıl yaparsın" diye öğreten talimat paketi; yetenek vermez, var olan aracı iyi kullanmayı öğretir (2026-09-20)
+- `MCP sunucusu` — ajana yeni bir YETENEK veren program (tarayıcıyı sürmek gibi); o yoksa hangi skill kurulu olursa olsun iş yapılamaz (2026-09-20)
 
 ---
 
@@ -258,6 +261,7 @@ Bir sonraki projede kontrol listesi olarak kullanılır.
 | Tarih | Ne sormayı unuttum | Sonucu ne oldu |
 |---|---|---|
 | 2026-09-04 | Belgelerin GitHub'a gidip gitmeyeceğini sormadım | Kişisel notlar public depoya gitti; geri alındı ama geçmişte kaldı |
+| 2026-09-20 | Ajanın hazır verdiği §0 metnindeki sürümü ölçmeden yapıştırdım (16 yazıldı, `docker-compose.yml` 18.4) | → ajanın verdiği sayı da önce ölçülür |
 
 ---
 
@@ -275,6 +279,7 @@ kısalması öğrenmenin ölçüsüdür.
 | Konu | Neresi zor geldi | Ne oturttu |
 |---|---|---|
 | Migration aracı: kendi projede Prisma Migrate, kurumda Flyway biçimi | "İkisi de en iyiyse neden farklı?" — aynı işin iki ortamda iki doğrusu olması | Belirleyen üç şey: **veritabanını kim kontrol ediyor · kaç ekip/dil paylaşıyor · inceleme ve geri alma zorunlu mu.** Tam anlatım: `docs/standards/04-database.md` → *"MIGRATION ARACI"* |
+| Aynı anda iki proje (iki VS Code penceresi) | "İkinci pencere yeter mi?" — çakışmaların görünmez olması | Üç somut çakışma: **port 3000** (`PORT=3001`), **makine yükü** (E2E `uptime` < 2.5 ister; 2026-09-20'de yük 5–7'de bir test düştü, inince geçti), **Docker** konteyner adı/portu. Build ve test iki projede aynı anda koşturulmaz |
 
 ---
 
@@ -312,4 +317,4 @@ Genelleşmiş, artık kural olabilecek maddeler. /kit-senkron ile taşınır
 ve buradan silinir.
 -->
 
-- [ ] <!-- madde -->
+- [ ] **Kit senkronuna başlamadan kaynak klonun YEREL durumuna bak:** `git -C ~/baris_projects/bariskose-skills status` ve `log -1 --format=%cd`. `status -sb` yalnızca uzak farkı gösterir, aynı makinede eşzamanlı atılmış commit'i göstermez. 2026-09-20'de benim-belediyem #81 karışık anlık görüntü oldu (`00-stack` 3.15.1'den, kalanı 3.15.2'den). Senkron boyunca tek anlık görüntüden çalış; klon değişirse baştan ölç → `kit-senkron` SKILL.md Adım 1

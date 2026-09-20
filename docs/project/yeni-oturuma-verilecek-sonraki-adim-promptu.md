@@ -16,8 +16,8 @@ benim-belediyem projesinde **borç #107'nin 107c adımına** geçiyoruz (sepet, 
 - `docs/project/roadmap.md` — nerede kalındı + teknik borç listesi
 - `docs/standards/15-oturum-devri-kurallari.md` — oturum kapanmadan ne yazacağın
 - ⭐ `docs/kullanici/calisilacak-konular.md` ve `docs/kullanici/ogrendigim-konular.md`
-  — **bana neyi ne kadar açıklayacağın buradan okunur.** ⚠️ İkisi de 2026-09-20'de
-  kit şablonundan **boş** geldi; henüz doldurulmadı (aşağıda "ÖNCE ÇÖZÜLECEK")
+  — **bana neyi ne kadar açıklayacağın buradan okunur.** Kullanıcı defteri projeler
+  arası birleşir; önceki projeden satırlar + 2026-09-20'nin dört girdisi içinde
 - `docs/project/decisions/ADR-021-*.md` — yanıt sözleşmesi neden üç kapıya bağlı
 - ⭐ **Proje 2026-09-20'de kit 3.15.3'e taşındı:** `.claude/rules/` (9 dosya —
   çekirdek her oturum, alan kuralları dosya açılınca), kısa `CLAUDE.md` (§0 orada),
@@ -63,13 +63,9 @@ Roadmap adım **0 → 18g bitti**. Borç **#103 ödendi**, **#107 kısmen ödend
 
 ## ÖNCE ÇÖZÜLECEK MESELELER
 
-1. **İki kullanıcı defteri BOŞ** — `docs/kullanici/calisilacak-konular.md` ve
-   `ogrendigim-konular.md` kit şablonundan geldi, içi doldurulmadı. 2026-09-20'de
-   üç gözlem teklif edildi, **cevap gelmedi**. ⛔ Oturum başında **BİR KEZ** sor,
-   ısrar etme: (a) skill vs MCP sunucusu ayrımı — "nasıl kullanılır" vs
-   "yapabilir mi"; (b) §0 için ezberden "PostgreSQL 16" dendi, ölçüm 18.4 —
-   "kurulu sürüm hafızada değil `docker-compose.yml`'de"; (c) aynı anda iki
-   proje: port 3000 çakışması + E2E'nin yüke duyarlılığı
+1. **Kullanıcı defterine 2026-09-20'de dört girdi yazıldı, teklif kapandı** —
+   sorma. *Kite taşınacaklar*'da bir madde bekliyor (kit senkron dersi); kit
+   oturumu alacak, sen dokunma
 2. **Kit iki dosya daha bekliyor, ikisi de YAZIM işi (senkron değil):**
    `REPO-YAPISI.md` ("projeye bakarak doldur" — 22 feature klasörü için hangi
    iş nerede) ve `docs/project/teknoloji-ve-plan.md` (kararların gerekçesi —
@@ -77,13 +73,7 @@ Roadmap adım **0 → 18g bitti**. Borç **#103 ödendi**, **#107 kısmen ödend
    yönlendirilir, karar verilmedi). ⚠️ 107c'nin önüne alma; ayrı adım
 3. **Roadmap biçimi:** kit `⬜/✅` kutucuk bekliyor; proje `~~…~~ **BİTTİ**`
    kullanıyor. Kozmetik; dönüştürmek istersen sor, kendiliğinden değiştirme
-4. **Kite gitmesi gereken bir ders var, bugün kapalıydı:** *"kit kaynak klonu
-   aynı makinede eşzamanlı düzenleniyor olabilir — senkrona başlamadan
-   `git -C ~/baris_projects/bariskose-skills log -1 --format=%cd` ile klonun
-   son commit ZAMANINA bak ve senkron boyunca tek anlık görüntüden çalış."*
-   #81 karışık bir anlık görüntü oldu (3.15.1 + 3.15.2). Sonraki `/kit-senkron`'da
-   öner
-5. **#23 sızmış şifre kontrolü** ve **#89 Google hesabında ikinci kanıt** —
+4. **#23 sızmış şifre kontrolü** ve **#89 Google hesabında ikinci kanıt** —
    proje sahibinin kararını bekliyor, mühendislik tercihi DEĞİL. Acelesi yok
 
 ## 📌 107a + 107b'DE NE YAPILDI — mekanizma burada
