@@ -1,75 +1,92 @@
-# Sonraki oturum için hazır prompt — borç #107'nin 107c adımı, sonra 107d, sonra adım 19
+# Yeni oturuma verilecek sonraki adım promptu — borç #107'nin 107c adımı
 
-> Bu dosya bir sonraki Claude oturumuna kopyala-yapıştır yapılmak için var.
-> Sonraki adım bitince **yeniden yazılır** (üstüne eklenmez).
+> ⚠️ **Adı ne anlatıyor:** bu dosya *"yeni oturuma verilecek metin"*dir.
+> `docs/standards/15-oturum-devri-kurallari.md` **KURALDIR**; bu dosya o kuralın **ÜRÜNÜDÜR**.
+
+> Bu dosya bir sonraki oturuma kopyala-yapıştır yapılmak için var.
+> Adım bitince **yeniden yazılır** (üstüne eklenmez).
 
 ---
 
-benim-belediyem projesinde **borç #107'nin 107a ve 107b adımları bitti ve
-canlıya çıktı.** Sıradaki iş **107c**, sonra 107d, en son adım 19 (mobil).
-Başlamadan önce
-`CLAUDE.md` + `docs/` klasörünü oku. Özellikle şu dördü:
+benim-belediyem projesinde **borç #107'nin 107c adımına** geçiyoruz (sepet, ödeme,
+üyelik — 7 uç). Başlamadan önce `CLAUDE.md` + `docs/` klasörünü oku. Özellikle:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
-  Kullanıcıya "şunu aç" demeden önce burayı oku
-- `docs/project/decisions/ADR-021-yanit-sozlesmesi-uc-kapiya-baglanir.md` —
-  ⭐ **YENİ.** Yanıt şeması neden üç kapıya birden bağlı, bayrak neden
-  `NODE_ENV`'e bağlanmadı
-- `docs/project/roadmap.md` — borç #107 satırı ve **adım 19'un bölünme notu**
-- `docs/standards/03-api-guidelines.md` (yeni "Yanıt gövdesi de belgelenir") +
-  `docs/standards/06-testing.md` (⭐ yeni "BİR KAPIYI `NODE_ENV`'E BAĞLAMA")
+  Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
+- `docs/project/roadmap.md` — nerede kalındı + teknik borç listesi
+- `docs/standards/15-oturum-devri-kurallari.md` — oturum kapanmadan ne yazacağın
+- ⭐ `docs/kullanici/calisilacak-konular.md` ve `docs/kullanici/ogrendigim-konular.md`
+  — **bana neyi ne kadar açıklayacağın buradan okunur.** ⚠️ İkisi de 2026-09-20'de
+  kit şablonundan **boş** geldi; henüz doldurulmadı (aşağıda "ÖNCE ÇÖZÜLECEK")
+- `docs/project/decisions/ADR-021-*.md` — yanıt sözleşmesi neden üç kapıya bağlı
+- ⭐ **Proje 2026-09-20'de kit 3.15.3'e taşındı:** `.claude/rules/` (9 dosya —
+  çekirdek her oturum, alan kuralları dosya açılınca), kısa `CLAUDE.md` (§0 orada),
+  19 standart (2.482 → 7.803 satır). Eski 332 satırlık CLAUDE.md YOK artık
 
 ## ⛔ İLK İŞ: DURUM BÖLÜMÜNE İNANMA, ÖLÇ
 
 `15-oturum-devri-kurallari.md` kuralı: bu dosyanın DURUM bölümü **merge'den önceki
-dünyayı** anlatıyor olabilir, çünkü commit kapısında beklerken yazılıyor.
-
-**İlk üç komut:**
+dünyayı** anlatıyor olabilir.
 
 ```
 git log --oneline -5
 git status
 gh pr list
+curl -s https://benim-belediyem.vercel.app/api/health
 ```
 
 Depoda görülen, dosyada yazandan üstündür. Çelişki bulursan **söyle.**
 
 ## DURUM
 
-Roadmap adım **0 → 18f bitti**. Borç **#103 ödendi**, **#107 kısmen ödendi
+Roadmap adım **0 → 18g bitti**. Borç **#103 ödendi**, **#107 kısmen ödendi
 (mekanizma + 15 uç hazır, 14 uç kaldı)**. Kalan: **107c → 107d**, sonra
 **adım 19 (Expo mobil)**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- ✅ **107b MERGE EDİLDİ ve CANLIDA** (PR #73 → `b4a1398`; devir + CHANGELOG
-  commit'leri de merge edildi, `main` = en son `docs(handoff)` commit'i).
-  ⭐ Bu satır merge'den SONRA yazıldı. Dağıtım doğrulandı: `commit: 6d13e1c`,
-  `db: ok`, `env: production`. Canlı duman testi temiz — altı sayfa **200**,
-  `/api/cron/daily` **401**. Yine de körü körüne güvenme: `git log --oneline -3`
-  ve `curl -s .../api/health` ile teyit et
-- ✅ 107a canlıda (PR #71 → `2adce12`), #103 canlıda (PR #69 → `8bb0419`)
+- ✅ **2026-09-20'de beş PR merge edildi, hepsi canlıda** (`main` = `0eee2ce`):
+  - **#80** — ⛔ Next.js'te kimlik doğrulamasız **RCE** dahil 10 üretim açığı
+    kapandı (`next` 16.3.5 · `prisma` 7.10.0 · `sharp`/`hono`/`js-yaml`
+    override'ları savunmasız sürüme SABİTLENMİŞTİ, düzeltildi). Denetim kapısı
+    haftalardır kırmızıydı, yeşil
+  - **#81** — kit 3.15.1 yapısı: `.claude/rules/`, kısa `CLAUDE.md`, 19 standart
+  - **#82** — 7 şapkalı (`^`) sürüm tam sürüme sabitlendi
+  - **#83** — `.npmrc` → `save-exact=true` (bir daha `^` yazılmasın)
+  - **#84** — `00-stack.md` kit 3.15.3'ten yeniden; pnpm sapma notu kalktı
+- Dependabot #76 #77 #79 kapatıldı (#80 aştı); **#78 (vitest 4.1.11) yanlış
+  kapatılmıştı, `@dependabot recreate` yorumu bırakıldı** — yeni PR gelirse
+  denetim kapısı artık yeşil olduğu için tek başına geçebilir
+- Testler: **843** birim · **344** veritabanı · **325** E2E · **19** kalite
 - ✅ **CRON'UN ÇALIŞTIĞI KANITLANDI** — production denetim kaydında 9 adet
   `scheduled_task_run`. Bir daha sorgulama
 - Gerçek kullanıcı 0 · Sentry canlıda ve uçtan uca doğrulanmış
 
-## ⛔ 2026-08-13 OLAYI — CANLI 80 SANİYE ESKİ SÜRÜME DÜŞTÜ
+## ÖNCE ÇÖZÜLECEK MESELELER
 
-**Ne oldu:** PR #73'ün preview derlemesi, Neon uykuda olduğu için `P1001` ile
-düştü. Kurtarmak için bir dağıtım yeniden dağıtıldı ama seçilen dağıtım
-**preview değil production**'dı; Vercel onu canlı alan adına alias'ladı ve site
-üç sürüm eski bir yapıya (`490713e`) döndü.
+1. **İki kullanıcı defteri BOŞ** — `docs/kullanici/calisilacak-konular.md` ve
+   `ogrendigim-konular.md` kit şablonundan geldi, içi doldurulmadı. 2026-09-20'de
+   üç gözlem teklif edildi, **cevap gelmedi**. ⛔ Oturum başında **BİR KEZ** sor,
+   ısrar etme: (a) skill vs MCP sunucusu ayrımı — "nasıl kullanılır" vs
+   "yapabilir mi"; (b) §0 için ezberden "PostgreSQL 16" dendi, ölçüm 18.4 —
+   "kurulu sürüm hafızada değil `docker-compose.yml`'de"; (c) aynı anda iki
+   proje: port 3000 çakışması + E2E'nin yüke duyarlılığı
+2. **Kit iki dosya daha bekliyor, ikisi de YAZIM işi (senkron değil):**
+   `REPO-YAPISI.md` ("projeye bakarak doldur" — 22 feature klasörü için hangi
+   iş nerede) ve `docs/project/teknoloji-ve-plan.md` (kararların gerekçesi —
+   bu projede karşılığı ADR'ler; şablondan mı türetilir, ADR'lere mi
+   yönlendirilir, karar verilmedi). ⚠️ 107c'nin önüne alma; ayrı adım
+3. **Roadmap biçimi:** kit `⬜/✅` kutucuk bekliyor; proje `~~…~~ **BİTTİ**`
+   kullanıyor. Kozmetik; dönüştürmek istersen sor, kendiliğinden değiştirme
+4. **Kite gitmesi gereken bir ders var, bugün kapalıydı:** *"kit kaynak klonu
+   aynı makinede eşzamanlı düzenleniyor olabilir — senkrona başlamadan
+   `git -C ~/baris_projects/bariskose-skills log -1 --format=%cd` ile klonun
+   son commit ZAMANINA bak ve senkron boyunca tek anlık görüntüden çalış."*
+   #81 karışık bir anlık görüntü oldu (3.15.1 + 3.15.2). Sonraki `/kit-senkron`'da
+   öner
+5. **#23 sızmış şifre kontrolü** ve **#89 Google hesabında ikinci kanıt** —
+   proje sahibinin kararını bekliyor, mühendislik tercihi DEĞİL. Acelesi yok
 
-**Nasıl düzeltildi:** doğru dağıtım bulunup `vercel promote` ile terfi ettirildi.
-
-**Kural artık yazılı:** `09-ci-cd-deploy.md` → "BİR DAĞITIMI YENİDEN DAĞITMADAN
-ÖNCE ORTAMINI DOĞRULA". Kite de senkronlandı (1.19.0).
-
-⛔ **Doğru ilk hamle yeniden dağıtmak DEĞİL, önce veritabanını uyandırmaktır:**
-o ortamın çalışan bir dağıtımındaki `/api/health` ucuna istek at. Preview ve
-production AYRI Neon dalları kullanıyor — production'ı uyandırmak preview'ı
-uyandırmaz.
-
-## 📌 107a + 107b'DE NE YAPILDI
+## 📌 107a + 107b'DE NE YAPILDI — mekanizma burada
 
 **Yanıt gövdesi artık belgede GERÇEK Zod şemasıyla görünüyor.** Şema kütüğe elle
 yazılmıyor: ucun `ok()`/`created()` çağrısında kullandığı şemanın AYNISI kütüğe
@@ -142,15 +159,6 @@ kararıyla ele alınmalı.
 
 **107d bitince** `RESPONSE_BODY_PENDING` boşalır ve sabit **silinir**.
 
-## ⚠️ İKİ KONU PROJE SAHİBİNİN KARARINI BEKLİYOR
-
-⚠️ **Bunlar mühendislik tercihi DEĞİL** — biri dış servise bağlanma (#23), biri
-kullanıcı deneyimi/maliyet takası (#89). Bu yüzden hâlâ ona sorulur.
-
-- **#23 sızmış şifre kontrolü:** (a) HIBP ekle, (b) yerel listeyi büyüt, (c) bırak
-- **#89 Google hesabında ikinci kanıt:** (a) "yeniden kimlik doğrula" OAuth modu,
-  (b) bırak
-
 ## 📋 PROJE SAHİBİNİN BEKLEYEN İŞLERİ — ⭐ BU OTURUMDA **KISACA HATIRLAT**
 
 ⭐ **KURAL 2026-08-14'TE DEĞİŞTİ.** Proje sahibi bugüne kadar "sonraya bırak,
@@ -171,20 +179,15 @@ sonraki session'da hatırlat."**
 |---|---|---|
 | **107a + 107b'nin elle kontrolü** | `/api/health` (commit `6d13e1c` görünmeli) · `/giris` · `/kayit` · `/sifremi-unuttum` | 2026-08-14'te ertelendi. ⚠️ İkisinin de ekranda görünen karşılığı YOK (arayüz, akış ve veritabanı hiç değişmedi); kontrol "bozulmamış mı" diye bakmak için |
 | **#103'ün preview'da elle kontrolü** | preview URL → market → sepete ekle → sepet | Ertelendi. ⚠️ Otomatik taraf zaten kanıtlı (`POST /api/v1/carts/current/items` → `201`, gerçek tarayıcıda) |
-| Telefondan toplu elle test | — | **18. kez ertelendi.** ⛔ Listeyi ÜRETME, tek satırla an ve geç |
+| Telefondan toplu elle test | — | **19. kez ertelendi** (2026-09-20'de gündeme gelmedi). ⛔ Listeyi ÜRETME, tek satırla an ve geç |
 | `proje-kiti`'nin Windows makineye kurulumu | `/plugin marketplace add bariskose9/bariskose-skills` → `/plugin install proje-kiti@bariskose-skills` | Ertelendi |
 | Cloudflare'da preview alan adı yetkilendirme (#114) | Cloudflare paneli | ⚠️ İSTEĞE BAĞLI, zorunlu değil |
 | #23 (sızmış şifre) ve #89 (Google ikinci kanıt) | — | Kararı bekliyor, acelesi yok |
 
-### ⚠️ KURULU KİT SÜRÜMÜ — HATIRLATMA 2026-08-14'TE ZATEN YAPILDI
+### Kurulu kit sürümü: 3.15.3 — kaynak, kurulu ve proje eşit
 
-Kurulu sürüm **1.11.0**, güncel sürüm **1.19.0** (sekiz sürüm geride).
-Proje sahibi ikinci bir proje açmayı planladığını söyleyince **tetik geldi ve
-uyarı verildi:** `/yeni-proje` çalıştırmadan önce `/plugin` ekranından kiti
-güncellemesi gerektiği söylendi.
-
-⛔ **Kendiliğinden TEKRAR hatırlatma.** Yalnızca `/yeni-proje` veya
-`/kit-senkron` fiilen çalıştırılacağı an tekrar söyle.
+⛔ Kendiliğinden sürüm hatırlatması yapma. Yalnızca `/yeni-proje` veya
+`/kit-senkron` fiilen çalıştırılacağı an kaynak ile kuruluyu karşılaştır.
 
 ⚠️ Proje sahibi **aynı anda ikinci bir projede** çalışmayı planlıyor (ayrı VS
 Code penceresi). Bu projede ölçüm yaparken bunu hesaba kat: **E2E yüke duyarlı**
@@ -205,28 +208,20 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — sürüm 1.19.0, kurulu sürüm 1.11.0
+## 📦 KİT — kaynak 3.15.3, kurulu 3.15.3, proje 3.15.3
 
-✅ **KAPI 8 GEÇİLDİ, diff ile kanıtlandı (üç dosyada da çıktı boş).**
+✅ **Üçü eşit.** Kapı 8 kanıtı (2026-09-20, #84 sonrası): 17/19 standart kitle
+birebir; `00-stack.md` farkı = korunan dört bölge (Stack tablosu · Auth.js
+anlatısı + ADR-005 üstünlük cümlesi · sınır altı · —), `05` farkı = sahte-ödeme
+notu. `.claude/rules` 9/9, `sablonlar` 15/15, kılavuz ve defterler birebir.
 
-- **1.18.0** (`0e40146`) — `03-api-guidelines.md`: yanıt gövdesi de belgelenir,
-  şema telden doğrulanır, sözleşme borcu yalnızca küçülen listeyle kapatılır ·
-  `06-testing.md`: bir kapıyı `NODE_ENV`'e bağlama, açık olduğunu ölç
-- **1.19.0** (`926bfc5`) — `09-ci-cd-deploy.md`: bir dağıtımı yeniden dağıtmadan önce
-  ortamını doğrula (production'ı yeniden dağıtmak canlıyı GERİ ALIR); uyuyan
-  veritabanını önce uyandır
+⛔ **`00-stack.md`'deki ADR-005 cümlesi SİLİNMEZ:** kitin `guvenlik.md`
+tetikleyicisi "JWT çerezde + `tokenVersion`" der; bu projede oturum `sessions`
+tablosuyla elle yazıldı. Kaynak hiyerarşisinde ADR üstün. Tetikleyiciyi görüp
+oturumu yeniden yazmaya KALKMA.
 
-⛔ **PROJE SAHİBİNİN KURULU SÜRÜMÜ 1.11.0 — ESKİ (yedi sürüm geride).**
-Yalnızca `/yeni-proje` veya `/kit-senkron` çalıştırılacağı gün "önce `/plugin`
-ekranından kiti güncelle" de. **Bilinçli olarak ertelendi; kendiliğinden
-hatırlatma.**
-
-⛔ **`00-stack.md` HÂLÂ FARKLI ve bu AÇIK BİR SORU.** Sürüm 1.7.0 istisnayı bölüm
-seviyesine indirdi (`<!-- ⛔ SENKRON SINIRI -->`) ama projedeki fark **sınırın
-ÜSTÜNDE** kalıyor (satır 19-68). Ya sınır yanlış yerde ya da o metin sınırın
-altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan **17'si** birebir aynı — 2026-08-14'te ölçüldü.)
-
-⚠️ Kit deposunu karşılaştırmadan önce daima `git fetch` + `git pull` yap.
+⚠️ Kit deposunu karşılaştırmadan önce `git -C ~/baris_projects/bariskose-skills
+pull --ff-only` **ve** son commit zamanına bak (yukarıdaki mesele 4).
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
@@ -262,6 +257,32 @@ altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan **17'si** birebir 
 - `messages.ts` (tek istisna `messages-legal.ts`) · tasarım token'ları
 
 ## TUZAKLAR — daha önce vakit kaybettirenler
+
+**2026-09-20'de öğrenilenler (güvenlik + kit senkronu)**
+- ⛔ **DENETİM KAPISI TÜM AÇIKLARI GÖRÜR, O PR'IN KAPATTIĞINI DEĞİL** —
+  `npm audit --omit=dev --audit-level=high` yüzünden dört Dependabot PR'ı
+  haftalarca kırmızı kaldı; hiçbiri tek başına yeşile dönemezdi. Çözüm: hepsini
+  birden kapatan tek PR, sonra Dependabot'unkileri "aştı" notuyla kapat
+- ⚠️ **`--omit=dev` PRISMA'YI DIŞARIDA BIRAKMIYOR** — `prisma` devDependency ama
+  `@prisma/client`'ın (üretim) bağımlılığı; `npm ls prisma --omit=dev` ile ölçüldü
+- ⛔ **npm'in "fix available" ÖNERİSİ MAJOR GERİ ALMA OLABİLİR** — Prisma zinciri
+  için `prisma@6.19.3` önerdi (ADR-008 ihlali). Kabul etme; minör yükselt +
+  `overrides` yaz. Depodaki mevcut desen zaten bu
+- ⛔ **`overrides` YAZDIKTAN SONRA KAPIYI YENİDEN ÖLÇ** — bir override BOŞ dizeye
+  yazılınca koruma sessizce düştü, 3 yüksek açık geri geldi. "Yazdım" yetmez
+- ⚠️ **`require('paket/package.json')` `exports` KULLANAN PAKETTE PATLAR**
+  (`deepmerge-ts`). Sürümü `node_modules/<paket>/package.json`'ı doğrudan
+  okuyarak al; boşsa DUR, yazma
+- ⛔ **`npm install x@1.2.3` VARSAYILAN OLARAK `^` YAZAR** — artık `.npmrc`
+  `save-exact=true` engelliyor (#83); yine de commit öncesi `grep '"\^' package.json`
+- ⛔ **KİT KLONU AYNI MAKİNEDE EŞZAMANLI DÜZENLENİYOR OLABİLİR** — `git status -sb`
+  yalnızca uzak farkı gösterir, yerel yeni commit'i değil. Senkrona başlamadan
+  `git -C <kit> log -1 --format=%cd` ile zamana bak; #81 karışık anlık görüntü oldu
+- ⚠️ **KİT ŞABLONLARINDAKİ DOSYA ADI SENİN VERDİĞİN AD DEĞİLDİR** — devir dosyası
+  bir kez `yeni-oturuma-verilecek-sonraki-adim-promptu.md` yapıldı, kanonik ad
+  `yeni-oturuma-verilecek-sonraki-adim-promptu.md` çıktı. Adı kitin `15`'inden oku
+- ⚠️ **Prettier markdown'a DOKUNMUYOR** — kit dosyaları olduğu gibi kalıyor,
+  `diff` kanıtı bozulmuyor (ölçüldü: `format:check` 19 dosyada temiz)
 
 **107a/107b'de yeni öğrenilenler**
 - ⛔ **KAPIYI `NODE_ENV`'E BAĞLAMA** — E2E production modunda koşuyor
@@ -482,6 +503,9 @@ altına taşınmalı. **Karar hâlâ bekliyor.** (18 dosyadan **17'si** birebir 
 - Uzun süren işlerde `caffeinate -dimsu &`; **oturum bitince `pkill caffeinate`**
 
 ## KOMUTLAR
+
+**Denetim kapısını CI ile aynı komutla koşturma:**
+`npm audit --omit=dev --audit-level=high` — çıkış kodu 0 olmalı
 
 `npm run db:up · db:migrate · db:reset · db:studio`
 `npm run test · test:db · test:e2e · test:quality · lint · typecheck · format · build`

@@ -127,7 +127,7 @@ bariskose9/bariskose-skills
 5. **PRD:** analiz dokümanını ister, eksikleri `interview-me` ile **tek tek** sorar.
    "Açık sorular" boşalmadan kod yazılmaz
 6. **`roadmap.md`, `ADR-001`, `altyapi-durumu.md`** oluşturulur;
-   `sonraki-adim-promptu.md` *"henüz doldurulmadı — ilk adım bitince yazılacak"*
+   `yeni-oturuma-verilecek-sonraki-adim-promptu.md` *"henüz doldurulmadı — ilk adım bitince yazılacak"*
    notuyla açılır
 7. **İskelet:** framework kurulur, `git init`, ilk commit
 8. **Dış dünya:** GitHub deposu açılır, hosting + veritabanı bağlanır, CI kurulur.

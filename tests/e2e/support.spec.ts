@@ -23,7 +23,7 @@ const PASSWORD = "Test1234!";
 /**
  * Her Playwright projesine AYRI hesap — projeler paralel koşuyor ve tek
  * veritabanına yazıyor. Bu hesaplar BAŞKA HİÇBİR spec dosyasında
- * kullanılmıyor (`sonraki-adim-promptu.md` "boşta" listesi).
+ * kullanılmıyor (`yeni-oturuma-verilecek-sonraki-adim-promptu.md` "boşta" listesi).
  */
 const USER_BY_PROJECT: Record<string, { nationalId: string; email: string }> = {
   "desktop-chrome": { nationalId: "97876775668", email: "emre.arslan1@ornek.test" },
