@@ -17,7 +17,7 @@ import { cleanupTestData, prisma, testId } from "./helpers.js";
  * UPDATE sıfır satır etkiledi" davranışını ancak elle yeniden yazarak
  * taklit edebilirdi ve o kod, test ettiği koddan daha karmaşık olurdu.
  * Daha kötüsü: taklit yanlış yazılırsa test YANLIŞ YEŞİL gösterir — bu
- * projede 4b-2'de bir kez yaşandı (`sonraki-adim-promptu.md` tuzaklar).
+ * projede 4b-2'de bir kez yaşandı (`yeni-oturuma-verilecek-sonraki-adim-promptu.md` tuzaklar).
  *
  * Servis katmanı DOĞRUDAN çağrılıyor, HTTP ucu üzerinden değil: kurallar
  * serviste yaşıyor ve uç yalnızca kapı + zarf işi yapıyor. Ucun kendi işi
