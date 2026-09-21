@@ -446,6 +446,13 @@ gereken bölümlerin** aynı olduğudur.
 Mevcut bir projede çalışırken kurulu sürümün eski olması **hiçbir şeyi
 bozmaz** — o proje kendi `docs/standards/` klasörünü okur.
 
+⭐ **Projenin kopyası geride kaldığında da kanca söyler** (3.21.0): açılışta
+`docs/standards/KIT-SURUM` damgası (`sürüm @ hash`, senkron yazar) güncel kitle
+karşılaştırılır; gerideyse ajan *"/kit-senkron ile getireyim mi?"* diye sorar.
+Üç katman ayrıdır ve hiçbiri diğerine kendiliğinden yansımaz: kaynak depo →
+kurulu plugin (`plugin update` + yeniden başlatma) → proje kopyası (yalnızca
+senkron). Damga üçüncüsünü görünür kılar.
+
 Güncelleme kendiliğinden inmez. ⭐ **Ajan fark ettiği an sorar** — oturum kancası
 her açılışta GitHub'daki sürüme bakar, `/yeni-proje` ve `/kit-senkron` başında
 yeniden kontrol edilir — ve kullanıcı onaylarsa komutları **kendisi** koşturur:
