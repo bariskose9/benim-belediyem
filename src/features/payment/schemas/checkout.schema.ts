@@ -11,6 +11,7 @@ import {
   CART_MAX_QUANTITY_PER_ITEM,
 } from "@/config/constants";
 import { messages } from "@/config/messages";
+import { kurusSchema } from "@/lib/money-schema";
 
 /**
  * Ödeme ucunun girdi şeması (03-api-guidelines.md: her uç Zod ile doğrulanır).
@@ -144,4 +145,28 @@ export const newAddressSchema = z.object({
   title: z.string().trim().min(2).max(60),
   fullAddress: z.string().trim().min(10).max(300),
   district: z.string().trim().min(2).max(60),
+});
+
+/**
+ * ═══ YANIT SÖZLEŞMESİ (borç #107 · adım 107c · ADR-021) ═══
+ *
+ * `POST /api/v1/payments` başarılı yanıtının gövdesi. Şema hem route'un
+ * `created()` çağrısında hem API belgesinde KULLANILIYOR — ikisi aynı nesne.
+ *
+ * ⛔ Kart bilgisinin HİÇBİR parçası yanıtta yok ve şema bunu belgeye de yazıyor:
+ * belgeyi okuyan istemci, son 4 haneyi bile bu uçtan bekleyemez.
+ */
+export const paymentCreatedResponseSchema = z.object({
+  paymentId: z.string(),
+  transactionId: z.string().describe("Sahte ödeme sağlayıcısının işlem kodu; fişte gösterilir."),
+  /**
+   * BİR ÖDEME, BİRDEN ÇOK SİPARİŞ: karışık sepet modül başına ayrı siparişe
+   * bölünür (PRD §6.1) ama tek seferde tahsil edilir. Boş sepet ödemeye hiç
+   * gelemediği için (`CART_EMPTY`) liste her zaman en az bir kimlik taşır.
+   */
+  orderIds: z
+    .array(z.string())
+    .min(1)
+    .describe("Oluşturulan siparişlerin kimlikleri — modül başına bir sipariş, tek ödeme."),
+  totalKurus: kurusSchema,
 });

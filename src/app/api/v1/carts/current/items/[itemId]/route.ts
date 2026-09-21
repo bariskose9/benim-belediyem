@@ -1,4 +1,8 @@
 import { InvalidCartRequestError, OutOfStockError } from "@/features/cart/errors";
+import {
+  cartSummaryResponseSchema,
+  toCartSummaryResponse,
+} from "@/features/cart/schemas/cart-summary.schema";
 import { getCartContext } from "@/features/cart/services/cart-context";
 import {
   changeItemNote,
@@ -44,7 +48,8 @@ export async function PATCH(request: Request, context: Context) {
         ? await changeItemNote({ ...actor, note: parsed.data.note })
         : await changeItemQuantity({ ...actor, quantity: parsed.data.quantity ?? 0 });
 
-    return ok(summary, { noStore: true });
+    // Tel biçimine çevir + belgedeki şemanın aynısı (ADR-021 · cart-summary.schema.ts).
+    return ok(toCartSummaryResponse(summary), { noStore: true, schema: cartSummaryResponseSchema });
   } catch (error) {
     return fail(error, stockDetails(error));
   }
@@ -67,7 +72,7 @@ export async function DELETE(_request: Request, context: Context) {
 
     // 204 DEĞİL 200: istemcinin güncel sepet özetine ihtiyacı var (tutarlar,
     // teslimat ücreti). Boş yanıt dönseydi ekran ikinci bir istek atardı.
-    return ok(summary, { noStore: true });
+    return ok(toCartSummaryResponse(summary), { noStore: true, schema: cartSummaryResponseSchema });
   } catch (error) {
     return fail(error);
   }

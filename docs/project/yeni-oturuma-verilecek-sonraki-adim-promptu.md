@@ -1,4 +1,4 @@
-# Yeni oturuma verilecek sonraki adım promptu — borç #107'nin 107c adımı
+# Yeni oturuma verilecek sonraki adım promptu — borç #107'nin 107d adımı
 
 > ⚠️ **Adı ne anlatıyor:** bu dosya *"yeni oturuma verilecek metin"*dir.
 > `docs/standards/15-oturum-devri-kurallari.md` **KURALDIR**; bu dosya o kuralın **ÜRÜNÜDÜR**.
@@ -8,8 +8,10 @@
 
 ---
 
-benim-belediyem projesinde **borç #107'nin 107c adımına** geçiyoruz (sepet, ödeme,
-üyelik — 7 uç). Başlamadan önce `CLAUDE.md` + `docs/` klasörünü oku. Özellikle:
+benim-belediyem projesinde **borç #107'nin 107d adımına** geçiyoruz (profil,
+hizmetler ve **gövdesi JSON olmayan iki uç** — 7 uç; bitince liste boşalır ve
+`RESPONSE_BODY_PENDING` sabiti SİLİNİR). Başlamadan önce `CLAUDE.md` + `docs/`
+klasörünü oku. Özellikle:
 
 - `docs/project/altyapi-durumu.md` — **hangi hesap açık, ne yapılandırılmış.**
   Kullanıcıya "şunu aç" demeden önce burayı oku; zaten yapılmış olabilir
@@ -17,11 +19,10 @@ benim-belediyem projesinde **borç #107'nin 107c adımına** geçiyoruz (sepet, 
 - `docs/standards/15-oturum-devri-kurallari.md` — oturum kapanmadan ne yazacağın
 - ⭐ `docs/kullanici/calisilacak-konular.md` ve `docs/kullanici/ogrendigim-konular.md`
   — **bana neyi ne kadar açıklayacağın buradan okunur.** Kullanıcı defteri projeler
-  arası birleşir; önceki projeden satırlar + 2026-09-20'nin dört girdisi içinde
+  arası birleşir
 - `docs/project/decisions/ADR-021-*.md` — yanıt sözleşmesi neden üç kapıya bağlı
-- ⭐ **Proje 2026-09-20'de kit 3.15.3'e taşındı:** `.claude/rules/` (9 dosya —
-  çekirdek her oturum, alan kuralları dosya açılınca), kısa `CLAUDE.md` (§0 orada),
-  19 standart (2.482 → 7.803 satır). Eski 332 satırlık CLAUDE.md YOK artık
+- ⭐ **Proje kit 3.18.1'de:** `.claude/rules/` (9 dosya — çekirdek her oturum, alan
+  kuralları dosya açılınca), kısa `CLAUDE.md` (§0 orada), 19 standart
 
 ## ⛔ İLK İŞ: DURUM BÖLÜMÜNE İNANMA, ÖLÇ
 
@@ -39,25 +40,19 @@ Depoda görülen, dosyada yazandan üstündür. Çelişki bulursan **söyle.**
 
 ## DURUM
 
-Roadmap adım **0 → 18g bitti**. Borç **#103 ödendi**, **#107 kısmen ödendi
-(mekanizma + 15 uç hazır, 14 uç kaldı)**. Kalan: **107c → 107d**, sonra
-**adım 19 (Expo mobil)**.
+Roadmap adım **0 → 18i bitti** (18h — kitin iki proje belgesi — **atlanmış
+durumda, bilerek; 107d'nin önüne alma**). Borç **#103 ödendi**, **#107 üç
+adımda kısmen ödendi (mekanizma + 22 uç hazır, 7 uç kaldı)**. Kalan: **107d**,
+sonra **18h**, sonra **adım 19 (Expo mobil)**.
 
 - Canlı: https://benim-belediyem.vercel.app · sağlık ucu `/api/health`
-- ✅ **2026-09-20'de beş PR merge edildi, hepsi canlıda** (`main` = `0eee2ce`):
-  - **#80** — ⛔ Next.js'te kimlik doğrulamasız **RCE** dahil 10 üretim açığı
-    kapandı (`next` 16.3.5 · `prisma` 7.10.0 · `sharp`/`hono`/`js-yaml`
-    override'ları savunmasız sürüme SABİTLENMİŞTİ, düzeltildi). Denetim kapısı
-    haftalardır kırmızıydı, yeşil
-  - **#81** — kit 3.15.1 yapısı: `.claude/rules/`, kısa `CLAUDE.md`, 19 standart
-  - **#82** — 7 şapkalı (`^`) sürüm tam sürüme sabitlendi
-  - **#83** — `.npmrc` → `save-exact=true` (bir daha `^` yazılmasın)
-  - **#84** — `00-stack.md` kit 3.15.3'ten yeniden; pnpm sapma notu kalktı
-- Dependabot #76 #77 #79 kapatıldı (#80 aştı); **#78 (vitest 4.1.11) yanlış
-  kapatılmıştı, `@dependabot recreate` yorumu bırakıldı** — yeni PR gelirse
-  denetim kapısı artık yeşil olduğu için tek başına geçebilir
-- Testler: **843** birim · **344** veritabanı · **325** E2E · **19** kalite
-- ✅ **CRON'UN ÇALIŞTIĞI KANITLANDI** — production denetim kaydında 9 adet
+- ⚠️ **107c'nin PR'ı bu dosya yazılırken HENÜZ AÇILMAMIŞTI** (dal:
+  `feature/107c-commerce-response-schemas`, `main` = `369938c`). Kontrol:
+  `gh pr list` + `git log --oneline -3`. Merge olduysa `/api/health`'teki
+  `commit` alanı `369938c`'den farklı olmalı — **doğrula, varsayma**
+- Testler: **870** birim+entegrasyon (107c'de +27) · **344** veritabanı ·
+  **325** E2E · **19** kalite
+- ✅ **CRON'UN ÇALIŞTIĞI KANITLANDI** — production denetim kaydında
   `scheduled_task_run`. Bir daha sorgulama
 - ⭐ **Bu proje YALNIZCA bu Mac'te çalışılıyor** (2026-09-21 kararı). Öteki
   bilgisayarda `backend-ogrenme` ve kit geliştirme (`deneme-proje`) var; oradan
@@ -67,44 +62,68 @@ Roadmap adım **0 → 18g bitti**. Borç **#103 ödendi**, **#107 kısmen ödend
 
 ## ÖNCE ÇÖZÜLECEK MESELELER
 
-1. **Kullanıcı defterine 2026-09-20'de dört girdi yazıldı, teklif kapandı** —
-   sorma. *Kite taşınacaklar* boş — senkron dersi kit 3.16.0'a alındı
+1. **Kullanıcı defteri 2026-09-21'de DEĞİŞMEDİ** — 107c'de yeni terim
+   anlatıldı ("tel biçimi / DTO", "belgede integer ile number farkı") ama
+   kullanıcı **soru sormadı, kendi cümlesinde kullanmadı**; kanıt yok, satır
+   açılmadı. Bu oturumda o iki kavram geçerse tepkisine bak; ikinci gözlem
+   gelirse seviye 1 satırı **teklif et** (kendiliğinden yazma)
 2. **Kit iki dosya daha bekliyor — KARAR VERİLDİ → roadmap adım 18h.**
-   `teknoloji-ve-plan.md` şablondan türetilir (BÖLÜM 0–G), gerekçeler ADR'den
-   kopyalanmaz, "→ ADR-00x" diye işaret edilir; `REPO-YAPISI.md` kitin güncel
-   şablonuyla gerçek klasörlere bakılarak yeniden yazılır (kökteki 1 Ağustos
-   reçetesi güncel değil). ⚠️ 107c'nin önüne alma; ayrı küçük adım
+   ⚠️ 107d'nin önüne alma; ayrı küçük adım
 3. **Roadmap biçimi:** kit `⬜/✅` kutucuk bekliyor; proje `~~…~~ **BİTTİ**`
    kullanıyor. Kozmetik; dönüştürmek istersen sor, kendiliğinden değiştirme
 4. **#23 sızmış şifre kontrolü** ve **#89 Google hesabında ikinci kanıt** —
    proje sahibinin kararını bekliyor, mühendislik tercihi DEĞİL. Acelesi yok
+5. ⭐ **Yeni borç #116 — başlık bloğu.** Kit 3.15 kuralı ("her dosya sabit
+   başlık bloğuyla başlar") mevcut 526 dosyada yok, 107c'nin 5 yeni dosyasında
+   var. **107d'de açtığın her yeni dosya bloğu alır** (`02-coding-standards.md`
+   → *"BAŞLIK BLOĞU SABİT BİÇİMDE YAZILIR"*: `NEREDEN · NE · NEREYE · SONUÇ ·
+   KAYNAK · NEDEN · DİKKAT`, gerçek dosya yolları, uydurma `KAYNAK` yok).
+   Mevcut dosyalara geriye dönük yazım ayrı adım — 107d'ye karıştırma
+6. ⭐ **`03-api-guidelines.md` KİTTEN İLERİDE — `/kit-senkron` bekliyor.**
+   107c'de iki kural projenin standardına yazıldı ("Yanıt gövdesi de
+   belgelenir" bölümü: para alanı `z.int()` + CI kapısı · iç içe `Date` gövdede
+   açık çevirmen, spread yok). Kit kopyasına YAZILMADI (herkese açık depo,
+   kullanıcı onayı şart — `15-oturum-devri-kurallari.md`). Kanıt komutu:
+   `diff docs/standards/03-api-guidelines.md ~/baris_projects/bariskose-skills/skills/yeni-proje/dosyalar/docs/standards/03-api-guidelines.md`
+   — boş dönene kadar Kapı 8 açık. Kullanıcı "evet" derse `/kit-senkron`.
+   ⚠️ Aynı senkron **defteri de** kapsıyor: `calisilacak-konular.md` → "API
+   sözleşmesi" satırının son kanıt sütunu 2026-09-21'de güncellendi; kit
+   kopyasında yok. Proje sahibi bu oturumda "kit senkronu" sorusunu
+   anlamadığını söyledi ve anlatıldı (aşağıda "BENİMLE İLETİŞİM"e bak);
+   yeniden sorarken **ne yapılacağını tek cümleyle** söyle: "projede
+   öğrenilen iki kural + defterdeki bir satır kitin şablon kopyasına
+   kopyalanacak, kit herkese açık depo olduğu için onayını istiyorum"
 
-## 📌 107a + 107b'DE NE YAPILDI — mekanizma burada
+## 📌 107a + 107b + 107c'DE NE YAPILDI — mekanizma burada
 
-**Yanıt gövdesi artık belgede GERÇEK Zod şemasıyla görünüyor.** Şema kütüğe elle
+**Yanıt gövdesi belgede GERÇEK Zod şemasıyla görünüyor.** Şema kütüğe elle
 yazılmıyor: ucun `ok()`/`created()` çağrısında kullandığı şemanın AYNISI kütüğe
-giriyor (ADR-021).
+giriyor (ADR-021). 46 uçtan **29'u gövdeli**; 107a platform (3), 107b auth+hesap
+(12), 107c ticaret (7) taşındı. **7 uç kaldı.**
 
-**Ölçüm:** 46 uçtan **29'u gövdeli**, 17'si gövdesiz (204/302/303).
-107a'da platform grubu (3 uç), 107b'de auth+hesap grubu (12 uç) taşındı.
-**14 uç kaldı.**
+### ⭐ ALTI DERS (107a-c)
 
-### ⭐ DÖRT DERS
+1. ⛔ **YANIT SÖZLEŞMESİ TİP SİSTEMİYLE BELGELENEMEZ.** `Date` derlemede `Date`
+   telde ISO **metin**, `undefined` alan telde **hiç yok**. Kontrol gövdeyi
+   `JSON.parse(JSON.stringify(...))` ile telden geçmiş hâline çevirip doğruluyor
+2. ⛔ **BİR KAPIYI `NODE_ENV`'E BAĞLAMA.** E2E production modunda koşuyor;
+   bayrak ayrı: `API_RESPONSE_CONTRACT_CHECK`
+3. ⚠️ **`serverEnv` HER YERDEN İÇE AKTARILAN BİR MODÜLDE OKUNAMAZ** (tarayıcıda
+   bilerek istisna fırlatıyor)
+4. ⭐ **BİR UÇ İKİ FARKLI BAŞARI DÖNDÜREBİLİR** → `alternateSuccess`
+5. ⭐ **(107c) İÇ İÇE GÖVDE `Date` TAŞIYORSA ROUTE'TA SATIR İÇİ `toISOString()`
+   YETMEZ — AÇIK ÇEVİRMEN YAZ, ALANLARI TEK TEK SAY.** Sepet özeti
+   `toCartSummaryResponse` ile tel biçimine çevriliyor; `...spread`
+   KULLANILMIYOR ki iç kullanım için eklenen bir alan belgeye yazılmadan API'ye
+   sızmasın. Sızıntı deneyi `tests/unit/cart-summary-response.test.ts` içinde;
+   spread'e dönülürse kırmızı. Örnek: `src/features/cart/schemas/cart-summary.schema.ts`
+6. ⭐ **(107c) PARA BELGEDE `integer`** — `z.int()`, `z.number()` DEĞİL; ikisi
+   derlemede aynı, fark belgede. Tek kaynak `src/lib/money-schema.ts` →
+   `kurusSchema`. CI kapısı: belgedeki her `…Kurus` alanı `integer` olmak
+   zorunda, sıfır alan bulmak da kırmızı. ⚠️ `money.ts`'e `zod` KOYMA — beş
+   istemci bileşeni onu içe aktarıyor, tarayıcı paketine girer
 
-1. ⛔ **YANIT SÖZLEŞMESİ TİP SİSTEMİYLE BELGELENEMEZ.** Tip JSON'a hayatta
-   kalmıyor: `Date` derlemede `Date` telde ISO **metin**, `undefined` alan telde
-   **hiç yok**. Kontrol gövdeyi `JSON.parse(JSON.stringify(...))` ile **telden
-   geçmiş hâline** çevirip öyle doğruluyor
-2. ⛔ **BİR KAPIYI `NODE_ENV`'E BAĞLAMA — ÖLÇÜLDÜ.** E2E `next build &&
-   next start` ile **production modunda** koşuyor; kapı en çok gerektiği yerde
-   sessizce kapanırdı. Bayrak ayrı: `API_RESPONSE_CONTRACT_CHECK`
-3. ⚠️ **`serverEnv` HER YERDEN İÇE AKTARILAN BİR MODÜLDE OKUNAMAZ.** Tarayıcıda
-   bilerek istisna fırlatıyor; `jsdom` ortamındaki 5 test kırmızıya döndü
-4. ⭐ **BİR UÇ İKİ FARKLI BAŞARI DÖNDÜREBİLİR ve kütük bunu tutabilmeli.**
-   `POST /api/v1/registrations/current/verifications` hem `200` hem `201`
-   dönüyordu ama `200` HİÇ belgelenmemişti. `alternateSuccess` eklendi
-
-### HAZIR MEKANİZMA — 107c'DE YENİDEN YAZMA, KULLAN
+### HAZIR MEKANİZMA — 107d'DE YENİDEN YAZMA, KULLAN
 
 | Parça | Ne işe yarar |
 |---|---|
@@ -112,45 +131,67 @@ giriyor (ADR-021).
 | `ok(data, { schema })` · `created(data, { schema })` | Derleme anı bağı (`ZodType<T>`) |
 | `success.body` (`api-docs/types.ts`) | Kütükte şema beyanı. `envelope: "raw"` ve `externalContract` seçenekleri var |
 | `alternateSuccess` (`api-docs/types.ts`) | İkinci başarı yanıtı (farklı durum kodu) |
-| `RESPONSE_BODY_PENDING` (`registry/index.ts`) | ⏳ **Kalan 14 uç.** Çözülen uçlar buradan DÜŞÜRÜLÜR |
-| `tests/unit/api-docs-response.test.ts` | 8 kapı: eksik şema, liste hijyeni, gövdesiz uç, dönüştürme yasağı, ikinci yanıt, route↔kütük eşleşmesi |
+| `kurusSchema` (`src/lib/money-schema.ts`) | Her para alanı buradan; belgede `integer` + "tam sayı kuruş" |
+| `RESPONSE_BODY_PENDING` (`registry/index.ts`) | ⏳ **Kalan 7 uç.** Çözülen uçlar buradan DÜŞÜRÜLÜR; 107d bitince sabit SİLİNİR |
+| `tests/unit/api-docs-response.test.ts` | 9 kapı: eksik şema, liste hijyeni, gövdesiz uç, dönüştürme yasağı, ikinci yanıt, route↔kütük eşleşmesi, **para integer** |
+| `tests/integration/cart-items-route.test.ts` · `memberships-route.test.ts` | ⭐ **"Kapı bu uca bağlı mı" deseni:** servis taklidi sözleşme dışı gövde döndürür → uç `500` vermeli. 107d'nin uçları için aynı deseni kur |
 
-**Örnek almak için bak:** `src/features/auth/schemas/registration.schema.ts`
-(dosyanın alt yarısı) — beş yanıt şeması, gerekçeleriyle birlikte.
+**Örnek almak için bak:** `src/features/gym/schemas/membership.schema.ts`
+(alt yarısı — `nullable()` alanlar ve gerekçeleri) · `src/features/cart/schemas/cart-summary.schema.ts`
+(iç içe gövde + çevirmen).
 
-## YAPILACAK — 107c (ticaret, 7 uç)
+## YAPILACAK — 107d (7 uç)
 
-`RESPONSE_BODY_PENDING` listesinin **"107c" başlıklı satırları**:
+`RESPONSE_BODY_PENDING` listesinin tamamı:
 
 ```
-POST   /api/v1/carts/current/items            POST   /api/v1/payments
-PATCH  /api/v1/carts/current/items/{itemId}   POST   /api/v1/memberships
-DELETE /api/v1/carts/current/items/{itemId}   PATCH  /api/v1/memberships/{membershipId}
-                                              DELETE /api/v1/memberships/{membershipId}
+PATCH  /api/v1/notifications                         → { updated: number }           (ok, noStore)
+POST   /api/v1/addresses                             → { id: string }                (created)
+POST   /api/v1/appointments                          → { id, startsAt: ISO metin }   (created)
+POST   /api/v1/events/{eventId}/seat-holds           → { id, block, rowLabel, seatNumber, holdExpiresAt: ISO metin } (created)
+POST   /api/v1/support-tickets                       → { id: string }                (created; istek gövdesi multipart)
+GET    /api/v1/account/export                        → HAM JSON DOSYASI — ok() KULLANMIYOR
+GET    /api/v1/support-tickets/{ticketId}/attachments/{attachmentId} → HAM İKİLİ DOSYA — ok() KULLANMIYOR
 ```
 
-**Her uç için sıra:**
+**İlk beş uç için sıra (107b/107c ile aynı):**
 1. Yanıt şemasını ilgili feature'ın `schemas/` dosyasına yaz (mevcut şema
-   dosyasının altına ekle — auth'ta böyle yapıldı)
+   dosyasının altına; feature'ın `schemas/` klasörü yoksa yeni dosya + başlık bloğu)
 2. Route'ta `ok`/`created` çağrısına `schema:` ver
 3. Kütükte `success.body: { schema: ... }` yaz
-4. `RESPONSE_BODY_PENDING`'den adını **DÜŞÜR** (düşürmezsen kapı kırmızıya döner)
+4. `RESPONSE_BODY_PENDING`'den adını **DÜŞÜR**
+5. "Kapı bağlı mı" entegrasyon testi (yukarıdaki desen)
 
-⚠️ **107c'YE ÖZEL DİKKAT**
-- ⛔ **PARA TAM SAYI KURUŞ.** Şema `z.int()` olmalı, `z.number()` DEĞİL — belge
-  "ondalık olabilir" derse mobil istemci kuruşu lira sanar
-- ⚠️ Sepet özeti iç içe (kalemler + ara toplam + toplam) — en büyük şema bu
-- ⚠️ Sipariş/üyelik durumları KOLONDA DEĞİL, okuma anında türetiliyor (ADR-013)
-- ⛔ Şema `.transform()` taşıyamaz · tarihler `z.iso.datetime()`
+⚠️ **107d'YE ÖZEL DİKKAT — İKİ HAM DOSYA UCU AYRI BİR KARAR İSTİYOR**
 
-**Sonra 107d** (7 uç: bildirim, talep, randevu, koltuk + **iki ham dosya
-indirmesi**). ⚠️ `GET /api/v1/account/export` ve
-`GET /api/v1/support-tickets/{ticketId}/attachments/{attachmentId}` ikisi de
-`ok()` KULLANMIYOR ve `{ data }` zarfına sarmıyor; `account/export`'un gövdesi
-bugün `Record<string, unknown>` — yani tipi bile yok. İkisi birlikte, kendi
-kararıyla ele alınmalı.
+- ⛔ **Belge üreticisi her gövdeyi `application/json` olarak basıyor**
+  (`openapi.service.ts` → `toResponseEntry`: `content: { "application/json": … }`).
+  `externalContract` bile bu medya tipinin altına düşüyor. Ek dosyası ucu
+  **ikili** (`Content-Type` veritabanından, `Content-Disposition: inline`);
+  ona JSON şeması yazmak yanlış belge olur. **Kütüğe yeni bir gövde türü
+  gerekiyor** (örn. `file: { contentTypes: [...] }` → belgede
+  `application/octet-stream` / `*/*` + `contentMediaType`), üretici ona göre
+  medya tipini seçmeli. Bu, mekanizmaya **107a'dan beri ilk dokunuş** —
+  `types.ts` + `openapi.service.ts` + `api-docs-response.test.ts` üçü birlikte
+  değişir; ADR-021'e ek karar notu gerekir mi diye düşün (kararı sen ver)
+- ⚠️ **`account/export` JSON ama `ok()` zarfına sarılı DEĞİL** ve gövdesi
+  bugün `Record<string, unknown>` — tipi bile yok. İki yol: gövdenin gerçek
+  şemasını yazıp `envelope: "raw"` ile beyan etmek (KVKK m.11 dışa aktarımı
+  bir SÖZLEŞMEDİR, dokuz bölüm; şema büyük ama gerçek) ya da dosya türü olarak
+  işaretlemek. **Mühendislik tercihi sana ait**; ölçüt: belgeyi okuyan mobil
+  istemci bu dosyayı ayrıştırmak isteyecek mi? (`/hesabim/verilerim` ekranı
+  onu yalnızca indiriyor)
+- ⚠️ Çalışma anı kontrolü `ok()`/`created()` içinde çalışıyor; ham `Response`
+  dönen iki uçta hiç çalışmaz. Kapı yoksa bunu **yazılı** bırak (ADR-021
+  "kabul edilen bedel" tarzında), sessizce geçme
+- ⚠️ `POST /api/v1/support-tickets` istek gövdesi `multipart/form-data`;
+  yanıt tarafı normal JSON — karıştırma
+- ⛔ Şema `.transform()` taşıyamaz · tarihler `z.iso.datetime()` · para `kurusSchema`
 
-**107d bitince** `RESPONSE_BODY_PENDING` boşalır ve sabit **silinir**.
+**107d bitince** `RESPONSE_BODY_PENDING` boşalır ve sabit **silinir**;
+`openapi.service.ts`'teki "HENÜZ BELGELENMEDİ" uyarı dalı da ölü koda döner —
+onu ve `api-docs-response.test.ts`'teki liste testlerini kaldır (ölü uyarı
+arşiv değildir, `15-oturum-devri-kurallari.md`).
 
 ## 📋 PROJE SAHİBİNİN BEKLEYEN İŞLERİ — ⭐ BU OTURUMDA **KISACA HATIRLAT**
 
@@ -170,17 +211,12 @@ sonraki session'da hatırlat."**
 
 | Ne | Adres / komut | Durum |
 |---|---|---|
-| **107a + 107b'nin elle kontrolü** | `/api/health` (commit `6d13e1c` görünmeli) · `/giris` · `/kayit` · `/sifremi-unuttum` | 2026-08-14'te ertelendi. ⚠️ İkisinin de ekranda görünen karşılığı YOK (arayüz, akış ve veritabanı hiç değişmedi); kontrol "bozulmamış mı" diye bakmak için |
-| **#103'ün preview'da elle kontrolü** | preview URL → market → sepete ekle → sepet | Ertelendi. ⚠️ Otomatik taraf zaten kanıtlı (`POST /api/v1/carts/current/items` → `201`, gerçek tarayıcıda) |
-| Telefondan toplu elle test | — | **19. kez ertelendi** (2026-09-20'de gündeme gelmedi). ⛔ Listeyi ÜRETME, tek satırla an ve geç |
+| **107a + 107b + 107c'nin elle kontrolü** | Canlıda ya da preview'da: `/api/health` (commit alanı yeni) · `/giris` · `/kayit` · market → sepete ekle → `/sepet` → adet artır → satırı çıkar | 2026-09-21'de yine ertelendi — proje sahibi: *"diğer oturumda bakarım, belki topluca"*. ⚠️ Hiçbirinin ekranda görünen karşılığı YOK (arayüz, akış ve veritabanı değişmedi); kontrol "bozulmamış mı" diye bakmak için |
+| **#103'ün preview'da elle kontrolü** | preview URL → market → sepete ekle → sepet | Ertelendi. ⚠️ Otomatik taraf zaten kanıtlı |
+| Telefondan toplu elle test | — | **20. kez ertelendi** (2026-09-21'de gündeme gelmedi). ⛔ Listeyi ÜRETME, tek satırla an ve geç |
 | `proje-kiti`'nin Windows makineye kurulumu | `/plugin marketplace add bariskose9/bariskose-skills` → `/plugin install proje-kiti@bariskose-skills` | Ertelendi |
 | Cloudflare'da preview alan adı yetkilendirme (#114) | Cloudflare paneli | ⚠️ İSTEĞE BAĞLI, zorunlu değil |
 | #23 (sızmış şifre) ve #89 (Google ikinci kanıt) | — | Kararı bekliyor, acelesi yok |
-
-### Kurulu kit sürümü: 3.15.3 — kaynak, kurulu ve proje eşit
-
-⛔ Kendiliğinden sürüm hatırlatması yapma. Yalnızca `/yeni-proje` veya
-`/kit-senkron` fiilen çalıştırılacağı an kaynak ile kuruluyu karşılaştır.
 
 ⚠️ Proje sahibi **aynı anda ikinci bir projede** çalışmayı planlıyor (ayrı VS
 Code penceresi). Bu projede ölçüm yaparken bunu hesaba kat: **E2E yüke duyarlı**
@@ -191,9 +227,9 @@ Port 3000 de çakışabilir.
 
 ⛔ **UTC 00:00–00:59 = TÜRKİYE 03:00–03:59 arasında production'a dağıtım
 tetikleyen merge YAPMA** — o pencere cron'un penceresi (`vercel.json` →
-`0 0 * * *`, Vercel cron'u UTC sayar). ⚠️ Saat söylerken hangisi olduğunu yaz;
-2026-09-21'de "00:31" dendi, kullanıcı saati 03:31 gördü, karıştı. Otomatik
-merge görevi kurarken `date -u +%H` ile pencereyi bekle.
+`0 0 * * *`, Vercel cron'u UTC sayar). ⚠️ Saat söylerken hangisi olduğunu yaz
+(`TR 04:00 / UTC 01:00`). Otomatik merge görevi kurarken `date -u +%H` ile
+pencereyi bekle.
 
 **Production veritabanına okuma erişimi (gerekirse):**
 ```
@@ -206,10 +242,14 @@ kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR*
 
 ## 📦 KİT — kaynak 3.18.1 @ `8cd038d`, kurulu 3.18.1, proje 3.18.1
 
-✅ **Üçü eşit.** Kapı 8 kanıtı (2026-09-21, 3.18.1 senkronu): 17/19 standart kitle
-birebir; `00-stack.md` farkı = korunan dört bölge (Stack tablosu · Auth.js
-anlatısı + ADR-005 üstünlük cümlesi · sınır altı · —), `05` farkı = sahte-ödeme
-notu. `.claude/rules` 9/9, `sablonlar` 15/15, kılavuz ve defterler birebir.
+✅ **Sürümler eşit** (2026-09-21'de ölçüldü: `installed_plugins.json` → 3.18.1;
+kit klonu `git log -1` → `8cd038d`). ⚠️ **İçerik tam eşit DEĞİL:** projenin
+`03-api-guidelines.md`'si 107c'de iki kural ileri gitti (mesele 6). ⚠️ Oturum kancası "3.15.1 kurulu" derse
+Claude güncellemeden önce açılmış demektir — kancanın sürümü Claude yeniden
+başlayınca düzelir, **güncelleme sorma**, yapılmış işi tekrar yaptırma.
+
+⛔ **Kendiliğinden sürüm hatırlatması yapma.** Yalnızca `/yeni-proje` veya
+`/kit-senkron` fiilen çalıştırılacağı an kaynak ile kuruluyu karşılaştır.
 
 ⛔ **`00-stack.md`'deki ADR-005 cümlesi SİLİNMEZ:** kitin `guvenlik.md`
 tetikleyicisi "JWT çerezde + `tokenVersion`" der; bu projede oturum `sessions`
@@ -217,12 +257,17 @@ tablosuyla elle yazıldı. Kaynak hiyerarşisinde ADR üstün. Tetikleyiciyi gö
 oturumu yeniden yazmaya KALKMA.
 
 ⚠️ Kit deposunu karşılaştırmadan önce `git -C ~/baris_projects/bariskose-skills
-pull --ff-only` **ve** son commit zamanına bak (yukarıdaki mesele 4).
+pull --ff-only` **ve** son commit zamanına bak (`git -C <kit> log -1 --format=%cd`).
 
 ## HAZIR BEKLEYEN PARÇALAR — YENİDEN YAZMA, KULLAN
 
-- ⭐ **`src/lib/api-response-contract.ts`** — YENİ. Yanıt sözleşmesi kontrolü
-- ⭐ **`src/features/api-docs/types.ts` → `SuccessBody`** — YENİ. Gövde beyanı
+- ⭐ **`src/lib/money-schema.ts` → `kurusSchema`** — YENİ (107c). Her para alanı buradan
+- ⭐ **`src/features/cart/schemas/cart-summary.schema.ts`** — YENİ (107c). İç içe
+  gövde + açık çevirmen deseni (`toCartSummaryResponse`)
+- ⭐ **`tests/integration/cart-items-route.test.ts`** — YENİ (107c). "Kapı bu uca
+  bağlı mı" test deseni; yeni uç için kopyala
+- ⭐ **`src/lib/api-response-contract.ts`** — Yanıt sözleşmesi kontrolü
+- ⭐ **`src/features/api-docs/types.ts` → `SuccessBody`** — Gövde beyanı
 - ⭐ **`src/lib/api-deprecation.ts`** — Bir ucu emekliye ayırırken **buradan geç**
 - ⭐ **`tests/unit/api-versioning.test.ts`** — Yeni iş ucu `/api/v1/` altına açılır
 - ⭐ **`src/proxy.ts`** — nonce + tüm CSP politikası tek yerde. **Yeni dış alan
@@ -280,7 +325,29 @@ pull --ff-only` **ve** son commit zamanına bak (yukarıdaki mesele 4).
 - ⚠️ **Prettier markdown'a DOKUNMUYOR** — kit dosyaları olduğu gibi kalıyor,
   `diff` kanıtı bozulmuyor (ölçüldü: `format:check` 19 dosyada temiz)
 
-**107a/107b'de yeni öğrenilenler**
+**107c'de öğrenilenler (2026-09-21)**
+- ⛔ **`ZodType<T>` KAPISI `Date` TAŞIYAN GÖVDEYİ DERLEMEDE REDDEDER** — şema
+  `z.iso.datetime()` (metin) beklerken route `Date` verirse `typecheck`
+  kırılır. Çözüm şemayı gevşetmek DEĞİL, route'un tel biçimini üretmesi
+  (satır içi `toISOString()` ya da iç içe gövdede açık çevirmen)
+- ⚠️ **BİLEREK YANLIŞ TEST NESNESİ `as X` İLE YAZILAMAZ** — fazladan alan
+  taşıyan nesne literal'i `as CartSummary` derlemede düşer; `as unknown as X`
+  gerekir ve neden olduğu yorumla yazılır
+- ⚠️ **`kurusSchema.describe("...")` PAYLAŞILAN ŞEMAYI BOZMAZ** (ölçüldü:
+  `describe` klonlar) — ama alan için yazılan açıklama "tam sayı kuruş"
+  notunu EZER; alanın kendi açıklamasında parayı yeniden söyle ya da
+  `.nullable().describe()` gibi sarmalayıcıya yaz
+- ⚠️ **`z.enum(PrismaEnumObject)` ÇALIŞIYOR** (Zod 4, `as const` nesne) ve
+  `@/generated/prisma/enums` değer olarak içe aktarılabiliyor — dosya düz, Prisma
+  istemcisini çekmiyor (`consent.schema.ts` de böyle yapıyor)
+- ⚠️ **CI'DAKİ route↔kütük METİN KAPISI `ok(`/`created(` SONRASI 400 KARAKTERE
+  BAKIYOR** — çok uzun bir gövde literal'inden sonra gelen `{ schema: … }`
+  pencereden çıkarsa kapı "route hiç şema vermiyor" der. Prettier'ın böldüğü
+  hâli de say; şüphede `npx vitest run tests/unit/api-docs-response.test.ts`
+- ⚠️ **YÜK: `npm run test` + `next build` ART ARDA MAKİNEYİ 6-7'YE ÇIKARIYOR** —
+  E2E'den önce `uptime` < 2.5 için birkaç dakika bekle; bekleme arka planda
+  `until` döngüsüyle, ön planda `sleep` engelli
+
 - ⛔ **KAPIYI `NODE_ENV`'E BAĞLAMA** — E2E production modunda koşuyor
 - ⚠️ **`serverEnv` TARAYICIDA İSTİSNA FIRLATIYOR** — her yerden içe aktarılan
   bir yardımcı modülde okuma; `process.env`'den oku, doğrulamayı şemada bırak

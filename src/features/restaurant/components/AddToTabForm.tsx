@@ -10,7 +10,8 @@ import { CART_ITEM_NOTE_MAX_LENGTH, CART_MAX_QUANTITY_PER_ITEM } from "@/config/
 import { messages } from "@/config/messages";
 import { apiRequest } from "@/features/auth/components/api-client";
 import { TextField } from "@/features/auth/components/TextField";
-import type { CartSummary } from "@/features/cart/types";
+// Yanıtın TEL biçimi (tarihler metin), uygulama içi `CartSummary` değil — 107c.
+import type { CartSummaryResponse } from "@/features/cart/schemas/cart-summary.schema";
 
 /**
  * Bir menü kalemini ADET VE NOTLA adisyona ekler (PRD §5.4).
@@ -51,7 +52,7 @@ export function AddToTabForm({ itemId, name }: { itemId: string; name: string })
     event.preventDefault();
     setIsPending(true);
 
-    const result = await apiRequest<CartSummary>("/api/v1/carts/current/items", {
+    const result = await apiRequest<CartSummaryResponse>("/api/v1/carts/current/items", {
       method: "POST",
       body: {
         itemType: "restaurant",

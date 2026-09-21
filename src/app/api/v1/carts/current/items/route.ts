@@ -1,4 +1,8 @@
 import { InvalidCartRequestError, OutOfStockError } from "@/features/cart/errors";
+import {
+  cartSummaryResponseSchema,
+  toCartSummaryResponse,
+} from "@/features/cart/schemas/cart-summary.schema";
 import { getCartContext } from "@/features/cart/services/cart-context";
 import { addItemToCart } from "@/features/cart/services/cart.service";
 import { addCartItemSchema } from "@/features/payment/schemas/checkout.schema";
@@ -35,7 +39,9 @@ export async function POST(request: Request) {
       note: parsed.data.note,
     });
 
-    return created(summary);
+    // Özet uygulama içi biçimde (`Date` taşıyor); tel biçimine burada çevriliyor
+    // ve belgedeki şemanın AYNISI veriliyor (ADR-021 · cart-summary.schema.ts).
+    return created(toCartSummaryResponse(summary), { schema: cartSummaryResponseSchema });
   } catch (error) {
     return fail(error, stockDetails(error));
   }

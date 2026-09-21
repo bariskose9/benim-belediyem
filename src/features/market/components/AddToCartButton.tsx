@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { messages } from "@/config/messages";
 import { apiRequest } from "@/features/auth/components/api-client";
-import type { CartSummary } from "@/features/cart/types";
+// Yanıtın TEL biçimi (tarihler metin), uygulama içi `CartSummary` değil — 107c.
+import type { CartSummaryResponse } from "@/features/cart/schemas/cart-summary.schema";
 
 /**
  * Ürünü sepete ekleyen düğme.
@@ -33,7 +34,7 @@ export function AddToCartButton({ productId, name }: { productId: string; name: 
   async function addToCart() {
     setIsPending(true);
 
-    const result = await apiRequest<CartSummary>("/api/v1/carts/current/items", {
+    const result = await apiRequest<CartSummaryResponse>("/api/v1/carts/current/items", {
       method: "POST",
       body: { itemType: "market", refId: productId, quantity: 1 },
     });
