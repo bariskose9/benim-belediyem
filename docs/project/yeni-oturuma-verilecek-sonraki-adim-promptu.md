@@ -21,8 +21,16 @@ klasörünü oku. Özellikle:
   — **bana neyi ne kadar açıklayacağın buradan okunur.** Kullanıcı defteri projeler
   arası birleşir
 - `docs/project/decisions/ADR-021-*.md` — yanıt sözleşmesi neden üç kapıya bağlı
-- ⭐ **Proje kit 3.18.1'de:** `.claude/rules/` (9 dosya — çekirdek her oturum, alan
-  kuralları dosya açılınca), kısa `CLAUDE.md` (§0 orada), 19 standart
+- ⭐ **Proje kit 3.21.0'da** (`docs/standards/KIT-SURUM` damgası: `3.21.0 @ d24334f`;
+  açılış kancası bununla "proje kopyası geride mi" der — gerideyse `/kit-senkron`
+  sorar, senkron sonunda damga EN SON yazılır): `.claude/rules/` (9 dosya), kısa
+  `CLAUDE.md` (§0 orada), 19 standart
+- ⭐ **YENİ KURAL (kit 3.20.0, `15` → "KURAL RAPORU"):** oturum sonunda, devir
+  dosyasını yazmadan ÖNCE kural raporu koşturulur, çıktısı DURUM'a olduğu gibi
+  yapıştırılır; "⚠️ İşaretçiye gidilmedi" varken oturum KAPANMAZ — işaret edilen
+  standart açılır, yazılan kod ona karşı yeniden okunur. Komut `15`'te ve
+  aşağıda KOMUTLAR'da. ⚠️ Alan kuralı (`kod.md`, `test.md`…) bir dosyaya
+  dokununca gelir ve "şu standardı oku" der — **oku**, adını görmek okumak değil
 
 ## ⛔ İLK İŞ: DURUM BÖLÜMÜNE İNANMA, ÖLÇ
 
@@ -60,6 +68,42 @@ sonra **18h**, sonra **adım 19 (Expo mobil)**.
   fetch && git status -sb`
 - Gerçek kullanıcı 0 · Sentry canlıda ve uçtan uca doğrulanmış
 
+### Kural raporu — 107c oturumu (b56cd330), 15 → "KURAL RAPORU" gereği
+
+```
+━━━ Oturum b56cd330 · 2026-09-21 01:31 → 01:47 · 4 olay ━━━
+Açılışta yüklenen (2): CLAUDE.md · .claude/rules/00-cekirdek.md
+Tetiklenen (2):
+  .claude/rules/kod.md               ← src/features/cart/schemas/cart-summary.schema.ts
+  .claude/rules/test.md              ← tests/unit/cart-summary-response.test.ts
+Fiilen okunan standart (0): — HİÇ
+⚠️ İşaretçiye gidilmedi: kod.md geldi ama 01-architecture.md/02-coding-standards.md açılmadı · test.md geldi ama 06-testing.md açılmadı
+```
+
+Uyarı kapatıldıktan sonra ikinci koşum:
+
+```
+━━━ Oturum b56cd330 · 2026-09-21 01:31 → 02:55 · 11 olay ━━━
+Fiilen okunan standart (4): 02-coding-standards.md ×3 · 06-testing.md · 03-api-guidelines.md · 01-architecture.md ×2
+✓ Gelen her tetikleyicinin standardı en az bir kez açıldı
+```
+
+**Uyarı kapatıldı (aynı oturumda, kit 3.20.0 geldikten sonra):** `02` → "Para"
+ve "Türkçe karşılık", `01` → "Bu kod hangi katmana ait" + "Tip ve şema tek
+yerde", `03` → "Yanıt gövdesi de belgelenir", `06` → "Yeşil test yanlış şeyi
+ölçüyor olabilir" açıldı; 107c'nin şema ve testleri onlara karşı yeniden
+okundu. **Bulunan sapma: 1** — `kurusSchema` standardın kanonik biçiminde
+değildi (`min(0)` yerine `nonnegative()`, açıklama örneksiz); hizalandı,
+davranış aynı. **Eklenen:** yeni dosyalarda kod adlarına ilk geçtikleri yerde
+parantezli Türkçe karşılık. **Sapma yok:** 01 (çevirmen API katmanı işi —
+karar/kural yok, HTTP yok), 06 (her yeni kapı mutasyonla kırmızıya döndürüldü),
+03 (kodla tutarlı).
+⚠️ **Ölçüm notu:** "Fiilen okunan: HİÇ" satırı **eksik ölçüm** — o oturumda
+çalışan kanca 3.15.1'di ve yalnızca `Read` aracını görüyordu; oturum boyunca
+`cat`/`sed` ile okunan 10, 11, 15, 02 (başlık bloğu), 03 loglanmadı. Ama
+uyarı **yine de doğruydu**: 02 → "Para" ve 06 gerçekten açılmamıştı. Kurulu
+plugin artık 3.20.0 (Bash okumalarını görür); bu oturumun raporu güvenilir olur.
+
 ## ÖNCE ÇÖZÜLECEK MESELELER
 
 1. **Kullanıcı defteri 2026-09-21'de DEĞİŞMEDİ** — 107c'de yeni terim
@@ -81,7 +125,9 @@ sonra **18h**, sonra **adım 19 (Expo mobil)**.
    Mevcut dosyalara geriye dönük yazım ayrı adım — 107d'ye karıştırma
 6. ✅ **Kapı 8 kapandı (2026-09-21):** 107c'nin iki kuralı (`03-api-guidelines.md`
    → "Yanıt gövdesi de belgelenir") ve defterin altı satırı `/kit-senkron` ile kite
-   yazıldı, **kit 3.19.0 @ `a338135`** GitHub'da. Kanıt: `diff` boş (03 + defter).
+   yazıldı, **kit 3.19.0 @ `a338135`** GitHub'da; ardından kit 3.20.0
+   (`bbb8581`, kural raporu) ve 3.21.0 (`d24334f`, `KIT-SURUM` damgası)
+   projeye getirildi. Kanıt: `diff` boş.
    ⚠️ Ders: 2026-09-20'nin beş defter satırı 3.16–3.18 senkronlarında kitten
    projeye gelirken projeden kite HİÇ gitmemişti — senkronda defter farkı
    **her seferinde** `diff` ile ölçülür, "birebir" varsayılmaz
@@ -232,14 +278,14 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — kaynak 3.19.0 @ `a338135`, kurulu 3.18.1 (ölç), proje 3.19.0
+## 📦 KİT — kaynak 3.21.0 @ `d24334f`, kurulu 3.21.0, proje 3.21.0 (`KIT-SURUM` damgalı)
 
-✅ **Proje ile kaynak eşit** (2026-09-21, 107c sonrası: 19/19 standart — `00` ve
-`05` farkı yalnızca korunan/projeye özel bölgeler — `sablonlar` ve defterler
-birebir, `.claude/rules` 9/9). **Kurulu plugin 3.18.1'de kalmış olabilir**;
-ölç: `grep version ~/.claude/plugins/installed_plugins.json`. Fark yalnızca
-`/yeni-proje` için önemli — güncelleme komutları kancada yazılı, sorulunca
-koşturulur. ⚠️ Oturum kancası "3.15.1 kurulu" derse
+✅ **Üçü eşit** (2026-09-21, kit 3.20.0 + 3.21.0 senkronu — 15'e "KURAL RAPORU"
+ve "kopya geride kaldığında kanca söyler", 07'de işaretçi düzeltmesi, 16'ya ve
+`CLAUDE.md` tablosuna `KIT-SURUM` satırı, `sablonlar/calisilacak-konular.md`
+şablon kopyası eşitlendi, damga yazıldı): 19/19 standart — `00` ve `05` farkı yalnızca korunan/projeye özel
+bölgeler — `sablonlar` 15/15, defterler birebir, `.claude/rules` 9/9. Kurulu
+plugin 3.21.0 (`installed_plugins.json`); Claude yeniden başlayınca etkin. ⚠️ Oturum kancası "3.15.1 kurulu" derse
 Claude güncellemeden önce açılmış demektir — kancanın sürümü Claude yeniden
 başlayınca düzelir, **güncelleme sorma**, yapılmış işi tekrar yaptırma.
 
@@ -321,6 +367,10 @@ pull --ff-only` **ve** son commit zamanına bak (`git -C <kit> log -1 --format=%
   `diff` kanıtı bozulmuyor (ölçüldü: `format:check` 19 dosyada temiz)
 
 **107c'de öğrenilenler (2026-09-21)**
+- ⛔ **ALAN KURALI GELİNCE İŞARET ETTİĞİ STANDARDI FİİLEN AÇ** — `kod.md` ve
+  `test.md` yüklendi, 02 → "Para" ve 06 hiç açılmadı; rapor yakaladı. Adı
+  görmek okumak değil. Ayrıca kanca `Read` ve Bash okumalarını loglar; hangi
+  aracı kullandığın fark etmez (3.18.1+), ama eski kancada Bash görünmüyordu
 - ⛔ **`ZodType<T>` KAPISI `Date` TAŞIYAN GÖVDEYİ DERLEMEDE REDDEDER** — şema
   `z.iso.datetime()` (metin) beklerken route `Date` verirse `typecheck`
   kırılır. Çözüm şemayı gevşetmek DEĞİL, route'un tel biçimini üretmesi
@@ -531,8 +581,14 @@ pull --ff-only` **ve** son commit zamanına bak (`git -C <kit> log -1 --format=%
 **Yayın**
 - **Neon uykudayken deploy PATLIYOR** (`P1001`). ⛔ **Çözüm ÖNCE veritabanını
   uyandırmaktır**, yeniden dağıtmak değil: o ortamın çalışan bir dağıtımındaki
-  `/api/health` ucuna istek at. Sonra `npx vercel redeploy <PREVIEW-URL>
-  --scope barisss` — ⛔ **hedefin `Preview` olduğunu ÖNCE doğrula.** Merge sonrası
+  `/api/health` ucuna istek at (2026-09-21'de yaşandı: preview health 4,7 sn'de
+  uyandı, `db: ok`). ⭐ **Sonra yeniden tetiklemenin GİRİŞSİZ yolu: dala boş
+  commit** (`git commit --allow-empty -m "chore: retrigger preview deploy…"` +
+  push) — Vercel Git entegrasyonu yeni dağıtım açar, PR kontrolü güncellenir,
+  squash merge'de tarihçeden düşer. `npx vercel redeploy` bu Mac'te ÇALIŞMIYOR:
+  Vercel CLI kimliksiz (cihaz girişi istiyor, ajan yapamaz; hesabın giriş
+  yöntemi kayıtlı değil). Kullanıcı bir gün giriş yaparsa reçete geri döner —
+  o zaman ⛔ **hedefin `Preview` olduğunu ÖNCE doğrula.** Merge sonrası
   `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR**
 - ⚠️ **Ücretsiz planda cron GÜNDE 1 ve saati garanti DEĞİL**
@@ -547,7 +603,10 @@ pull --ff-only` **ve** son commit zamanına bak (`git -C <kit> log -1 --format=%
   `git merge origin/main` → çakışmayı çöz → commit → push
 
 **Diğer**
-- `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
+- `vercel` ve `neonctl` PATH'te **değil** → `npx`. ⚠️ **`npx vercel` bu Mac'te
+  KİMLİKSİZ** (2026-09-21): her komut cihaz girişi (OAuth) akışı başlatıyor ve
+  asılı kalıyor — `ls`, `inspect`, `redeploy` hiçbiri çalışmaz; `timeout` ile
+  koştur, girişi kullanıcıya bırak. `neonctl` için
   `--org-id org-still-water-86075112` şart
 - `psql` **kurulu değil** → `npx tsx` + Prisma betiği (**proje kökünde**, `.mts`,
   commit edilmeden SİLİNİR). `--env-file=.env` ile koştur
@@ -568,6 +627,9 @@ pull --ff-only` **ve** son commit zamanına bak (`git -C <kit> log -1 --format=%
 `npm run db:up · db:migrate · db:reset · db:studio`
 `npm run test · test:db · test:e2e · test:quality · lint · typecheck · format · build`
 `gh` PATH'te. `vercel` ve `neonctl` için `npx`.
+
+**Kural raporu (oturum sonu, `15` → "KURAL RAPORU"):**
+`node "$(ls -d ~/.claude/plugins/cache/bariskose-skills/proje-kiti/*/ | sort -V | tail -1)hooks/kural-rapor.mjs" benim-belediyem --son 1`
 
 **Yanıt sözleşmesi kapısını tek başına koşturma:**
 `npx vitest run tests/unit/api-docs-response.test.ts tests/unit/api-response-contract.test.ts`

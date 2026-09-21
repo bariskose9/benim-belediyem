@@ -158,6 +158,7 @@ gerekçe, kararı verirken en net hatırlanır.
 | `.claude/**` (`settings.json` + `rules/` 9 dosya) | `.claude/` | **Olduğu gibi kopyala.** `rules/00-cekirdek.md` her oturum, diğerleri `paths` ile ilgili dosya açılınca kendiliğinden yüklenir; içlerinde `@import` yok |
 | `CALISMA-KILAVUZU.md` | Kullanıcının kılavuzu: nasıl başlanır, ne sorulur, hangi dosya ne işe yarar | Olduğu gibi kopyalanır |
 | `docs/standards/**` (00–18, **19 dosya**) | `docs/standards/` | **Olduğu gibi kopyala, İÇİNİ DEĞİŞTİRME.** Stack farklıysa yalnızca `00-stack.md` tablosu güncellenir |
+| `docs/standards/KIT-SURUM` | `docs/standards/` | Kopyayla gelir: `<sürüm> @ <hash>`. Açılış kancası "proje kopyası geride mi" diye buna bakar; senkron sonunda yenilenir |
 | `docs/standards/sablonlar/**` | ⛔ **İKİYE AYRILIR:** çoğu `docs/project/` · ⭐ iki defter `docs/kullanici/` | Kopyala ve **içini doldur**. Hedefler satır satır aşağıdaki *"`sablonlar/` içinde ne var"* tablosunda — ezberden `docs/project/` yazma |
 | `REPO-YAPISI.md` | repo kökü | Kopyala, projeye özel klasör adlarını değiştir |
 

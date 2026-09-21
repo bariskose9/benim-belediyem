@@ -165,7 +165,7 @@ Manuel kontrol de yapılır: sadece klavye ile tüm akış tamamlanabilmeli.
 
 ## Görsel doğrulama — bakmadan "bitti" denmez
 ⛔ **Kodun doğru görünmesi ekranın doğru göründüğünün kanıtı değildir**
-(`CLAUDE.md` kapı 1c). Arayüz değiştiren her adımda `chrome-devtools` MCP ile
+(`00-cekirdek.md` → *"Zorunlu kapılar"* kapı 4b). Arayüz değiştiren her adımda `chrome-devtools` MCP ile
 ekran görüntüsü alınır ve **fiilen bakılır**:
 
 | Genişlik | Tema | Bakılan |

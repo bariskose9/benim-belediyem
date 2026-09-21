@@ -12,7 +12,7 @@ import { z } from "zod";
  *           · docs/project/data-model.md → para alanları (Decimal(10,2), float yok)
  * NEDEN   : Aşağıda — `z.number()` belgeye "ondalık olabilir" yazardı
  * DİKKAT  : tests/unit/api-docs-response.test.ts → "para alanları belgede tam sayı" kapısı bu şemayı ölçüyor;
- *           `min(0)` gevşetilmez, eksi tutar gerekirse ayrı şema açılır
+ *           `nonnegative()` gevşetilmez, eksi tutar gerekirse ayrı şema açılır
  *
  * ⛔ NEDEN `z.int()`, `z.number()` DEĞİL. İkisi de TypeScript'te `number`;
  * derleme farkı görmez. Fark BELGEDE çıkıyor: `z.number()` JSON Schema'ya
@@ -27,11 +27,13 @@ import { z } from "zod";
  * paketine girerdi ve `tests/quality` bütçesini boşuna şişirirdi. Şema
  * yalnızca sunucu tarafında (route + belge) okunuyor.
  *
- * `min(0)`: bu projede telde giden hiçbir tutar eksi değil — iade ayrı bir
+ * `nonnegative()`: bu projede telde giden hiçbir tutar eksi değil — iade ayrı bir
  * kayıt, fark ayrı bir alan. Eksi tutar bir gün gerekirse ayrı bir şema olur;
  * bu şema gevşetilmez.
  */
+// kurusSchema (kuruş şeması) — 02-coding-standards.md → "Para" bölümündeki
+// kanonik biçim: `z.int().nonnegative().describe("Tam sayı KURUŞ — 1250 = 12,50 TL")`.
 export const kurusSchema = z
   .int()
-  .min(0)
-  .describe("Tam sayı kuruş (100 kuruş = 1 TL). Ondalık DEĞİL.");
+  .nonnegative()
+  .describe("Tam sayı KURUŞ — 1250 = 12,50 TL. Ondalık DEĞİL.");

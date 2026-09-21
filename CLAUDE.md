@@ -48,6 +48,7 @@ Next + NestJS, kurumun Postgres'i, GitLab · mobil varsa Expo (aynı REST API).
 | Standartların tamamı (kural + gerekçe + örnek) | `docs/standards/00…18` | Tetikleyici ya da çekirdekteki tablo gönderince açılır |
 | Bu projeye özel her şey | `docs/project/` (PRD, roadmap, ADR, altyapı, kurumdan öğrenilecekler) | Çekirdekteki "hangi soru → hangi dosya" tablosu |
 | Kullanıcının defterleri | `docs/kullanici/` | Her oturum başında anlatım düzeyi için okunur |
+| Kopyanın kit sürümü | `docs/standards/KIT-SURUM` | Açılış kancası okur; gerideyse `/kit-senkron` sorar |
 
 ⛔ Çekirdekle bu dosya çelişirse çekirdek kazanır; çelişkiyi bildir, ikisini de
 düzelt (`/kit-senkron`).

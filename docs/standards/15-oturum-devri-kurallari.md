@@ -150,12 +150,48 @@ Bir oturumu kapatmadan önce ajan şu **taramayı** yapar:
 3. **`CHANGELOG.md`'ye yaz** — ne eklendi, ne değişti, ne düzeltildi
 4. **`yeni-oturuma-verilecek-sonraki-adim-promptu.md`'yi yeniden yaz** — bir sonraki oturum bunu
    kopyalayıp yapıştıracak; içinde ne olması gerektiği aşağıda
+4b. ⭐ **Kural raporunu koştur, uyarısını kapat, çıktısını devir dosyasına koy** —
+   aşağıdaki *"KURAL RAPORU"* bölümü
 5. **Öğrenilen kalıcı kuralı İKİ kopyaya da yaz ve diff ile kanıtla**
-   (CLAUDE.md kapı 8 — aşağıdaki bölüm)
+   (`00-cekirdek.md` → *"Zorunlu kapılar"* kapı 8 — aşağıdaki bölüm)
 5b. ⛔ **Defterler değiştiyse kite GERİ TAŞINMASINI hatırlat** — aşağıdaki bölüm
 6. **Değişen durumu, o durumu yazan HER satırda güncelle** — aşağıdaki bölüm
 7. ⛔ **Uzak depoya GÖNDER** — aşağıdaki bölüm
 8. Kullanıcıya **"yeni oturuma şunu ver"** diye tek bir cümle söyle
+
+### ⭐ KURAL RAPORU — hangi kural yüklendi, hangisi açılmadı
+
+**Sorun:** alan kuralları (`.claude/rules/kod.md`, `test.md`…) bir dosyaya
+dokununca yüklenir ve "şu standardı oku" der; ama okunup okunmadığını kimse
+görmüyordu. Ölçüm 2026-09-21: bir oturumda `kod.md` (← sepet şeması) ve
+`test.md` (← test dosyası) geldi, işaret ettikleri `02` ve `06` **hiç
+açılmadı**. Kod yazıldı, kural okunmadı; kural adı görülmüştü, içeriği değil.
+
+**Araç:** plugin kancası her yüklemeyi ve her standart okumasını (`Read` ya
+da `cat`/`sed`/`grep`) `~/.claude/proje-kiti/log/<proje>.jsonl` dosyasına
+yazar; rapor betiği oturum başına özetler:
+
+```bash
+node "$(ls -d ~/.claude/plugins/cache/bariskose-skills/proje-kiti/*/ | sort -V | tail -1)hooks/kural-rapor.mjs" <proje-klasör-adı> --son 1
+```
+
+Çıktı dört satır: **açılışta yüklenen** (çekirdek gelmiş mi) · **tetiklenen ←
+hangi dosya** · **fiilen okunan standart** · **⚠️ İşaretçiye gidilmedi** (geldi
+ama işaret ettiği standart açılmadı).
+
+**Kural:**
+1. Devir dosyasını yazmadan önce rapor koşturulur; çıktısı devir dosyasının
+   *DURUM* bölümüne **olduğu gibi** yapıştırılır (bir sonraki oturum ve kit
+   sahibi ölçümü görür; `11-agent-workflow.md` → *"Bağlam yönetimi"*
+   gözden geçirmesi bu kayıtlarla yapılır).
+2. ⚠️ uyarısı varsa oturum **kapanmaz**: işaret edilen standardın ilgili
+   bölümü açılır, bu oturumda yazılan kod o bölüme karşı **yeniden okunur**,
+   bulunan sapma düzeltilir ya da gerekçesiyle devir dosyasına yazılır.
+   "Kuralı zaten biliyordum" kanıt değildir — ölçüm, bilmediğini gösterdi.
+3. Rapor "log yok" diyorsa plugin kancası çalışmıyordur: sürümü kontrol et
+   (*"Kurulu plugin sürümü ne zaman güncellenir"*), kullanıcıya söyle.
+
+Windows'ta komut Git Bash'te aynen çalışır; PowerShell'de değil.
 
 ### ⛔ DEFTER KİTE DÖNMEZSE SONRAKİ PROJE GERİDE BAŞLAR
 
@@ -409,6 +445,13 @@ gereken bölümlerin** aynı olduğudur.
 
 Mevcut bir projede çalışırken kurulu sürümün eski olması **hiçbir şeyi
 bozmaz** — o proje kendi `docs/standards/` klasörünü okur.
+
+⭐ **Projenin kopyası geride kaldığında da kanca söyler** (3.21.0): açılışta
+`docs/standards/KIT-SURUM` damgası (`sürüm @ hash`, senkron yazar) güncel kitle
+karşılaştırılır; gerideyse ajan *"/kit-senkron ile getireyim mi?"* diye sorar.
+Üç katman ayrıdır ve hiçbiri diğerine kendiliğinden yansımaz: kaynak depo →
+kurulu plugin (`plugin update` + yeniden başlatma) → proje kopyası (yalnızca
+senkron). Damga üçüncüsünü görünür kılar.
 
 Güncelleme kendiliğinden inmez. ⭐ **Ajan fark ettiği an sorar** — oturum kancası
 her açılışta GitHub'daki sürüme bakar, `/yeni-proje` ve `/kit-senkron` başında
