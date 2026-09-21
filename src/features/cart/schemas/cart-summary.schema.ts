@@ -33,6 +33,7 @@ import { kurusSchema } from "@/lib/money-schema";
  * `.transform()` YOK — üçü de `tests/unit/api-docs-response.test.ts` kapıları.
  */
 
+// cartLineResponseSchema (sepet satırı yanıt şeması) — bir kalem: ürün, adet, fiyat, stok durumu.
 export const cartLineResponseSchema = z.object({
   id: z.string(),
   itemType: z.enum(CartItemType),
@@ -64,6 +65,7 @@ export const cartLineResponseSchema = z.object({
     ),
 });
 
+// cartSectionResponseSchema (sepet bölümü yanıt şeması) — bir modülün satırları ve ara toplamı.
 export const cartSectionResponseSchema = z.object({
   itemType: z.enum(CartItemType),
   lines: z.array(cartLineResponseSchema),
@@ -76,6 +78,7 @@ export const cartSectionResponseSchema = z.object({
     .describe("Ücretsiz teslimat eşiğine kalan tutar; eşik yoksa veya aşıldıysa null."),
 });
 
+// cartSummaryResponseSchema (sepet özeti yanıt şeması) — üç sepet ucunun döndürdüğü gövde.
 export const cartSummaryResponseSchema = z.object({
   cartId: z
     .string()
@@ -106,6 +109,7 @@ export type CartSummaryResponse = z.infer<typeof cartSummaryResponseSchema>;
  * buraya yazınca dışarı çıkar. `tests/unit/cart-summary-response.test.ts`
  * bunu bir sızıntı deneyiyle ölçüyor.
  */
+// toCartSummaryResponse (sepet özetini tel biçimine çevir) — CartSummary (uygulama içi özet) → CartSummaryResponse (telde giden gövde).
 export function toCartSummaryResponse(summary: CartSummary): CartSummaryResponse {
   return {
     cartId: summary.cartId,

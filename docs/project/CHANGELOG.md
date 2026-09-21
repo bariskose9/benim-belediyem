@@ -127,6 +127,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
   526 dosyaya geriye dönük yazım ayrı bir adım olarak roadmap'e yazıldı
 - **27 yeni test** (843 → 870 birim + entegrasyon); **2 mutasyon** kırmızıya
   döndürüldü (spread sızıntısı · `z.number()` para alanı)
+- **Kural raporu (kit 3.20.0) ilk kez uygulandı:** rapor "02 ve 06 açılmadı"
+  dedi, haklıydı; standartlar açılıp kod yeniden okundu. Tek sapma: `kurusSchema`
+  02 → "Para"nın kanonik biçimine hizalandı (`nonnegative()`, belgede
+  "Tam sayı KURUŞ — 1250 = 12,50 TL" örneği) — davranış aynı, belge metni değişti
 
 ### Değişti — API sürümleme: uçlar `/api/v1/` altına taşındı (teknik borç #103 · ADR-020)
 
