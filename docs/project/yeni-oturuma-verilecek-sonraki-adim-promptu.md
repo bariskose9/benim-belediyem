@@ -21,8 +21,10 @@ klasörünü oku. Özellikle:
   — **bana neyi ne kadar açıklayacağın buradan okunur.** Kullanıcı defteri projeler
   arası birleşir
 - `docs/project/decisions/ADR-021-*.md` — yanıt sözleşmesi neden üç kapıya bağlı
-- ⭐ **Proje kit 3.20.0'da:** `.claude/rules/` (9 dosya — çekirdek her oturum, alan
-  kuralları dosya açılınca), kısa `CLAUDE.md` (§0 orada), 19 standart
+- ⭐ **Proje kit 3.21.0'da** (`docs/standards/KIT-SURUM` damgası: `3.21.0 @ d24334f`;
+  açılış kancası bununla "proje kopyası geride mi" der — gerideyse `/kit-senkron`
+  sorar, senkron sonunda damga EN SON yazılır): `.claude/rules/` (9 dosya), kısa
+  `CLAUDE.md` (§0 orada), 19 standart
 - ⭐ **YENİ KURAL (kit 3.20.0, `15` → "KURAL RAPORU"):** oturum sonunda, devir
   dosyasını yazmadan ÖNCE kural raporu koşturulur, çıktısı DURUM'a olduğu gibi
   yapıştırılır; "⚠️ İşaretçiye gidilmedi" varken oturum KAPANMAZ — işaret edilen
@@ -124,7 +126,8 @@ plugin artık 3.20.0 (Bash okumalarını görür); bu oturumun raporu güvenilir
 6. ✅ **Kapı 8 kapandı (2026-09-21):** 107c'nin iki kuralı (`03-api-guidelines.md`
    → "Yanıt gövdesi de belgelenir") ve defterin altı satırı `/kit-senkron` ile kite
    yazıldı, **kit 3.19.0 @ `a338135`** GitHub'da; ardından kit 3.20.0
-   (`bbb8581`, kural raporu kuralı) projeye getirildi. Kanıt: `diff` boş.
+   (`bbb8581`, kural raporu) ve 3.21.0 (`d24334f`, `KIT-SURUM` damgası)
+   projeye getirildi. Kanıt: `diff` boş.
    ⚠️ Ders: 2026-09-20'nin beş defter satırı 3.16–3.18 senkronlarında kitten
    projeye gelirken projeden kite HİÇ gitmemişti — senkronda defter farkı
    **her seferinde** `diff` ile ölçülür, "birebir" varsayılmaz
@@ -275,13 +278,14 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — kaynak 3.20.0 @ `bbb8581`, kurulu 3.20.0, proje 3.20.0
+## 📦 KİT — kaynak 3.21.0 @ `d24334f`, kurulu 3.21.0, proje 3.21.0 (`KIT-SURUM` damgalı)
 
-✅ **Üçü eşit** (2026-09-21, kit 3.20.0 senkronu — 15'e "KURAL RAPORU", 07'de
-işaretçi düzeltmesi, `sablonlar/calisilacak-konular.md` şablon kopyası
-eşitlendi): 19/19 standart — `00` ve `05` farkı yalnızca korunan/projeye özel
+✅ **Üçü eşit** (2026-09-21, kit 3.20.0 + 3.21.0 senkronu — 15'e "KURAL RAPORU"
+ve "kopya geride kaldığında kanca söyler", 07'de işaretçi düzeltmesi, 16'ya ve
+`CLAUDE.md` tablosuna `KIT-SURUM` satırı, `sablonlar/calisilacak-konular.md`
+şablon kopyası eşitlendi, damga yazıldı): 19/19 standart — `00` ve `05` farkı yalnızca korunan/projeye özel
 bölgeler — `sablonlar` 15/15, defterler birebir, `.claude/rules` 9/9. Kurulu
-plugin 3.20.0 (`installed_plugins.json`); Claude yeniden başlayınca etkin. ⚠️ Oturum kancası "3.15.1 kurulu" derse
+plugin 3.21.0 (`installed_plugins.json`); Claude yeniden başlayınca etkin. ⚠️ Oturum kancası "3.15.1 kurulu" derse
 Claude güncellemeden önce açılmış demektir — kancanın sürümü Claude yeniden
 başlayınca düzelir, **güncelleme sorma**, yapılmış işi tekrar yaptırma.
 
