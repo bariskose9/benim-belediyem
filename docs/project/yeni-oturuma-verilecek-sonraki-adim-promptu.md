@@ -59,6 +59,10 @@ Roadmap adım **0 → 18g bitti**. Borç **#103 ödendi**, **#107 kısmen ödend
 - Testler: **843** birim · **344** veritabanı · **325** E2E · **19** kalite
 - ✅ **CRON'UN ÇALIŞTIĞI KANITLANDI** — production denetim kaydında 9 adet
   `scheduled_task_run`. Bir daha sorgulama
+- ⭐ **Bu proje YALNIZCA bu Mac'te çalışılıyor** (2026-09-21 kararı). Öteki
+  bilgisayarda `backend-ogrenme` ve kit geliştirme (`deneme-proje`) var; oradan
+  bu depoya dokunulmuyor. "Öteki makinede ilerlemiş mi" diye sorma, ölç: `git
+  fetch && git status -sb`
 - Gerçek kullanıcı 0 · Sentry canlıda ve uçtan uca doğrulanmış
 
 ## ÖNCE ÇÖZÜLECEK MESELELER
@@ -200,9 +204,9 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — kaynak 3.17.0 @ `6b7fe2c`, kurulu 3.17.0, proje 3.17.0
+## 📦 KİT — kaynak 3.18.1 @ `8cd038d`, kurulu 3.18.1, proje 3.18.1
 
-✅ **Üçü eşit.** Kapı 8 kanıtı (2026-09-21, 3.17.0 senkronu): 17/19 standart kitle
+✅ **Üçü eşit.** Kapı 8 kanıtı (2026-09-21, 3.18.1 senkronu): 17/19 standart kitle
 birebir; `00-stack.md` farkı = korunan dört bölge (Stack tablosu · Auth.js
 anlatısı + ADR-005 üstünlük cümlesi · sınır altı · —), `05` farkı = sahte-ödeme
 notu. `.claude/rules` 9/9, `sablonlar` 15/15, kılavuz ve defterler birebir.
