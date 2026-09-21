@@ -324,6 +324,15 @@ Tipik olanlar — projede karşılığı yoksa kurulmaz:
 Her planlı görev **idempotent** olur: iki kez çalışırsa veri bozulmaz.
 Çalıştığı ve sonucu loglanır; sessizce başarısız olmasına izin verilmez.
 
+**Saat dilimi tuzağı:** platform zamanlayıcıları (Vercel Cron, GitHub Actions
+`schedule`, GitLab pipeline schedule) **UTC** ile çalışır; "her gece 04:00"
+isteği `0 1 * * *` olur ve tanımın yanına TR karşılığı yorum olarak yazılır
+(`# UTC 01:00 = TR 04:00`). Kendi zamanlayıcında (BullMQ `repeat`,
+`node-cron`) dilim açıkça verilir: `tz: "Europe/Istanbul"`; verilmezse
+konteynerin `TZ=UTC`'si geçerlidir (`02-coding-standards.md` → *"Zaman
+dilimi"*). Gece penceresi hesaplarken yaz saati değil, **UTC+3 sabit** —
+ama adla (`Europe/Istanbul`), sayıyla değil.
+
 ## Bakım penceresi ve duyuru
 Kesinti gerektiren işlem varsa kullanıcıya önceden bildirilir ve
 bakım sayfası gösterilir; boş beyaz ekran bırakılmaz.

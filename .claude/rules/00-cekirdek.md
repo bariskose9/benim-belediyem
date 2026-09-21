@@ -102,6 +102,9 @@ Etkilenen yerlerin **hepsi** fiilen açılıp kontrol edilir; "en az biri" yok.
   belgeye bak (`source-driven-development`).
 - Aynı anda tek sayfa/modül; kapsamı kendiliğinden genişletme. Bozduğunu fark
   edersen hemen söyle. **Kanıtsız "çalışıyor" deme** — test çıktısı, ekran, log.
+- Saat yazarken dilim belli: **TSİ**; UTC kaçınılmazsa ikisi birden
+  (`TR 04:00 / UTC 01:00`). Rapor, devir dosyası, "şu saatte merge olur" —
+  hepsi. Bekleme komutunda `date -u` ile UTC'yi göster, tahmin etme.
 
 ## Git ve commit — ONAYSIZ COMMIT YOK
 
