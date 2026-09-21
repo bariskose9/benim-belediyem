@@ -81,6 +81,53 @@ Format: [Keep a Changelog](https://keepachangelog.com/tr/) · Sürümleme: SemVe
   tip döndürme · ikinci yanıtın durum kodunu çakıştırma · ikinci yanıtın
   şemasını silme
 
+### Eklendi — ticaret uçlarının yanıt sözleşmeleri (borç #107 · 107c)
+
+- **7 uç şemasını beyan ediyor:** sepete ekleme, sepet satırının adedini/notunu
+  değiştirme, satırı çıkarma, ödeme, üyelik başlatma, paket değiştirme ve
+  üyeliği sonlandırma. Kalan iş listesi 14 → 7; sırada 107d
+- ⭐ **SEPET ÖZETİ ARTIK AÇIKÇA TEL BİÇİMİNE ÇEVRİLİYOR.** Uygulama içi sepet
+  özeti bir tarih nesnesi taşıyor (koltuk kilidinin bitiş anı); telde ise
+  yalnızca metin gider. Üç sepet ucu özeti olduğu gibi gönderiyordu ve derleme
+  bunu göremiyordu — ADR-021'in ilk dersinin ta kendisi. Yeni çevirmen
+  (`toCartSummaryResponse`) sınırı açıkça geçiyor ve alanları **tek tek
+  sayıyor**, `...spread` ile değil: ileride iç kullanım için eklenecek bir alan
+  (maliyet, tedarikçi kodu…) belgeye yazılmadan API'ye **sızamıyor**. Bu iddia
+  yorumda bırakılmadı, bir sızıntı deneyiyle test edildi; çevirmen geçici olarak
+  spread'e çevrilince test kırmızıya döndü
+- ⭐ **PARA BELGEDE `integer`, `number` DEĞİL — ve bu bir kapı.** Dokuz tutar
+  alanının hepsi tek bir `kurusSchema`'dan geliyor (`z.int()`, sıfır ve üzeri,
+  belgede "tam sayı kuruş" açıklamasıyla). Sebep: `z.number()` belgeye
+  "ondalık olabilir" yazardı ve belgeden tip üreten mobil istemci (adım 19)
+  `45900` kuruşu `45.900 TL` sanabilirdi — ya da tersine. Derleme ikisini de
+  `number` görür, fark yalnızca belgede çıkar; bu yüzden CI'a yeni bir test
+  girdi: belgedeki her yanıt şemasında adı `Kurus` ile biten alan `integer`
+  olmak zorunda, hiç para alanı bulamamak da kırmızı (kapısız kapı olmasın).
+  Bir şema bilerek `z.number()` yapıldı, kapı alanı adıyla yakaladı
+- ⭐ **"Kapı bu uca gerçekten bağlı mı" artık DAVRANIŞLA ölçülüyor.** CI'daki
+  metin kapısı kütükteki şema adıyla route'takini karşılaştırıyor ama kaynak
+  metnine bakıyor. Yedi uç için yeni entegrasyon testleri servis taklidine
+  sözleşme dışı bir gövde döndürtüyor (para yerine metin, dizi yerine boş
+  liste, boolean yerine "evet") ve ucun sessizce `201`/`200` vermek yerine
+  `500`'e düştüğünü, log'un hangi alanın tutmadığını söylediğini doğruluyor
+- **`null` alanlar belgede açıkça `null`:** taahhütsüz pakette taahhüt bitişi,
+  sıradaki paket değişimi iptal edildiğinde yürürlük tarihi, sonraki tahsilat
+  tarihi yoksa tesise giriş bitişi — "alan yok" ile "alan var ama null" mobil
+  istemci için farklı şeylerdir ve belge artık hangisi olduğunu söylüyor
+- **Ödeme yanıtı belgede kart bilgisinin hiçbir parçasını taşımıyor** — son
+  4 hane bile yok; belgeyi okuyan istemci onu bu uçtan bekleyemez. Sipariş
+  kimlikleri listesi "en az bir" olarak belgelendi: boş sepet ödemeye hiç
+  gelemiyor (`CART_EMPTY`)
+- **İstemcideki iki tip etiketi düzeltildi:** market ve restoran bileşenleri
+  sepet yanıtını uygulama içi `CartSummary` tipiyle etiketliyordu — tarih
+  alanı nesne görünüyordu, telde metindi. Şimdi tel tipini (`CartSummaryResponse`)
+  kullanıyorlar; davranış değişmedi, yalan düzeldi
+- **Yeni kural, yeni borç (#116):** kit 3.15'in "her dosya sabit başlık
+  bloğuyla başlar" kuralı bu adımda açılan 5 yeni dosyada uygulandı; mevcut
+  526 dosyaya geriye dönük yazım ayrı bir adım olarak roadmap'e yazıldı
+- **27 yeni test** (843 → 870 birim + entegrasyon); **2 mutasyon** kırmızıya
+  döndürüldü (spread sızıntısı · `z.number()` para alanı)
+
 ### Değişti — API sürümleme: uçlar `/api/v1/` altına taşındı (teknik borç #103 · ADR-020)
 
 - ⛔ **KIRICI DEĞİŞİKLİK — 36 iş ucunun adresi değişti.** `/api/<kaynak>` artık

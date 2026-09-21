@@ -169,6 +169,48 @@ function comparableShape(schema: ZodType, io: "input" | "output"): unknown {
   return strip(z.toJSONSchema(schema, { io }));
 }
 
+/**
+ * Belgedeki para alanlarını bulur: adı `Kurus` ile biten her özellik, iç içe
+ * nesneler ve diziler dahil. Her isabet için belgede yazan tür(ler) döner.
+ *
+ * `anyOf` açılıyor çünkü `nullable()` alan JSON Schema'da `anyOf: [tür, null]`
+ * olarak basılıyor; `null` dalı para değil, atlanıyor.
+ */
+function findMoneyFields(node: unknown, path = ""): { path: string; types: string[] }[] {
+  if (Array.isArray(node)) return node.flatMap((item) => findMoneyFields(item, path));
+
+  if (node === null || typeof node !== "object") return [];
+
+  const record = node as Record<string, unknown>;
+  const found: { path: string; types: string[] }[] = [];
+
+  for (const [name, property] of Object.entries(record.properties ?? {})) {
+    if (name.endsWith("Kurus")) {
+      found.push({ path: `${path}.${name}`, types: declaredTypes(property) });
+    }
+
+    found.push(...findMoneyFields(property, `${path}.${name}`));
+  }
+
+  found.push(...findMoneyFields(record.items, `${path}[]`));
+  found.push(...findMoneyFields(record.anyOf, path));
+
+  return found;
+}
+
+/** Bir JSON Schema düğümünün `null` dışındaki türleri. */
+function declaredTypes(node: unknown): string[] {
+  if (node === null || typeof node !== "object") return ["(yok)"];
+
+  const record = node as Record<string, unknown>;
+
+  if (Array.isArray(record.anyOf)) {
+    return record.anyOf.flatMap(declaredTypes).filter((type) => type !== "null");
+  }
+
+  return [typeof record.type === "string" ? record.type : "(yok)"];
+}
+
 describe("yanıt gövdesinin şeması belgeleniyor", () => {
   it("gövdeli her uç ya şema beyan ediyor ya da kalan iş listesinde", () => {
     const pending = new Set(RESPONSE_BODY_PENDING);
@@ -323,5 +365,32 @@ describe("yanıt gövdesinin şeması belgeleniyor", () => {
       .filter((signature) => !registry.has(signature));
 
     expect(unreadable, "kütükten şema adı okunamadı — kapı bu uçta çalışmıyor").toEqual([]);
+  });
+
+  /**
+   * ⛔ PARA BELGEDE TAM SAYI KURUŞTUR — `integer`, `number` DEĞİL (107c).
+   *
+   * Uygulama içinde para tam sayı kuruş (`src/lib/money.ts`); şema `z.number()`
+   * yazılsaydı belge "ondalık olabilir" derdi ve belgeden tip üreten mobil
+   * istemci (adım 19) `45900` kuruşu `45.900 TL` sanabilirdi — ya da tersine.
+   * Derleme bunu göremez (ikisi de `number`), bu yüzden kural belgenin
+   * ÇIKTISINDA ölçülüyor: istemcinin göreceği JSON Schema'da `integer` yazmalı.
+   *
+   * ⚠️ Sıfır alan bulmak da HATA: kapı hiçbir şeyi ölçmüyorsa sessizce yeşil
+   * kalmamalı (ticaret şemaları en az dokuz para alanı taşıyor).
+   */
+  it("para alanları belgede tam sayı (integer), ondalık değil", () => {
+    const moneyFields = declaredSchemas().flatMap(({ operation, schema }) =>
+      findMoneyFields(z.toJSONSchema(schema, { io: "input" }), key(operation)),
+    );
+
+    const notInteger = moneyFields
+      .filter(({ types }) => types.length === 0 || types.some((type) => type !== "integer"))
+      .map(({ path, types }) => `${path}: ${types.join(" | ")}`);
+
+    expect(moneyFields.length, "belgede hiç para alanı bulunamadı — kapı ölçmüyor").toBeGreaterThan(
+      0,
+    );
+    expect(notInteger, "para alanı belgede `integer` değil — `kurusSchema` kullanın").toEqual([]);
   });
 });

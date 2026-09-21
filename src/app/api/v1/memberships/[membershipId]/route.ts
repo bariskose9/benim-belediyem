@@ -2,6 +2,8 @@ import { requireAccess } from "@/features/auth/services/api-guard";
 import { InvalidMembershipRequestError } from "@/features/gym/errors";
 import {
   cancelMembershipSchema,
+  membershipCancelledResponseSchema,
+  membershipPlanChangedResponseSchema,
   updateMembershipSchema,
 } from "@/features/gym/schemas/membership.schema";
 import {
@@ -48,13 +50,14 @@ export async function PATCH(
       now: new Date(),
     });
 
+    // Belgedeki şemanın AYNISI (ADR-021).
     return ok(
       {
         pendingPlanId: result.pendingPlanId,
         effectiveAt: result.effectiveAt?.toISOString() ?? null,
         feeKurus: result.feeKurus,
       },
-      { noStore: true },
+      { noStore: true, schema: membershipPlanChangedResponseSchema },
     );
   } catch (error) {
     return fail(error);
@@ -81,13 +84,14 @@ export async function DELETE(
       now: new Date(),
     });
 
+    // Belgedeki şemanın AYNISI (ADR-021).
     return ok(
       {
         feeKurus: result.feeKurus,
         feeCharged: result.feeCharged,
         accessEndsAt: result.accessEndsAt?.toISOString() ?? null,
       },
-      { noStore: true },
+      { noStore: true, schema: membershipCancelledResponseSchema },
     );
   } catch (error) {
     return fail(error);

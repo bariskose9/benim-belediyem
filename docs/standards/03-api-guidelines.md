@@ -313,6 +313,30 @@ biçimiyle basılır. Çıktı biçimi kullanılamaz:** çıktı modu JSON Schem
 der — oysa yanıta alan eklemek yukarıda **kırıcı olmayan** değişiklik sayılıyor.
 Çıktı biçimiyle basılan bir belge, kendi uyumluluk kuralıyla çelişir.
 
+⛔ **PARA ALANI YANIT ŞEMASINDA `z.int()` OLUR, `z.number()` DEĞİL — ve bu bir
+CI kapısıdır.** İkisi derlemede aynı tiptir (`number`); fark yalnızca belgede
+çıkar: `z.number()` JSON Schema'ya `"type": "number"` yazar, yani *"ondalık
+olabilir"*. Belgeden tip üreten bir istemci (mobil uygulama, başka bir ekip)
+`45900` kuruşu `45.900` lira sanabilir — ya da tersine, tutarı ondalık gönderir.
+`z.int()` ise `"type": "integer"` yazar ve tek yorum kalır. Kural yorumda değil
+kapıda yaşar: belgeye giren her yanıt şemasında adı para ekini (`…Kurus`,
+`…Cents`) taşıyan alan `integer` olmak zorundadır; kapı **hiç para alanı
+bulamazsa da kırmızıya döner** — ölçmeyen kapı, kapı değildir. Tek bir
+paylaşılan para şeması (`kurusSchema`) hem tekrarı hem sapmayı önler.
+
+⛔ **İÇ İÇE BİR GÖVDE `Date` TAŞIYORSA ROUTE'TA SATIR İÇİ `toISOString()`
+YETMEZ — AÇIK BİR ÇEVİRMEN YAZILIR VE ALANLAR TEK TEK SAYILIR.** Tel biçimi
+(`string`) ile uygulama içi biçim (`Date`) ayrı tiplerdir; derleme kapısı
+(`ZodType<T>`) ikisini aynı saymaz ve şemayı gevşetmek yanlış çözümdür. Doğru
+çözüm, uygulama içi nesneyi tel biçimine çeviren küçük bir fonksiyondur. O
+fonksiyonda `...spread` **kullanılmaz:** çalışma anı kontrolü fazladan alanı
+bilerek reddetmediği için (yanıta alan eklemek kırıcı değildir), spread ile
+taşınan iç bir alan (maliyet, tedarikçi kodu…) belgeye yazılmadan API'ye
+**sızar** ve hiçbir kapı görmez. Alanlar tek tek sayılınca yeni bir alan ancak
+biri bilerek hem şemaya hem çevirmene yazınca dışarı çıkar. Bu iddia bir
+**sızıntı deneyiyle** test edilir: fazladan alan taşıyan bir nesne verilir,
+çıktıda olmadığı doğrulanır; çevirmen spread'e çevrilirse test kırmızıya döner.
+
 ### Sözleşme borcu, CI'ın okuduğu ve yalnızca KÜÇÜLEN bir listeyle kapatılır
 
 Var olan bir API'ye sözleşme kapısı eklemek çoğu zaman onlarca uca dokunmayı

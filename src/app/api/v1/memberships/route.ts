@@ -1,6 +1,9 @@
 import { requireAccess } from "@/features/auth/services/api-guard";
 import { InvalidMembershipRequestError } from "@/features/gym/errors";
-import { createMembershipSchema } from "@/features/gym/schemas/membership.schema";
+import {
+  createMembershipSchema,
+  membershipCreatedResponseSchema,
+} from "@/features/gym/schemas/membership.schema";
 import { startMembership } from "@/features/gym/services/membership-purchase.service";
 import { created, fail } from "@/lib/http";
 import { readActorIp } from "@/lib/rate-limit";
@@ -40,12 +43,16 @@ export async function POST(request: Request) {
       now: new Date(),
     });
 
-    return created({
-      id: result.membershipId,
-      chargedKurus: result.chargedKurus,
-      nextBillingAt: result.nextBillingAt.toISOString(),
-      commitmentEndsAt: result.commitmentEndsAt?.toISOString() ?? null,
-    });
+    // Belgedeki şemanın AYNISI (ADR-021): tarihler burada metne çevriliyor, şema da metin bekliyor.
+    return created(
+      {
+        id: result.membershipId,
+        chargedKurus: result.chargedKurus,
+        nextBillingAt: result.nextBillingAt.toISOString(),
+        commitmentEndsAt: result.commitmentEndsAt?.toISOString() ?? null,
+      },
+      { schema: membershipCreatedResponseSchema },
+    );
   } catch (error) {
     return fail(error);
   }

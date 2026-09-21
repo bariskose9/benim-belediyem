@@ -215,6 +215,41 @@ describe("kart numarası sızıntısı", () => {
   });
 });
 
+/**
+ * ⭐ ÇALIŞMA ANI KAPISI BU UCA BAĞLI (borç #107 · 107c · ADR-021).
+ *
+ * Şemayı kütüğe yazıp route'a vermeyi unutmak mümkün; CI'daki metin kapısı
+ * bunu kaynak metninden yakalıyor, burada DAVRANIŞ ölçülüyor: servis
+ * sözleşmeye uymayan bir gövde döndürdüğünde uç sessizce 201 vermemeli.
+ */
+describe("yanıt sözleşmesi", () => {
+  it("sözleşme dışı gövde sessizce geçmiyor, 500'e düşüyor", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    checkout.mockResolvedValue({
+      paymentId: "payment-1",
+      transactionId: "TRX-TEST-1",
+      orderIds: [],
+      totalKurus: "459,00 TL",
+    });
+
+    const response = await POST(request(validBody()));
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.error.code).toBe("INTERNAL_ERROR");
+
+    const logged = consoleError.mock.calls.map((call) => JSON.stringify(call)).join(" ");
+
+    expect(logged).toContain("Yanıt sözleşmesi ihlali");
+    expect(logged).toContain("totalKurus");
+    expect(logged).toContain("orderIds");
+    expect(logged).not.toContain(CARD_NUMBER);
+
+    consoleError.mockRestore();
+  });
+});
+
 describe("hata zarfı", () => {
   it("sepet değiştiyse 409 CART_CHANGED döner", async () => {
     checkout.mockRejectedValue(new CartChangedError());

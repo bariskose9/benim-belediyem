@@ -113,7 +113,7 @@ Boş bırakılan alan seviye 0 sayılır.
 
 | Konu | Sv | Son kanıt | Tarih |
 |---|:--:|---|---|
-| API sözleşmesi · sürümleme | 1 | "Contract da ne" diye sordu, açıklandı | 2026-09 |
+| API sözleşmesi · sürümleme | 1 | "Contract da ne" diye sordu, açıklandı (2026-09). 107c'de **tel biçimi / DTO** (kod içi `Date` → telde metin, açık çevirmen) ve **belgede `integer` ile `number` farkı** (mobil istemci kuruşu lira sanabilir) ilk kez anlatıldı; soru gelmedi, kendi cümlesinde kullanmadı — kanıt sayılmadı, seviye değişmedi | 2026-09-21 |
 | Kimlik doğrulama · yetki | 0 | | |
 | Transaction · eşzamanlılık | 0 | | |
 | Arka plan işleri · kuyruk | 1 | BullMQ'nun sunucusuzda çalışmadığını kendi getirdi, maliyeti sordu | 2026-09 |

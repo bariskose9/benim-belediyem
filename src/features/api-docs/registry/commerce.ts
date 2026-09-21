@@ -1,19 +1,30 @@
 import { z } from "zod";
 
+import { cartSummaryResponseSchema } from "@/features/cart/schemas/cart-summary.schema";
 import {
   cancelMembershipSchema,
   createMembershipSchema,
+  membershipCancelledResponseSchema,
+  membershipCreatedResponseSchema,
+  membershipPlanChangedResponseSchema,
   updateMembershipSchema,
 } from "@/features/gym/schemas/membership.schema";
 import { orderIdSchema } from "@/features/orders/schemas/order.schema";
 import {
   addCartItemSchema,
   checkoutSchema,
+  paymentCreatedResponseSchema,
   updateCartItemSchema,
 } from "@/features/payment/schemas/checkout.schema";
 import type { ApiOperation } from "@/features/api-docs/types";
 
-/** Sepet, ödeme, sipariş ve üyelik uçları (adım 18b). */
+/**
+ * Sepet, ödeme, sipariş ve üyelik uçları (adım 18b).
+ *
+ * ⭐ 107c: gövdeli yedi ucun `success.body` şeması, route'un `ok()`/`created()`
+ * çağrısında kullandığı şemanın AYNISI (ADR-021). Sepetin üç ucu tek şemayı
+ * paylaşıyor — üçü de aynı gövdeyi (güncel sepet özeti) döndürüyor.
+ */
 
 /**
  * ⚠️ BELGELEME SIRASINDA BULUNDU — teknik borç #106.
@@ -47,7 +58,11 @@ export const commerceOperations: ApiOperation[] = [
     description: "Fiyat İSTEMCİDEN ALINMAZ — sunucuda katalogdan okunur ve tam sayı kuruş tutulur.",
     access: "public",
     requestBody: { schema: addCartItemSchema },
-    success: { status: 201, description: "Güncel sepet özeti (kalemler, ara toplam, toplam)." },
+    success: {
+      status: 201,
+      description: "Güncel sepet özeti (bölümler, satırlar, ara toplam, teslimat ücreti, toplam).",
+      body: { schema: cartSummaryResponseSchema },
+    },
     errors: [
       "CART_ITEM_NOT_FOUND",
       "OUT_OF_STOCK",
@@ -65,7 +80,11 @@ export const commerceOperations: ApiOperation[] = [
     access: "public",
     pathParams: [{ name: "itemId", description: UNVALIDATED_PATH_PARAM, schema: z.string() }],
     requestBody: { schema: updateCartItemSchema },
-    success: { status: 200, description: "Güncel sepet özeti." },
+    success: {
+      status: 200,
+      description: "Güncel sepet özeti.",
+      body: { schema: cartSummaryResponseSchema },
+    },
     errors: ["CART_ITEM_NOT_FOUND", "OUT_OF_STOCK", "QUANTITY_TOO_HIGH"],
     rateLimited: true,
   },
@@ -76,7 +95,11 @@ export const commerceOperations: ApiOperation[] = [
     summary: "Sepet kalemini çıkarır.",
     access: "public",
     pathParams: [{ name: "itemId", description: UNVALIDATED_PATH_PARAM, schema: z.string() }],
-    success: { status: 200, description: "Güncel sepet özeti." },
+    success: {
+      status: 200,
+      description: "Güncel sepet özeti — 204 değil, istemci tutarları yeniden istemesin diye.",
+      body: { schema: cartSummaryResponseSchema },
+    },
     errors: ["CART_ITEM_NOT_FOUND"],
     rateLimited: true,
   },
@@ -93,7 +116,12 @@ export const commerceOperations: ApiOperation[] = [
       "`DUPLICATE_PAYMENT` ile elenir (idempotency).",
     access: "authenticated",
     requestBody: { schema: checkoutSchema },
-    success: { status: 201, description: "Oluşturulan siparişin kimliği ve ödeme sonucu." },
+    success: {
+      status: 201,
+      description:
+        "Ödeme kimliği, işlem kodu, oluşturulan sipariş kimlikleri ve tahsil edilen toplam.",
+      body: { schema: paymentCreatedResponseSchema },
+    },
     errors: [
       "CART_EMPTY",
       "CART_CHANGED",
@@ -135,7 +163,12 @@ export const commerceOperations: ApiOperation[] = [
       "30 gün eklenerek değil.",
     access: "staff",
     requestBody: { schema: createMembershipSchema },
-    success: { status: 201, description: "Oluşturulan üyeliğin kimliği ve bitiş tarihi." },
+    success: {
+      status: 201,
+      description:
+        "Oluşturulan üyeliğin kimliği, tahsil edilen ilk ay, sonraki tahsilat ve taahhüt bitişi.",
+      body: { schema: membershipCreatedResponseSchema },
+    },
     errors: [
       "ALREADY_MEMBER",
       "MEMBERSHIP_PLAN_NOT_FOUND",
@@ -154,7 +187,11 @@ export const commerceOperations: ApiOperation[] = [
     access: "staff",
     pathParams: [{ name: "membershipId", description: UNVALIDATED_PATH_PARAM, schema: z.string() }],
     requestBody: { schema: updateMembershipSchema },
-    success: { status: 200, description: "Güncellenen üyeliğin yeni planı ve bitiş tarihi." },
+    success: {
+      status: 200,
+      description: "Sıraya alınan paket, yürürlük tarihi ve varsa tahsil edilen erken çıkış farkı.",
+      body: { schema: membershipPlanChangedResponseSchema },
+    },
     errors: [
       "MEMBERSHIP_NOT_FOUND",
       "MEMBERSHIP_PLAN_NOT_FOUND",
@@ -174,7 +211,11 @@ export const commerceOperations: ApiOperation[] = [
     access: "staff",
     pathParams: [{ name: "membershipId", description: UNVALIDATED_PATH_PARAM, schema: z.string() }],
     requestBody: { schema: cancelMembershipSchema },
-    success: { status: 200, description: "Sonlandırılan üyeliğin son durumu." },
+    success: {
+      status: 200,
+      description: "Erken çıkış farkı, tahsil edilip edilmediği ve tesise girişin biteceği an.",
+      body: { schema: membershipCancelledResponseSchema },
+    },
     errors: ["MEMBERSHIP_NOT_FOUND", "NO_ACTIVE_MEMBERSHIP", "EARLY_EXIT_FEE_CHANGED"],
     rateLimited: true,
   },

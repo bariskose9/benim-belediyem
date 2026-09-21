@@ -1,6 +1,9 @@
 import { requireAccess } from "@/features/auth/services/api-guard";
 import { InvalidCheckoutRequestError } from "@/features/payment/errors";
-import { checkoutSchema } from "@/features/payment/schemas/checkout.schema";
+import {
+  checkoutSchema,
+  paymentCreatedResponseSchema,
+} from "@/features/payment/schemas/checkout.schema";
 import { checkout } from "@/features/payment/services/checkout.service";
 import { created, fail } from "@/lib/http";
 import { readActorIp } from "@/lib/rate-limit";
@@ -36,12 +39,16 @@ export async function POST(request: Request) {
       now: new Date(),
     });
 
-    return created({
-      paymentId: result.paymentId,
-      transactionId: result.transactionId,
-      orderIds: result.orderIds,
-      totalKurus: result.totalKurus,
-    });
+    // Belgedeki şemanın AYNISI (ADR-021): gövde telden geçmiş hâliyle doğrulanıyor.
+    return created(
+      {
+        paymentId: result.paymentId,
+        transactionId: result.transactionId,
+        orderIds: result.orderIds,
+        totalKurus: result.totalKurus,
+      },
+      { schema: paymentCreatedResponseSchema },
+    );
   } catch (error) {
     return fail(error);
   }

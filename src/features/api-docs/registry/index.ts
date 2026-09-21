@@ -48,15 +48,7 @@ export const UNDOCUMENTED_PATH_PREFIXES = ["/api/mock-kps"] as const;
  */
 export const RESPONSE_BODY_PENDING: readonly string[] = [
   // ✅ 107b (kimlik doğrulama ve hesap) BİTTİ — 12 uç bu listeden düştü.
-
-  // 107c — sepet, ödeme, üyelik
-  "DELETE /api/v1/carts/current/items/{itemId}",
-  "DELETE /api/v1/memberships/{membershipId}",
-  "PATCH /api/v1/carts/current/items/{itemId}",
-  "PATCH /api/v1/memberships/{membershipId}",
-  "POST /api/v1/carts/current/items",
-  "POST /api/v1/memberships",
-  "POST /api/v1/payments",
+  // ✅ 107c (sepet, ödeme, üyelik) BİTTİ — 7 uç bu listeden düştü.
 
   /**
    * 107d — profil, hizmetler ve GÖVDESİ JSON OLMAYAN uçlar.

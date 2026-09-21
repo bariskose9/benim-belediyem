@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { checkoutCardSchema } from "@/features/payment/schemas/checkout.schema";
+import { kurusSchema } from "@/lib/money-schema";
 
 /**
  * Üyelik uçlarının girdi şemaları (03-api-guidelines.md: her uç Zod ile
@@ -75,3 +76,53 @@ export const cancelMembershipSchema = z.object({
 export type CreateMembershipPayload = z.infer<typeof createMembershipSchema>;
 export type UpdateMembershipPayload = z.infer<typeof updateMembershipSchema>;
 export type CancelMembershipPayload = z.infer<typeof cancelMembershipSchema>;
+
+/**
+ * ═══ YANIT SÖZLEŞMELERİ (borç #107 · adım 107c · ADR-021) ═══
+ *
+ * Üç üyelik ucunun başarılı yanıtları. Şemalar hem route'un `ok()`/`created()`
+ * çağrısında hem API belgesinde KULLANILIYOR — ikisi aynı nesne.
+ *
+ * ⛔ TARİHLER `z.iso.datetime()`, `z.date()` DEĞİL: route'lar `toISOString()`
+ * ile metne çeviriyor; telde metin gidiyor.
+ *
+ * ⭐ `null` ALANLAR AÇIKÇA `nullable()`: "alan yok" ile "alan var ama null"
+ * belgede farklı şeylerdir. Taahhütsüz pakette taahhüt bitişi, sıradaki
+ * değişim iptal edildiğinde yürürlük tarihi — ikisi de `null` olarak GELİR,
+ * eksik olarak değil. Mobil istemci bunu belgeden okumalı, deneyerek değil.
+ */
+export const membershipCreatedResponseSchema = z.object({
+  id: z.string(),
+  chargedKurus: kurusSchema,
+  /** Bir sonraki aylık tahsilat — TAKVİM AYI eklenerek bulunur, 30 gün değil. */
+  nextBillingAt: z.iso.datetime(),
+  commitmentEndsAt: z.iso
+    .datetime()
+    .nullable()
+    .describe("Taahhüdün bittiği an; taahhütsüz pakette null."),
+});
+
+export const membershipPlanChangedResponseSchema = z.object({
+  pendingPlanId: z
+    .string()
+    .nullable()
+    .describe("Bir sonraki vadede yürürlüğe girecek paket; sıradaki değişim iptal edildiyse null."),
+  effectiveAt: z.iso
+    .datetime()
+    .nullable()
+    .describe("Değişimin yürürlüğe gireceği an (bir sonraki tahsilat tarihi); iptalde null."),
+  /** Taahhütsüz pakete düşerken tahsil edilen erken çıkış farkı; fark doğmadıysa 0. */
+  feeKurus: kurusSchema,
+});
+
+export const membershipCancelledResponseSchema = z.object({
+  /** Hesaplanan erken çıkış farkı — tahsil edilmemiş olsa da bildirilir. */
+  feeKurus: kurusSchema,
+  feeCharged: z.boolean().describe("Fark fiilen tahsil edildi mi."),
+  accessEndsAt: z.iso
+    .datetime()
+    .nullable()
+    .describe(
+      "Tesise girişin biteceği an — ödenmiş dönemin sonu. Sıradaki tahsilat tarihi yoksa null.",
+    ),
+});
