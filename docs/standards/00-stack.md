@@ -586,6 +586,15 @@ parçadan oluşur ve üçü ayrı yerde yaşar:
   ve imzalı (`05-auth-security.md`).
 - Gönderen alan adı için SPF/DKIM/DMARC kayıtları — kendi projede sen, kurumda
   DevOps; kayıtsız posta spam'e düşer (`altyapi-durumu.md`).
+- **"Gönderdim" ≠ "ulaştı".** Gönderici teslim olaylarını (delivered · bounced ·
+  complained) webhook'la bildirir; `email_deliveries(message_id, durum, neden,
+  zaman)` tablosuna yazılır. **Sert bounce** (adres yok) → adres geçersiz
+  işaretlenir, bir daha denenmez; **yumuşak bounce** (kutu dolu) → kuyruk yeniden
+  dener. OTP gibi zaman kritik postada kullanıcıya "kod gelmedi → yeniden gönder"
+  yolu ve soğuma süresi verilir; teslim durumu destek ekranında görünür
+  ("gönderildi 14:02 · teslim edildi 14:02" / "adres geçersiz"). SMS için aynı
+  kalıp (`kurumdan-ogrenilecekler.md` → 5.2).
+  ⚠️ İddia: henüz hiçbir projede fiilen kullanılmadı — ilk kullanan ölçüp düzeltir.
 
 ## API biçimi — REST tek başına mı, yanına GraphQL de mi
 

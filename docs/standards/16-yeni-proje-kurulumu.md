@@ -218,7 +218,7 @@ kontrol eder.
 Proje adı, stack, deploy hedefi, ana dal, arayüz dili, kod dili.
 
 ### 3. PRD'yi çıkar — `interview-me` ile
-Kullanıcının analiz dokümanı **her zaman eksiktir**. CLAUDE.md §3 kapı 1:
+Kullanıcının analiz dokümanı **her zaman eksiktir**. `00-cekirdek.md` → *"Zorunlu kapılar"* kapı 1:
 **tek tek soru sor, varsayım yapma.** Cevaplar `docs/project/PRD.md`'ye yazılır,
 "Açık sorular" bölümü boşalana kadar kodlama başlamaz.
 
@@ -336,7 +336,7 @@ dosyada yaşar. Biri boş kalırsa o soru bir daha cevaplanamaz.
 
 Yeni projede de eski projede de aynı hata yapılabilir: kullanıcıya zaten
 yapılmış bir işi tekrar yaptırmak. Bunun tek panzehiri **önce
-`docs/project/altyapi-durumu.md`'yi okumaktır** (CLAUDE.md §1, madde 5).
+`docs/project/altyapi-durumu.md`'yi okumaktır** (`00-cekirdek.md` → *"Hangi soru → hangi dosya"*, kaynak hiyerarşisi).
 
 ## İlk oturumun sonunda
 

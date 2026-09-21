@@ -403,7 +403,8 @@ rastgele kod) kolonu. Kurumun bu kolona itirazı olup olmadığı
 ## Bütünlük
 - İlişkiler veritabanı seviyesinde yabancı anahtarla zorlanır — uygulamaya bırakılmaz.
 - Benzersizlik kuralları unique index ile zorlanır (örn. aynı doktor + aynı saat).
-- Para **asla** float değil: `Decimal` veya kuruş cinsinden `Integer`.
+- Para **asla** float değil: `Decimal(10,2)` ya da kuruş `INTEGER`; uygulama
+  tarafı tam sayı kuruş, yuvarlama kuralı `02-coding-standards.md` → *"Para"*.
 - Sabit değer kümeleri (durum, tür, kategori) için PostgreSQL `ENUM` tipi
   **hiç** kullanılmaz — kural ve gerekçesi aşağıda, *"Sabit değer kümesi"*.
 
@@ -567,6 +568,15 @@ sorun üretir:
   benzersiz index + transaction ile korunur; "önce kontrol et sonra yaz" yeterli değildir.
 - Güncellemede kayıp yazma riski varsa iyimser kilitleme (`version` kolonu) kullanılır.
 - Transaction mümkün olduğunca kısa tutulur; içinde dış API çağrısı yapılmaz.
+- **Koşullu yazma — etkilenen satır sayısı kanıttır.** "Önce oku, sonra yaz"
+  iki adımdır; arada başkası yazar. Tek ifade: `UPDATE slot SET durum='dolu',
+  uye_id=? WHERE id=? AND durum='bos'` → Prisma `updateMany(...).count`;
+  `1` ise kazandın, `0` ise başkası önce davrandı → `409`. İyimser kilit
+  (`version` kolonu) aynı kalıbın özel hâli: `WHERE id=? AND version=?` +
+  `version+1`. Test: iki isteği aynı anda gönder, biri `200` biri `409`
+  (`06-testing.md` → *"Yeşil test yanlış şeyi ölçüyor olabilir"*).
+  *Bu projede nerede:* randevu saati, koltuk kilidi, stok düşümü, durum geçişi
+  (`01-architecture.md` → *"Durum makinesi"*).
 
 ## Denetim kaydı ve saklama
 

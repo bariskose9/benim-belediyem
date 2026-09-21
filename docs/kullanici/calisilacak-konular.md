@@ -317,4 +317,4 @@ Genelleşmiş, artık kural olabilecek maddeler. /kit-senkron ile taşınır
 ve buradan silinir.
 -->
 
-- [ ] **Kit senkronuna başlamadan kaynak klonun YEREL durumuna bak:** `git -C ~/baris_projects/bariskose-skills status` ve `log -1 --format=%cd`. `status -sb` yalnızca uzak farkı gösterir, aynı makinede eşzamanlı atılmış commit'i göstermez. 2026-09-20'de benim-belediyem #81 karışık anlık görüntü oldu (`00-stack` 3.15.1'den, kalanı 3.15.2'den). Senkron boyunca tek anlık görüntüden çalış; klon değişirse baştan ölç → `kit-senkron` SKILL.md Adım 1
+- [ ] <!-- madde -->

@@ -11,7 +11,7 @@ Oturum başında: `git status` temiz mi, hangi daldayız, PRD'de bu feature ne d
 
 Komut adları **tam yazılır**. Ortamda aynı adı taşıyan başka skill paketleri
 olabilir (`/spec`, `/review`, `/plan` birden fazla pakette bulunur); bu projede
-kastedilen **her zaman `agent-skills:` önekli olanlardır** (CLAUDE.md §2).
+kastedilen **her zaman `agent-skills:` önekli olanlardır** (`00-cekirdek.md` → *"Beceriler"*).
 
 ```
 /agent-skills:spec   → gereksinimi netleştir (interview-me ile soru sor)  [ONAY]
@@ -355,6 +355,26 @@ tartışma kapanır; ısrar etmek de kuralın ihlalidir.
 sektör pratiğini bilmesi** gerekiyorsa, o soru ona sorulmamalıydı. Kullanıcı
 "hangisi doğruysa o" diyorsa bu bir cevap değil, **sorunun yanlış sorulduğunun
 kanıtıdır.**
+
+### Kod ertelenir, kural ertelenmez
+
+**YAGNI** (*You Aren't Gonna Need It* — "ihtiyacın olmayacak") **kodu** erteler:
+bu projede yüzde hesabı yoksa `percentOfKurus` yazılmaz. Ama **kural
+ertelenmez.** Kural birkaç satırdır; yanlış refleksin bedeli pahalıdır — bir
+sonraki proje o alana ilk çarptığında "o an türetilen" cevap, kitte hazır duran
+cevaptan kötüdür. *Gerçek hayat:* emekli maaşı hesabının mekanizması ilk
+emekliden **önce** yazılır; ilk emekli çıkınca "şimdi düşünelim" denmez.
+
+Ayırt edici soru: **"Gerçek bir belediye uygulamasında bu alan var mı?"** Evet
+ise kural kite girer, kod ihtiyaç doğunca gelir.
+
+Ölçülmemiş kural bir **iddiadır**; bunu söylemek kuralın parçasıdır. Henüz hiçbir
+projede fiilen kullanılmamış kuralın sonuna şu not konur:
+
+> ⚠️ İddia: henüz hiçbir projede fiilen kullanılmadı — ilk kullanan ölçüp düzeltir.
+
+Not, kuralı zayıflatmaz; okuyana "burada tecrübe değil, yerleşik pratik var" der.
+İlk kullanan proje kuralı ölçer, gerekirse düzeltir ve notu kaldırır.
 
 ## ⛔ AYNI KARAR İKİNCİ KEZ TÜRETİLMEZ — KİTE TABLO OLARAK YAZILIR
 
