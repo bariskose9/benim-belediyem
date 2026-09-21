@@ -9,7 +9,7 @@ BU DOSYA NEDEN VAR
 Burada yazmayan bir özellik yapılmaz; yapılması isteniyorsa ÖNCE buraya yazılır.
 
 NASIL DOLDURULUR
-Kullanıcının verdiği analiz dokümanı HER ZAMAN eksiktir. CLAUDE.md §3 kapı 1:
+Kullanıcının verdiği analiz dokümanı HER ZAMAN eksiktir. `00-cekirdek.md` → *"Zorunlu kapılar"* kapı 1:
 `interview-me` ile TEK TEK soru sor, varsayım yapma. "§9 Açık sorular" bölümü
 boşalmadan kodlama başlamaz.
 

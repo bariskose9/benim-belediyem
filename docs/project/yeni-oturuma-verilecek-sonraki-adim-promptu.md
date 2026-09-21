@@ -64,13 +64,12 @@ Roadmap adım **0 → 18g bitti**. Borç **#103 ödendi**, **#107 kısmen ödend
 ## ÖNCE ÇÖZÜLECEK MESELELER
 
 1. **Kullanıcı defterine 2026-09-20'de dört girdi yazıldı, teklif kapandı** —
-   sorma. *Kite taşınacaklar*'da bir madde bekliyor (kit senkron dersi); kit
-   oturumu alacak, sen dokunma
-2. **Kit iki dosya daha bekliyor, ikisi de YAZIM işi (senkron değil):**
-   `REPO-YAPISI.md` ("projeye bakarak doldur" — 22 feature klasörü için hangi
-   iş nerede) ve `docs/project/teknoloji-ve-plan.md` (kararların gerekçesi —
-   bu projede karşılığı ADR'ler; şablondan mı türetilir, ADR'lere mi
-   yönlendirilir, karar verilmedi). ⚠️ 107c'nin önüne alma; ayrı adım
+   sorma. *Kite taşınacaklar* boş — senkron dersi kit 3.16.0'a alındı
+2. **Kit iki dosya daha bekliyor — KARAR VERİLDİ → roadmap adım 18h.**
+   `teknoloji-ve-plan.md` şablondan türetilir (BÖLÜM 0–G), gerekçeler ADR'den
+   kopyalanmaz, "→ ADR-00x" diye işaret edilir; `REPO-YAPISI.md` kitin güncel
+   şablonuyla gerçek klasörlere bakılarak yeniden yazılır (kökteki 1 Ağustos
+   reçetesi güncel değil). ⚠️ 107c'nin önüne alma; ayrı küçük adım
 3. **Roadmap biçimi:** kit `⬜/✅` kutucuk bekliyor; proje `~~…~~ **BİTTİ**`
    kullanıyor. Kozmetik; dönüştürmek istersen sor, kendiliğinden değiştirme
 4. **#23 sızmış şifre kontrolü** ve **#89 Google hesabında ikinci kanıt** —
@@ -186,8 +185,11 @@ Port 3000 de çakışabilir.
 
 ## ✅ CRON ÇALIŞIYOR — KANITLANDI, BİR DAHA SORGULAMA
 
-⛔ **UTC 00:00–00:59 arasında production'a dağıtım tetikleyen merge YAPMA** —
-o pencere cron'un penceresi.
+⛔ **UTC 00:00–00:59 = TÜRKİYE 03:00–03:59 arasında production'a dağıtım
+tetikleyen merge YAPMA** — o pencere cron'un penceresi (`vercel.json` →
+`0 0 * * *`, Vercel cron'u UTC sayar). ⚠️ Saat söylerken hangisi olduğunu yaz;
+2026-09-21'de "00:31" dendi, kullanıcı saati 03:31 gördü, karıştı. Otomatik
+merge görevi kurarken `date -u +%H` ile pencereyi bekle.
 
 **Production veritabanına okuma erişimi (gerekirse):**
 ```
@@ -198,9 +200,9 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — kaynak 3.15.3, kurulu 3.15.3, proje 3.15.3
+## 📦 KİT — kaynak 3.17.0 @ `6b7fe2c`, kurulu 3.17.0, proje 3.17.0
 
-✅ **Üçü eşit.** Kapı 8 kanıtı (2026-09-20, #84 sonrası): 17/19 standart kitle
+✅ **Üçü eşit.** Kapı 8 kanıtı (2026-09-21, 3.17.0 senkronu): 17/19 standart kitle
 birebir; `00-stack.md` farkı = korunan dört bölge (Stack tablosu · Auth.js
 anlatısı + ADR-005 üstünlük cümlesi · sınır altı · —), `05` farkı = sahte-ödeme
 notu. `.claude/rules` 9/9, `sablonlar` 15/15, kılavuz ve defterler birebir.
@@ -468,7 +470,7 @@ pull --ff-only` **ve** son commit zamanına bak (yukarıdaki mesele 4).
   `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR**
 - ⚠️ **Ücretsiz planda cron GÜNDE 1 ve saati garanti DEĞİL**
-- ⛔ **UTC 00:00–00:59 ARASINDA MERGE ETME** — o pencere cron'un penceresi
+- ⛔ **UTC 00:00–00:59 = TÜRKİYE 03:00–03:59 ARASINDA MERGE ETME** — cron penceresi; saat verirken TR/UTC belirt
 
 **Git**
 - **YENİ DALI HER ZAMAN `main`'DEN AÇ**

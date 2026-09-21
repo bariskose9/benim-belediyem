@@ -503,8 +503,8 @@ Sayı ve metin sabitleri koda gömülmez; `src/config/` altında adlandırılır
 
 ## Yerelleştirme, para ve tarih
 - Kullanıcıya görünen metinler koda gömülmez; `src/config/` altında tek yerden gelir.
-- Para birimi `Intl.NumberFormat("tr-TR", { currency: "TRY" })` ile biçimlendirilir.
-  Hesaplama **kuruş cinsinden tam sayı** veya `Decimal` ile yapılır, float ile asla.
+- Para: hesap **tam sayı kuruş**, ekran `Intl.NumberFormat("tr-TR", { style:
+  "currency", currency: "TRY" })` — kural ve yuvarlama aşağıda, *"Para"*.
 - Sıralama ve arama Türkçe karakter duyarlıdır (`localeCompare("tr")`);
   "İ/ı" dönüşümü için `toLocaleLowerCase("tr")`.
   ⛔ **İstisna — URL slug'ında Türkçe küçültme KULLANILMAZ.** Türkçe kuralında
@@ -537,6 +537,47 @@ Cevap "evet" ise iki ayrı sorun vardır ve karıştırılmaz:
 - Çevrilmemiş içerik için **geri düşüş** (fallback) kuralı baştan: Türkçesi
   gösterilir + "bu içerik yalnızca Türkçe" notu; boş sayfa asla.
 
+### ⭐ Para — tam sayı kuruş, tek yuvarlama, en büyük kalan
+
+**Sorun:** `0.1 + 0.2 === 0.30000000000000004`. Ondalık sayı (float, IEEE 754)
+0,1'i tam tutamaz; sepet toplamı 12,50 yerine 12,499999 olur, bir yerde
+yuvarlanır ve fark birike birike **birinin cebinden** çıkar.
+
+- **Uygulama içinde para tam sayı en küçük birimdir: kuruş.** `1250` = 12,50 TL.
+  Veritabanında `Decimal(10,2)` durabilir; dönüşüm **yalnızca sınırlarda**
+  yapılır — okurken `toKurus`, yazarken `toDecimalInput`, ekranda
+  `formatTry`. Servis katmanı `Decimal` görmez, tam sayı görür.
+- **Alan adı birimi taşır:** `totalKurus`, `unitPriceKurus`. Birimsiz
+  `total` yazılmaz — okuyan lira mı kuruş mu bilemez.
+- **API şeması birimi belgeye basar:** `z.int().nonnegative().describe("Tam
+  sayı KURUŞ — 1250 = 12,50 TL")`; mobil istemci birimi belgeden okur. Yanıt
+  sözleşmesi kontrolü (`03-api-guidelines.md` → *"Yanıt gövdesi de
+  belgelenir"*) kesirli değeri testte kırmızıya çevirir.
+- **Çarpım sırası: kuruş × adet.** Önce liraya çevirip çarpmak yuvarlama
+  hatası üretir.
+- **Kuruşun altı para değildir.** Kuruş yasal en küçük birimdir; yuvarlama
+  zorunlu ve meşrudur — soru "yuvarlanır mı" değil, **"nerede ve nasıl"**.
+- **Nerede: yalnızca son adımda, bir kez.** Ara sonuç yuvarlanmaz; her ara
+  yuvarlama tek yöne sistematik sızıntı üretir ("birike birike").
+- **Nasıl — bölüştürme: en büyük kalan yöntemi** (Fowler, *PoEAA* →
+  `Money.allocate`). Toplam parçalara bölünürken önce herkese taban verilir,
+  artan kuruşlar kesir kalıntısı en büyük olandan başlayarak dağıtılır:
+  100 kuruş → 3 kişi = 34 + 33 + 33, **tam 100**. Kural: **Σparça === toplam,
+  her zaman.** Yüzde (KDV, indirim) aynı yol — `percentOfKurus` tam sayı
+  çarpar, sonda bir kez yuvarlar.
+- **Test:** her bölüştürme için "Σparça === toplam" testi zorunludur ve koruma
+  kaldırılınca kırmızıya döndüğü görülür (`06-testing.md` → *"Yeşil test
+  yanlış şeyi ölçüyor olabilir"*).
+- Yardımcılar (`allocateKurus`, `percentOfKurus`) `money.ts`'e **ihtiyaç
+  doğunca** girer; kural şimdi girer (`11-agent-workflow.md` → *"Kod
+  ertelenir, kural ertelenmez"*).
+
+*Bu projede nerede:* sepet toplamı, KDV ve indirim, kısmi iade, bölüşme —
+hepsi `money.ts` üzerinden; servis katmanında çıplak `*` / `/` ile para
+işlemi yoktur.
+
+⚠️ İddia (yuvarlama ve bölüştürme kısmı): henüz hiçbir projede fiilen kullanılmadı — ilk kullanan ölçüp düzeltir.
+
 ### ⭐ Zaman dilimi — sakla UTC, göster İstanbul, hesapla dikkatle
 
 - Veritabanında **`TIMESTAMPTZ`** (saat dilimli zaman); değer **UTC** olarak
@@ -558,6 +599,19 @@ Cevap "evet" ise iki ayrı sorun vardır ve karıştırılmaz:
   (`12-operations-and-scaling.md` → *"Planlı görevler"*).
 - Kullanıcıya gösterilen her zaman damgasında dilim bellidir; "14:00" tek başına
   yazılmaz, `14:00 (TSİ)` ya da bağlamdan kesinse en azından tek dilim.
+- **Tarih aralığı yarı açıktır: `[başlangıç, bitiş)`** — bitiş dahil değil;
+  böylece 09:00–09:30 ile 09:30–10:00 çakışmaz. İki aralık çakışıyor mu:
+  `a.start < b.end && b.start < a.end` — dört ayrı `if` değil, bu tek ifade.
+  Veritabanı da zorlar: PostgreSQL `EXCLUDE USING gist (kaynak_id WITH =,
+  tstzrange(baslangic, bitis) WITH &&)`; "kontrol ettim, sonra yazdım" yarışa
+  açıktır (`04-database.md` → *"Eşzamanlılık"*).
+- **"Bir ay sonra" tek başına tanımsızdır:** 31 Ocak + 1 ay = ? `date-fns`
+  `addMonths` ayın son gününe kırpar (28/29 Şubat). "Her ayın N'i" kuralı
+  (üyelik tahsilatı) için gün **ayrıca saklanır** (`tahsilat_gunu = 31`) ve
+  "o ayda yoksa son gün" yazılır; ardışık `addMonths` zinciri günü kaydırır
+  (31 → 28 → 28…), her dönem **başlangıç tarihinden** hesaplanır.
+
+⚠️ İddia (aralık ve ay sonu maddeleri): henüz hiçbir projede fiilen kullanılmadı — ilk kullanan ölçüp düzeltir.
 
 ## Kullanıcıya görünen metin (copy) kuralları
 - Sade, kısa, teknik terimsiz Türkçe. "Hata: 500" değil → "Şu an bağlanamıyoruz, biraz sonra tekrar deneyin."

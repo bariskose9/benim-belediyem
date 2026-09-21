@@ -46,7 +46,7 @@ kaçınılmaz. **Kural bu yüzden "açık PR varken dal açma".**
 - Özet İngilizce, emir kipi, <= 72 karakter, sonunda nokta yok.
 - Gövdede madde madde "ne değişti" ve gerekiyorsa "neden".
 - Bir commit tek bir mantıksal değişiklik içerir. Formatlama ile davranış değişikliği aynı commit'te olmaz.
-- **Onaysız commit/push/merge yok** (bkz. CLAUDE.md §6.3).
+- **Onaysız commit/push/merge yok** (bkz. `00-cekirdek.md` → *"Git ve commit"*).
 
 ## ⛔ GIT KİMLİĞİ — bir kez sorulur, sonra sorulmaz
 

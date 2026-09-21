@@ -266,7 +266,7 @@ Kurumda MinIO/nesne deposu var mı, kaç replica çalışacak, yedek kimde —
 | 3 | Uzantı + MIME + imza **üçü birden** tutarlı | Biri uymuyorsa reddet |
 | 4 | **Dosya adı yeniden üretilir** — UUID + zaman; kullanıcının adı diske hiç yazılmaz, yalnızca gösterim için DB'de | `../../etc/passwd` adlı dosya — **path traversal** (`..` ile klasör dışına çıkma) |
 | 5 | **Hedef klasör beyaz listeden**, istemciden gelmez | Keyfi yol yok |
-| 6 | **Özel dosya yetkili uçtan servis edilir** — `GET /api/attachments/:id` kimlik + sahiplik kontrolü yapar, sonra depodan okur ya da **kısa ömürlü imzalı URL** (signed URL, 5 dk) üretir | Tahmin edilen URL = KVKK ihlali |
+| 6 | **Özel dosya yetkili uçtan servis edilir** — `GET /api/attachments/:id` kimlik + sahiplik kontrolü yapar, sonra depodan okur ya da **kısa ömürlü imzalı URL** (signed URL, 5 dk) üretir. İndirirken `Content-Disposition: attachment; filename*=UTF-8''…` + `X-Content-Type-Options: nosniff` — tarayıcı yüklenen HTML/SVG'yi sayfa gibi **açmaz** (depolanmış XSS). ⚠️ *İddia — ilk kullanan ölçer* | Tahmin edilen URL = KVKK ihlali; içeriği tarayıcıda çalışan ek |
 | 7 | **Görseller normalize edilir** (`sharp`): yeniden kodlanır, boyut sınırlanır, **EXIF silinir** | Telefon fotoğrafındaki GPS konumu kişisel veridir; yeniden kodlama gömülü zararlıyı da temizler |
 | 8 | **Virüs taraması** — kurumda ClamAV benzeri varsa yükleme sonrası kuyruğa; yoksa sorulur (5.6) | Vatandaştan gelen PDF |
 

@@ -220,7 +220,7 @@ hâldir.
 deposunda durur; kişisel hesaba push etmek, çoğu kurumda sözleşme ihlalidir ve
 geri alınması git geçmişini temizlemeyi gerektirir.
 
-⚠️ **Onaysız push yok** (`CLAUDE.md` §6.3). Rapor sunulur, onay alınır, sonra
+⚠️ **Onaysız push yok** (`00-cekirdek.md` → *"Git ve commit"*). Rapor sunulur, onay alınır, sonra
 gönderilir.
 
 #### Hangi dil nerede — karıştırılmaz
@@ -230,7 +230,7 @@ Bu ayrım sık karışır ve yanlış "düzeltilir":
 | Ne | Dil | Neden |
 |---|---|---|
 | **Commit özeti** (`feat(x): add …`) | **İngilizce** | Conventional Commits; kod dilinin parçası (`08-git-workflow.md`) |
-| **Değişiklik raporu** (sana sunulan) | **Türkçe** | Okuyan sensin (`CLAUDE.md` §6.3) |
+| **Değişiklik raporu** (sana sunulan) | **Türkçe** | Okuyan sensin (`00-cekirdek.md` → *"Git ve commit"*) |
 | **`CHANGELOG.md`** | **Türkçe**, tam cümle | Okuyan kullanıcı ve devralan |
 | **Devir notu** (`yeni-oturuma-verilecek-sonraki-adim-promptu.md`) | **Türkçe** | Sonraki oturuma ve sana |
 | Kod, değişken, tablo, kolon | **İngilizce** | `02-coding-standards.md` |
@@ -343,7 +343,7 @@ hata sessizce çoğalır. "Doğrulandı" kelimesini yalnızca bu oturumda ölçt
 
 | Nerede | Ne işe yarar | Ne zaman etkili olur |
 |---|---|---|
-| `<proje>/docs/standards/` | **Bu projenin bağlayıcı kuralları.** `CLAUDE.md` §1 hiyerarşisinde 1. sırada | **Hemen** — bir sonraki oturum bunu okur |
+| `<proje>/docs/standards/` | **Bu projenin bağlayıcı kuralları.** `00-cekirdek.md` → *"Hangi soru → hangi dosya"* hiyerarşisinde 1. sırada | **Hemen** — bir sonraki oturum bunu okur |
 | `proje-kiti` → `skills/yeni-proje/dosyalar/docs/standards/` | **Yeni proje kurulurken kopyalanan şablon** | Yalnızca **yeni proje** kurulduğunda |
 
 İkisi **birbirini güncellemez.** Sonuçlar:
