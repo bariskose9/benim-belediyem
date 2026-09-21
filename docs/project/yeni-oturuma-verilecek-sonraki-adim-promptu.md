@@ -577,8 +577,14 @@ pull --ff-only` **ve** son commit zamanına bak (`git -C <kit> log -1 --format=%
 **Yayın**
 - **Neon uykudayken deploy PATLIYOR** (`P1001`). ⛔ **Çözüm ÖNCE veritabanını
   uyandırmaktır**, yeniden dağıtmak değil: o ortamın çalışan bir dağıtımındaki
-  `/api/health` ucuna istek at. Sonra `npx vercel redeploy <PREVIEW-URL>
-  --scope barisss` — ⛔ **hedefin `Preview` olduğunu ÖNCE doğrula.** Merge sonrası
+  `/api/health` ucuna istek at (2026-09-21'de yaşandı: preview health 4,7 sn'de
+  uyandı, `db: ok`). ⭐ **Sonra yeniden tetiklemenin GİRİŞSİZ yolu: dala boş
+  commit** (`git commit --allow-empty -m "chore: retrigger preview deploy…"` +
+  push) — Vercel Git entegrasyonu yeni dağıtım açar, PR kontrolü güncellenir,
+  squash merge'de tarihçeden düşer. `npx vercel redeploy` bu Mac'te ÇALIŞMIYOR:
+  Vercel CLI kimliksiz (cihaz girişi istiyor, ajan yapamaz; hesabın giriş
+  yöntemi kayıtlı değil). Kullanıcı bir gün giriş yaparsa reçete geri döner —
+  o zaman ⛔ **hedefin `Preview` olduğunu ÖNCE doğrula.** Merge sonrası
   `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR**
 - ⚠️ **Ücretsiz planda cron GÜNDE 1 ve saati garanti DEĞİL**
@@ -593,7 +599,10 @@ pull --ff-only` **ve** son commit zamanına bak (`git -C <kit> log -1 --format=%
   `git merge origin/main` → çakışmayı çöz → commit → push
 
 **Diğer**
-- `vercel` ve `neonctl` PATH'te **değil** → `npx`. `neonctl` için
+- `vercel` ve `neonctl` PATH'te **değil** → `npx`. ⚠️ **`npx vercel` bu Mac'te
+  KİMLİKSİZ** (2026-09-21): her komut cihaz girişi (OAuth) akışı başlatıyor ve
+  asılı kalıyor — `ls`, `inspect`, `redeploy` hiçbiri çalışmaz; `timeout` ile
+  koştur, girişi kullanıcıya bırak. `neonctl` için
   `--org-id org-still-water-86075112` şart
 - `psql` **kurulu değil** → `npx tsx` + Prisma betiği (**proje kökünde**, `.mts`,
   commit edilmeden SİLİNİR). `--env-file=.env` ile koştur

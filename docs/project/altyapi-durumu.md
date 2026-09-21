@@ -738,7 +738,12 @@ ikisi de 2026-08-11'de geçersiz kaldı (girildi ve canlıda doğrulandı).
   `P1001: Can't reach database server` ile ~5 saniyede vazgeçiyor. Derleme
   başarısız olur ama **canlı site eski sürümle ayakta kalır** — kesinti olmaz.
   Çözüm: veritabanını uyandır (`curl .../api/health` yeter, `db: ok` görene kadar)
-  sonra `npx vercel redeploy <basarisiz-deploy-url> --scope barisss`.
+  sonra yeniden tetikle. ⭐ **Girişsiz yol (2026-09-21):** dala boş commit +
+  push — Git entegrasyonu yeni dağıtım açar (PR #89'da uygulandı, çalıştı).
+  `npx vercel redeploy <basarisiz-deploy-url> --scope barisss` yalnızca Vercel
+  CLI'ya giriş yapılmışsa çalışır; **2026-09-21 itibarıyla bu Mac'te CLI
+  kimliksiz** (cihaz girişi istiyor, ajan yapamaz; hesabın giriş yöntemi —
+  GitHub mı Google mı — burada kayıtlı değil, proje sahibi bilir).
   Merge sonrası sağlık ucundaki `commit` alanının değiştiğini **doğrula**;
   değişmediyse dağıtım başarısız olmuştur
 - Ortam değişkeni değişikliği **kendiliğinden yayına girmez**; yeni bir dağıtım
