@@ -79,20 +79,12 @@ sonra **18h**, sonra **adım 19 (Expo mobil)**.
    → *"BAŞLIK BLOĞU SABİT BİÇİMDE YAZILIR"*: `NEREDEN · NE · NEREYE · SONUÇ ·
    KAYNAK · NEDEN · DİKKAT`, gerçek dosya yolları, uydurma `KAYNAK` yok).
    Mevcut dosyalara geriye dönük yazım ayrı adım — 107d'ye karıştırma
-6. ⭐ **`03-api-guidelines.md` KİTTEN İLERİDE — `/kit-senkron` bekliyor.**
-   107c'de iki kural projenin standardına yazıldı ("Yanıt gövdesi de
-   belgelenir" bölümü: para alanı `z.int()` + CI kapısı · iç içe `Date` gövdede
-   açık çevirmen, spread yok). Kit kopyasına YAZILMADI (herkese açık depo,
-   kullanıcı onayı şart — `15-oturum-devri-kurallari.md`). Kanıt komutu:
-   `diff docs/standards/03-api-guidelines.md ~/baris_projects/bariskose-skills/skills/yeni-proje/dosyalar/docs/standards/03-api-guidelines.md`
-   — boş dönene kadar Kapı 8 açık. Kullanıcı "evet" derse `/kit-senkron`.
-   ⚠️ Aynı senkron **defteri de** kapsıyor: `calisilacak-konular.md` → "API
-   sözleşmesi" satırının son kanıt sütunu 2026-09-21'de güncellendi; kit
-   kopyasında yok. Proje sahibi bu oturumda "kit senkronu" sorusunu
-   anlamadığını söyledi ve anlatıldı (aşağıda "BENİMLE İLETİŞİM"e bak);
-   yeniden sorarken **ne yapılacağını tek cümleyle** söyle: "projede
-   öğrenilen iki kural + defterdeki bir satır kitin şablon kopyasına
-   kopyalanacak, kit herkese açık depo olduğu için onayını istiyorum"
+6. ✅ **Kapı 8 kapandı (2026-09-21):** 107c'nin iki kuralı (`03-api-guidelines.md`
+   → "Yanıt gövdesi de belgelenir") ve defterin altı satırı `/kit-senkron` ile kite
+   yazıldı, **kit 3.19.0 @ `a338135`** GitHub'da. Kanıt: `diff` boş (03 + defter).
+   ⚠️ Ders: 2026-09-20'nin beş defter satırı 3.16–3.18 senkronlarında kitten
+   projeye gelirken projeden kite HİÇ gitmemişti — senkronda defter farkı
+   **her seferinde** `diff` ile ölçülür, "birebir" varsayılmaz
 
 ## 📌 107a + 107b + 107c'DE NE YAPILDI — mekanizma burada
 
@@ -240,11 +232,14 @@ npx neonctl connection-string production --project-id lively-night-99128871 \
 yolundan gelir ve `PrismaPg` adaptörü verilmek zorundadır. Betik **proje
 kökünde** `.mts` olmalı, **yalnızca okur** ve **commit edilmeden SİLİNİR**.
 
-## 📦 KİT — kaynak 3.18.1 @ `8cd038d`, kurulu 3.18.1, proje 3.18.1
+## 📦 KİT — kaynak 3.19.0 @ `a338135`, kurulu 3.18.1 (ölç), proje 3.19.0
 
-✅ **Sürümler eşit** (2026-09-21'de ölçüldü: `installed_plugins.json` → 3.18.1;
-kit klonu `git log -1` → `8cd038d`). ⚠️ **İçerik tam eşit DEĞİL:** projenin
-`03-api-guidelines.md`'si 107c'de iki kural ileri gitti (mesele 6). ⚠️ Oturum kancası "3.15.1 kurulu" derse
+✅ **Proje ile kaynak eşit** (2026-09-21, 107c sonrası: 19/19 standart — `00` ve
+`05` farkı yalnızca korunan/projeye özel bölgeler — `sablonlar` ve defterler
+birebir, `.claude/rules` 9/9). **Kurulu plugin 3.18.1'de kalmış olabilir**;
+ölç: `grep version ~/.claude/plugins/installed_plugins.json`. Fark yalnızca
+`/yeni-proje` için önemli — güncelleme komutları kancada yazılı, sorulunca
+koşturulur. ⚠️ Oturum kancası "3.15.1 kurulu" derse
 Claude güncellemeden önce açılmış demektir — kancanın sürümü Claude yeniden
 başlayınca düzelir, **güncelleme sorma**, yapılmış işi tekrar yaptırma.
 
