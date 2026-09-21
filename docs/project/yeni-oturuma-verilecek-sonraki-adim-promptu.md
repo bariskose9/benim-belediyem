@@ -185,8 +185,11 @@ Port 3000 de çakışabilir.
 
 ## ✅ CRON ÇALIŞIYOR — KANITLANDI, BİR DAHA SORGULAMA
 
-⛔ **UTC 00:00–00:59 arasında production'a dağıtım tetikleyen merge YAPMA** —
-o pencere cron'un penceresi.
+⛔ **UTC 00:00–00:59 = TÜRKİYE 03:00–03:59 arasında production'a dağıtım
+tetikleyen merge YAPMA** — o pencere cron'un penceresi (`vercel.json` →
+`0 0 * * *`, Vercel cron'u UTC sayar). ⚠️ Saat söylerken hangisi olduğunu yaz;
+2026-09-21'de "00:31" dendi, kullanıcı saati 03:31 gördü, karıştı. Otomatik
+merge görevi kurarken `date -u +%H` ile pencereyi bekle.
 
 **Production veritabanına okuma erişimi (gerekirse):**
 ```
@@ -467,7 +470,7 @@ pull --ff-only` **ve** son commit zamanına bak (yukarıdaki mesele 4).
   `/api/health` içindeki `commit` alanının değiştiğini **mutlaka doğrula**
 - **Cloudflare kutusu production'da OTOMATİZE EDİLEMİYOR**
 - ⚠️ **Ücretsiz planda cron GÜNDE 1 ve saati garanti DEĞİL**
-- ⛔ **UTC 00:00–00:59 ARASINDA MERGE ETME** — o pencere cron'un penceresi
+- ⛔ **UTC 00:00–00:59 = TÜRKİYE 03:00–03:59 ARASINDA MERGE ETME** — cron penceresi; saat verirken TR/UTC belirt
 
 **Git**
 - **YENİ DALI HER ZAMAN `main`'DEN AÇ**
